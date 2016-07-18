@@ -1,0 +1,3 @@
+{% for key in tags.keys() %}
+{{ key }}={{ tags[key] }}
+{% endfor %}

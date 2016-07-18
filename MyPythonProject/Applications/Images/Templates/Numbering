@@ -1,0 +1,30 @@
+{% set sequence = 0 %}
+# {{ header.coding }}
+# {{ header.today }}
+{{ header.author }}
+
+
+# ========
+# Imports.
+# ========
+from os import rename
+from os.path import exists, isfile
+
+
+# ===============
+# Main algorithm.
+# ===============
+
+{% set sequence = sequence + 1 %}
+# {{ sequence }}. Rename existing files.
+{% for src, dst in list1|sort %}
+rename(src=r"{{ src }}", dst=r"{{ dst }}")
+{% endfor %}
+
+{% set sequence = sequence + 1 %}
+# {{ sequence }}. Sequence existing files.
+{% for src, dst in list2|sort %}
+if exists(r"{{ src }}"):
+    if isfile(r"{{ src }}"):
+        rename(src=r"{{ src }}", dst=r"{{ dst }}")
+{% endfor %}

@@ -1,0 +1,23 @@
+# {{ header.coding }}
+# {{ header.today }}
+{{ header.author }}
+
+
+# ========
+# Imports.
+# ========
+import os
+import shutil
+import os.path
+
+
+# ===============
+# Main algorithm.
+# ===============
+{% for src, dst1, dst2 in files %}
+
+# Move "{{ src }}".
+if not os.path.exists(r"{{ dst1 }}"):
+    os.makedirs(r"{{ dst1 }}")
+shutil.move(src=r"{{ src }}", dst=r"{{ dst2 }}")
+{% endfor %}

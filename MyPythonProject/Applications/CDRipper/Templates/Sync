@@ -1,0 +1,164 @@
+{% set seq1 = 0 %}
+{% set seq2 = 0 %}
+# {{ header.coding }}
+# {{ header.today }}
+{{ header.author }}
+
+
+# ==============
+# Main function.
+# ==============
+def noname():
+{#
+#}
+{#    ------ #}
+{# 1. BLOC 1 #}
+{#    ------ #}
+{% set seq1 = seq1 + 1 %}
+{% set title = "imports." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+
+    # {{ sep }}
+    # {{ seq1|rjustify(width=2) }}. {{ title|capitalize }}
+    # {{ sep }}
+    import sys
+    sys.path.insert(1, r"G:\Documents\MyPythonProject\Applications")
+    from datetime import datetime
+    from logging import handlers
+    from pytz import timezone
+    from ftplib import FTP
+    import os.path
+    import logging
+    import shared
+{#
+#}
+{#    ------ #}
+{# 2. BLOC 2 #}
+{#    ------ #}
+{% set seq1 = seq1 + 1 %}
+{% set title = "create logger." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+
+    # {{ sep }}
+    # {{ seq1|rjustify(width=2) }}. {{ title|capitalize }}
+    # {{ sep }}
+    logger = logging.getLogger(__file__)
+    logger.setLevel(logging.INFO)
+    # -----
+    handler = logging.handlers.RotatingFileHandler(shared.Global()["log"], backupCount=5, maxBytes=500000)
+    handler.setLevel(logging.INFO)
+    # -----
+    formatter = shared.CustomFormatter(shared.Global()["logpattern"])
+    # -----
+    handler.setFormatter(formatter)
+    # -----
+    logger.addHandler(handler)
+{#
+#}
+{% set seq1 = seq1 + 1 %}
+{% set title = "start logging." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+
+    # {{ sep }}
+    # {{ seq1|rjustify(width=2) }}. {{ title|capitalize }}
+    # {{ sep }}
+    logger.info("{0} {1} {0}".format("="*50, shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3)))
+    logger.info('START "%s".' % (os.path.basename(__file__),))
+{#
+#}
+{#    ------ #}
+{# 3. BLOC 3 #}
+{#    ------ #}
+{% set seq1 = seq1 + 1 %}
+{% set title = "Open FTP session." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+
+    # {{ sep }}
+    # {{ seq1|rjustify(width=2) }}. {{ title }}
+    # {{ sep }}
+    session = FTP(host="{{ configuration.host }}", user="{{ configuration.user }}", passwd="{{ configuration.password }}", timeout={{ configuration.timeout }})
+{#
+#}
+{#    ------ #}
+{# 4. BLOC 4 #}
+{#    ------ #}
+{% set seq1 = seq1 + 1 %}
+{% set title = "set current working directory." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+
+    # {{ sep }}
+    # {{ seq1|rjustify(width=2) }}. {{ title|capitalize }}
+    # {{ sep }}
+    session.cwd("{{ configuration.cwd }}")
+    logger.info('Current working directory is: "{{ configuration.cwd }}".')
+{#
+#}
+{#    ------ #}
+{# 5. BLOC 5 #}
+{#    ------ #}
+{% set seq1 = seq1 + 1 %}
+{% set title = "upload files to server." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+
+    # {{ sep }}
+    # {{ seq1|rjustify(width=2) }}. {{ title|capitalize }}
+    # {{ sep }}
+{#
+#}
+{#    ------ #}
+{# 6. BLOC 6 #}
+{#    ------ #}
+{% for b, a in files %}
+{% set seq2 = seq2 + 1%}
+
+    # {{ seq1|rjustify(width=2) }}.{{ seq2 }}. --> Upload "{{ b }}".
+{% set fld = a|splitstring("/") %}
+{% set len = a|splitstring("/")|length - 1 %}
+{% for i in range(len) %}
+    if "{{ fld[i] }}" not in session.nlst():
+        session.mkd("{{ fld[i] }}")
+{% if i < len - 1 %}
+    session.cwd("{{ fld[i] }}")
+{% endif %}
+{% endfor %}
+{% for i in ['session.cwd("..")']*(len - 1) %}
+    {{ i }}
+{% endfor %}
+    session.storbinary("STOR {{ a }}", open(r"{{ b }}", mode="rb"))
+    logger.info("Upload to server.")
+    logger.info('\t{0:<12}: "{1}"'.format("Source", r"{{ b }}").expandtabs(4))
+    logger.info('\t{0:<12}: "{1}"'.format("Destination", r"{{ a }}").expandtabs(4))
+{% endfor %}
+{#
+#}
+{#    ------ #}
+{# 7. BLOC 7 #}
+{#    ------ #}
+{% set seq1 = seq1 + 1 %}
+{% set title = "Close FTP session." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+
+    # {{ sep }}
+    # {{ seq1|rjustify(width=2) }}. {{ title }}
+    # {{ sep }}
+    session.quit()
+{#
+#}
+{#    ------ #}
+{# 8. BLOC 8 #}
+{#    ------ #}
+{% set seq1 = seq1 + 1 %}
+{% set title = "stop logging." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+
+    # {{ sep }}
+    # {{ seq1|rjustify(width=2) }}. {{ title|capitalize }}
+    # {{ sep }}
+    logger.info('STOP "%s".' % (os.path.basename(__file__),))
+
+
+# ===============
+# Main algorithm.
+# ===============
+if __name__ == "__main__":
+    noname()

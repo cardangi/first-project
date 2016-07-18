@@ -1,0 +1,25 @@
+{% extends "T1" %}
+
+{% block table %}
+                <table>
+                    <tr>
+                    {% for header in th %}
+                        <th>{{ header }}</th>
+                    {% endfor %}
+                    </tr>
+                    {% for a, b, c in tr %}
+                    <tr>
+                        <td>{{ a }}</td>
+                        <td>{{ b }}</td>
+                        <td>{{ c }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+{%- endblock %}
+
+{% block div %}
+            <div id="{{ id }}">
+                <h2>{{ h2 }}</h2>
+{{ super() }}
+            </div>
+{% endblock %}

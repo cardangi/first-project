@@ -1,0 +1,9 @@
+{% extends "Main" %}
+
+{% block title %}
+    {{- title -}}
+{% endblock %}
+
+{% block content %}
+    {{- content -}}
+{% endblock %}

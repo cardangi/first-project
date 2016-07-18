@@ -1,0 +1,14 @@
+{% for src, dst in detail %}
+    {% if loop.first %}
+
+
+    {% endif %}
+
+          {{ loop.index|integertostring()|rjustify(3) }}. Source     : "{{ src }}"
+               Destination: "{{ dst }}"
+    {% if loop.last %}
+
+
+          {{ loop.length|integertostring()|rjustify(3) }} file(s) ready to be {{ mode }}.
+    {% endif %}
+{% endfor %}

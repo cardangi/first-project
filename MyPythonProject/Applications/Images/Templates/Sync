@@ -1,0 +1,85 @@
+{% set len = actions|length %}
+{% set seq = 0 %}
+# {{ header.coding }}
+# {{ header.today }}
+{{ header.author }}
+
+
+# ==============
+# Main function.
+# ==============
+def noname():
+
+{% set seq = seq + 1 %}
+{% set title = "imports." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+    # {{ sep }}
+    # {{ seq|rjustify(width=2) }}. {{ title|capitalize }}
+    # {{ sep }}
+    from ftplib import FTP
+
+{% set seq = seq + 1 %}
+{% set title = "Open FTP session." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+    # {{ sep }}
+    # {{ seq|rjustify(width=2) }}. {{ title }}
+    # {{ sep }}
+    session = FTP(host="{{ configuration.host }}", user="{{ configuration.user }}", passwd="{{ configuration.password }}", timeout={{ configuration.timeout }})
+
+{% set seq = seq + 1 %}
+{% set title = "set current working directory." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+    # {{ sep }}
+    # {{ seq|rjustify(width=2) }}. {{ title|capitalize }}
+    # {{ sep }}
+    session.cwd("{{ configuration.cwd }}")
+{% for key, value in actions|dictsort %}
+
+{% set seq = seq + 1 %}
+{% set title = titles[key] %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+    # {{ sep }}
+    # {{ seq|rjustify(width=2) }}. {{ title }}
+    # {{ sep }}
+{% for action in value|sort %}
+
+
+{#-   ---------------- #}
+{# 1. Create directory #}
+{#    ---------------- #}
+{% if key[3:]|upper == "CREATE" %}
+    session.mkd("{{ action }}")
+
+
+{#-   ----------- #}
+{# 2. Delete file #}
+{#    ----------- #}
+{% elif key[3:]|upper == "DELETE" %}
+    session.delete("{{ action }}")
+
+
+{#-   ----------- #}
+{# 3. Upload file #}
+{#    ----------- #}
+{% elif key[3:]|upper == "UPLOAD" %}
+    session.storbinary("STOR {{ action[0] }}", open(r"{{ action[1] }}", mode="rb"))
+
+
+{%- endif %}
+{% endfor %}
+{% endfor %}
+
+{% set seq = seq + 1 + len %}
+{% set title = "Close FTP session." %}
+{% set sep = title|length|fillchar|rjustify(width=title|length + 4) %}
+    # {{ sep }}
+    # {{ seq|rjustify(width=2) }}. {{ title }}
+    # {{ sep }}
+    session.quit()
+
+
+# ===============
+# Main algorithm.
+# ===============
+if __name__ == "__main__":
+    noname()

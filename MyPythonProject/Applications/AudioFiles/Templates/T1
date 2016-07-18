@@ -1,0 +1,61 @@
+{% set p1 %}
+    {% for element in "*"|repeatelement(header.main|length() + 2*10) -%}
+        {{ element }}
+    {%- endfor %}
+{% endset %}
+{% set p2 %}
+    {% for element in " "|repeatelement(header.main|length() + 2*10) -%}
+        {{ element }}
+    {%- endfor %}
+{% endset %}
+{% set p3 = header.main|ljustify(header.main|length() + 10)|rjustify(header.main|length() + 2*10) %}
+{% set space = " " %}
+
+{{ "**%s**"|format(p1)|center() }}
+{{ "****%s****"|format(p1)|center() }}
+{{ "******%s******"|format(p2)|center() }}
+{{ "********%s********"|format(p3|upper())|center() }}
+{{ "******%s******"|format(p2)|center() }}
+{{ "****%s****"|format(p1)|center() }}
+{{ "**%s**"|format(p1)|center() }}
+
+{{ now|center() }}
+{{ "%s 2016 Xavier ROSSET"|format(copyright)|center() }}
+
+
+
+
+          STEP {{ header.step|default(1)|integertostring()|rjustify(2) }}
+        {%- if header.title -%}
+            .{{ space -}}
+        {% endif -%}
+        {{ header.title|default() }}
+
+{%- if message %}
+    {% if message is iterable %}
+        {% include "T2" %}
+    {% endif %}
+{% endif %}
+
+{%- if menu %}
+    {% if menu is iterable %}
+        {% include "T3" %}
+    {% endif %}
+{% endif %}
+
+{%- if detail %}
+    {% if detail is iterable %}
+        {% include "T4" %}
+    {% endif %}
+{% endif %}
+
+{%- if results %}
+    {% if results|attr("display") is defined %}
+        {% if results.display %}
+
+
+     {{ results.mode|capitalize() }} succeeded for {{ results.successes|integertostring()|rjustify(3) }}/{{ results.files }} files.
+     {{ results.mode|capitalize() }} failed    for {{ results.fails|integertostring()|rjustify(3) }}/{{ results.files }} files.
+        {% endif %}
+    {% endif %}
+{% endif %}
