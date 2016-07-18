@@ -1,0 +1,92 @@
+﻿body {
+    font-family: "Trebuchet MS", verdana, geneva, arial, helvetica, sans-serif;
+    font-size: 1em;
+    color: #292E58;
+    width: 1600px;
+    margin: 5px auto 5px;
+    counter-reset: section2;
+}
+
+h1 {
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 3em;
+    margin: 0 0 0 88px;
+}
+
+h2 {
+    padding: 15px 10px;
+    font-size: 1.4em;
+    border: 2px solid;
+    background-color: #DFB5B6;
+}
+
+h2:before {
+    counter-increment: section2;
+    content: "Part " counter(section2) ": "
+}
+
+h2 {
+    margin: 100px 0 0;
+}
+
+p.validator {
+    margin: 0;
+}
+
+.validator img {
+    border: 0;
+    width: 88px;
+    height: 31px;
+    float: right;
+}
+
+p.datetime {
+    text-align: center;
+    margin: 0;
+}
+
+table {
+    margin: 25px 0 0;
+}
+
+.content1 td {
+    vertical-align: top;
+    padding: 5px;
+}
+
+td.cover {
+    width: 120px;
+    border: 2px solid #DFB5B6;
+}
+
+p.logcontent {
+    margin: 0 0 2px;
+    font-size: 0.95em;
+}
+
+table.content2 {
+    border: 1px solid #DFB5B6;
+}
+
+.content2 tr:nth-child(even) {
+    background-color: #F2F2F2;
+}
+
+.content2 tr:hover {
+    background-color: #C67482;
+}
+
+.content2  th, .content2  td {
+    border: 1px solid #DFB5B6;
+}
+
+.content2 th {
+    background-color: #DFB5B6;
+    text-transform: uppercase;
+    padding: 15px;
+}
+
+.content2  td {
+    text-align: center;
+}
