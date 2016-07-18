@@ -1,0 +1,26 @@
+Text 1
+
+{% for item in iterable -%}
+    {{ item }}
+{%- endfor %}
+
+
+Text 2
+
+{% for item in iterable %}
+    {{- item }}
+{% endfor %}
+
+Text 3
+
+{%- if condition %}
+    Text if condition true
+{% endif %}
+
+Text 4
+
+{%- if condition %}
+    Text if condition true
+{% endif -%}
+
+Text 5

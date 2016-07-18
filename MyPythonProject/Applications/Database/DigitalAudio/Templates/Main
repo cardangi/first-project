@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" type="text/css" href="../database.css">
+        <title>Digital Audio base raw view</title>
+    </head>
+    <body>
+        <div id="content">
+            <div id="header">
+                <h1>Digital Audio Base</h1>
+                <div id="browser">
+                    <ul>
+                        <li><a href="albums">albums</a></li>
+                        <li><a href="discs">discs</a></li>
+                        <li><a href="tracks">tracks</a></li>
+                    </ul>
+                </div>
+            </div>
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>
