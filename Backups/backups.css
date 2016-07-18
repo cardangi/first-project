@@ -1,0 +1,100 @@
+body {
+    font-family: "Trebuchet MS", tahoma, arial;
+    width: 2000px;
+    margin: 50px auto;
+    font-size: 1em;
+    color: #840F30;
+}
+
+h2 {
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 2.5em;
+    margin: 0;
+}
+
+h3 {
+    text-transform: uppercase;
+    font-size: 1.5em;
+    margin: 0;
+}
+
+div#audio, div#documents {
+   margin: 75px 0 0;
+}
+
+div.scripts {
+   margin: 25px 0 0;
+}
+
+div.menu {
+    margin: 50px auto 0;
+    width: 60%;
+}
+
+table, th, td {
+   border: solid 2px #E3D9B1;
+}
+
+tr:first-child {
+    height: 3em;
+}
+
+tr:not(:first-child) {
+    height: 3em;
+}
+
+tr:nth-child(2n+3) {
+    background-color: #957A7F;
+    color: #E3D9B1;
+}
+
+th {
+    font-size: 1.1em;
+    text-decoration: underline;
+    background-color: #840F30;
+    color: #E3D9B1;
+}
+
+td:nth-child(6n+1) {
+    width: 100px;
+    text-align: center;
+}
+
+td:nth-child(6n+2), td:nth-child(6n+4)  {
+    width: 200px;
+}
+
+td:nth-child(6n+3) {
+    width: 75px;
+}
+
+td:nth-child(6n+6)  {
+    width: 250px;
+}
+
+.id , .name , .source, .destination, .backup {
+    padding: 0 20px;
+}
+
+ul {
+    text-align: center;
+}
+
+ul, ul li {
+    margin: 0;
+}
+
+ul li {
+    display: inline;
+    background-color: #840F30;
+    color: #E3D9B1;
+    padding: 8px 15px;
+    text-transform: capitalize;
+    border-radius: 4px 4px 0 0;
+}
+
+ul li a:link, ul li a:visited, ul li a:hover, ul li a:active {
+    text-decoration: none;
+    color: #E3D9B1;
+}
