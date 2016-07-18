@@ -1,0 +1,145 @@
+﻿body {
+    font-family: verdana, geneva, arial, helvetica, sans-serif;
+    font-size: 1em;
+    width: 1600px;
+    margin: 50px auto 5px;
+    color: #34587D;
+}
+
+h1, h2, th {
+    text-transform: uppercase;
+}
+
+h2 {
+    margin: 0 0 25px;
+}
+
+#header {
+    text-align: justify;
+}
+
+#header h1, #header #navcontainer {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#header h1 {
+    padding: 0;
+    margin: 0;
+    font-size: 3em;
+}
+
+#header::after {
+    content: '';
+    display: inline-block;
+    width: 100%
+}
+
+#navcontainer ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    
+}
+
+#navcontainer ul li {
+    display: inline;
+}
+
+#navcontainer ul li a {
+    text-decoration: none;
+    padding: 0.2em 1em;
+    background-color: #AAB6C3;
+    color: #34587D;
+}
+
+#navcontainer ul li a:hover {
+    background-color: #AFD9A7;
+    color: white;
+}
+
+div:nth-of-type(n+2) {
+    margin: 75px 0 0;
+}
+
+table {
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border-color: #34587D;
+}
+
+th {
+    padding: 8px;
+    height: 60px;
+    text-decoration: underline;
+}
+
+th:nth-child(8n+2) {
+    text-align: left;
+}
+
+th:nth-child(8n+3) {
+    text-align: left;
+}
+
+th:nth-child(8n+5) {
+    text-align: left;
+}
+
+tr:nth-child(2n+1) {
+    background-color: #AAB6C3;
+}
+
+tr:nth-child(n+2):hover {
+    background-color: #AFD9A7;
+    color: white;
+}
+
+td:nth-child(8n+1) {
+    font-size: 0.75em;
+    text-decoration: underline;
+}
+
+td {
+    padding: 14px 4px;
+    font-size: 0.95em;
+}
+
+td.center {
+    text-align: center;
+}
+
+td.album:nth-child(8n+2) {
+    width: 30%;
+}
+
+td.album:nth-child(8n+3) {
+    width: 12%;
+}
+
+td.album:nth-child(8n+4) {
+    width: 5%;
+}
+
+td.album:nth-child(8n+5) {
+    width: 28%;
+}
+
+td.album:nth-child(8n+6) {
+    width: 5%;
+}
+
+td.album:nth-child(8n+7) {
+    width: 10%;
+}
+
+td.album:nth-child(8n+8) {
+    width: 10%;
+}
+
+td.titi1git status:nth-child(8n+8) {
+    width: 10%;
+}

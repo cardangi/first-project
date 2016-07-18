@@ -1,0 +1,69 @@
+# -*- coding: ISO-8859-1 -*-
+__author__ = 'Xavier ROSSET'
+
+
+# ===================
+# Absolute import(s).
+# ===================
+import os
+import json
+import subprocess
+from contextlib import contextmanager
+
+
+# ==========
+# Functions.
+# ==========
+@contextmanager
+def chgcurdir(d):
+    wcdir = os.getcwd()
+    os.chdir(d)
+    yield
+    os.chdir(wcdir)
+
+
+# ==========
+# Constants.
+# ==========
+INPUT, PYTHON = os.path.join(os.path.expandvars("%TEMP%"), "arguments"), r"C:\Program Files (x86)\Python35-32\python.exe"
+
+
+# ================
+# Initializations.
+# ================
+dftargs, view1 = [PYTHON, "-m", "Applications.CDRipper.AudioCDRippingLog", "update"], False
+
+
+# ===============
+# Main algorithm.
+# ===============
+with chgcurdir(os.path.expandvars("%_PYTHONPROJECT%")):
+
+    #     -----------------
+    #  1. Enter new values.
+    #     -----------------
+    process1 = subprocess.run([PYTHON, "-m", "Applications.Database.RippingLog.dbRippingLog"])
+
+    #     ----------------
+    #  2. Update database.
+    #     ----------------
+    if not process1.returncode:
+        if os.path.exists(INPUT):
+            with open(INPUT, encoding="ISO-8859-1") as fr:
+                for argument in json.load(fr):
+                    if len(argument) >= 2:
+                        args = [item for item in dftargs]
+                        args.append(argument[0])
+                        for key, value in argument[1].items():
+                            args.append("--{0}".format(key))
+                            args.append(value)
+                        process2 = subprocess.run(args)
+                        if not process2.returncode:
+                            view1 = True
+
+
+# =================
+# Update HTML view.
+# =================
+if view1:
+    process3 = subprocess.run([PYTHON, r"G:\Computing\MyPythonProject\Database`HTMLView`L.py", "RippingLog"])
