@@ -1,0 +1,52 @@
+[
+    {
+        "workspace": "music",
+        "description": "Artists [A-E]",
+        "target": "854796030"
+    },
+    {
+        "workspace": "music",
+        "description": "Artists [F-J]",
+        "target": "1674209532"
+    },
+    {
+        "workspace": "music",
+        "description": "Artists [K-O]",
+        "target": "1196865155"    
+    },
+    {
+        "workspace": "music",
+        "description": "Artists [P-T]",
+        "target": "1535780732"        
+    },
+    {
+        "workspace": "music",
+        "description": "Artists [U-Z]",
+        "target": "204959095"        
+    },
+    {
+        "workspace": "music",
+        "description": "[Pearl Jam - 2000]",
+        "target": "1460302155"    
+    },
+    {
+        "workspace": "music",
+        "description": "[Pearl Jam - 2003]",
+        "target": "1557918403"        
+    },
+    {
+        "workspace": "music",
+        "description": "[Pearl Jam - 2006]",
+        "target": "1404261019"    
+    },
+    {
+        "workspace": "music",
+        "description": "[Pearl Jam - 2010]",
+        "target": "445045058"        
+    },
+    {
+        "workspace": "music",
+        "description": "[Pearl Jam - 2011]",
+        "target": "1484552884"    
+    }
+]
