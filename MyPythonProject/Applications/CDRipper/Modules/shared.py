@@ -8,6 +8,7 @@ __author__ = 'Xavier ROSSET'
 from sortedcontainers import SortedDict
 from datetime import datetime
 from pytz import timezone
+import logging
 import json
 import os
 import re
@@ -30,6 +31,12 @@ ENCODERS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", 
 TITLES = os.path.join(os.path.expandvars("%_COMPUTING%"), "Titles.json")
 ENC_KEYS = ["name", "code", "folder", "extension"]
 TIT_KEYS = ["number", "title", "overwrite"]
+
+
+# ========
+# Logging.
+# ========
+logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 
 
 # ========
@@ -69,13 +76,22 @@ class AudioCD:
 
         # ----- Encoder attributes.
         if not missingattribute(self, "encoder"):
-            for encoder in self.deserialize(ENCODERS):  # element est un dictionnaire.
+            for encoder in self.deserialize(ENCODERS):  # "encoder" est un dictionnaire.
                 if sorted(list(encoder.keys())) == sorted(ENC_KEYS):
                     if self.encoder == encoder["name"]:
                         self.encodercode = encoder["code"]
                         self.encoderfold = encoder["folder"]
                         self.encoderexte = encoder["extension"]
                         break
+        logger.debug("Used encoder.")
+        if not missingattribute(self, "encoder"):
+            logger.debug("\t%s".expandtabs(4) % ("Name\t: %s".expandtabs(9) % (self.encoder,)),)
+        if not missingattribute(self, "encodercode"):
+            logger.debug("\t%s".expandtabs(4) % ("Code\t: %s".expandtabs(9) % (self.encodercode,)),)
+        if not missingattribute(self, "encoderfold"):
+            logger.debug("\t%s".expandtabs(4) % ("Folder\t: %s".expandtabs(9) % (self.encoderfold,)),)
+        if not missingattribute(self, "encoderexte"):
+            logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (self.encoderexte,)),)
 
         # ----- Tracknumber / Totaltracks.
         if not missingattribute(self, "track"):
@@ -302,6 +318,8 @@ class DefaultCD(AudioCD):
             self.albumsortyear = self.origyear
         if not missingattribute(self, *("albumsortyear", "albumsortcount", "encodercode")):
             self.albumsort = "1.{year}0000.{count}.{enc}".format(year=self.albumsortyear, count=self.albumsortcount, enc=self.encodercode)
+        logger.debug("Build tags.")
+        logger.debug("\talbumsort: %s".expandtabs(4) % (self.albumsort,))
 
         # ----- Titlesort.
         if not missingattribute(self, *("discnumber", "tracknumber", "bonus", "live", "bootleg")):

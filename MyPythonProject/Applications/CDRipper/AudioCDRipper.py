@@ -56,14 +56,24 @@ exists, join, expandvars, missingattribute = os.path.exists, os.path.join, os.pa
 # ==========
 # Variables.
 # ==========
-l, NewRippedCD, fo, encoding, regex, arguments = [], None, None, None, re.compile(s2.DFTPATTERN), parser.parse_args()
+NewRippedCD, fo, encoding, regex, arguments = None, None, None, re.compile(s2.DFTPATTERN), parser.parse_args()
 
 
 # ===================
 # Jinja2 environment.
 # ===================
-environment = Environment(loader=PackageLoader("Applications.CDRipper", "Templates"), trim_blocks=True, keep_trailing_newline=True)
+environment = Environment(loader=PackageLoader("Applications.CDRipper", "Templates"), trim_blocks=True, lstrip_blocks=True)
+
+
+# ======================
+# Jinja2 custom filters.
+# ======================
 environment.filters["hasattribute"] = hasattribute
+
+
+# =================
+# Jinja2 templates.
+# =================
 outputtags = environment.get_template("AudioCDOutputTags")
 rippinglog = environment.get_template("AudioCDRippingLog")
 audiodatabase = environment.get_template("DigitalAudioBase")
@@ -74,41 +84,35 @@ audiodatabase = environment.get_template("DigitalAudioBase")
 # ==============
 logger.info("{0} {1} {0}".format("="*50, s1.dateformat(datetime.now(tz=timezone(s1.DFTTIMEZONE)), s1.TEMPLATE1)))
 logger.info('START "%s".' % (os.path.basename(__file__),))
-logger.info('"{0}" used as ripping profile.'.format(arguments.profile))
+logger.info('"{0}" used as ripping profile.'.format(arguments.rippingprofile))
 
 
 # ===============
 # Main algorithm.
 # ===============
-if exists(arguments.input) and arguments.profile.lower() in s2.PROFILES:
+if exists(arguments.tagsfile) and arguments.rippingprofile.lower() in s2.PROFILES:
 
     #     ---------------
     # --> Log input tags.
     #     ---------------
     logger.debug("Input file.")
-    logger.debug('\t"{0}"'.format(arguments.input).expandtabs(4))
+    logger.debug('\t"{0}"'.format(arguments.tagsfile).expandtabs(4))
     logger.debug("Input tags.")
-    if exists(arguments.input):
-        with open(arguments.input, encoding=s1.UTF16) as fr:
+    if exists(arguments.tagsfile):
+        with open(arguments.tagsfile, encoding=s1.UTF16) as fr:
             for line in fr:
                 logger.debug("\t{0}".format(line.splitlines()[0]).expandtabs(4))
-
-    #     ----------------------------
-    # --> Open connection to database.
-    #     ----------------------------
-    # conn = sqlite3.connect(s1.DATABASE)
-    # conn.row_factory = sqlite3.Row
 
     #     -----------
     # --> Default CD.
     #     -----------
-    if arguments.profile.lower() == s2.PROFILES[0]:
-        NewRippedCD = s2.DefaultCD.fromfile(arguments.input, s1.UTF16)
+    if arguments.rippingprofile.lower() == s2.PROFILES[0]:
+        NewRippedCD = s2.DefaultCD.fromfile(arguments.tagsfile, s1.UTF16)
 
         #          같같같같같같같같같같같�
         # ----- 1. Digital audio database.
         #          같같같같같같같같같같같�
-        with open(join(expandvars("%TEMP%"), "digitalaudiodatabase.txt"), mode=s1.APPEND, encoding=s1.DFTENCODING) as fw:
+        with open(join(expandvars("%TEMP%"), "digitalaudiodatabase"), mode=s1.APPEND, encoding=s1.DFTENCODING) as fw:
             fw.write("{0}\n".format(audiodatabase.render(headers=[], rippedcd=NewRippedCD)))
 
         #          같같같같같같같같같같같같같
@@ -121,20 +125,20 @@ if exists(arguments.input) and arguments.profile.lower() in s2.PROFILES:
     #     ---------------
     # --> Self titled CD.
     #     ---------------
-    elif arguments.profile.lower() == s2.PROFILES[3]:
-        NewRippedCD = s2.SelfTitledCD.fromfile(arguments.input, s1.UTF16)
+    elif arguments.rippingprofile.lower() == s2.PROFILES[3]:
+        NewRippedCD = s2.SelfTitledCD.fromfile(arguments.tagsfile, s1.UTF16)
 
     #     -----------------------
     # --> Springsteen bootleg CD.
     #     -----------------------
-    elif arguments.profile.lower() == s2.PROFILES[1]:
-        NewRippedCD = s2.DefaultBootlegs.fromfile(arguments.input, s1.UTF16)
+    elif arguments.rippingprofile.lower() == s2.PROFILES[1]:
+        NewRippedCD = s2.DefaultBootlegs.fromfile(arguments.tagsfile, s1.UTF16)
 
     #     ---------------------
     # --> Pearl Jam bootleg CD.
     #     ---------------------
-    elif arguments.profile.lower() == s2.PROFILES[2]:
-        NewRippedCD = s2.PJBootlegs.fromfile(arguments.input, s1.UTF16)
+    elif arguments.rippingprofile.lower() == s2.PROFILES[2]:
+        NewRippedCD = s2.PJBootlegs.fromfile(arguments.tagsfile, s1.UTF16)
 
     #     ----------------
     # --> Log output tags.
@@ -149,13 +153,13 @@ if exists(arguments.input) and arguments.profile.lower() in s2.PROFILES:
     # Set output tags.
     # Default output is the input file encoded in "utf-16-le".
     # Test output is a temporary "IDTags.txt" file encoded in "utf-8".
-    fo, encoding = arguments.input, s1.UTF16
+    fo, encoding = arguments.tagsfile, s1.UTF16
     if arguments.test:
         fo, encoding = join(expandvars("%TEMP%"), "OutTagsT{0}.txt".format(NewRippedCD.tracknumber.zfill(2))), s1.UTF8
     with open(fo, s1.WRITE, encoding=encoding) as fw:
         fw.write(outputtags.render(tags=NewRippedCD))
-    with open(join(expandvars("%TEMP%"), "OutTags.json"), s1.APPEND, encoding=encoding) as fp:
-        json.dump(NewRippedCD, fp, indent=4, sort_keys=True)
+    with open(join(expandvars("%TEMP%"), "outtags.json"), s1.APPEND, encoding=s1.UTF8) as fp:
+        json.dump({key: NewRippedCD[key] for key in NewRippedCD.keys()}, fp, indent=4, sort_keys=True)
 
 
 # ============
