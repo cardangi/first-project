@@ -15,11 +15,9 @@ SET _myparent=%~dp0
 REM ==================
 REM Initializations 2.
 REM ==================
-SET _workdir=%TEMP%\tmp-Xavier
-SET _music=%_BACKUP%\workspace.music
 SET _rippingbase=%TEMP%\rippingdatabase
 SET _htmlrippinglog=%_COMPUTING%\rippinglog.html
-SET _txtdigitalaudiobase=%TEMP%\digitalaudiodatabase.txt
+SET _txtdigitalaudiobase=%TEMP%\digitalaudiodatabase
 SET _xmldigitalaudiobase=%TEMP%\digitalaudiobase.xml
 SET _digitalaudiobase=%_COMPUTING%\digitalaudiobase\digitalaudiobase
 
@@ -39,7 +37,9 @@ SHIFT
 GOTO MAIN
 
 
-REM  1 --> Audio CD ripping database.
+REM        -----------------
+REM  1 --> Ripping database.
+REM        -----------------
 :STEP1
 IF EXIST "%_rippingbase%" (
     SET _first=Y
@@ -59,7 +59,9 @@ SHIFT
 GOTO MAIN
 
 
+REM        -----------------------
 REM  2 --> Digital audio database.
+REM        -----------------------
 :STEP2
 IF EXIST "%_txtdigitalaudiobase%" (
     PUSHD "%_PYTHONPROJECT%"
@@ -71,7 +73,9 @@ SHIFT
 GOTO MAIN
 
 
+REM        ---------------------------
 REM  3 --> Ripping database HTML page.
+REM        ---------------------------
 :STEP3
 PUSHD "%_PYTHONPROJECT%"
 python -m Applications.Database.RippingLog.View1 > %_htmlrippinglog%
@@ -80,7 +84,9 @@ SHIFT
 GOTO MAIN
 
 
+REM        ---------------------------------
 REM  4 --> Digital audio database HTML page.
+REM        ---------------------------------
 :STEP4
 PUSHD "%_PYTHONPROJECT%"
 python -m Applications.Database.DigitalAudio.View1

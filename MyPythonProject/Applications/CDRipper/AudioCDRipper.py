@@ -54,9 +54,15 @@ exists, join, expandvars, missingattribute = os.path.exists, os.path.join, os.pa
 
 
 # ==========
+# Constants.
+# ==========
+JSON = join(expandvars("%TEMP%"), "tags.json")
+
+
+# ==========
 # Variables.
 # ==========
-NewRippedCD, fo, encoding, regex, arguments = None, None, None, re.compile(s2.DFTPATTERN), parser.parse_args()
+NewRippedCD, fo, encoding, obj, regex, arguments = None, None, None, [], re.compile(s2.DFTPATTERN), parser.parse_args()
 
 
 # ===================
@@ -147,19 +153,27 @@ if exists(arguments.tagsfile) and arguments.rippingprofile.lower() in s2.PROFILE
     for k, v in NewRippedCD:
         logger.debug("\t{0}={1}".format(k, v).expandtabs(4))
 
-    #     --------------------------------
-    # --> Elaboration du fichier des tags.
-    #     --------------------------------
+    #     -----------------
+    # --> Stocker les tags.
+    #     -----------------
     # Set output tags.
     # Default output is the input file encoded in "utf-16-le".
     # Test output is a temporary "IDTags.txt" file encoded in "utf-8".
     fo, encoding = arguments.tagsfile, s1.UTF16
     if arguments.test:
-        fo, encoding = join(expandvars("%TEMP%"), "OutTagsT{0}.txt".format(NewRippedCD.tracknumber.zfill(2))), s1.UTF8
+        fo, encoding = join(expandvars("%TEMP%"), "T{0}.txt".format(NewRippedCD.tracknumber.zfill(2))), s1.UTF8
     with open(fo, s1.WRITE, encoding=encoding) as fw:
         fw.write(outputtags.render(tags=NewRippedCD))
-    with open(join(expandvars("%TEMP%"), "outtags.json"), s1.APPEND, encoding=s1.UTF8) as fp:
-        json.dump({key: NewRippedCD[key] for key in NewRippedCD.keys()}, fp, indent=4, sort_keys=True)
+
+    #     ----------------------------------
+    # --> Stocker les tags au format python.
+    #     ----------------------------------
+    if exists(JSON):
+        with open(JSON) as fp:
+            obj = json.load(fp)
+    obj.append({key: NewRippedCD[key] for key in NewRippedCD.keys()})
+    with open(JSON, s1.WRITE) as fp:
+        json.dump(obj, fp, indent=4, sort_keys=True)
 
 
 # ============

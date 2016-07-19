@@ -6,8 +6,6 @@ __author__ = 'Xavier ROSSET'
 # Absolute import(s).
 # ===================
 import sys
-# import logging
-# import os.path
 import sqlite3
 import argparse
 from datetime import datetime
@@ -86,12 +84,6 @@ parser_upd.add_argument("--barcode", type=validbarcode)
 # DELETE command.
 parser_del = subparsers.add_parser("delete")
 parser_del.add_argument("uid", nargs="+", help="Mandatory record unique ID", type=int)
-
-
-# ========
-# Logging.
-# ========
-# logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 
 
 # ================
