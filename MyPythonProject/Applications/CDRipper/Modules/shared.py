@@ -179,10 +179,10 @@ class AudioCD:
         s = re.compile(r"(?i)^{0}\b".format(regex["2"])).sub(cls.cap1, s)
         s = re.compile(r"(?i)^{0}\b".format(regex["3"])).sub(cls.cap1, s)
         s = re.compile(r"(?i)^{0}\b".format(regex["4"])).sub(cls.cap1, s)
-        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex[1])).sub(cls.cap2, s)
-        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex[2])).sub(cls.cap2, s)
-        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex[3])).sub(cls.cap2, s)
-        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex[4])).sub(cls.cap2, s)
+        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex["1"])).sub(cls.cap2, s)
+        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex["2"])).sub(cls.cap2, s)
+        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex["3"])).sub(cls.cap2, s)
+        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex["4"])).sub(cls.cap2, s)
 
         # ------------------------------------
         # Les acronymes demeurent capitalisés.
@@ -497,14 +497,14 @@ class PJBootlegs(Bootlegs):
 # ==========
 # Functions.
 # ==========
-def missingattribute(object, *names):
+def missingattribute(obj, *attrs):
     """
     Check if an object has got attribute(s).
-    :param object: object created from AudioCD class.
-    :param names: attribute(s) looked for.
+    :param obj: object created from AudioCD class.
+    :param attrs: attribute(s) looked for.
     :return: True: at lease one attribute is missing.
              False: all attributes looked for are present.
     """
-    if all(hasattr(object, name) for name in names):
+    if all(hasattr(obj, name) for name in attrs):
         return False
     return True

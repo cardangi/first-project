@@ -7,6 +7,7 @@ __author__ = 'Xavier ROSSET'
 # =================
 import os
 import re
+import json
 import logging
 import argparse
 import logging.handlers
@@ -34,8 +35,8 @@ parser.add_argument("-t", "--test", action="store_true")
 # ======================
 # Jinja2 custom filters.
 # ======================
-def hasattribute(object, name):
-    if hasattr(object, name):
+def hasattribute(obj, attr):
+    if hasattr(obj, attr):
         return True
     return False
 
@@ -117,12 +118,6 @@ if exists(arguments.input) and arguments.profile.lower() in s2.PROFILES:
             fw.write("{0}\n".format(rippinglog.render(detail=list((NewRippedCD.artist, NewRippedCD.year, NewRippedCD.album, NewRippedCD.genre, NewRippedCD.upc, NewRippedCD.albumsort[:-3], NewRippedCD.tracknumber,
                                                                    NewRippedCD.encoder, NewRippedCD.artistsort)))))
 
-    #     --------------
-    # --> Soundtrack CD.
-    #     --------------
-    # elif arguments.profile.lower() == s2.PROFILES[1]:
-    #     NewRippedCD = s2.SoundtrackCD.fromfile(arguments.input, s1.UTF16)
-
     #     ---------------
     # --> Self titled CD.
     #     ---------------
@@ -140,18 +135,6 @@ if exists(arguments.input) and arguments.profile.lower() in s2.PROFILES:
     #     ---------------------
     elif arguments.profile.lower() == s2.PROFILES[2]:
         NewRippedCD = s2.PJBootlegs.fromfile(arguments.input, s1.UTF16)
-
-    #     -----------------------
-    # --> Crystal Cat bootleg CD.
-    #     -----------------------
-    # elif arguments.profile.lower() == s2.PROFILES[6]:
-    #     NewRippedCD = s2.DefaultBootlegs.fromfile(arguments.input, s1.UTF16)
-
-    #     ------------------------
-    # --> Other artist bootleg CD.
-    #     ------------------------
-    # elif arguments.profile.lower() == s2.PROFILES[5]:
-    #     NewRippedCD = s2.DefaultBootlegs.fromfile(arguments.input, s1.UTF16)
 
     #     ----------------
     # --> Log output tags.
@@ -171,11 +154,8 @@ if exists(arguments.input) and arguments.profile.lower() in s2.PROFILES:
         fo, encoding = join(expandvars("%TEMP%"), "OutTagsT{0}.txt".format(NewRippedCD.tracknumber.zfill(2))), s1.UTF8
     with open(fo, s1.WRITE, encoding=encoding) as fw:
         fw.write(outputtags.render(tags=NewRippedCD))
-
-    #     ------------------------------------------------
-    # --> Commit changes and close connection to database.
-    #     ------------------------------------------------
-    # conn.close()
+    with open(join(expandvars("%TEMP%"), "OutTags.json"), s1.APPEND, encoding=encoding) as fp:
+        json.dump(NewRippedCD, fp, indent=4, sort_keys=True)
 
 
 # ============
