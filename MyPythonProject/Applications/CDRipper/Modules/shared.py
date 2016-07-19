@@ -106,12 +106,13 @@ class AudioCD:
                     break
 
         # ----- Title.
-        for track in self.deserialize(TITLES):  # track est un dictionnaire.
-            if sorted(list(track.keys())) == sorted(TIT_KEYS):
-                if self.tracknumber == track["number"]:
-                    if track["overwrite"]:
-                        self.title = track["title"]
-                        break
+        if not missingattribute(self, "tracknumber"):
+            for track in self.deserialize(TITLES):  # "track" est un dictionnaire.
+                if sorted(list(track.keys())) == sorted(TIT_KEYS):
+                    if self.tracknumber == track["number"]:
+                        if track["overwrite"]:
+                            self.title = track["title"]
+                            break
 
     def __iter__(self):
         for k, v in self.tags.items():
