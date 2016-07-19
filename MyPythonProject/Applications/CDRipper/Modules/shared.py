@@ -140,9 +140,6 @@ class AudioCD:
     def __repr__(self):
         return repr(self.tags)
 
-    def get(self, itm):
-        return self.tags.get(itm, None)
-
     def keys(self):
         return list(self.tags.keys())
 
