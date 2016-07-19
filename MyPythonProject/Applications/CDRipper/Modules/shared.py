@@ -8,6 +8,8 @@ __author__ = 'Xavier ROSSET'
 from sortedcontainers import SortedDict
 from datetime import datetime
 from pytz import timezone
+import json
+import os
 import re
 
 
@@ -15,7 +17,6 @@ import re
 # Relative imports.
 # =================
 from ... import shared
-from ...Database.Modules import shared as s2
 
 
 # ==========
@@ -23,7 +24,12 @@ from ...Database.Modules import shared as s2
 # ==========
 DFTPATTERN = r"^(?:\ufeff)?(?!#)(?:z_)?([^=]+)=(.+)$"
 PROFILES = ["default", "defaultbootlegs", "pjbootlegs", "selftitled"]
-# PROFILES = ["default", "soundtrack", "sbootlegs", "pjbootlegs", "selftitled", "xbootlegs", "ccbootlegs"]
+GENRES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Genres.json")
+LANGUAGES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Languages.json")
+ENCODERS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Encoders.json")
+TITLES = os.path.join(os.path.expandvars("%_COMPUTING%"), "Titles.json")
+ENC_KEYS = ["name", "code", "folder", "extension"]
+TIT_KEYS = ["number", "title", "overwrite"]
 
 
 # ========
@@ -63,13 +69,13 @@ class AudioCD:
 
         # ----- Encoder attributes.
         if not missingattribute(self, "encoder"):
-            encoder = s2.Record(self.encoder, table=s2.Table(table="encoders"))
-            if encoder.exists:
-                definitions = encoder["definitions"].decode(shared.DFTENCODING).split(";")
-                if definitions:
-                    self.encodercode = definitions[0]
-                    self.encoderfold = definitions[1]
-                    self.encoderexte = definitions[2]
+            for encoder in self.deserialize(ENCODERS):  # element est un dictionnaire.
+                if sorted(list(encoder.keys())) == sorted(ENC_KEYS):
+                    if self.encoder == encoder["name"]:
+                        self.encodercode = encoder["code"]
+                        self.encoderfold = encoder["folder"]
+                        self.encoderexte = encoder["extension"]
+                        break
 
         # ----- Tracknumber / Totaltracks.
         if not missingattribute(self, "track"):
@@ -87,25 +93,25 @@ class AudioCD:
 
         # ----- Genre.
         if not missingattribute(self, "artist"):
-            artist = s2.Record(self.artist, table=s2.Table(table="genres"))
-            if artist.exists:
-                self.genre = artist["genre"]
+            for artist, genre in self.deserialize(GENRES):
+                if self.artist.lower() == artist.lower():
+                    self.genre = genre
+                    break
 
         # ----- Titlelanguage.
         if not missingattribute(self, "artist"):
-            artist = s2.Record(self.artist, table=s2.Table(table="languages"))
-            if artist.exists:
-                self.genre = artist["language"]
+            for artist, language in self.deserialize(LANGUAGES):
+                if self.artist.lower() == artist.lower():
+                    self.language = language
+                    break
 
         # ----- Title.
-        regex = re.compile(r"^([^=]+)=(.+)$", re.IGNORECASE)
-        with open(r"G:\Computing\dBpoweramp - Titles.xav", encoding=shared.DFTENCODING) as f:
-            for line in self.contents(f):
-                    match = regex.match(line)
-                    if match:
-                        if match.group(1) == self.track:
-                            self.title = match.group(2)
-                            break
+        for track in self.deserialize(TITLES):  # track est un dictionnaire.
+            if sorted(list(track.keys())) == sorted(TIT_KEYS):
+                if self.tracknumber == track["number"]:
+                    if track["overwrite"]:
+                        self.title = track["title"]
+                        break
 
     def __iter__(self):
         for k, v in self.tags.items():
@@ -130,7 +136,7 @@ class AudioCD:
 
     @classmethod
     def fromfile(cls, fil, enc=shared.UTF8):
-        regex, d = re.compile(r"^(?:\ufeff)?(?!#)(?:z_)?([^=]+)=(.+)$", re.IGNORECASE), {}
+        regex, d = re.compile(DFTPATTERN, re.IGNORECASE), {}
         with open(fil, encoding=enc) as f:
             for line in cls.contents(f):
                 match = regex.match(line)
@@ -140,12 +146,12 @@ class AudioCD:
 
     @classmethod
     def case(cls, s):
-        regex = {1: r"(for|and|nor|but|or|yet|so)",
-                 2: r"((?:al)?though|as|because|if|since|so that|such as|to|unless|until|when|where(?:as)?|while)",
-                 3: r"(above|after|against|along(?:side)?|around|at|before|behind|below|between|beside|close to|down|(?:far )?from|in(?: front of)?(?:side)?(to)?|near|off?|on(?:to)?|out(?:side)?|over|toward|under"
-                    r"(?:neath)?|up(?: to)?)",
-                 4: r"(a(?:n(?:d)?)?|as|by|than|the|till|upon)",
-                 5: r"[\.\-]+"}
+        regex = {"1": r"(for|and|nor|but|or|yet|so)",
+                 "2": r"((?:al)?though|as|because|if|since|so that|such as|to|unless|until|when|where(?:as)?|while)",
+                 "3": r"(above|after|against|along(?:side)?|around|at|before|behind|below|between|beside|close to|down|(?:far )?from|in(?: front of)?(?:side)?(to)?|near|off?|on(?:to)?|out(?:side)?|over|toward|"
+                      r"under(?:neath)?|up(?: to)?)",
+                 "4": r"(a(?:n(?:d)?)?|as|by|than|the|till|upon)",
+                 "5": r"[\.\-]+"}
 
         # ---------------------------------------------
         # Chaque mot est formaté en lettres minuscules.
@@ -160,22 +166,22 @@ class AudioCD:
         # -------------------------------------------------------------
         # Les conjonctions demeurent entièrement en lettres minsucules.
         # -------------------------------------------------------------
-        s = re.compile(r"(?i)\b{}\b".format(regex[1])).sub(cls.low, s)
-        s = re.compile(r"(?i)\b{}\b".format(regex[2])).sub(cls.low, s)
-        s = re.compile(r"(?i)\b{}\b".format(regex[3])).sub(cls.low, s)
-        s = re.compile(r"(?i)\b{}\b".format(regex[4])).sub(cls.low, s)
+        s = re.compile(r"(?i)\b{0}\b".format(regex["1"])).sub(cls.low, s)
+        s = re.compile(r"(?i)\b{0}\b".format(regex["2"])).sub(cls.low, s)
+        s = re.compile(r"(?i)\b{0}\b".format(regex["3"])).sub(cls.low, s)
+        s = re.compile(r"(?i)\b{0}\b".format(regex["4"])).sub(cls.low, s)
 
         # -------------------------------------
         # Le début du titre demeure capitalisé.
         # -------------------------------------
-        s = re.compile(r"(?i)^{}\b".format(regex[1])).sub(cls.cap1, s)
-        s = re.compile(r"(?i)^{}\b".format(regex[2])).sub(cls.cap1, s)
-        s = re.compile(r"(?i)^{}\b".format(regex[3])).sub(cls.cap1, s)
-        s = re.compile(r"(?i)^{}\b".format(regex[4])).sub(cls.cap1, s)
-        s = re.compile(r"(?i)^({})({})\b".format(regex[5], regex[1])).sub(cls.cap2, s)
-        s = re.compile(r"(?i)^({})({})\b".format(regex[5], regex[2])).sub(cls.cap2, s)
-        s = re.compile(r"(?i)^({})({})\b".format(regex[5], regex[3])).sub(cls.cap2, s)
-        s = re.compile(r"(?i)^({})({})\b".format(regex[5], regex[4])).sub(cls.cap2, s)
+        s = re.compile(r"(?i)^{0}\b".format(regex["1"])).sub(cls.cap1, s)
+        s = re.compile(r"(?i)^{0}\b".format(regex["2"])).sub(cls.cap1, s)
+        s = re.compile(r"(?i)^{0}\b".format(regex["3"])).sub(cls.cap1, s)
+        s = re.compile(r"(?i)^{0}\b".format(regex["4"])).sub(cls.cap1, s)
+        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex[1])).sub(cls.cap2, s)
+        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex[2])).sub(cls.cap2, s)
+        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex[3])).sub(cls.cap2, s)
+        s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex[4])).sub(cls.cap2, s)
 
         # ------------------------------------
         # Les acronymes demeurent capitalisés.
@@ -187,7 +193,7 @@ class AudioCD:
         # ----------------------------------
         # Autres mots demeurant capitalisés.
         # ----------------------------------
-        s = re.compile(r"(?i)\b({})({})\b".format(regex[5], regex[3])).sub(cls.cap2, s)
+        s = re.compile(r"(?i)\b({0})({1})\b".format(regex["5"], regex["3"])).sub(cls.cap2, s)
 
         # -----------------------------------------------------------------
         # Les mots précédés d'une apostrophe demeurent en lettre minuscule.
@@ -220,18 +226,6 @@ class AudioCD:
         if m:
             return m.group(1, 2)
         return ()
-
-    @staticmethod
-    def isbonustitle(tit):
-        """
-        Check if title is a bonus title.
-        :param tit: title
-        :return: tuple composed of (boolean, returned title).
-        """
-        m = re.compile(r"(?i)^([^\[\(]+)(?:\[|\()bonus(?:\]|\))$").match(tit)
-        if m:
-            return True, tit[m.start(1):m.end(1)].strip()
-        return False, tit
 
     @staticmethod
     def cap1(s):
@@ -278,6 +272,12 @@ class AudioCD:
         """
         return "{0}({1})".format(s.groups()[0], s.groups()[1])
 
+    @staticmethod
+    def deserialize(fil, enc=shared.UTF8):
+        with open(fil, encoding=enc) as fp:
+            for structure in json.load(fp):
+                yield structure
+
 
 class DefaultCD(AudioCD):
     itags = ["label", "year", "album", "origyear", "albumsortcount", "bootleg", "live"]
@@ -316,24 +316,6 @@ class DefaultCD(AudioCD):
                 self.tags[i] = getattr(self, i)
 
 
-# class SoundtrackCD(DefaultCD):
-#     itags = []
-#     otags = []
-#
-#     def __init__(self, **kwargs):
-#         super(SoundtrackCD, self).__init__(**kwargs)
-#         for i in SoundtrackCD.itags:
-#             if i in kwargs:
-#                 setattr(self, i, kwargs[i])
-#         self.outputtags()
-#
-#     def outputtags(self):
-#         super(SoundtrackCD, self).outputtags()
-#         for i in SoundtrackCD.otags:
-#             if hasattr(self, i):
-#                 self.tags[i] = getattr(self, i)
-
-
 class SelfTitledCD(DefaultCD):
     itags = []
     otags = []
@@ -370,28 +352,6 @@ class LiveCD(AudioCD):
         for i in LiveCD.otags:
             if hasattr(self, i):
                 self.tags[i] = getattr(self, i)
-
-    # @staticmethod
-    # def getdate(s, r):
-    #     """
-    #     Get date from a string by using a regular expression.
-    #     :param s: string.
-    #     :param r: regular expression.
-    #     :return: tuple composed of (boolean, CCYY, MM, DD)
-    #     """
-    #     m = re.compile(r).match(s)
-    #     if m:
-    #         return True, m.group(1), m.group(2), m.group(3)
-    #     return False, None, None, None
-
-    # @staticmethod
-    # def hascomma(s):
-    #     """
-    #     Check if a string has a comma.
-    #     :param s: string.
-    #     :return: boolean.
-    #     """
-    #     return not re.compile(r"^((?!,).)*$").search(s)
 
 
 class Bootlegs(LiveCD):
@@ -489,54 +449,6 @@ class DefaultBootlegs(Bootlegs):
         for i in DefaultBootlegs.otags:
             if hasattr(self, i):
                 self.tags[i] = getattr(self, i)
-
-
-# class CCBootlegs(DefaultBootlegs):
-#
-#     def __init__(self, **kwargs):
-#         super(CCBootlegs, self).__init__(**kwargs)
-#         for i in CCBootlegs.itags:
-#             if i in kwargs:
-#                 setattr(self, i, kwargs[i])
-#         self.outputtags()
-#
-#     def outputtags(self):
-#         super(CCBootlegs, self).outputtags()
-#         for i in CCBootlegs.otags:
-#             if hasattr(self, i):
-#                 self.tags[i] = getattr(self, i)
-
-
-# class SBootlegs(DefaultBootlegs):
-#
-#     def __init__(self, **kwargs):
-#         super(SBootlegs, self).__init__(**kwargs)
-#         for i in SBootlegs.itags:
-#             if i in kwargs:
-#                 setattr(self, i, kwargs[i])
-#         self.outputtags()
-#
-#     def outputtags(self):
-#         super(SBootlegs, self).outputtags()
-#         for i in SBootlegs.otags:
-#             if hasattr(self, i):
-#                 self.tags[i] = getattr(self, i)
-
-
-# class XBootlegs(DefaultBootlegs):
-#
-#     def __init__(self, **kwargs):
-#         super(XBootlegs, self).__init__(**kwargs)
-#         for i in XBootlegs.itags:
-#             if i in kwargs:
-#                 setattr(self, i, kwargs[i])
-#         self.outputtags()
-#
-#     def outputtags(self):
-#         super(XBootlegs, self).outputtags()
-#         for i in XBootlegs.otags:
-#             if hasattr(self, i):
-#                 self.tags[i] = getattr(self, i)
 
 
 class PJBootlegs(Bootlegs):
