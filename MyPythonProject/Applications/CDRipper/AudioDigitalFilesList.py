@@ -20,7 +20,7 @@ from sortedcontainers import SortedDict, SortedList
 # =================
 # Relative imports.
 # =================
-from Applications import shared
+from .. import shared
 
 
 # ==========================
@@ -131,10 +131,12 @@ if artists:
 
     templist1 = [i for i in range(1, len(artists) + 1)]
 
+    # ----- Liste des artistes. Tri par nom croissant.
     templist2 = [key for key in sorted(list(artists.keys()))]
     templist3 = [artists[key] for key in sorted(list(artists.keys()))]
     listd = list(zip(templist1, templist2, templist3))
 
+    # ----- Liste des artistes. Tri par ranking décroissant, puis nom croissant.
     templist2 = [artist for artist, dummy in sorted([(key, artists[key]) for key in sorted(list(artists.keys()))], key=itemgetter(1), reverse=True)]
     templist3 = [count for dummy, count in sorted([(key, artists[key]) for key in sorted(list(artists.keys()))], key=itemgetter(1), reverse=True)]
     liste = list(zip(templist1, templist2, templist3))
@@ -145,29 +147,29 @@ if artists:
 #    -----------
 root = ElementTree.Element("Data", attrib=dict(css="firstcss.css"))
 if lista:
-    d1 = ElementTree.SubElement(root, "Files")
+    se = ElementTree.SubElement(root, "Files")
     for item1, item2, item3 in lista:
-        file = ElementTree.SubElement(d1, "File", attrib=dict(number=str(item1), created=item3))
+        file = ElementTree.SubElement(se, "File", attrib=dict(number=str(item1), created=item3))
         file.text = item2
 if listb:
-    d2 = ElementTree.SubElement(root, "RecentFiles")
+    se = ElementTree.SubElement(root, "RecentFiles")
     for item1, item2, item3 in listb:
-        file = ElementTree.SubElement(d2, "File", attrib=dict(number=str(item1), created=item3))
+        file = ElementTree.SubElement(se, "File", attrib=dict(number=str(item1), created=item3))
         file.text = item2
 if listc:
-    d3 = ElementTree.SubElement(root, "Extensions")
+    se = ElementTree.SubElement(root, "Extensions")
     for item1, item2, item3 in listc:
-        file = ElementTree.SubElement(d3, "Extension", attrib=dict(number=str(item1), count=str(item3)))
+        file = ElementTree.SubElement(se, "Extension", attrib=dict(number=str(item1), count=str(item3)))
         file.text = item2
 if listd:
-    d4 = ElementTree.SubElement(root, "Artists")
+    se = ElementTree.SubElement(root, "Artists")
     for item1, item2, item3 in listd:
-        file = ElementTree.SubElement(d4, "Artist", attrib=dict(number=str(item1), count=str(item3)))
+        file = ElementTree.SubElement(se, "Artist", attrib=dict(number=str(item1), count=str(item3)))
         file.text = item2
 if liste:
-    d5 = ElementTree.SubElement(root, "Artists2")
+    se = ElementTree.SubElement(root, "Ranking")
     for item1, item2, item3 in liste:
-        file = ElementTree.SubElement(d5, "Artist", attrib=dict(number=str(item1), count=str(item3)))
+        file = ElementTree.SubElement(se, "Artist", attrib=dict(number=str(item1), count=str(item3)))
         file.text = item2
 if any([lista, listb, listc, listd, liste]):
     ElementTree.ElementTree(root).write(os.path.join(os.path.expandvars("%_COMPUTING%"), "AudioDigitalFilesList.xml"), encoding="UTF-8", xml_declaration=True)
