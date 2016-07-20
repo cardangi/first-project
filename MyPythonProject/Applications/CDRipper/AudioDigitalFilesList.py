@@ -145,7 +145,7 @@ if artists:
 #    -----------
 root = ElementTree.Element("Data", attrib=dict(css="firstcss.css"))
 if lista:
-    d1 = ElementTree.SubElement(root, "Details")
+    d1 = ElementTree.SubElement(root, "Files")
     for item1, item2, item3 in lista:
         file = ElementTree.SubElement(d1, "File", attrib=dict(number=str(item1), created=item3))
         file.text = item2
