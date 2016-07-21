@@ -178,6 +178,3 @@ if liste:
         file.text = item2
 if any([lista, listb, listc, listd, liste]):
     ElementTree.ElementTree(root).write(os.path.join(os.path.expandvars("%_COMPUTING%"), "AudioDigitalFilesList.xml"), encoding="UTF-8", xml_declaration=True)
-
-
-

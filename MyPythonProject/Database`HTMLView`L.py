@@ -72,5 +72,4 @@ if not returncode:
     sys.exit(99)
 if all(not operator.eq(i, 0) for i in returncode):
     sys.exit(99)
-if any(operator.eq(i, 0) for i in returncode):
-    sys.exit(0)
+sys.exit(0)
