@@ -20,7 +20,7 @@ from sortedcontainers import SortedDict, SortedList
 # =================
 # Relative imports.
 # =================
-from .. import shared
+from Applications import shared
 
 
 # ==========================
@@ -37,19 +37,20 @@ def canfilebeprocessed(fe, *tu):
     fe: file extension.
     tu: filtered extensions tuple.
     """
+    if fe not in ["flac", "m4a", "mp3", "ogg"]:
+        return False
     if not tu:
         return True
-    if tu:
-        if fe.lower() in tu:
-            return True
+    if fe.lower() in tu:
+        return True
     return False
 
 
-def directory(d):
+def isvaliddirectory(d):
     if not os.path.isdir(d):
-        raise argparse.ArgumentTypeError('"{}" is not a valid directory'.format(d))
+        raise argparse.ArgumentTypeError('"{0}" is not a valid directory'.format(d))
     if not os.access(d, os.R_OK):
-        raise argparse.ArgumentTypeError('"{}" is not a readable directory'.format(d))
+        raise argparse.ArgumentTypeError('"{0}" is not a readable directory'.format(d))
     return d
 
 
@@ -57,7 +58,7 @@ def directory(d):
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("directory", help="mandatory directory to walk through", type=directory)
+parser.add_argument("directory", help="mandatory directory to walk through", type=isvaliddirectory)
 parser.add_argument("-e", "--ext", dest="extension", help="one or more extension(s) to filter out", nargs="*")
 arguments = parser.parse_args()
 
@@ -66,7 +67,8 @@ arguments = parser.parse_args()
 # Initializations.
 # ================
 reflist, lista, listb, listc, listd, liste, extensions, artists, rex1, rex2, acount, ecount = [], [], [], [], [], [], SortedDict(), SortedDict(), \
-                                                                                              re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\"), re.compile("recycle", re.IGNORECASE), \
+                                                                                              re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\"), \
+                                                                                              re.compile("recycle", re.IGNORECASE), \
                                                                                               0, 0
 
 
@@ -78,7 +80,10 @@ for fil in shared.directorytree(normpath(arguments.directory)):
     if not match:
         art = None
         ext = None
-        if canfilebeprocessed(splitext(fil)[1][1:], *tuple(arguments.extension)):
+        ext_filter = arguments.extension
+        if not ext_filter:
+            ext_filter = []
+        if canfilebeprocessed(splitext(fil)[1][1:], *tuple(ext_filter)):
             ext = splitext(fil)[1][1:].upper()
             match = rex1.match(normpath(fil))
             if match:
@@ -102,13 +107,13 @@ for fil in shared.directorytree(normpath(arguments.directory)):
 if reflist:
 
     # ----- Liste des fichiers. Tri par nom croissant.
-    templist1 = [i for i in range(1, len(reflist) + 1)]
+    templist1 = list(range(1, len(reflist) + 1))
     templist2 = [fil for fil, dummy1, dummy2, dummy3 in SortedList(reflist)]
     templist3 = [humantime for dummy1, dummy2, humantime, dummy3 in SortedList(reflist)]
     lista = list(zip(templist1, templist2, templist3))
 
     # ----- Liste des 50 fichiers créés dernièrement. Tri par date décroissante, puis nom croissant.
-    templist1 = [i for i in range(1, 51)]
+    templist1 = list(range(1, 51))
     templist2 = [fil for fil, dummy1, dummy2 in sorted([(fil, epoch, humantime) for fil, epoch, humantime, dummy1 in sorted(reflist, key=itemgetter(0))], key=itemgetter(1), reverse=True)[:50]]
     templist3 = [humantime for dummy1, dummy2, humantime in sorted([(fil, epoch, humantime) for fil, epoch, humantime, dummy1 in sorted(reflist, key=itemgetter(0))], key=itemgetter(1), reverse=True)[:50]]
     listb = list(zip(templist1, templist2, templist3))
@@ -118,7 +123,7 @@ if reflist:
 # 2. Extensions.
 #    -----------
 if extensions:
-    templist1 = [i for i in range(1, len(extensions) + 1)]
+    templist1 = list(range(1, len(extensions) + 1))
     templist2 = [key for key in sorted(list(extensions.keys()))]
     templist3 = [extensions[key] for key in sorted(list(extensions.keys()))]
     listc = list(zip(templist1, templist2, templist3))
@@ -129,7 +134,7 @@ if extensions:
 #    --------
 if artists:
 
-    templist1 = [i for i in range(1, len(artists) + 1)]
+    templist1 = list(range(1, len(artists) + 1))
 
     # ----- Liste des artistes. Tri par nom croissant.
     templist2 = [key for key in sorted(list(artists.keys()))]
