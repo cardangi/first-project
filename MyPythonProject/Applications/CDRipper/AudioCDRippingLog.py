@@ -116,35 +116,35 @@ if arguments.command == "insert":
 #  3. Mise à jour d'un CD.
 elif arguments.command == "update":
     for uid in arguments.uid:
-        set, args = "", ()
+        statment, args = "", ()
         if conn.cursor().execute("SELECT count(*) FROM rippinglog WHERE id=?", (uid,)).fetchone()[0]:
             if arguments.ripped:
-                set = '{0}ripped=?, '.format(set)
+                statment = '{0}ripped=?, '.format(statment)
                 args += (datetime.fromtimestamp(arguments.ripped),)
             if arguments.artistsort:
-                set = '{0}artistsort=?, '.format(set)
+                statment = '{0}artistsort=?, '.format(statment)
                 args += (arguments.artistsort,)
             if arguments.albumsort:
-                set = '{0}albumsort=?, '.format(set)
+                statment = '{0}albumsort=?, '.format(statment)
                 args += (arguments.albumsort,)
             if arguments.artist:
-                set = '{0}artist=?, '.format(set)
+                statment = '{0}artist=?, '.format(statment)
                 args += (arguments.artist,)
             if arguments.year:
-                set = '{0}year=?, '.format(set)
+                statment = '{0}year=?, '.format(statment)
                 args += (arguments.year,)
             if arguments.album:
-                set = '{0}album=?, '.format(set)
+                statment = '{0}album=?, '.format(statment)
                 args += (arguments.album,)
             if arguments.genre:
-                set = '{0}genre=?, '.format(set)
+                statment = '{0}genre=?, '.format(statment)
                 args += (arguments.genre,)
             if arguments.barcode:
-                set = '{0}UPC=?, '.format(set)
+                statment = '{0}UPC=?, '.format(statment)
                 args += (arguments.barcode,)
-            if set:
+            if statment:
                 args += (uid,)
-                conn.cursor().execute("UPDATE rippinglog SET {0} WHERE id=?".format(set[:-2]), args)
+                conn.cursor().execute("UPDATE rippinglog SET {0} WHERE id=?".format(statment[:-2]), args)
 
 #  4. Suppression d'un CD.
 elif arguments.command == "delete":
