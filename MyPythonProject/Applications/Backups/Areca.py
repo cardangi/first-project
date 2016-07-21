@@ -140,11 +140,4 @@ logger.info('END "%s".' % (os.path.basename(__file__),))
 # ===============
 if all(not operator.eq(i, 0) for i in returncode):
     sys.exit(99)
-if any(operator.eq(i, 0) for i in returncode):
-    sys.exit(0)
-
-
-# Fix areca backup
-# Fix areca backup
-# Fix areca backup
-# Fix areca backup
+sys.exit(0)

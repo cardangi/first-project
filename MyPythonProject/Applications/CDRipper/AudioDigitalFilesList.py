@@ -20,7 +20,7 @@ from sortedcontainers import SortedDict, SortedList
 # =================
 # Relative imports.
 # =================
-from Applications import shared
+from .. import shared
 
 
 # ==========================
