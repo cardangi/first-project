@@ -20,7 +20,8 @@ from sortedcontainers import SortedDict, SortedList
 # =================
 # Relative imports.
 # =================
-from .. import shared
+from .. import shared as s1
+from .Modules import shared as s2
 
 
 # ==========================
@@ -32,20 +33,6 @@ locale.setlocale(locale.LC_ALL, "")
 # ==========
 # Functions.
 # ==========
-def canfilebeprocessed(fe, *tu):
-    """
-    fe: file extension.
-    tu: filtered extensions tuple.
-    """
-    if fe not in ["flac", "m4a", "mp3", "ogg"]:
-        return False
-    if not tu:
-        return True
-    if fe.lower() in tu:
-        return True
-    return False
-
-
 def isvaliddirectory(d):
     if not os.path.isdir(d):
         raise argparse.ArgumentTypeError('"{0}" is not a valid directory'.format(d))
@@ -75,7 +62,7 @@ reflist, lista, listb, listc, listd, liste, extensions, artists, rex1, rex2, aco
 # ===============
 # Main algorithm.
 # ===============
-for fil in shared.directorytree(normpath(arguments.directory)):
+for fil in s1.directorytree(normpath(arguments.directory)):
     match = rex2.search(fil)
     if not match:
         art = None
@@ -83,11 +70,11 @@ for fil in shared.directorytree(normpath(arguments.directory)):
         ext_filter = arguments.extension
         if not ext_filter:
             ext_filter = []
-        if canfilebeprocessed(splitext(fil)[1][1:], *tuple(ext_filter)):
+        if s2.canfilebeprocessed(splitext(fil)[1][1:], *tuple(ext_filter)):
             ext = splitext(fil)[1][1:].upper()
             match = rex1.match(normpath(fil))
             if match:
-                reflist.append((fil, int(os.path.getctime(fil)), "Créé le %s" % (shared.dateformat(datetime.fromtimestamp(os.path.getctime(fil), tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1),), len(fil)))
+                reflist.append((fil, int(os.path.getctime(fil)), "Créé le %s" % (s1.dateformat(datetime.fromtimestamp(os.path.getctime(fil), tz=timezone(s1.DFTTIMEZONE)), s1.TEMPLATE1),), len(fil)))
                 art = match.group(1)
         if ext:
             if ext not in extensions:

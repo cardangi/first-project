@@ -523,3 +523,17 @@ def missingattribute(obj, *attrs):
     if all(hasattr(obj, name) for name in attrs):
         return False
     return True
+
+
+def canfilebeprocessed(fe, *tu):
+    """
+    fe: file extension.
+    tu: filtered extensions tuple.
+    """
+    if fe.lower() not in ["flac", "m4a", "mp3", "ogg"]:
+        return False
+    if not tu:
+        return True
+    if fe.lower() in [item.lower() for item in tu]:
+        return True
+    return False
