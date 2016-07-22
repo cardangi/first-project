@@ -1,10 +1,4 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
 from jinja2 import Environment, FileSystemLoader
 from string import Template
 import subprocess
@@ -15,13 +9,10 @@ import locale
 import sys
 import os
 import re
-
-
-# =================
-# Relative imports.
-# =================
 from .. import shared as s1
 from .Modules import shared as s2
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========================
