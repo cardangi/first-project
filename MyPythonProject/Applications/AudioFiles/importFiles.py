@@ -1,10 +1,4 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
 from jinja2 import Environment, FileSystemLoader
 from string import Template
 import subprocess
@@ -15,12 +9,10 @@ import locale
 import sys
 import os
 import re
+from .. import shared as s1
+from .Modules import shared as s2
 
-
-# =================
-# Relative imports.
-# =================
-from .. import shared
+__author__ = 'Xavier ROSSET'
 
 
 # ==========================
@@ -54,13 +46,6 @@ def directorytree(directory=os.getcwd(), rex=None):
             yield os.path.join(root, file)
 
 
-def grabdiscnumber(fil):
-    match = re.search(r"\B(?:1[1-9])(?:{0})(?:{1})d(\d)\B_".format(shared.DFTMONTHREGEX, shared.DFTDAYREGEX), fil)
-    if match:
-        return True, match.group(1)
-    return False, None
-
-
 # ========
 # Classes.
 # ========
@@ -71,24 +56,24 @@ class Header:
 # ======================
 # Jinja2 environment(s).
 # ======================
-environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "AudioFiles", "Templates"), encoding=shared.DFTENCODING), trim_blocks=True, lstrip_blocks=True)
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "AudioFiles", "Templates"), encoding=s1.DFTENCODING), trim_blocks=True, lstrip_blocks=True)
 
 
 # ==========================
 # Jinja2 global variable(s).
 # ==========================
-environment.globals["now"] = shared.now()
-environment.globals["copyright"] = shared.COPYRIGHT
+environment.globals["now"] = s1.now()
+environment.globals["copyright"] = s1.COPYRIGHT
 
 
 # ========================
 # Jinja2 custom filter(s).
 # ========================
-environment.filters["integertostring"] = shared.integertostring
-environment.filters["repeatelement"] = shared.repeatelement
-environment.filters["sortedlist"] = shared.sortedlist
-environment.filters["ljustify"] = shared.ljustify
-environment.filters["rjustify"] = shared.rjustify
+environment.filters["integertostring"] = s1.integertostring
+environment.filters["repeatelement"] = s1.repeatelement
+environment.filters["sortedlist"] = s1.sortedlist
+environment.filters["ljustify"] = s1.ljustify
+environment.filters["rjustify"] = s1.rjustify
 
 
 # ===================
@@ -125,7 +110,7 @@ HEADER, TITLES, MODES, INPUTS, CURWDIR, TABSIZE = "import audio files", \
 # ================
 # Initializations.
 # ================
-mode, status, somefilesimported, curwdir, set_folders, list_folders, list_files, srcs, dsts = shared.WRITE, 100, False, CURWDIR, set(), [], [], "", ""
+mode, status, somefilesimported, curwdir, set_folders, list_folders, list_files, srcs, dsts = s1.WRITE, 100, False, CURWDIR, set(), [], [], "", ""
 titles = dict(zip([str(i) for i in range(1, len(TITLES) + 1)], TITLES))
 inputs = dict(zip([str(i) for i in range(1, len(INPUTS) + 1)], INPUTS))
 # -----
@@ -144,8 +129,9 @@ arguments = parser.parse_args()
 # Regular expressions.
 # ====================
 rex1 = re.compile(r"^\d(\d\d?)?$")
-rex2 = re.compile(r"\b({0})\b\-\b({1})\b\-\b({2})\b \b([a-z, ]+)\\[^\\\.]+\.(?:{3})$".format(shared.DFTYEARREGEX, shared.DFTMONTHREGEX, shared.DFTDAYREGEX, arguments.extension), re.IGNORECASE)
-rex3 = re.compile(r"\b({0})\b\-\b({1})\b\-\b({2})\b \b([a-z, ]+)$".format(shared.DFTYEARREGEX, shared.DFTMONTHREGEX, shared.DFTDAYREGEX), re.IGNORECASE)
+rex2 = re.compile(r"\b({0})\b\-\b({1})\b\-\b({2})\b \b([a-z, ]+)\\[^\\\.]+\.(?:{3})$".format(s1.DFTYEARREGEX, s1.DFTMONTHREGEX, s1.DFTDAYREGEX, arguments.extension), re.IGNORECASE)
+rex3 = re.compile(r"\b({0})\b\-\b({1})\b\-\b({2})\b \b([a-z, ]+)$".format(s1.DFTYEARREGEX, s1.DFTMONTHREGEX, s1.DFTDAYREGEX), re.IGNORECASE)
+rex4 = re.compile(r"[a-z]\B(?:1[1-9])(?:{0})(?:{1})d(\d)\B_".format(s1.DFTMONTHREGEX, s1.DFTDAYREGEX), re.IGNORECASE)
 
 
 # ===============
@@ -160,7 +146,7 @@ while True:
         while True:
             pprint(t=tmpl)
             choice = input("{0}\t{1} ".format("".join(list(itertools.repeat("\n", 3))), inputs[str(inp)]).expandtabs(TABSIZE))
-            if choice.upper() not in shared.ACCEPTEDANSWERS:
+            if choice.upper() not in s1.ACCEPTEDANSWERS:
                 continue
             break
         if choice.upper() == "Y":
@@ -213,8 +199,8 @@ while True:
         if match1:
             list_files = [file for file in os.listdir(src) if fnmatch.fnmatch(file, "*.{0}".format(arguments.extension.lower()))]
             srcs = [os.path.join(src, file) for file in list_files]
-            dsts = ["{0}{1}".format(template3.substitute(year=match1.group(1), month=match1.group(2), day=match1.group(3), location=match1.group(4), disc=grabdiscnumber(file)[1]), os.path.sep)
-                    for file in list_files if grabdiscnumber(file)[0]]
+            dsts = ["{0}{1}".format(template3.substitute(year=match1.group(1), month=match1.group(2), day=match1.group(3), location=match1.group(4), disc=s2.grabdiscnumber(file, rex4)[1]), os.path.sep)
+                    for file in list_files if s2.grabdiscnumber(file, rex4)[0]]
             tmpl = template1.render(header=header, detail=sorted(list(zip(sorted(srcs), sorted(dsts))), key=lambda i: i[0]), mode=MODES["import"])
             inp, code = 3, 4
         elif not match1:
@@ -228,14 +214,14 @@ while True:
         while True:
             pprint(t=tmpl)
             choice = input("{0}\t{1} ".format("".join(list(itertools.repeat("\n", 3))), inputs[str(inp)]).expandtabs(TABSIZE))
-            if choice.upper() in shared.ACCEPTEDANSWERS:
+            if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "Y":
-            with open(os.path.join(os.path.expandvars("%TEMP%"), "xxcopy.txt"), mode=mode, encoding=shared.DFTENCODING) as fw:
+            with open(os.path.join(os.path.expandvars("%TEMP%"), "xxcopy.txt"), mode=mode, encoding=s1.DFTENCODING) as fw:
                 for src, dst in sorted(list(zip(srcs, dsts)), key=lambda i: i[0]):
                     fw.write("{0}\n".format(template2.render(src=src, dst=dst, log=os.path.expandvars("%_XXCOPYLOG%"))))
             header.title = titles["4"]
-            mode, inp, code, somefilesimported = shared.APPEND, 5, 5, True
+            mode, inp, code, somefilesimported = s1.APPEND, 5, 5, True
         elif choice.upper() == "N" and not somefilesimported:
             header.title = "Exit program."
             inp, code = 4, 99
@@ -253,7 +239,7 @@ while True:
         while True:
             pprint(t=tmpl)
             choice = input("{0}\t{1} ".format("".join(list(itertools.repeat("\n", 3))), inputs[str(inp)]).expandtabs(TABSIZE))
-            if choice.upper() in shared.ACCEPTEDANSWERS:
+            if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "N":
             inp, code = 4, 99
@@ -272,7 +258,7 @@ while True:
         while True:
             pprint(t=tmpl)
             choice = input("{0}\t{1} ".format("".join(list(itertools.repeat("\n", 3))), inputs[str(inp)]).expandtabs(TABSIZE))
-            if choice.upper() in shared.ACCEPTEDANSWERS:
+            if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "N":
             step, inp, code = 1, 1, 1

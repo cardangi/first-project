@@ -16,7 +16,7 @@ REM ==================
 REM Initializations 2.
 REM ==================
 SET _rippingbase=%TEMP%\rippingdatabase
-SET _htmlrippinglog=%_COMPUTING%\rippinglog.html
+SET _htmlrippinglog=%_COMPUTING%\RippingLog\rippinglog.html
 SET _txtdigitalaudiobase=%TEMP%\digitalaudiodatabase
 SET _xmldigitalaudiobase=%TEMP%\digitalaudiobase.xml
 SET _digitalaudiobase=%_COMPUTING%\digitalaudiobase\digitalaudiobase

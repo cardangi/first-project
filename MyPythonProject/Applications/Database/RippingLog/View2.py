@@ -21,7 +21,7 @@ from ... import shared
 # ==========
 # Constants.
 # ==========
-OUTPUT, KEYS = os.path.join(os.path.expandvars("%TEMP%"), "rippinglog"), ["RIPPED", "ARTISTSORT", "ALBUMSORT", "ARTIST", "YEAR", "ALBUM", "GENRE", "BARCODE", "APPLICATION"]
+OUTPUT, KEYS = os.path.join(os.path.expandvars("%TEMP%"), "rippinglog.json"), ["RIPPED", "ARTISTSORT", "ALBUMSORT", "ARTIST", "YEAR", "ALBUM", "GENRE", "BARCODE", "APPLICATION"]
 
 
 # ===============
