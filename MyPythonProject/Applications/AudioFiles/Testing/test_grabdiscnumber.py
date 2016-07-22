@@ -27,6 +27,9 @@ class TestGrabdiscnumber(TestCase):
     def test_sixth(self):
         self.assertEqual((True, "4"), s1.grabdiscnumber(r"bstuvwxyz160517d4_02_No_Surrender.flac", re.compile(r"[a-z]\B(?:1[1-9])(?:{0})(?:{1})d(\d)\B_".format(s2.DFTMONTHREGEX, s2.DFTDAYREGEX), re.IGNORECASE)))
 
+    def test_seventh(self):
+        self.assertEqual((False, None), s1.grabdiscnumber(r"2.20160517.1.13.D1.T01.flac", re.compile(r"[a-z]\B(?:1[1-9])(?:{0})(?:{1})d(\d)\B_".format(s2.DFTMONTHREGEX, s2.DFTDAYREGEX), re.IGNORECASE)))
+
 
 if __name__ == '__main__':
     main()
