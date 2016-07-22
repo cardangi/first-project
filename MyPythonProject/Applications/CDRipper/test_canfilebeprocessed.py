@@ -1,6 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 from unittest import TestCase, main
-from Applications.CDRipper.Modules import shared
+from .Modules import shared
 
 __author__ = 'Xavier ROSSET'
 
