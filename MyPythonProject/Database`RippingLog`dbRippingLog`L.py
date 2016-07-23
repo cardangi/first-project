@@ -68,3 +68,5 @@ with chgcurdir(os.path.expandvars("%_PYTHONPROJECT%")):
 # =================
 if view1:
     process3 = subprocess.run([PYTHON, r"G:\Computing\MyPythonProject\Database`HTMLView`L.py", "RippingLog"])
+    with chgcurdir(os.path.expandvars("%_PYTHONPROJECT%")):
+        process4 = subprocess.run([PYTHON, "-m", "Applications.Database.RippingLog.View2"])
