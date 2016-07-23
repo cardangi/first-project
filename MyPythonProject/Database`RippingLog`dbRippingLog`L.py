@@ -47,7 +47,7 @@ with chgcurdir(os.path.expandvars("%_PYTHONPROJECT%")):
     #     ----------------
     #  2. Update database.
     #     ----------------
-    # Tous les éléments de la liste "args" doivent être définis en alphanumérique !
+    #     Tous les éléments de la liste "args" doivent être définis en alphanumérique !
     if not process1.returncode:
         if os.path.exists(INPUT):
             with open(INPUT, encoding="ISO-8859-1") as fr:
