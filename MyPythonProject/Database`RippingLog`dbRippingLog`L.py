@@ -25,7 +25,7 @@ def chgcurdir(d):
 # ==========
 # Constants.
 # ==========
-INPUT, PYTHON = os.path.join(os.path.expandvars("%TEMP%"), "arguments"), r"C:\Program Files (x86)\Python35-32\python.exe"
+INPUT, PYTHON = os.path.join(os.path.expandvars("%TEMP%"), "arguments.json"), r"C:\Program Files (x86)\Python35-32\python.exe"
 
 
 # ================
@@ -47,16 +47,17 @@ with chgcurdir(os.path.expandvars("%_PYTHONPROJECT%")):
     #     ----------------
     #  2. Update database.
     #     ----------------
+    # Tous les éléments de la liste "args" doivent être définis en alphanumérique !
     if not process1.returncode:
         if os.path.exists(INPUT):
             with open(INPUT, encoding="ISO-8859-1") as fr:
                 for argument in json.load(fr):
                     if len(argument) >= 2:
                         args = [item for item in dftargs]
-                        args.append(argument[0])
+                        args.append("{0}".format(argument[0]))
                         for key, value in argument[1].items():
                             args.append("--{0}".format(key))
-                            args.append(value)
+                            args.append("{0}".format(value))
                         process2 = subprocess.run(args)
                         if not process2.returncode:
                             view1 = True
