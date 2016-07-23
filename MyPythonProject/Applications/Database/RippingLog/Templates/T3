@@ -1,0 +1,26 @@
+{% extends "T2" %}
+
+{% block table %}
+                <table class="content2">
+                    <tr>
+                    {% for header in th %}
+                        <th>{{ header }}</th>
+                    {% endfor %}
+                    </tr>
+                    {% for td1, td2 in tr %}
+                    <tr>
+                        <td>{{ td1 }}</td>
+                        <td>{{ td2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+{%- endblock %}
+
+{% block div %}
+            <div id="{{ id }}">
+            {% if h2 %}
+                <h2>{{ h2 }}</h2>
+            {% endif %}
+{{ super() }}
+            </div>
+{% endblock %}

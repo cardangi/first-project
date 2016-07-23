@@ -1,10 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# ===================
-# Absolute import(s).
-# ===================
+from jinja2 import Environment, FileSystemLoader
+from itertools import repeat
 from subprocess import run
 from pytz import timezone
 import sqlite3
@@ -13,18 +9,44 @@ import json
 import sys
 import os
 import re
-
-
-# =================
-# Relative imports.
-# =================
 from ... import shared
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========================
 # Define French environment.
 # ==========================
 locale.setlocale(locale.LC_ALL, "")
+
+
+# ======================
+# Jinja2 environment(s).
+# ======================
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "AudioFiles", "Templates"), encoding=shared.DFTENCODING), trim_blocks=True, lstrip_blocks=True)
+
+
+# ==========================
+# Jinja2 global variable(s).
+# ==========================
+environment.globals["now"] = shared.now()
+environment.globals["copyright"] = shared.COPYRIGHT
+
+
+# ========================
+# Jinja2 custom filter(s).
+# ========================
+environment.filters["integertostring"] = shared.integertostring
+environment.filters["repeatelement"] = shared.repeatelement
+environment.filters["sortedlist"] = shared.sortedlist
+environment.filters["ljustify"] = shared.ljustify
+environment.filters["rjustify"] = shared.rjustify
+
+
+# ===================
+# Jinja2 template(s).
+# ===================
+template = environment.get_template("T1")
 
 
 # ==========
@@ -55,8 +77,8 @@ regex4 = re.compile("^\d{10}$")
 # ==========
 # Constants.
 # ==========
-HEADER, TITLES, GENRES, OUTPUT, TABSIZE = "convert unix epoch", \
-                                          ["Set start epoch.", "Set end epoch.", "Set time zone.", "Confirm arguments"], \
+HEADER, TITLES, GENRES, OUTPUT, TABSIZE = "update rippinglog table", \
+                                          ["Record number.", "Set end epoch.", "Set time zone.", "Confirm arguments"], \
                                           ["Rock", "Hard Rock", "Heavy Metal", "Trash Metal", "Alternative Rock", "Black Metal", "Progressive Rock"], \
                                           os.path.join(os.path.expandvars("%TEMP%"), "arguments"), \
                                           10
@@ -65,14 +87,19 @@ HEADER, TITLES, GENRES, OUTPUT, TABSIZE = "convert unix epoch", \
 # ==================
 # Initializations 1.
 # ==================
-args, status, code, step, number, update = [], 100, 1, 0, 0, False
+args, status, number, update, titles = [], 100, 0, False, dict(zip([str(i) for i in range(1, len(TITLES) + 1)], TITLES))
 
 
 # ==================
 # Initializations 2.
 # ==================
+step = 1
 header = Header()
-step += 1
+header.main = HEADER
+header.step = step
+header.title = titles[str(step)]
+tmpl = template.render(header=header)
+code = 1
 
 
 # ===============
@@ -86,15 +113,21 @@ while True:
     #  1. Grab actual values.
     #     -------------------
     while True:
-        pprint()
-        number = input("Please enter record number: ")
+        pprint(t=tmpl)
+        number = input("{0}\tPlease enter record number: ".expandtabs(TABSIZE).format("".join(list(repeat("\n", 4)))))
         if number:
+            if not re.compile("\d+").match(number):
+                tmpl = template.render(header=header, message=list(("Record unique ID must be numeric!",)))
+                continue
+            uid = int(number)
+            if not(uid):
+                continue
             conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
             conn.row_factory = sqlite3.Row
-            if not conn.cursor().execute("SELECT count(*) FROM rippinglog WHERE id=?", (number,)).fetchone()[0]:
-                # tmpl = template.render(header=header, message=list(("artist: ".format(row["artist"]), "year: ".format(row["year"]), "album: ".format(row["album"]))))
+            if not conn.cursor().execute("SELECT count(*) FROM rippinglog WHERE id=?", (uid,)).fetchone()[0]:
+                tmpl = template.render(header=header, message=list(('No record with "{0}" as unique ID.'.format(uid),)))
                 continue
-            for row in conn.cursor().execute("SELECT ripped, artistsort, albumsort, artist, year, album, genre, UPC FROM rippinglog WHERE id=?", (number,)):
+            for row in conn.cursor().execute("SELECT ripped, artistsort, albumsort, artist, year, album, genre, UPC FROM rippinglog WHERE id=?", (uid,)):
                 actualripped = timezone(shared.DFTTIMEZONE).localize(row["ripped"]).timestamp()
                 actualartistsort = row["artistsort"]
                 actualalbumsort = row["albumsort"]
@@ -103,19 +136,19 @@ while True:
                 actualalbum = row["album"]
                 actualgenre = row["genre"]
                 actualbarcode = row["UPC"]
-            # tmpl = template.render(header=header, message=list(("artist: ".format(row["artist"]), "year: ".format(row["year"]), "album: ".format(row["album"]))))
+            step += 1
+            header.step = step
+            header.title = titles[str(step)]
+            tmpl = template.render(header=header, message=list(("artist: {0}".format(actualartist), "year: {0}".format(actualyear), "album: {0}".format(actualalbum))))
             break
-        # tmpl = template.render(header=header)
-    step += 1
-    # header.title = ...
-    # tmpl = ...
+        tmpl = template.render(header=header)
 
     #     ----------------
     #  2. Update datetime.
     #     ----------------
     while True:
-        pprint()
-        ripped = input("Please enter ripped datetime new value: ")
+        pprint(t=tmpl)
+        ripped = input("{0}\tPlease enter ripped datetime new value: ".expandtabs(TABSIZE).format("".join(list(repeat("\n", 4)))))
         if ripped:
             if not regex4.match(ripped):
                 continue

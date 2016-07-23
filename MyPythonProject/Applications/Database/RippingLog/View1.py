@@ -36,7 +36,7 @@ environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvar
 # ================
 # Jinja2 template.
 # ================
-t1 = environment.get_template("T1")
+t1 = environment.get_template("Content")
 t3 = environment.get_template("T3")
 
 
@@ -104,16 +104,6 @@ tr5 = t3.render(id="month",
                     for row in conn.cursor().execute("SELECT a.ccyymm AS ccyymm, count(*) AS count FROM (SELECT strftime('%Y %m', ripped) AS ccyymm FROM rippinglog) a GROUP BY a.ccyymm ORDER BY a.ccyymm")
                     ]
                 )
-
-
-#  7. Journal des CDs rippés. Totaux.
-# sep = DFTSEPPATTERN.format(len(HEADER5)*"=", len(HEADER5) + 2 + DFTRIGHTJUST)
-# i += 1
-# d.append("\n\n%s" % (sep,))
-# d.append(DFTHEADERPATTERN.format(i, DFTRIGHTJUST, HEADER5))
-# d.append(sep)
-# d.append("{0:>4} ripped CDs.".format(conn.cursor().execute("SELECT count(*) FROM rippinglog").fetchone()[0]))
-# d.append("{0:>4} ripped artists.".format(conn.cursor().execute("SELECT count(a.artist) FROM (SELECT DISTINCT artist AS artist FROM rippinglog) a").fetchone()[0]))
 
 
 #     -----------------------------------------------
