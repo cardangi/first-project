@@ -1,15 +1,11 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# ===================
-# Absolute import(s).
-# ===================
 import os
 import sys
 import json
 import subprocess
 from contextlib import contextmanager
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========
