@@ -73,27 +73,33 @@ SHIFT
 GOTO MAIN
 
 
-REM        ---------------------------
-REM  3 --> Ripping database HTML page.
-REM        ---------------------------
+REM        ------------------------
+REM  3 --> Update RippingLog views.
+REM        ------------------------
 :STEP3
-PUSHD "%_PYTHONPROJECT%"
-python -m Applications.Database.RippingLog.View1 > %_htmlrippinglog%
-POPD
+python G:\Computing\MyPythonProject\Database`HTMLView`L.py RippingLog
+IF NOT ERRORLEVEL 1 (
+    PUSHD %_PYTHONPROJECT%
+    python -m Applications.Database.RippingLog.View2
+    POPD
+)
 SHIFT
 GOTO MAIN
 
 
-REM        ---------------------------------
-REM  4 --> Digital audio database HTML page.
-REM        ---------------------------------
+REM        ---------------------------
+REM  4 --> Update Digital Audio views.
+REM        ---------------------------
 :STEP4
-PUSHD "%_PYTHONPROJECT%"
-python -m Applications.Database.DigitalAudio.View1
-POPD
-IF EXIST "%_xmldigitalaudiobase%" (
-    java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
-    DEL "%_xmldigitalaudiobase%"
+python G:\Computing\MyPythonProject\Database`HTMLView`L.py DigitalAudio
+IF NOT ERRORLEVEL 1 (
+    PUSHD "%_PYTHONPROJECT%"
+    python -m Applications.Database.DigitalAudio.View1
+    POPD
+    IF EXIST "%_xmldigitalaudiobase%" (
+        java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
+        DEL "%_xmldigitalaudiobase%"
+    )
 )
 SHIFT
 GOTO MAIN
