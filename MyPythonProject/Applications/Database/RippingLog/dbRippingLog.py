@@ -62,7 +62,7 @@ def pprint(t=None):
 def displayvalues(*t):
     l = []
     if len(t) >= 7:
-        l.append("Ripped\t: {v[0]} - {0}".format(shared.dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(t[0])).astimezone(timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3), v=t).expandtabs(10))
+        l.append("Ripped\t: {v[0]} - {0}".format(shared.dateformat(shared.UTC.localize(datetime.utcfromtimestamp(t[0])).astimezone(shared.LOCAL), shared.TEMPLATE3), v=t).expandtabs(10))
         l.append("Artistsort: {v[1]}".format(v=t))
         l.append("Albumsort\t: {v[2]}".format(v=t).expandtabs(10))
         l.append("Artist\t: {v[3]}".format(v=t).expandtabs(10))
