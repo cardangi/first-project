@@ -14,16 +14,17 @@
 
 
 
-        ***********************                                 ***************
-        * TABLES HTML EDITING *                                 * MATHEMATICS *
-        ***********************                                 ***************
+        ******************                                      ***************
+        * TABLES EDITING *                                      * MATHEMATICS *
+        ******************                                      ***************
         10. Backup.                                             16. Display arithmetic sequence.
         11. LastRunDates.                                       17. Display geometric sequence.
-        12. DigitalAudio.
-        13. RippingLog.
 
-        14. RippingLog fancy editing.
-        15. DigitalAudio fancy editing.
+        12. Digital Audio simple editing.
+        13. Digital Audio fancy editing.
+
+        14. RippingLog JSON editing.
+        15. RippingLog fancy editing.
 
 
 

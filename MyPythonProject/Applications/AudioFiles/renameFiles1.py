@@ -26,7 +26,7 @@ from .. import shared
 HEADER, TITLES, INPUTS, OUTFILE, TABSIZE = "rename  audio  files", \
                                            ["Set directory.", "Set extensions."], \
                                            ["Please enter root directory", "Please enter extensions"], \
-                                           os.path.join(os.path.expandvars("%TEMP%"), "arguments"), \
+                                           os.path.join(os.path.expandvars("%TEMP%"), "arguments.json"), \
                                            10
 
 

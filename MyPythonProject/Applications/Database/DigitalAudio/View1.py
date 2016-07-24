@@ -34,7 +34,7 @@ conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
 conn.row_factory = sqlite3.Row
 
 # 2. Initialisation de la structure XML.
-root = ElementTree.Element("Data", attrib=dict(css="digitalaudiobase.css", timestamp=shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE2)))
+root = ElementTree.Element("Data", attrib=dict(css="digitalaudiobase.css", timestamp=shared.now()))
 
 # 3. Itération sur les données composant les tables ALBUMS, DISCS et TRACKS.
 for rowa in conn.cursor().execute("SELECT artist, year, album, albumid FROM albums ORDER BY albumid"):

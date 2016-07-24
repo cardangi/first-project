@@ -25,7 +25,7 @@ def chgcurdir(d):
 # ==========
 # Constants.
 # ==========
-INFILE, PYTHON = os.path.join(os.path.expandvars("%TEMP%"), "arguments"), r"C:\Program Files (x86)\Python35-32\python.exe"
+INFILE, PYTHON = os.path.join(os.path.expandvars("%TEMP%"), "arguments.json"), r"C:\Program Files (x86)\Python35-32\python.exe"
 
 
 # ===============
