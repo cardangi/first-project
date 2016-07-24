@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 __author__ = 'Xavier ROSSET'
 
 
@@ -29,14 +29,14 @@ previousart, regex1, regex2, regex3 = "", re.compile(r"[, ]"), re.compile(r"\s+"
 # Main algorithm.
 # ===============
 
-# 1. Ouverture de la connexion à la base de données.
+# 1. Ouverture de la connexion Ã  la base de donnÃ©es.
 conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
 conn.row_factory = sqlite3.Row
 
 # 2. Initialisation de la structure XML.
 root = ElementTree.Element("Data", attrib=dict(css="digitalaudiobase.css", timestamp=shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE2)))
 
-# 3. Itération sur les données composant les tables ALBUMS, DISCS et TRACKS.
+# 3. ItÃ©ration sur les donnÃ©es composant les tables ALBUMS, DISCS et TRACKS.
 for rowa in conn.cursor().execute("SELECT artist, year, album, albumid FROM albums ORDER BY albumid"):
 
     # Artist node.
@@ -76,8 +76,8 @@ for rowa in conn.cursor().execute("SELECT artist, year, album, albumid FROM albu
             track = ElementTree.SubElement(disc, "Track", attrib=dict(id=str(rowt["trackid"])))
             track.text = rowt["title"]
 
-# 4. Fermeture de la connexion à la base de données.
+# 4. Fermeture de la connexion Ã  la base de donnÃ©es.
 conn.close()
 
-# 5. Restitution des données.
+# 5. Restitution des donnÃ©es.
 ElementTree.ElementTree(root).write(os.path.join(os.path.expandvars("%TEMP%"), "DigitalAudioBase.xml"), encoding="UTF-8", xml_declaration=True)

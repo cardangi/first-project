@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 __author__ = 'Xavier ROSSET'
 
 
@@ -43,25 +43,25 @@ content = environment.get_template("Content")
 
 
 #    -----------------------------------------------
-# 1. Ouverture de la connexion à la base de données.
+# 1. Ouverture de la connexion Ã  la base de donnÃ©es.
 #    -----------------------------------------------
 conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
 conn.row_factory = sqlite3.Row
 
 
 #    -----------------------
-# 2. Extraction des données.
+# 2. Extraction des donnÃ©es.
 #    -----------------------
 tr = [(row["id"], shared.dateformat(timezone(shared.DFTTIMEZONE).localize(row["lastrundate"]), shared.TEMPLATE3)) for row in conn.cursor().execute("SELECT * FROM lastrundates ORDER BY rowid")]
 
 
 #    ------------------------
-# 3. Restitution des données.
+# 3. Restitution des donnÃ©es.
 #    ------------------------
 print(content.render(title="Last run dates (raw view)", content=t2.render(id="lastrundates", h1="Last Run Dates", th=["id", "date"], tr=tr)))
 
 
 #    -----------------------------------------------
-# 4. Fermeture de la connexion à la base de données.
+# 4. Fermeture de la connexion Ã  la base de donnÃ©es.
 #    -----------------------------------------------
 conn.close()
