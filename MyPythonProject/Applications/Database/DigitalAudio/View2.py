@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 __author__ = 'Xavier ROSSET'
 
 
@@ -76,14 +76,14 @@ logger.info('START "%s".' % (os.path.basename(__file__),))
 
 
 #    -----------------------------------------------
-#  2. Ouverture de la connexion à la base de données.
+#  2. Ouverture de la connexion Ã  la base de donnÃ©es.
 #    -----------------------------------------------
 conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
 conn.row_factory = sqlite3.Row
 
 
 #    -----------------------
-#  3. Extraction des données.
+#  3. Extraction des donnÃ©es.
 #    -----------------------
 for album in conn.cursor().execute("SELECT rowid, albumid, artist, year, album, discs, genre, upc FROM albums ORDER BY rowid"):
     albums.append(album)
@@ -94,13 +94,13 @@ for album in conn.cursor().execute("SELECT rowid, albumid, artist, year, album, 
 
 
 #    -----------------------------------------------
-#  4. Fermeture de la connexion à la base de données.
+#  4. Fermeture de la connexion Ã  la base de donnÃ©es.
 #    -----------------------------------------------
 conn.close()
 
 
 #    ------------------------
-#  5. Restitution des données.
+#  5. Restitution des donnÃ©es.
 #    ------------------------
 print(content.render(content="{0}{1}{2}".format(t3.render(id="albums", h2="albums", th=ALBUMS, tr=albums),
                                                 t4.render(id="discs", h2="discs", th=DISCS, tr=discs),

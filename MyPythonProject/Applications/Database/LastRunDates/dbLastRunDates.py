@@ -26,7 +26,7 @@ import sys
 # =================
 # Relative imports.
 # =================
-from .. import shared
+from ... import shared
 
 
 # ==========================
