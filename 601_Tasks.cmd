@@ -111,10 +111,30 @@ IF ERRORLEVEL 16 (
 )
 
 
+REM ---------------------------
+REM RippingLog HTML fancy view.
+REM ---------------------------
+IF ERRORLEVEL 15 (
+    python G:\Computing\MyPythonProject\Database`HTMLView`L.py RippingLog
+    GOTO MENU
+)
+
+
+REM ---------------------
+REM RippingLog JSON view.
+REM ---------------------
+IF ERRORLEVEL 14 (
+    PUSHD %_PYTHONPROJECT%
+    python -m Applications.Database.RippingLog.View2
+    POPD
+    GOTO MENU
+)
+
+
 REM ------------------------------
 REM Digital Audio HTML fancy view.
 REM ------------------------------
-IF ERRORLEVEL 15 (
+IF ERRORLEVEL 13 (
     PUSHD %_PYTHONPROJECT%
     python -m Applications.Database.DigitalAudio.View1
     IF NOT ERRORLEVEL 1 (
@@ -128,47 +148,27 @@ IF ERRORLEVEL 15 (
 )
 
 
-REM ---------------------------
-REM RippingLog HTML fancy view.
-REM ---------------------------
-IF ERRORLEVEL 14 (
-    python G:\Computing\MyPythonProject\Database`HTMLView`L.py RippingLog
-    GOTO MENU
-)
-
-
-REM -------------------------
-REM RippingLog HTML raw view.
-REM -------------------------
-IF ERRORLEVEL 13 (
-    PUSHD %_PYTHONPROJECT%
-    python -m Applications.Database.RippingLog.View2
-    POPD
-    GOTO MENU
-)
-
-
-REM ---------------------------------
-REM Digital Audio base HTML raw view.
-REM ---------------------------------
+REM -------------------------------
+REM Digital Audio HTML simple view.
+REM -------------------------------
 IF ERRORLEVEL 12 (
     python G:\Computing\MyPythonProject\Database`HTMLView`L.py DigitalAudio
     GOTO MENU
 )
 
 
-REM ---------------------------
-REM LastRunDates HTML raw view.
-REM ---------------------------
+REM ------------------------------
+REM LastRunDates HTML simple view.
+REM ------------------------------
 IF ERRORLEVEL 11 (
     python G:\Computing\MyPythonProject\Database`HTMLView`L.py LastRunDates
     GOTO MENU
 )
 
 
-REM ---------------------
-REM Backup HTML raw view.
-REM ---------------------
+REM ------------------------
+REM Backup HTML simple view.
+REM ------------------------
 IF ERRORLEVEL 10 (
     python G:\Computing\MyPythonProject\Database`HTMLView`L.py Backups
     GOTO MENU

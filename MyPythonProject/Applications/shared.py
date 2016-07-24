@@ -37,6 +37,8 @@ DATABASE = r"g:\computing\database.db"
 LOG = r"g:\computing\log.log"
 DFTENCODING = "ISO-8859-1"
 DFTTIMEZONE = "Europe/Paris"
+UTC = timezone("UTC")
+LOCAL = timezone("Europe/Paris")
 TEMPLATE1 = "$day $d/$m/$Y $H:$M:$S $Z$z"
 TEMPLATE2 = "$day $d $month $Y $H:$M:$S $Z$z"
 TEMPLATE3 = "$d/$m/$Y $H:$M:$S $Z$z"
@@ -319,7 +321,7 @@ def sortedlist(l):
 
 
 def now():
-    return dateformat(datetime.now(tz=timezone(DFTTIMEZONE)), TEMPLATE4)
+    return dateformat(UTC.localize(datetime.utcnow()).astimezone(LOCAL), TEMPLATE4)
 
 
 def getdatetime(epoch1, timzon, epoch2=None):

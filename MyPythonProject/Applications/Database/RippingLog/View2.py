@@ -1,21 +1,12 @@
 # -*- coding: utf-8 -*-
-__author__ = 'Xavier ROSSET'
 
-
-# =================
-# Absolute imports.
-# =================
 import os
 import sys
 import json
 import sqlite3
-from pytz import timezone
-
-
-# =================
-# Relative imports.
-# =================
 from ... import shared
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========
@@ -32,7 +23,7 @@ with open(OUTPUT, mode=shared.WRITE, encoding="UTF_8") as fp:
     conn.row_factory = sqlite3.Row
     args = []
     for row in conn.cursor().execute("SELECT rowid AS uid, ripped, artistsort, albumsort, artist, year, album, genre, upc, application FROM rippinglog"):
-        dict1 = dict(zip(KEYS, [shared.dateformat(timezone(shared.DFTTIMEZONE).localize(row["ripped"]), shared.TEMPLATE4),
+        dict1 = dict(zip(KEYS, [shared.dateformat(shared.LOCAL.localize(row["ripped"]), shared.TEMPLATE4),
                                 row["artistsort"],
                                 row["albumsort"],
                                 row["artist"],
@@ -42,6 +33,7 @@ with open(OUTPUT, mode=shared.WRITE, encoding="UTF_8") as fp:
                                 row["upc"],
                                 row["application"]]))
         args.append(tuple([row["uid"], dict1]))
+    args.insert(0, shared.now())
     json.dump(args, fp, indent=4, sort_keys=True)
     conn.close()
 

@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-__author__ = 'Xavier ROSSET'
 
-
-# =================
-# Absolute imports.
-# =================
 import os
 import locale
 import sqlite3
@@ -13,12 +8,9 @@ from string import Template
 from dateutil import parser
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
-
-
-# =================
-# Relative imports.
-# =================
 from ... import shared
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========================
@@ -115,7 +107,7 @@ conn.close()
 #     ------------
 #  9. HTML Output.
 #     ------------
-print(content.render(now=shared.dateformat(timezone("UTC").localize(datetime.utcnow()).astimezone(timezone(shared.DFTTIMEZONE)), shared.TEMPLATE4),
+print(content.render(now=shared.dateformat(shared.UTC.localize(datetime.utcnow()).astimezone(shared.LOCAL), shared.TEMPLATE4),
                      content1=tr4,
                      content2="{0}{1}{2}{3}".format(tr1, tr2, tr3, tr5)
                      )
