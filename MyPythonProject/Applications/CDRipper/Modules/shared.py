@@ -65,7 +65,7 @@ class AudioCD:
             setattr(self, i, "N")
 
         # ----- Encodedby.
-        self.encodedby = "dBpoweramp 15.1 on {}".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3))
+        self.encodedby = "dBpoweramp 15.1 on {0}".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3))
 
         # ----- Taggingtime.
         self.taggingtime = shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3)
@@ -257,7 +257,7 @@ class AudioCD:
         :param s: match object.
         :return: formatted capturing group(s).
         """
-        return "{}{}".format(s.groups()[0], s.groups()[1].capitalize())
+        return "{0}{1}".format(s.groups()[0], s.groups()[1].capitalize())
 
     @staticmethod
     def upp(s):
@@ -284,7 +284,7 @@ class AudioCD:
         :param s: match object.
         :return: formatted capturing group(s).
         """
-        return "{0}({1})".format(s.groups()[0], s.groups()[1])
+        return "{d[0]}({d[1]})".format(d=s.groups())
 
     @staticmethod
     def deserialize(fil, enc=shared.UTF8):
