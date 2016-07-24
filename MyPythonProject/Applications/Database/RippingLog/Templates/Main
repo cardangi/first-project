@@ -3,7 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" type="text/css" href="rippinglog.css">
-        <title>{{ title }}</title>
+        <title>Audio CD ripping log</title>
     </head>
     <body>
         <div id="content">

@@ -36,8 +36,8 @@ environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvar
 # ================
 # Jinja2 template.
 # ================
-t1 = environment.get_template("Content")
-t3 = environment.get_template("T3")
+content = environment.get_template("Content")
+t2 = environment.get_template("T2")
 
 
 # ===============
@@ -68,7 +68,7 @@ tr4 = [tuple([shared.dateformat(timezone(shared.DFTTIMEZONE).localize(row["rippe
 
 
 #  3. Journal des CDs rippés. Cumul par artiste. Tri par artiste croissant.
-tr1 = t3.render(id="artist1",
+tr1 = t2.render(id="artist1",
                 h2="Palmarès par artiste",
                 th=["artist", "count"],
                 tr=[tuple([row["artist"], row["count"]]) for row in conn.cursor().execute("SELECT artist, count(*) AS count from rippinglog GROUP BY artist ORDER BY artist")]
@@ -76,7 +76,7 @@ tr1 = t3.render(id="artist1",
 
 
 #  4. Journal des CDs rippés. Cumul par artiste. Tri par cumul décroissant.
-tr2 = t3.render(id="artist2",
+tr2 = t2.render(id="artist2",
                 h2="Palmarès par artiste",
                 th=["artist", "count"],
                 tr=[tuple([row["artist"], row["count"]])
@@ -84,7 +84,7 @@ tr2 = t3.render(id="artist2",
 
 
 #  5. Journal des CDs rippés. Cumul par genre. Tri par cumul décroissant.
-tr3 = t3.render(id="genre",
+tr3 = t2.render(id="genre",
                 h2="Palmarès par genre",
                 th=["genre", "count"],
                 tr=[tuple([row["genre"], row["count"]])
@@ -93,7 +93,7 @@ tr3 = t3.render(id="genre",
 
 #  6. Journal des CDs rippés. Cumul par période. Tri par période croissante.
 #     Une date respectant le masque "SSAA MM 01" est parsée afin d'extraire le nom du mois et l'année.
-tr5 = t3.render(id="month",
+tr5 = t2.render(id="month",
                 h2="Palmarès par mois",
                 th=["month", "count"],
                 tr=[tuple(["%s %s" % (parser.parse("%s 01" % (row["ccyymm"],)).strftime("%B").capitalize(),
@@ -115,10 +115,8 @@ conn.close()
 #     ------------
 #  9. HTML Output.
 #     ------------
-print(t1.render(title="Audio CD ripping log",
-                now=shared.dateformat(timezone("UTC").localize(datetime.utcnow()).astimezone(timezone(shared.DFTTIMEZONE)), shared.TEMPLATE4),
-                h1="Audio CD ripping log",
-                content1=tr4,
-                content2="{0}{1}{2}{3}".format(tr1, tr2, tr3, tr5)
-                )
+print(content.render(now=shared.dateformat(timezone("UTC").localize(datetime.utcnow()).astimezone(timezone(shared.DFTTIMEZONE)), shared.TEMPLATE4),
+                     content1=tr4,
+                     content2="{0}{1}{2}{3}".format(tr1, tr2, tr3, tr5)
+                     )
       )
