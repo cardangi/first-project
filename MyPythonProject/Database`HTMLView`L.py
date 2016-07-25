@@ -1,10 +1,4 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
 import os
 import sys
 import json
@@ -13,6 +7,8 @@ import operator
 from subprocess import run, PIPE
 from os.path import expandvars, join
 from contextlib import contextmanager
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========
