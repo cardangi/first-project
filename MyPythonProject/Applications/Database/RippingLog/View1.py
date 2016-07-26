@@ -84,7 +84,7 @@ tr3 = t2.render(id="genre",
 
 #  6. Journal des CDs rippés. Cumul par période. Tri par période croissante.
 #     Une date respectant le masque "SSAA MM 01" est parsée afin d'extraire le nom du mois et l'année.
-tr5 = t2.render(id="month",
+tr4 = t2.render(id="month",
                 h2="Palmarès par mois",
                 th=["month", "count"],
                 tr=[tuple(["%s %s" % (parser.parse("%s 01" % (row["ccyymm"],)).strftime("%B").capitalize(),
@@ -108,6 +108,6 @@ conn.close()
 #     ------------
 print(content.render(now=shared.dateformat(shared.UTC.localize(datetime.utcnow()).astimezone(shared.LOCAL), shared.TEMPLATE4),
                      content1=tr4,
-                     content2="{0}{1}{2}{3}".format(tr1, tr2, tr3, tr5)
+                     content2="{0}{1}{2}{3}".format(tr1, tr2, tr3, tr4)
                      )
       )
