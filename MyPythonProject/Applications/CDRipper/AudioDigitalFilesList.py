@@ -1,10 +1,4 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
 import re
 import locale
 import os.path
@@ -15,13 +9,10 @@ from operator import itemgetter
 from os.path import normpath, splitext
 import xml.etree.ElementTree as ElementTree
 from sortedcontainers import SortedDict, SortedList
-
-
-# =================
-# Relative imports.
-# =================
 from .. import shared as s1
 from .Modules import shared as s2
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========================

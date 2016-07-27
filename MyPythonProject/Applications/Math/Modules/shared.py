@@ -49,4 +49,4 @@ def geometricseries(firstterm, ratio, terms):
     :return:
     """
     from math import pow
-    return firstterm*((pow(ratio, terms)-1)/(ratio-1))
+    return firstterm*((pow(ratio, terms) - 1)/(ratio - 1))
