@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import os
 import locale
 import sqlite3
