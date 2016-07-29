@@ -1,5 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 import re
+import json
 import locale
 import os.path
 import argparse
@@ -42,6 +43,11 @@ parser.add_argument("-e", "--ext", dest="extension", help="one or more extension
 arguments = parser.parse_args()
 
 
+# ==========
+# Constants.
+# ==========
+OUTFILE = os.path.join(os.path.expandvars("%TEMP%"), "ranking.json")
+
 # ================
 # Initializations.
 # ================
@@ -82,6 +88,8 @@ for fil in s1.directorytree(normpath(arguments.directory)):
 #     -----------------------
 for extension in ext_list:
     ext_count[extension] += 1
+ext_count1 = collections.OrderedDict(sorted(ext_count.items(), key=lambda i: i[0]))
+ext_count2 = collections.OrderedDict(sorted(sorted(ext_count.items(), key=lambda i: i[0]), key=lambda i: i[1], reverse=True))
 
 
 #     ---------------------
@@ -89,6 +97,8 @@ for extension in ext_list:
 #     ---------------------
 for artist in art_list:
     art_count[artist] += 1
+art_count1 = collections.OrderedDict(sorted(art_count.items(), key=lambda i: i[0]))
+art_count2 = collections.OrderedDict(sorted(sorted(art_count.items(), key=lambda i: i[0]), key=lambda i: i[1], reverse=True))
 
 
 #     ------
@@ -168,3 +178,11 @@ if liste:
         file.text = item2
 if any([lista, listb, listc, listd, liste]):
     ElementTree.ElementTree(root).write(os.path.join(os.path.expandvars("%_COMPUTING%"), "AudioDigitalFilesList.xml"), encoding="UTF-8", xml_declaration=True)
+
+
+#     ---------------
+#  8. Ranking Output.
+#     ---------------
+if any([ext_count1, ext_count2, art_count1, art_count2]):
+    with open(OUTFILE, mode=s1.WRITE, encoding=s1.UTF8) as fp:
+        json.dump([ext_count1, ext_count2, art_count1, art_count2], fp, indent=4)
