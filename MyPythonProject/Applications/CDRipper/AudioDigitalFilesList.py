@@ -51,7 +51,8 @@ OUTFILE = os.path.join(os.path.expandvars("%TEMP%"), "ranking.json")
 # ================
 # Initializations.
 # ================
-reflist, lista, listb, listc, listd, liste, ext_list, art_list, extensions, artists, ext_count, art_count = [], [], [], [], [], [], [], [], SortedDict(), SortedDict(), collections.Counter(), collections.Counter()
+reflist, lista, listb, listc, listd, liste, ext_list, art_list, artext_dict, extensions, artists, ext_count, art_count = [], [], [], [], [], [], [], [], SortedDict(), SortedDict(), SortedDict(), \
+                                                                                                                         collections.Counter(), collections.Counter()
 rex1, rex2 = re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\"), re.compile("recycle", re.IGNORECASE)
 
 
@@ -81,25 +82,53 @@ for fil in s1.directorytree(normpath(arguments.directory)):
             ext_list.append(ext)
         if art:
             art_list.append(art)
+        if all([art, ext]):
+            if art in artext_dict:
+                artext_dict[art].append(ext)
+            else:
+                artext_dict[art] = list((ext,))
 
 
-#     -----------------------
-#  2. Palmarès par extension.
-#     -----------------------
+#     --------------------
+#  2. Total par extension.
+#     --------------------
 for extension in ext_list:
     ext_count[extension] += 1
+
+#  Tri par nom croissant.
 ext_count1 = collections.OrderedDict(sorted(ext_count.items(), key=lambda i: i[0]))
+
+#  Tri par total décroissant et par nom croissant.
 ext_count2 = collections.OrderedDict(sorted(sorted(ext_count.items(), key=lambda i: i[0]), key=lambda i: i[1], reverse=True))
 
 
-#     ---------------------
-#  3. Palmarès par artiste.
-#     ---------------------
+#     ------------------
+#  3. Total par artiste.
+#     ------------------
 for artist in art_list:
     art_count[artist] += 1
+
+#  Tri par nom croissant.
 art_count1 = collections.OrderedDict(sorted(art_count.items(), key=lambda i: i[0]))
+
+#  Tri par total décroissant et par nom croissant.
 art_count2 = collections.OrderedDict(sorted(sorted(art_count.items(), key=lambda i: i[0]), key=lambda i: i[1], reverse=True))
 
+
+#     -----------------------------------
+#  4. Total par couple artiste/extension.
+#     -----------------------------------
+
+#  Total des extensions respectives à chaque artiste.
+for artist in artext_dict.keys():
+    artext_count = collections.Counter()
+    for extension in artext_dict[artist]:
+        artext_count[extension] += 1
+    artext_dict[artist] = artext_count
+
+#  Tri par extension croissante.
+for artist in artext_dict.keys():
+    artext_dict[artist] = collections.OrderedDict(sorted(artext_dict[artist].items(), key=lambda i: i[0]))
 
 #     ------
 #  4. Files.
@@ -183,6 +212,6 @@ if any([lista, listb, listc, listd, liste]):
 #     ---------------
 #  8. Ranking Output.
 #     ---------------
-if any([ext_count1, ext_count2, art_count1, art_count2]):
+if any([ext_count1, ext_count2, art_count1, art_count2, artext_dict]):
     with open(OUTFILE, mode=s1.WRITE, encoding=s1.UTF8) as fp:
-        json.dump([ext_count1, ext_count2, art_count1, art_count2], fp, indent=4)
+        json.dump([s1.now(), ext_count1, ext_count2, art_count1, art_count2, artext_dict], fp, indent=4)
