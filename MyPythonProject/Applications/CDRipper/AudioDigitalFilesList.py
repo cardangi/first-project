@@ -3,6 +3,7 @@ import re
 import locale
 import os.path
 import argparse
+import collections
 from pytz import timezone
 from datetime import datetime
 from operator import itemgetter
@@ -44,15 +45,18 @@ arguments = parser.parse_args()
 # ================
 # Initializations.
 # ================
-reflist, lista, listb, listc, listd, liste, extensions, artists, rex1, rex2, acount, ecount = [], [], [], [], [], [], SortedDict(), SortedDict(), \
-                                                                                              re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\"), \
-                                                                                              re.compile("recycle", re.IGNORECASE), \
-                                                                                              0, 0
+reflist, lista, listb, listc, listd, liste, ext_list, art_list, extensions, artists, ext_count, art_count = [], [], [], [], [], [], [], [], SortedDict(), SortedDict(), collections.Counter(), collections.Counter()
+rex1, rex2 = re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\"), re.compile("recycle", re.IGNORECASE)
 
 
 # ===============
 # Main algorithm.
 # ===============
+
+
+#     ------------------------
+#  1. Inventaire des fichiers.
+#     ------------------------
 for fil in s1.directorytree(normpath(arguments.directory)):
     match = rex2.search(fil)
     if not match:
@@ -68,20 +72,28 @@ for fil in s1.directorytree(normpath(arguments.directory)):
                 reflist.append((fil, int(os.path.getctime(fil)), "Créé le %s" % (s1.dateformat(datetime.fromtimestamp(os.path.getctime(fil), tz=timezone(s1.DFTTIMEZONE)), s1.TEMPLATE1),), len(fil)))
                 art = match.group(1)
         if ext:
-            if ext not in extensions:
-                extensions[ext] = 0
-            extensions[ext] += 1
-            ecount += 1
+            ext_list.append(ext)
         if art:
-            if art not in artists:
-                artists[art] = 0
-            artists[art] += 1
-            acount += 1
+            art_list.append(art)
 
 
-#    ------
-# 1. Files.
-#    ------
+#     -----------------------
+#  2. Palmarès par extension.
+#     -----------------------
+for extension in ext_list:
+    ext_count[extension] += 1
+
+
+#     ---------------------
+#  3. Palmarès par artiste.
+#     ---------------------
+for artist in art_list:
+    art_count[artist] += 1
+
+
+#     ------
+#  4. Files.
+#     ------
 if reflist:
 
     # ----- Liste des fichiers. Tri par nom croissant.
@@ -97,9 +109,9 @@ if reflist:
     listb = list(zip(templist1, templist2, templist3))
 
 
-#    -----------
-# 2. Extensions.
-#    -----------
+#     -----------
+#  5. Extensions.
+#     -----------
 if extensions:
     templist1 = list(range(1, len(extensions) + 1))
     templist2 = [key for key in sorted(list(extensions.keys()))]
@@ -107,9 +119,9 @@ if extensions:
     listc = list(zip(templist1, templist2, templist3))
 
 
-#    --------
-# 3. Artists.
-#    --------
+#     --------
+#  6. Artists.
+#     --------
 if artists:
 
     templist1 = list(range(1, len(artists) + 1))
@@ -125,9 +137,9 @@ if artists:
     liste = list(zip(templist1, templist2, templist3))
 
 
-#    -----------
-# 4. XML Output.
-#    -----------
+#     -----------
+#  7. XML Output.
+#     -----------
 root = ElementTree.Element("Data", attrib=dict(css="firstcss.css"))
 if lista:
     se = ElementTree.SubElement(root, "Files")
