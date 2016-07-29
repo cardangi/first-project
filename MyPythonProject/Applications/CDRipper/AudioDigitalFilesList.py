@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 import re
 import json
 import locale
@@ -76,7 +76,7 @@ for fil in s1.directorytree(normpath(arguments.directory)):
             ext = splitext(fil)[1][1:].upper()
             match = rex1.match(normpath(fil))
             if match:
-                reflist.append((fil, int(os.path.getctime(fil)), "Créé le %s" % (s1.dateformat(datetime.fromtimestamp(os.path.getctime(fil), tz=timezone(s1.DFTTIMEZONE)), s1.TEMPLATE1),), len(fil)))
+                reflist.append((fil, int(os.path.getctime(fil)), "CrÃ©Ã© le %s" % (s1.dateformat(datetime.fromtimestamp(os.path.getctime(fil), tz=timezone(s1.DFTTIMEZONE)), s1.TEMPLATE1),), len(fil)))
                 art = match.group(1)
         if ext:
             ext_list.append(ext)
@@ -98,7 +98,7 @@ for extension in ext_list:
 #  Tri par nom croissant.
 ext_count1 = collections.OrderedDict(sorted(ext_count.items(), key=lambda i: i[0]))
 
-#  Tri par total décroissant et par nom croissant.
+#  Tri par total dÃ©croissant et par nom croissant.
 ext_count2 = collections.OrderedDict(sorted(sorted(ext_count.items(), key=lambda i: i[0]), key=lambda i: i[1], reverse=True))
 
 
@@ -111,7 +111,7 @@ for artist in art_list:
 #  Tri par nom croissant.
 art_count1 = collections.OrderedDict(sorted(art_count.items(), key=lambda i: i[0]))
 
-#  Tri par total décroissant et par nom croissant.
+#  Tri par total dÃ©croissant et par nom croissant.
 art_count2 = collections.OrderedDict(sorted(sorted(art_count.items(), key=lambda i: i[0]), key=lambda i: i[1], reverse=True))
 
 
@@ -119,7 +119,7 @@ art_count2 = collections.OrderedDict(sorted(sorted(art_count.items(), key=lambda
 #  4. Total par couple artiste/extension.
 #     -----------------------------------
 
-#  Total des extensions respectives à chaque artiste.
+#  Total des extensions respectives Ã  chaque artiste.
 for artist in artext_dict.keys():
     artext_count = collections.Counter()
     for extension in artext_dict[artist]:
@@ -141,7 +141,7 @@ if reflist:
     templist3 = [humantime for dummy1, dummy2, humantime, dummy3 in SortedList(reflist)]
     lista = list(zip(templist1, templist2, templist3))
 
-    # ----- Liste des 50 fichiers créés dernièrement. Tri par date décroissante, puis nom croissant.
+    # ----- Liste des 50 fichiers crÃ©Ã©s derniÃ¨rement. Tri par date dÃ©croissante, puis nom croissant.
     templist1 = list(range(1, 51))
     templist2 = [fil for fil, dummy1, dummy2 in sorted([(fil, epoch, humantime) for fil, epoch, humantime, dummy1 in sorted(reflist, key=itemgetter(0))], key=itemgetter(1), reverse=True)[:50]]
     templist3 = [humantime for dummy1, dummy2, humantime in sorted([(fil, epoch, humantime) for fil, epoch, humantime, dummy1 in sorted(reflist, key=itemgetter(0))], key=itemgetter(1), reverse=True)[:50]]
@@ -170,7 +170,7 @@ if artists:
     templist3 = [artists[key] for key in sorted(list(artists.keys()))]
     listd = list(zip(templist1, templist2, templist3))
 
-    # ----- Liste des artistes. Tri par ranking décroissant, puis nom croissant.
+    # ----- Liste des artistes. Tri par ranking dÃ©croissant, puis nom croissant.
     templist2 = [artist for artist, dummy in sorted([(key, artists[key]) for key in sorted(list(artists.keys()))], key=itemgetter(1), reverse=True)]
     templist3 = [count for dummy, count in sorted([(key, artists[key]) for key in sorted(list(artists.keys()))], key=itemgetter(1), reverse=True)]
     liste = list(zip(templist1, templist2, templist3))
