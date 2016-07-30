@@ -1,4 +1,12 @@
 # -*- coding: ISO-8859-1 -*-
+import sys
+import locale
+import sqlite3
+import argparse
+from pytz import timezone
+from datetime import datetime
+from ... import shared
+
 __author__ = 'Xavier ROSSET'
 
 
@@ -10,23 +18,6 @@ __author__ = 'Xavier ROSSET'
 #  3. dbBackup.py delete
 #  4. dbBackup.py update 123456797 123456798
 #  5. dbBackup.py update 123456797 123456798 -t 1461004077
-
-
-# =================
-# Absolute imports.
-# =================
-import sys
-import locale
-import sqlite3
-import argparse
-from pytz import timezone
-from datetime import datetime
-
-
-# =================
-# Relative imports.
-# =================
-from ... import shared
 
 
 # ==========================
@@ -75,7 +66,7 @@ if arguments.command == "delete":
         conn.cursor().execute("DELETE FROM backup")
 
 #  3. Sélection d'un script.
-if arguments.command == "select":
+elif arguments.command == "select":
     if conn.cursor().execute("SELECT count(*) FROM backup WHERE id=?", (arguments.uid,)).fetchone()[0]:
         status = 0
         print(shared.dateformat(timezone(shared.DFTTIMEZONE).localize(conn.cursor().execute("SELECT lastbackup FROM backup WHERE id=?", (arguments.uid,)).fetchone()[0]), shared.TEMPLATE1))

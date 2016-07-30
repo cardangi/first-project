@@ -3,9 +3,9 @@
         **********************************                      **************************
         * BACKUP --> DIGITAL AUDIO FILES *                      * BACKUP --> OTHER TASKS *
         **********************************                      **************************
-         1. Default.                                             8. Backup documents.
-         2. Pearl Jam bootlegs.                                  9. Backup python scripts.
-
+         1. Default.                                             8. Documents.
+         2. Pearl Jam bootlegs.                                  9. Videos.
+                                                                10. Python scripts.
          3. Pearl Jam 2000 bootlegs series.
          4. Pearl Jam 2003 bootlegs series.
          5. Pearl Jam 2006 bootlegs series.
@@ -17,24 +17,24 @@
         ******************                                      ***************
         * TABLES EDITING *                                      * MATHEMATICS *
         ******************                                      ***************
-        10. Backup.                                             16. Display arithmetic sequence.
-        11. LastRunDates.                                       17. Display geometric sequence.
+        11. Backup.                                             17. Display arithmetic sequence.
+        12. LastRunDates.                                       18. Display geometric sequence.
 
-        12. Digital Audio simple editing.
-        13. Digital Audio fancy editing.
+        13. Digital Audio simple editing.
+        14. Digital Audio fancy editing.
 
-        14. RippingLog JSON editing.
-        15. RippingLog fancy editing.
+        15. RippingLog JSON editing.
+        16. RippingLog fancy editing.
 
 
 
         ***************                                         *****************
         * AUDIO FILES *                                         * MISCELLANEOUS *
         ***************                                         *****************
-        18. Import files to audio drive.                        22. Get Unix epoch.
-        19. Copy files from audio drive.                        23. Convert Unix epoch.
-        20. Rename files.
-        21. Timestamp tags.
+        19. Import files to audio drive.                        23. Get Unix epoch.
+        20. Copy files from audio drive.                        24. Convert Unix epoch.
+        21. Rename files.
+        22. Timestamp tags.
 
 
         99. Exit

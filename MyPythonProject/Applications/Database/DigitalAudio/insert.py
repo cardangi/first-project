@@ -1,21 +1,12 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
 from datetime import datetime
 import argparse
 import sqlite3
 import locale
 import csv
-
-
-# =================
-# Relative imports.
-# =================
 from ... import shared
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========================
