@@ -27,7 +27,7 @@ REM ==================
 SET _wsdocuments=%_BACKUP%\workspace.documents
 SET _wsmusic=%_BACKUP%\workspace.music
 SET _wsvideos=%_BACKUP%\workspace.videos
-SET _targetsfile=%_COMPUTING%\documentsbackuptargets.txt
+REM SET _targetsfile=%_COMPUTING%\documentsbackuptargets.txt
 SET _workdir=%TEMP%\tmp-Xavier
 SET _arecabackuplog=%_COMPUTING%\ArecaBackupLog.txt
 SET _videos=%USERPROFILE%\videos
@@ -66,7 +66,6 @@ IF "%~1" EQU "10" GOTO STEP10
 IF "%~1" EQU "11" GOTO STEP11
 IF "%~1" EQU "12" GOTO STEP12
 IF "%~1" EQU "13" GOTO STEP13
-IF "%~1" EQU "14" GOTO STEP14
 SHIFT
 GOTO MAIN
 
@@ -228,5 +227,16 @@ IF "%_zready%" EQU "Y" (
     )
     XXCOPY "%_videos%\*.mp4" z:\Z123456792\ /CLONE /oA:%_XXCOPYLOG%
 )
+SHIFT
+GOTO MAIN
+
+
+REM     -------------------------------
+REM 14. Delete GNUCash sandbox content.
+REM     -------------------------------
+:STEP13
+REM PUSHD %_PYTHONPROJECT%
+REM python -m Applications.Database.dbLastRunDates delta "%_gnucashID%" -t "10" && "C:\Program Files\Sandboxie\Start.exe" /box:GNUCash delete_sandbox_silent && python -m Applications.Database.dbLastRunDates update "%_gnucashID%"
+REM POPD
 SHIFT
 GOTO MAIN
