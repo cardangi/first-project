@@ -1,4 +1,6 @@
 @ECHO off
+REM Exécuté depuis le scheduler windows avec les paramètres 1 2 3 4 5 6 7 9 10 11 13.
+
 
 REM
 SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
