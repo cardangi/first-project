@@ -17,7 +17,7 @@ REM ==================
 SET _xready=N
 SET _yready=N
 SET _zready=N
-SET _documentsID=123456797
+REM SET _documentsID=123456797
 SET _gnucashID=123456798
 
 
@@ -84,37 +84,37 @@ REM     -----------------
 REM  4. Backup documents.
 REM     -----------------
 :STEP2
-IF "%_yready%%_zready%" EQU "YY" (
+rem IF "%_yready%%_zready%" EQU "YY" (
 
-    PUSHD %_PYTHONPROJECT%
-    python -m Applications.Database.dbLastRunDates delta "%_documentsID%" -t "5"
-    IF NOT ERRORLEVEL 1 (
-        FOR /F "usebackq delims=; eol=# tokens=2" %%a IN ("%_targetsfile%") DO (
-            IF EXIST "%_arecabackuplog%" (
-                IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 500000 "%_arecabackuplog%"
-            )
-            (
-                ECHO.
-                ECHO -------------
-                ECHO Start backup.
-                ECHO -------------
-                ECHO INFO -  - !date! !time!
-            ) >> %_arecabackuplog%
-            "C:\Program Files\Areca\areca_cl.exe" backup -c -wdir "%_workdir%" -config "%_wsdocuments%\%%a.bcfg" >> %_arecabackuplog%
-            IF NOT ERRORLEVEL 1 (
-                IF "%_xready%" EQU "Y" (
-                    IF EXIST "%_XXCOPYLOG%" (
-                        IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
-                    )
-                    XXCOPY z:\%%a\ x:\%%a\ /CLONE /oA:%_XXCOPYLOG%
-                )
-            )
-        )
-        python -m Applications.Database.dbLastRunDates update "%_documentsID%"
-    )
-    POPD
+rem     PUSHD %_PYTHONPROJECT%
+rem     python -m Applications.Database.dbLastRunDates delta "%_documentsID%" -t "5"
+rem     IF NOT ERRORLEVEL 1 (
+rem         FOR /F "usebackq delims=; eol=# tokens=2" %%a IN ("%_targetsfile%") DO (
+rem             IF EXIST "%_arecabackuplog%" (
+rem                 IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 500000 "%_arecabackuplog%"
+rem             )
+rem             (
+rem                 ECHO.
+rem                 ECHO -------------
+rem                 ECHO Start backup.
+rem                 ECHO -------------
+rem                 ECHO INFO -  - !date! !time!
+rem             ) >> %_arecabackuplog%
+rem             "C:\Program Files\Areca\areca_cl.exe" backup -c -wdir "%_workdir%" -config "%_wsdocuments%\%%a.bcfg" >> %_arecabackuplog%
+rem             IF NOT ERRORLEVEL 1 (
+rem                 IF "%_xready%" EQU "Y" (
+rem                     IF EXIST "%_XXCOPYLOG%" (
+rem                         IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
+rem                     )
+rem                     XXCOPY z:\%%a\ x:\%%a\ /CLONE /oA:%_XXCOPYLOG%
+rem                 )
+rem             )
+rem         )
+rem         python -m Applications.Database.dbLastRunDates update "%_documentsID%"
+rem     )
+rem     POPD
 
-)
+rem )
 SHIFT
 GOTO MAIN
 
@@ -228,36 +228,5 @@ IF "%_zready%" EQU "Y" (
     )
     XXCOPY "%_videos%\*.mp4" z:\Z123456792\ /CLONE /oA:%_XXCOPYLOG%
 )
-SHIFT
-GOTO MAIN
-
-
-REM     ---------------------------
-REM 14. RippingLog HTML fancy view.
-REM     ---------------------------
-:STEP13
-REM PUSHD "%_PYTHONPROJECT%"
-REM python -m Applications.Database.RippingLog.View1
-REM POPD
-SHIFT
-GOTO MAIN
-
-
-REM     -------------------------------
-REM 15. Delete GNUCash sandbox content.
-REM     -------------------------------
-:STEP14
-REM PUSHD %_PYTHONPROJECT%
-REM python -m Applications.Database.dbLastRunDates delta "%_gnucashID%" -t "10" && "C:\Program Files\Sandboxie\Start.exe" /box:GNUCash delete_sandbox_silent && python -m Applications.Database.dbLastRunDates update "%_gnucashID%"
-REM POPD
-SHIFT
-GOTO MAIN
-
-
-REM     --------------
-REM 16. Miscellaneous.
-REM     --------------
-:STEP8
-REM XXCOPY %_MYDOCUMENTS%\*\ /Fo:%TEMP%\FilesList.lst /L:DTZA
 SHIFT
 GOTO MAIN
