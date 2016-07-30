@@ -66,17 +66,17 @@ status, arguments = 99, parser.parse_args()
 # Main algorithm.
 # ===============
 
-#  1. Ouverture de la connexion à la base de données.
+#  1. Ouvrir de la connexion à la base de données.
 conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
 
-#  2. Sélection d'une tâche.
+#  2. Sélectionner une tâche.
 if arguments.command == "select":
     if conn.cursor().execute("SELECT count(*) FROM lastrundates WHERE id=?", (arguments.uid,)).fetchone()[0]:
         status = 0
         print(shared.dateformat(timezone(shared.DFTTIMEZONE).localize(conn.cursor().execute("SELECT lastrundate FROM lastrundates WHERE id=?", (arguments.uid,)).fetchone()[0]), shared.TEMPLATE1))
 
-#  3. Suppression d'une tâche.
-if arguments.command == "delete":
+#  3. Supprimer d'une tâche.
+elif arguments.command == "delete":
     status = 0
     if arguments.uid:
         for key in arguments.uid:
@@ -84,16 +84,16 @@ if arguments.command == "delete":
     if not arguments.uid:
         conn.cursor().execute("DELETE FROM lastrundates")
 
-if arguments.command == "delta":
+#  4. Calculer la date de prochaine exécution d'une tâche.
+elif arguments.command == "delta":
     status = 0
     if conn.cursor().execute("SELECT count(*) FROM lastrundates WHERE id=?", (arguments.uid,)).fetchone()[0]:
         now = datetime.now(tz=timezone(shared.DFTTIMEZONE))
         nextrundate = timezone(shared.DFTTIMEZONE).localize(conn.cursor().execute("SELECT lastrundate FROM lastrundates WHERE id=?", (arguments.uid,)).fetchone()[0]) + timedelta(days=arguments.timedelta)
         if now < nextrundate:
             status = 99
-        # print(shared.dateformat(nextrundate, shared.TEMPLATE3))
 
-#  5. Mise à jour de la date de dernière exécution d'une tâche.
+#  5. Mettre à jour la date de dernière exécution d'une tâche.
 #     La tâche est créée si elle n'existe pas.
 elif arguments.command == "update":
     status = 0
@@ -103,11 +103,11 @@ elif arguments.command == "update":
         else:
             conn.cursor().execute("INSERT INTO lastrundates (id, lastrundate) VALUES(?, ?)", (key, datetime.fromtimestamp(arguments.timestamp)))
 
-#  6. Mise à jour de la base de données.
+#  6. Mettre à jour de la base de données.
 conn.commit()
 
-#  7. Fermeture de la connexion à la base de données.
+#  7. Fermer la connexion à la base de données.
 conn.close()
 
-#  8. Communication du code retour au programme appelant.
+#  8. Communiquer le code retour au programme appelant.
 sys.exit(status)
