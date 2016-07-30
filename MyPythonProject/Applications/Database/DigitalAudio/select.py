@@ -42,7 +42,7 @@ parser_selecttck.add_argument("uid", type=int)
 # Constants.
 # ==========
 OUTFILE = os.path.join(os.path.expandvars("%TEMP%"), "content.json")
-FIELDS = {"albums": ["rowid", "albumid", "artist", "year", "album", "genre", "upc", "discs", "live", "bootleg", "incollection", "encodingyear", "origyear"],
+FIELDS = {"albums": ["rowid", "albumid", "artist", "year", "album", "genre", "upc", "discs", "live", "bootleg", "incollection", "encodingyear", "origyear", "language"],
           "discs": ["rowid", "albumid", "discid", "tracks"],
           "tracks": ["rowid", "albumid", "discid", "trackid", "title"]}
 
