@@ -175,7 +175,13 @@ IF ERRORLEVEL 10 (
 )
 
 
-IF ERRORLEVEL 8 GOTO EXIT
+REM -----------------
+REM Backup documents.
+REM -----------------
+IF ERRORLEVEL 8 (
+    python Backups`Areca`L.py documents --check --debug --target 1282856126
+    GOTO MENU
+)
 
 
 REM --------------------------------------
