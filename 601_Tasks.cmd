@@ -41,7 +41,7 @@ IF ERRORLEVEL 99 GOTO EXIT
 REM -------------------
 REM Convert Unix epoch.
 REM -------------------
-IF ERRORLEVEL 23 (
+IF ERRORLEVEL 24 (
     python Applications`convertUnixEpoch`L.py
     IF ERRORLEVEL 11 GOTO MENU
     GOTO MENU
@@ -51,7 +51,7 @@ IF ERRORLEVEL 23 (
 REM -------------------------
 REM Get Unix epoch from date.
 REM -------------------------
-IF ERRORLEVEL 22 (
+IF ERRORLEVEL 23 (
     python Applications`getUnixEpoch`L.py
     GOTO MENU
 )
@@ -60,7 +60,7 @@ IF ERRORLEVEL 22 (
 REM ----------------------
 REM Timestamp audio files.
 REM ----------------------
-IF ERRORLEVEL 21 (
+IF ERRORLEVEL 22 (
     python AudioFiles`Taggingtime`L.py
     GOTO MENU
 )
@@ -69,7 +69,7 @@ IF ERRORLEVEL 21 (
 REM -------------------
 REM Rename audio files.
 REM -------------------
-IF ERRORLEVEL 20 (
+IF ERRORLEVEL 21 (
     python AudioFiles`renameFiles`L.py
     GOTO MENU
 )
@@ -78,7 +78,7 @@ IF ERRORLEVEL 20 (
 REM ----------------------------------
 REM Copy audio files from audio drive.
 REM ----------------------------------
-IF ERRORLEVEL 19 (
+IF ERRORLEVEL 20 (
     CALL "G:\Computing\802_copyAudioFiles.cmd"
     GOTO MENU
 )
@@ -87,7 +87,7 @@ IF ERRORLEVEL 19 (
 REM ----------------------------------
 REM Import audio files to audio drive.
 REM ----------------------------------
-IF ERRORLEVEL 18 (
+IF ERRORLEVEL 19 (
     CALL "G:\Computing\801_importAudioFiles.cmd"
     GOTO MENU
 )
@@ -96,7 +96,7 @@ IF ERRORLEVEL 18 (
 REM ---------------------------
 REM Display geometric sequence.
 REM ---------------------------
-IF ERRORLEVEL 17 (
+IF ERRORLEVEL 18 (
     python Math`Sequences`L.py G
     GOTO MENU
 )
@@ -105,7 +105,7 @@ IF ERRORLEVEL 17 (
 REM ----------------------------
 REM Display arithmetic sequence.
 REM ---------------------------
-IF ERRORLEVEL 16 (
+IF ERRORLEVEL 17 (
     python Math`Sequences`L.py A
     GOTO MENU
 )
@@ -114,7 +114,7 @@ IF ERRORLEVEL 16 (
 REM ---------------------------
 REM RippingLog HTML fancy view.
 REM ---------------------------
-IF ERRORLEVEL 15 (
+IF ERRORLEVEL 16 (
     python G:\Computing\MyPythonProject\Database`HTMLView`L.py RippingLog
     GOTO MENU
 )
@@ -123,7 +123,7 @@ IF ERRORLEVEL 15 (
 REM ---------------------
 REM RippingLog JSON view.
 REM ---------------------
-IF ERRORLEVEL 14 (
+IF ERRORLEVEL 15 (
     PUSHD %_PYTHONPROJECT%
     python -m Applications.Database.RippingLog.View2
     POPD
@@ -134,7 +134,7 @@ IF ERRORLEVEL 14 (
 REM ------------------------------
 REM Digital Audio HTML fancy view.
 REM ------------------------------
-IF ERRORLEVEL 13 (
+IF ERRORLEVEL 14 (
     PUSHD %_PYTHONPROJECT%
     python -m Applications.Database.DigitalAudio.View1
     IF NOT ERRORLEVEL 1 (
@@ -148,29 +148,47 @@ IF ERRORLEVEL 13 (
 )
 
 
-REM -------------------------------
-REM Digital Audio HTML simple view.
-REM -------------------------------
-IF ERRORLEVEL 12 (
+REM ---------------------------------
+REM "Digital Audio" HTML simple view.
+REM ---------------------------------
+IF ERRORLEVEL 13 (
     python G:\Computing\MyPythonProject\Database`HTMLView`L.py DigitalAudio
     GOTO MENU
 )
 
 
-REM ------------------------------
-REM LastRunDates HTML simple view.
-REM ------------------------------
-IF ERRORLEVEL 11 (
+REM --------------------------------
+REM "LastRunDates" HTML simple view.
+REM --------------------------------
+IF ERRORLEVEL 12 (
     python G:\Computing\MyPythonProject\Database`HTMLView`L.py LastRunDates
     GOTO MENU
 )
 
 
-REM ------------------------
-REM Backup HTML simple view.
-REM ------------------------
-IF ERRORLEVEL 10 (
+REM --------------------------
+REM "Backup" HTML simple view.
+REM --------------------------
+IF ERRORLEVEL 11 (
     python G:\Computing\MyPythonProject\Database`HTMLView`L.py Backups
+    GOTO MENU
+)
+
+
+REM ----------------------
+REM Backup python scripts.
+REM ----------------------
+IF ERRORLEVEL 10 (
+    CALL "G:\Computing\start.cmd" 6
+    GOTO MENU
+)
+
+
+REM --------------
+REM Backup videos.
+REM --------------
+IF ERRORLEVEL 9 (
+    CALL "G:\Computing\start.cmd" 12
     GOTO MENU
 )
 
