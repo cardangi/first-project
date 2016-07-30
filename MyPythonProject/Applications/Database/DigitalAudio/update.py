@@ -1,4 +1,9 @@
 # -*- coding: ISO-8859-1 -*-
+import argparse
+import sqlite3
+import locale
+from ... import shared
+
 __author__ = 'Xavier ROSSET'
 
 
@@ -8,20 +13,6 @@ __author__ = 'Xavier ROSSET'
 #  1. update.py albums 1 2 3 --artist "newartist" --album "newalbum"
 #  2. update.py discs 1 2 3 --field "newvalue"
 #  3. update.py tracks 1 2 3 --title "newtitle"
-
-
-# =================
-# Absolute imports.
-# =================
-import argparse
-import sqlite3
-import locale
-
-
-# =================
-# Relative imports.
-# =================
-from ... import shared
 
 
 # ==========================

@@ -1,4 +1,9 @@
 # -*- coding: ISO-8859-1 -*-
+import argparse
+import sqlite3
+import locale
+from ... import shared
+
 __author__ = 'Xavier ROSSET'
 
 
@@ -7,20 +12,6 @@ __author__ = 'Xavier ROSSET'
 # =======================
 # 1. delete.py 100
 # 2. delete.py 100 101 102 103
-
-
-# =================
-# Absolute imports.
-# =================
-import argparse
-import sqlite3
-import locale
-
-
-# =================
-# Relative imports.
-# =================
-from ... import shared
 
 
 # ==========================

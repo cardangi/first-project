@@ -1,37 +1,15 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =======================
-# How to use this script?
-# =======================
-# select.py albums 100 > "%_result%"
-# IF NOT ERRORLEVEL 1 (
-#     FOR /F "usebackq delims=; tokens=1-6" %%i IN ("%_result%") DO (
-#         ECHO albumid: %%i
-#         ECHO artist: %%j
-#         ECHO year: %%k
-#         ECHO album: %%l
-#         ECHO genre: %%m
-#         ECHO upc: %%n
-#     )
-# )
-# IF ERRORLEVEL 1 ECHO Record number 100 doesn't exist in Albums table.
-
-
-# =================
-# Absolute imports.
-# =================
+from collections import OrderedDict
+from pprint import PrettyPrinter
 import argparse
 import sqlite3
 import locale
+import json
 import sys
-
-
-# =================
-# Relative imports.
-# =================
+import os
 from ... import shared
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========================
@@ -44,6 +22,7 @@ locale.setlocale(locale.LC_ALL, "")
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
+parser.add_argument("-p", "--print", action="store_true")
 subparsers = parser.add_subparsers(dest="table")
 
 # ----- Table "ALBUMS".
@@ -62,13 +41,26 @@ parser_selecttck.add_argument("uid", type=int)
 # ==========
 # Constants.
 # ==========
-qry = {"albums": "SELECT albumid, artist, year, album, genre, upc FROM albums WHERE rowid=?", "discs": "SELECT albumid, discid, FROM discs WHERE rowid=?", "tracks": "SELECT albumid, discid, trackid, title FROM tracks WHERE rowid=?"}
+OUTFILE = os.path.join(os.path.expandvars("%TEMP%"), "content.json")
+FIELDS = {"albums": ["rowid", "albumid", "artist", "year", "album", "genre", "upc", "discs", "live", "bootleg", "incollection", "encodingyear", "origyear"],
+          "discs": ["rowid", "albumid", "discid", "tracks"],
+          "tracks": ["rowid", "albumid", "discid", "trackid", "title"]}
+
+
+# ==========
+# Functions.
+# ==========
+def convert_boolean(f):
+    if int(f):
+        return True
+    return False
+sqlite3.register_converter("boolean", convert_boolean)
 
 
 # ================
 # Initializations.
 # ================
-status, o, iterable, arguments = 100, "", None, parser.parse_args()
+status, parent, arguments = 100, None, parser.parse_args()
 
 
 # ===============
@@ -79,18 +71,49 @@ status, o, iterable, arguments = 100, "", None, parser.parse_args()
 conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
 conn.row_factory = sqlite3.Row
 
-#  2. Contrôle de l'existence de l'enregistrement.
-count = conn.cursor().execute("SELECT count(*) FROM {0} WHERE rowid=?".format(arguments.table), (arguments.uid,)).fetchone()[0]
-if count > 0:
-    iterable = conn.cursor().execute(qry[arguments.table], (arguments.uid,)).fetchone()
-    for i in range(0, len(iterable)):
-        o = "{0}{1};".format(o, iterable[i])
-    if o:
-        print(o[:-1])
-        status = 0
+#  2. Extraction des données.
+if conn.cursor().execute("SELECT count(*) FROM {0} WHERE rowid=?".format(arguments.table), (arguments.uid,)).fetchone()[0]:
+    for row in conn.cursor().execute("SELECT {statement}, created FROM {table} WHERE rowid=?".format(statement=", ".join(FIELDS[arguments.table]), table=arguments.table), (arguments.uid,)):
+        templist1 = [(field, row[field]) for field in FIELDS[arguments.table]]
+        templist1.append(("created", shared.dateformat(shared.LOCAL.localize(row["created"]), shared.TEMPLATE4)))
+        parent = OrderedDict(sorted(templist1, key=lambda i: i[0]))
 
-#  3. Fermeture de la connexion à la base de données.
+        if arguments.table in ["albums", "discs"]:
+
+            if arguments.table == "albums":
+                for subrow in conn.cursor().execute("SELECT {statement}, created FROM discs WHERE albumid=?".format(statement=", ".join(FIELDS["discs"])), (row["albumid"],)):
+                    templist2 = [(field, subrow[field]) for field in FIELDS["discs"]]
+                    templist2.append(("created", shared.dateformat(shared.LOCAL.localize(subrow["created"]), shared.TEMPLATE4)))
+                    disc = OrderedDict(sorted(templist2, key=lambda i: i[0]))
+
+                    for ssubrow in conn.cursor().execute("SELECT {statement}, created FROM tracks WHERE albumid=? and discid=?".format(statement=", ".join(FIELDS["tracks"])), (row["albumid"], subrow["discid"])):
+                        templist3 = [(field, ssubrow[field]) for field in FIELDS["tracks"]]
+                        templist3.append(("created", shared.dateformat(shared.LOCAL.localize(ssubrow["created"]), shared.TEMPLATE4)))
+                        disc["track_{0}".format(str(ssubrow["trackid"]).zfill(2))] = OrderedDict(sorted(templist3, key=lambda i: i[0]))
+
+                    parent["disc_{0}".format(str(subrow["discid"]).zfill(2))] = disc
+
+            elif arguments.table == "discs":
+                for subrow in conn.cursor().execute("SELECT {statement}, created FROM tracks WHERE albumid=? and discid=?".format(statement=", ".join(FIELDS["tracks"])), (row["albumid"], row["discid"])):
+                    templist3 = [(field, subrow[field]) for field in FIELDS["tracks"]]
+                    templist3.append(("created", shared.dateformat(shared.LOCAL.localize(subrow["created"]), shared.TEMPLATE4)))
+                    parent["track_{0}".format(str(subrow["trackid"]).zfill(2))] = OrderedDict(sorted(templist3, key=lambda i: i[0]))
+
+#  3. Restitution des données.
+if parent:
+    status = 0
+
+    #  3.a. Edition écran des données
+    if arguments.print:
+        pp = PrettyPrinter(indent=4, width=160)
+        pp.pprint(parent)
+
+    #  3.b. Edition fichier des données.
+    with open(OUTFILE, mode=shared.WRITE) as fp:
+        json.dump([shared.now(), arguments.table.upper(), arguments.uid, parent], fp, indent=4)
+
+#  4. Fermeture de la connexion à la base de données.
 conn.close()
 
-#  4. Communication du code retour au programme appelant.
+#  5. Communication du code retour au programme appelant.
 sys.exit(status)
