@@ -37,7 +37,7 @@ pp, arguments = PrettyPrinter(indent=4, width=160), parser.parse_args()
 conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
 
 #  2. Restitution des tables.
-r = [row for row in conn.cursor().execute("SELECT * FROM {table}".format(table=arguments.table))]
+r = [row for row in conn.cursor().execute("SELECT * FROM {table} ORDER BY rowid".format(table=arguments.table))]
 if arguments.print:
     pp.pprint(r)
 with open(OUTFILE, mode=shared.WRITE) as fp:
