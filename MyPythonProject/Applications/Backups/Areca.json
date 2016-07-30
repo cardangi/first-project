@@ -48,5 +48,10 @@
         "workspace": "music",
         "description": "[Pearl Jam - 2011]",
         "target": "1484552884"    
+    },
+    {
+        "workspace": "documents",
+        "description": "Documents",
+        "target": "1282856126"
     }
 ]
