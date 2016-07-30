@@ -75,7 +75,7 @@ if arguments.command == "delete":
         conn.cursor().execute("DELETE FROM backup")
 
 #  3. Sélection d'un script.
-if arguments.command == "select":
+elif arguments.command == "select":
     if conn.cursor().execute("SELECT count(*) FROM backup WHERE id=?", (arguments.uid,)).fetchone()[0]:
         status = 0
         print(shared.dateformat(timezone(shared.DFTTIMEZONE).localize(conn.cursor().execute("SELECT lastbackup FROM backup WHERE id=?", (arguments.uid,)).fetchone()[0]), shared.TEMPLATE1))
