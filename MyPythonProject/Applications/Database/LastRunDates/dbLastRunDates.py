@@ -1,4 +1,12 @@
 # -*- coding: ISO-8859-1 -*-
+from datetime import datetime, timedelta
+from pytz import timezone
+import sqlite3
+import argparse
+import locale
+import sys
+from ... import shared
+
 __author__ = 'Xavier ROSSET'
 
 
@@ -12,21 +20,13 @@ __author__ = 'Xavier ROSSET'
 #  5. dbLastRunDates.py update 123456797 123456798 -t 1461004077
 
 
-# =================
-# Absolute imports.
-# =================
-from datetime import datetime, timedelta
-from pytz import timezone
-import sqlite3
-import argparse
-import locale
-import sys
-
-
-# =================
-# Relative imports.
-# =================
-from ... import shared
+# ==========
+# Functions.
+# ==========
+def validcommand(c):
+    if c not in ["delete", "delta", "update", "delete"]:
+        raise argparse.ArgumentTypeError('"{0}" is not a valid command'.format(c))
+    return c
 
 
 # ==========================
