@@ -179,7 +179,15 @@ REM -----------------
 REM Backup documents.
 REM -----------------
 IF ERRORLEVEL 8 (
+
+    REM Run Backup.
     python Backups`Areca`L.py documents --check --debug --target 1282856126
+
+    REM Update last run date.
+    PUSHD %_PYTHONPROJECT%
+    python -m Applications.Database.LastRunDates.dbLastRunDates update 123456797
+    POPD
+
     GOTO MENU
 )
 
