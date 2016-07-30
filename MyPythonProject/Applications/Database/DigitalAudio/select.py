@@ -67,9 +67,11 @@ status, parent, arguments = 100, None, parser.parse_args()
 # Main algorithm.
 # ===============
 
+
 #  1. Ouverture de la connexion à la base de données.
 conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
 conn.row_factory = sqlite3.Row
+
 
 #  2. Extraction des données.
 if conn.cursor().execute("SELECT count(*) FROM {0} WHERE rowid=?".format(arguments.table), (arguments.uid,)).fetchone()[0]:
@@ -90,7 +92,6 @@ if conn.cursor().execute("SELECT count(*) FROM {0} WHERE rowid=?".format(argumen
                         templist3 = [(field, ssubrow[field]) for field in FIELDS["tracks"]]
                         templist3.append(("created", shared.dateformat(shared.LOCAL.localize(ssubrow["created"]), shared.TEMPLATE4)))
                         disc["track_{0}".format(str(ssubrow["trackid"]).zfill(2))] = OrderedDict(sorted(templist3, key=lambda i: i[0]))
-
                     parent["disc_{0}".format(str(subrow["discid"]).zfill(2))] = disc
 
             elif arguments.table == "discs":
@@ -99,21 +100,24 @@ if conn.cursor().execute("SELECT count(*) FROM {0} WHERE rowid=?".format(argumen
                     templist3.append(("created", shared.dateformat(shared.LOCAL.localize(subrow["created"]), shared.TEMPLATE4)))
                     parent["track_{0}".format(str(subrow["trackid"]).zfill(2))] = OrderedDict(sorted(templist3, key=lambda i: i[0]))
 
+
 #  3. Restitution des données.
 if parent:
     status = 0
 
-    #  3.a. Edition écran des données
+    #  3.a. Edition écran.
     if arguments.print:
         pp = PrettyPrinter(indent=4, width=160)
         pp.pprint(parent)
 
-    #  3.b. Edition fichier des données.
+    #  3.b. Edition fichier.
     with open(OUTFILE, mode=shared.WRITE) as fp:
         json.dump([shared.now(), arguments.table.upper(), arguments.uid, parent], fp, indent=4)
 
+
 #  4. Fermeture de la connexion à la base de données.
 conn.close()
+
 
 #  5. Communication du code retour au programme appelant.
 sys.exit(status)
