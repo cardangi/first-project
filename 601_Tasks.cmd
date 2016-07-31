@@ -38,6 +38,24 @@ REM ----------
 IF ERRORLEVEL 99 GOTO EXIT
 
 
+REM ----------------------------------------
+REM Springsteen 201* bootlegs series backup.
+REM ----------------------------------------
+IF ERRORLEVEL 26 (
+    python Backups`Areca`L.py music --check --debug --target 1306312508
+    GOTO MENU
+)
+
+
+REM ----------------------------------------
+REM Springsteen 2016 bootlegs series backup.
+REM ----------------------------------------
+IF ERRORLEVEL 25 (
+    python Backups`Areca`L.py music --check --debug --target 1066663185
+    GOTO MENU
+)
+
+
 REM -------------------
 REM Convert Unix epoch.
 REM -------------------
