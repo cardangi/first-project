@@ -38,7 +38,7 @@ template = environment.get_template("T1")
 # Functions.
 # ==========
 def pprint(t):
-    run("CLS", shell=True)
+    # run("CLS", shell=True)
     if t:
         print(t)
 
@@ -76,6 +76,7 @@ with open(CODES) as fp:
 
 #  3. Grab choice.
 if all([tasks, codes]):
+    print(dict(enumerate(tasks, 1)))
     tasks = dict(zip([str(i) for i in range(1, len(tasks) + 1)], tasks))
     tasks["99"] = "Exit"
     o = template.render(tasks=tasks)
