@@ -68,5 +68,10 @@
         "workspace": "music",
         "description": "Bootlegs [Springsteen - 2009]",
         "target": "1068554868"
+    },
+    {
+        "workspace": "music",
+        "description": "Bootlegs [Springsteen - 200*]",
+        "target": "1222562470"
     }
 ]
