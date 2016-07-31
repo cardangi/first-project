@@ -29,7 +29,7 @@ REM -------------
 REM Display menu.
 REM -------------
 :MENU
-python -m Applications.Tasks.displayMenu
+python -m Applications.Tasks.Tasks
 
 
 REM ----------

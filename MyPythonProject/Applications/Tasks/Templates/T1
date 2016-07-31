@@ -3,48 +3,48 @@
         **********************************                      **************************
         * BACKUP --> DIGITAL AUDIO FILES *                      * BACKUP --> OTHER TASKS *
         **********************************                      **************************
-         1. {{ tasks["1"] }}.                   10. {{ tasks["10"] }}.
-         2. {{ tasks["2"] }}.                   11. {{ tasks["11"] }}.
-                                                12. {{ tasks["12"] }}.
-         3. {{ tasks["3"] }}.
-         4. {{ tasks["4"] }}.
-         5. {{ tasks["5"] }}.
-         6. {{ tasks["6"] }}.
-         7. {{ tasks["7"] }}.
+        {{ "%s%s%s"|format(" 1. %s."|format(tasks[0]), " 1. %s."|format(tasks[0])|inserttabulations(), "10. %s."|format(tasks[9]))|expandtabulations() }}
+        {{ "%s%s%s"|format(" 2. %s."|format(tasks[1]), " 2. %s."|format(tasks[1])|inserttabulations(), "11. %s."|format(tasks[10]))|expandtabulations() }}
+                                                                12. {{ tasks[11] }}.
+         3. {{ tasks[2] }}.
+         4. {{ tasks[3] }}.
+         5. {{ tasks[4] }}.
+         6. {{ tasks[5] }}.
+         7. {{ tasks[6] }}.
 
-         8. {{ tasks["8"] }}.
-         9. {{ tasks["9"] }}.
+         8. {{ tasks[7] }}.
+         9. {{ tasks[8] }}.
 
 
 
         ******************                                      ***************
         * TABLES EDITING *                                      * MATHEMATICS *
         ******************                                      ***************
-        13. {{ tasks["13"] }}.                                  19. {{ tasks["19"] }}.
-        14. {{ tasks["14"] }}.                                  20. {{ tasks["20"] }}.
+        {{ "%s%s%s"|format("13. %s"|format(tasks[12]), "13. %s."|format(tasks[12])|inserttabulations(), "19. %s."|format(tasks[18]))|expandtabulations() }}
+        {{ "%s%s%s"|format("14. %s"|format(tasks[13]), "14. %s."|format(tasks[13])|inserttabulations(), "20. %s."|format(tasks[19]))|expandtabulations() }}
 
-        15. {{ tasks["15"] }}.
-        16. {{ tasks["16"] }}.
+        15. {{ tasks[14] }}.
+        16. {{ tasks[15] }}.
 
-        17. {{ tasks["17"] }}.
-        18. {{ tasks["18"] }}.
+        17. {{ tasks[16] }}.
+        18. {{ tasks[17] }}.
 
 
 
         ***************                                         *****************
         * AUDIO FILES *                                         * MISCELLANEOUS *
         ***************                                         *****************
-        21. {{ tasks["21"] }}.                                  25. {{ tasks["25"] }}.
-        22. {{ tasks["22"] }}.                                  26. {{ tasks["26"] }}.
-        23. {{ tasks["23"] }}.
-        24. {{ tasks["24"] }}.
+        {{ "%s%s%s"|format("21. %s"|format(tasks[12]), "21. %s."|format(tasks[12])|inserttabulations(), "25. %s."|format(tasks[18]))|expandtabulations() }}
+        {{ "%s%s%s"|format("22. %s"|format(tasks[13]), "22. %s."|format(tasks[13])|inserttabulations(), "26. %s."|format(tasks[19]))|expandtabulations() }}
+        23. {{ tasks[22] }}.
+        24. {{ tasks[23] }}.
 
 
 
         ********
         * EXIT *
         ********
-        99. {{ tasks["99"] }}.
+        99. {{ tasks[26] }}.
 
 
 
