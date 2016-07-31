@@ -70,7 +70,7 @@ choice, status = 99, 100
 with open(TASKS) as fp:
     tasks = [item for item in json.load(fp)][0]
 
-#  2. Load return codes.
+#  2. Load available return codes.
 with open(CODES) as fp:
     codes = [item for item in json.load(fp)][0]
 
