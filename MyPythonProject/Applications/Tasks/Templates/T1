@@ -3,41 +3,45 @@
         **********************************                      **************************
         * BACKUP --> DIGITAL AUDIO FILES *                      * BACKUP --> OTHER TASKS *
         **********************************                      **************************
-         1. Default.                                             8. Documents.
-         2. Pearl Jam bootlegs.                                  9. Videos.
-                                                                10. Python scripts.
-         3. Pearl Jam 2000 bootlegs series.
-         4. Pearl Jam 2003 bootlegs series.
-         5. Pearl Jam 2006 bootlegs series.
-         6. Pearl Jam 2010 bootlegs series.
-         7. Pearl Jam 2011 bootlegs series.
+         1. {{ tasks["1"] }}.                                     8. {{ tasks["8"] }}.
+         2. {{ tasks["2"] }}.                                     9. {{ tasks["9"] }}.
+                                                                 10. {{ tasks["10"] }}.
+         3. {{ tasks["3"] }}.
+         4. {{ tasks["4"] }}.
+         5. {{ tasks["5"] }}.
+         6. {{ tasks["6"] }}.
+         7. {{ tasks["7"] }}.
 
 
 
         ******************                                      ***************
         * TABLES EDITING *                                      * MATHEMATICS *
         ******************                                      ***************
-        11. Backup.                                             17. Display arithmetic sequence.
-        12. LastRunDates.                                       18. Display geometric sequence.
+        11. {{ tasks["11"] }}.                                  17. {{ tasks["17"] }}.
+        12. {{ tasks["12"] }}.                                  18. {{ tasks["18"] }}.
 
-        13. Digital Audio simple editing.
-        14. Digital Audio fancy editing.
+        13. {{ tasks["13"] }}.
+        14. {{ tasks["14"] }}.
 
-        15. RippingLog JSON editing.
-        16. RippingLog fancy editing.
+        15. {{ tasks["15"] }}.
+        16. {{ tasks["16"] }}.
 
 
 
         ***************                                         *****************
         * AUDIO FILES *                                         * MISCELLANEOUS *
         ***************                                         *****************
-        19. Import files to audio drive.                        23. Get Unix epoch.
-        20. Copy files from audio drive.                        24. Convert Unix epoch.
-        21. Rename files.
-        22. Timestamp tags.
+        19. {{ tasks["19"] }}.                                  23. {{ tasks["23"] }}.
+        20. {{ tasks["20"] }}.                                  24. {{ tasks["24"] }}.
+        21. {{ tasks["21"] }}.
+        22. {{ tasks["22"] }}.
 
 
-        99. Exit
+
+        ********
+        * EXIT *
+        ********
+        99. Exit.
 
 
 

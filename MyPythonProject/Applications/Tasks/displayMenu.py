@@ -7,6 +7,7 @@ __author__ = 'Xavier ROSSET'
 # =================
 from jinja2 import Environment, FileSystemLoader
 from subprocess import run
+import json
 import sys
 import os
 import re
@@ -51,27 +52,46 @@ rex1 = re.compile(r"^\d\d?$")
 # ==========
 # Constants.
 # ==========
-NUMBER = 24
+TASKS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "Tasks", "Tasks.json")
+CODES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "Tasks", "ReturnCodes.json")
 
 
 # ================
 # Initializations.
 # ================
-task = 99
+choice, status = 99, 100
 
 
 # ===============
 # Main algorithm.
 # ===============
-o = template.render()
-while True:
-    pprint(t=o)
-    task = input("\t\tPlease enter task: ".expandtabs(4))
-    if task:
-        if not rex1.match(task):
-            continue
-        task = int(task)
-        if task not in range(1, NUMBER+1) and task != 99:
-            continue
-        break
-sys.exit(task)
+
+#  1. Load available tasks.
+with open(TASKS) as fp:
+    tasks = [item for item in json.load(fp)][0]
+
+#  2. Load return codes.
+with open(CODES) as fp:
+    codes = [item for item in json.load(fp)][0]
+
+#  3. Grab choice.
+if all([tasks, codes]):
+    o = template.render(tasks=dict(zip([str(i) for i in range(1, len(tasks) + 1)], tasks)))
+    while True:
+        pprint(t=o)
+        choice = input("\t\tPlease enter task: ".expandtabs(4))
+        if choice:
+            if not rex1.match(choice):
+                continue
+            if choice not in codes and choice != "99":
+                continue
+            break
+    status = int(choice)
+    if status != 99:
+        status = codes[choice]
+
+
+# ===============
+# Exit algorithm.
+# ===============
+sys.exit(status)
