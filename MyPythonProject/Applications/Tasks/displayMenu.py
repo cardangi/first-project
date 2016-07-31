@@ -68,7 +68,7 @@ choice, status = 99, 100
 
 #  1. Load available tasks.
 with open(TASKS) as fp:
-    tasks = [item for item in json.load(fp)][0]
+    tasks = [item for item in json.load(fp)]
 
 #  2. Load available return codes.
 with open(CODES) as fp:
