@@ -39,6 +39,15 @@ IF ERRORLEVEL 99 GOTO EXIT
 
 
 REM ----------------------------------------
+REM Springsteen 2009 bootlegs series backup.
+REM ----------------------------------------
+IF ERRORLEVEL 27 (
+    python Backups`Areca`L.py music --check --debug --target 1068554868
+    GOTO MENU
+)
+
+
+REM ----------------------------------------
 REM Springsteen 201* bootlegs series backup.
 REM ----------------------------------------
 IF ERRORLEVEL 26 (
