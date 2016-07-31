@@ -76,14 +76,16 @@ with open(CODES) as fp:
 
 #  3. Grab choice.
 if all([tasks, codes]):
-    o = template.render(tasks=dict(zip([str(i) for i in range(1, len(tasks) + 1)], tasks)))
+    tasks = dict(zip([str(i) for i in range(1, len(tasks) + 1)], tasks))
+    tasks["99"] = "Exit"
+    o = template.render(tasks=tasks)
     while True:
         pprint(t=o)
         choice = input("\t\tPlease enter task: ".expandtabs(4))
         if choice:
             if not rex1.match(choice):
                 continue
-            if choice not in codes and choice != "99":
+            if choice not in codes:
                 continue
             break
     status = int(choice)
