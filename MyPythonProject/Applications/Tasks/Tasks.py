@@ -31,11 +31,7 @@ def rpadtabulations(s, l=56, tab=4):
     t = (l - len(s))//tab
     if (l - len(s)) % tab:
         t += 1
-    return "{0}{1}".format(s, "\t"*t)
-
-
-def expandtabulations(s, tab=4):
-    return s.expandtabs(tab)
+    return "{0}{1}".format(s, "\t"*t).expandtabs(tab)
 
 
 # ===================
