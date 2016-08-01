@@ -77,12 +77,11 @@ choice, returncode = 99, 100
 # 1. Load both tasks and return codes.
 with open(TASKS) as fp:
     data = json.load(fp)
-    tasks = [key for key, value in [tuple(item) for item in data]]
-    codes = dict([(str(key), value) for key, value in list(enumerate([value for key, value in [tuple(item) for item in data] if value < 99], 1))])
+    tasks = [title for title, number, code in [tuple(item) for item in data]]
+    codes = dict([(str(number), code) for title, number, code in [tuple(item) for item in data]])
 
 # 2. Choose task.
 if all([tasks, codes]):
-    codes["99"] = 99
     o = template.render(tasks=tasks)
     while True:
         pprint(t=o)
@@ -93,9 +92,7 @@ if all([tasks, codes]):
             if choice not in codes:
                 continue
             break
-    returncode = int(choice)
-    if returncode != 99:
-        returncode = codes[choice]
+    returncode = codes[choice]
 
 
 # ===============
