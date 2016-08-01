@@ -1,5 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 from jinja2 import Environment, FileSystemLoader
+from collections import namedtuple
 from subprocess import run
 import json
 import sys
@@ -14,6 +15,8 @@ __author__ = 'Xavier ROSSET'
 # Constants.
 # ==========
 TASKS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "Tasks", "Tasks.json")
+COLUMN = 56
+SPACES = 5
 
 
 # ==========
@@ -25,7 +28,7 @@ def pprint(t):
         print(t)
 
 
-def rpadtabulations(s, l=56, tab=4):
+def rtabulate(s, l=COLUMN, tab=4):
     if len(s) >= l:
         return s
     t = (l - len(s))//tab
@@ -46,7 +49,7 @@ environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvar
 # ======================
 # Jinja2 custom filters.
 # ======================
-environment.filters["rpadtabulations"] = rpadtabulations
+environment.filters["rtabulate"] = rtabulate
 environment.filters["rjustify"] = shared.rjustify
 
 
@@ -65,7 +68,7 @@ rex1 = re.compile(r"^\d\d?$")
 # ================
 # Initializations.
 # ================
-choice, returncode = 99, 100
+choice, returncode, Task = 99, 100, namedtuple("Task", ["title", "number", "length"])
 
 
 # ===============
@@ -75,12 +78,12 @@ choice, returncode = 99, 100
 # 1. Load tasks, numbers and return codes.
 with open(TASKS) as fp:
     data = json.load(fp)
-    tasks = [(title, str(number)) for title, number, code in [tuple(item) for item in data]]
+    tasks = [Task(title, str(number), len(title) + SPACES) for title, number, code in [tuple(item) for item in data]]
     codes = dict([(str(number), code) for title, number, code in [tuple(item) for item in data]])
 
 # 2. Choose task.
 if all([tasks, codes]):
-    o = template.render(tasks=tasks)
+    o = template.render(tasks=tasks, column=COLUMN)
     while True:
         pprint(t=o)
         choice = input("\t\tPlease enter task: ".expandtabs(4))
