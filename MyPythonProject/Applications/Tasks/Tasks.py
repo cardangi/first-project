@@ -77,7 +77,7 @@ choice, returncode = 99, 100
 # 1. Load tasks, numbers and return codes.
 with open(TASKS) as fp:
     data = json.load(fp)
-    tasks = [(title, str(number)) for title, number, code in [tuple(item) for item in data]]
+    tasks = sorted([(title, str(number)) for title, number, code in [tuple(item) for item in data]], key=lambda i: i[1])
     codes = dict([(str(number), code) for title, number, code in [tuple(item) for item in data]])
 
 # 2. Choose task.
