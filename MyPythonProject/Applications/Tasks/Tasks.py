@@ -78,11 +78,12 @@ choice, returncode = 99, 100
 with open(TASKS) as fp:
     data = json.load(fp)
     tasks = [title for title, number, code in [tuple(item) for item in data]]
+    numbers = [number for title, number, code in [tuple(item) for item in data]]
     codes = dict([(str(number), code) for title, number, code in [tuple(item) for item in data]])
 
 # 2. Choose task.
 if all([tasks, codes]):
-    o = template.render(tasks=tasks)
+    o = template.render(number=codes, title=tasks)
     while True:
         pprint(t=o)
         choice = input("\t\tPlease enter task: ".expandtabs(4))
