@@ -47,7 +47,6 @@ environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvar
 # Jinja2 custom filters.
 # ======================
 environment.filters["rpadtabulations"] = rpadtabulations
-environment.filters["expandtabulations"] = expandtabulations
 environment.filters["rjustify"] = shared.rjustify
 
 
