@@ -38,6 +38,17 @@ REM ----------
 IF ERRORLEVEL 99 GOTO EXIT
 
 
+REM -----------------------------------------------------------------
+REM Test function "Applications\CDRipper\test_canfilebeprocessed.py".
+REM -----------------------------------------------------------------
+IF ERRORLEVEL 29 (
+    CLS
+    python -m Applications.CDRipper.test_canfilebeprocessed
+    PAUSE
+    GOTO MENU
+)
+
+
 REM ----------------------------------------
 REM Springsteen 200* bootlegs series backup.
 REM ----------------------------------------
