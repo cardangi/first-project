@@ -3,51 +3,48 @@
         **********************************                      **************************
         * BACKUP --> DIGITAL AUDIO FILES *                      * BACKUP --> OTHER TASKS *
         **********************************                      **************************
-        {{ "%s%s%s"|format(" 1. %s."|format(tasks[0]), " 1. %s."|format(tasks[0])|inserttabulations(), "12. %s."|format(tasks[11]))|expandtabulations() }}
-        {{ "%s%s%s"|format(" 2. %s."|format(tasks[1]), " 2. %s."|format(tasks[1])|inserttabulations(), "13. %s."|format(tasks[12]))|expandtabulations() }}
-                                                                14. {{ tasks[13] }}.
-         3. {{ tasks[2] }}.
-         4. {{ tasks[3] }}.
-         5. {{ tasks[4] }}.
-         6. {{ tasks[5] }}.
-         7. {{ tasks[6] }}.
+        {{ "%s. %s."|format(tasks[0].number|rjustify(2), tasks[0].title)|rtabulate() }}{{ "%s. %s."|format(tasks[11].number|rjustify(2), tasks[11].title) }}
+        {{ "%s. %s."|format(tasks[1].number|rjustify(2), tasks[1].title)|rtabulate() }}{{ "%s. %s."|format(tasks[12].number|rjustify(2), tasks[12].title) }}
+        {{ "%s. %s."|format(tasks[13].number|rjustify(2), tasks[13].title)|rjustify(tasks[13].length + column) }}
+        {{ "%s. %s."|format(tasks[2].number|rjustify(2), tasks[2].title)|rtabulate() }}
+        {{ "%s. %s."|format(tasks[3].number|rjustify(2), tasks[3].title)|rtabulate() }}
+        {{ "%s. %s."|format(tasks[4].number|rjustify(2), tasks[4].title)|rtabulate() }}
+        {{ "%s. %s."|format(tasks[5].number|rjustify(2), tasks[5].title)|rtabulate() }}
+        {{ "%s. %s."|format(tasks[6].number|rjustify(2), tasks[6].title)|rtabulate() }}
 
-         8. {{ tasks[7] }}.
-         9. {{ tasks[8] }}.
-        10. {{ tasks[9] }}.
-        11. {{ tasks[10] }}.
+        {{ "%s. %s."|format(tasks[7].number|rjustify(2), tasks[7].title) }}
+        {{ "%s. %s."|format(tasks[8].number|rjustify(2), tasks[8].title) }}
+        {{ "%s. %s."|format(tasks[9].number|rjustify(2), tasks[9].title) }}
+        {{ "%s. %s."|format(tasks[10].number|rjustify(2), tasks[10].title) }}
 
 
 
         ******************                                      ***************
         * TABLES EDITING *                                      * MATHEMATICS *
         ******************                                      ***************
-        {{ "%s%s%s"|format("15. %s."|format(tasks[14]), "15. %s."|format(tasks[14])|inserttabulations(), "21. %s."|format(tasks[20]))|expandtabulations() }}
-        {{ "%s%s%s"|format("16. %s."|format(tasks[15]), "16. %s."|format(tasks[15])|inserttabulations(), "22. %s."|format(tasks[21]))|expandtabulations() }}
-
-        17. {{ tasks[16] }}.
-        18. {{ tasks[17] }}.
-
-        19. {{ tasks[18] }}.
-        20. {{ tasks[19] }}.
+        {{ "%s. %s."|format(tasks[14].number|rjustify(2), tasks[14].title)|rtabulate() }}{{ "%s. %s."|format(tasks[20].number|rjustify(2), tasks[20].title) }}
+        {{ "%s. %s."|format(tasks[15].number|rjustify(2), tasks[15].title)|rtabulate() }}{{ "%s. %s."|format(tasks[21].number|rjustify(2), tasks[21].title) }}
+        {{ "%s. %s."|format(tasks[16].number|rjustify(2), tasks[16].title) }}
+        {{ "%s. %s."|format(tasks[17].number|rjustify(2), tasks[17].title) }}
+        {{ "%s. %s."|format(tasks[18].number|rjustify(2), tasks[18].title) }}
+        {{ "%s. %s."|format(tasks[19].number|rjustify(2), tasks[19].title) }}
 
 
 
         ***************                                         *****************
         * AUDIO FILES *                                         * MISCELLANEOUS *
         ***************                                         *****************
-        {{ "%s%s%s"|format("23. %s."|format(tasks[22]), "23. %s."|format(tasks[22])|inserttabulations(), "27. %s."|format(tasks[26]))|expandtabulations() }}
-        {{ "%s%s%s"|format("24. %s."|format(tasks[23]), "24. %s."|format(tasks[23])|inserttabulations(), "28. %s."|format(tasks[27]))|expandtabulations() }}
-        25. {{ tasks[24] }}.
-        26. {{ tasks[25] }}.
+        {{ "%s. %s."|format(tasks[22].number|rjustify(2), tasks[22].title)|rtabulate() }}{{ "%s. %s."|format(tasks[26].number|rjustify(2), tasks[26].title) }}
+        {{ "%s. %s."|format(tasks[23].number|rjustify(2), tasks[23].title)|rtabulate() }}{{ "%s. %s."|format(tasks[27].number|rjustify(2), tasks[27].title) }}
+        {{ "%s. %s."|format(tasks[24].number|rjustify(2), tasks[24].title) }}
+        {{ "%s. %s."|format(tasks[25].number|rjustify(2), tasks[25].title) }}
 
 
 
         ********
         * EXIT *
         ********
-        99. {{ tasks[26] }}.
-
+        {{ "%s. %s."|format(tasks[28].number|rjustify(2), tasks[28].title) }}
 
 
 
