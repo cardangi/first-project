@@ -3,51 +3,47 @@
         **********************************                      **************************
         * BACKUP --> DIGITAL AUDIO FILES *                      * BACKUP --> OTHER TASKS *
         **********************************                      **************************
-        {{ "%s%s%s"|format(" 1. %s."|format(titles[0]), " 1. %s."|format(titles[0])|inserttabulations(), "12. %s."|format(titles[11]))|expandtabulations() }}
-        {{ "%s%s%s"|format(" 2. %s."|format(titles[1]), " 2. %s."|format(titles[1])|inserttabulations(), "13. %s."|format(titles[12]))|expandtabulations() }}
-                                                                14. {{ titles[13] }}.
-        {{ numbers[2]|charfill(2) }}. {{ titles[2] }}.
-        {{ numbers[3]|charfill(2) }}. {{ titles[3] }}.
-        {{ numbers[4]|charfill(2) }}. {{ titles[4] }}.
-        {{ numbers[5]|charfill(2) }}. {{ titles[5] }}.
-        {{ numbers[6]|charfill(2) }}. {{ titles[6] }}.
+        {{ "%s%s%s"|format("%s. %s."|format(tasks[0][1]|charfill(2), tasks[0][0]), "%s. %s."|format(tasks[0][1]|charfill(2), tasks[0][0])|inserttabulations(), "%s. %s."|format(tasks[11][1]|charfill(2), tasks[11][0]))|expandtabulations() }}
+        {{ "%s%s%s"|format("%s. %s."|format(tasks[1][1]|charfill(2), tasks[1][0]), "%s. %s."|format(tasks[1][1]|charfill(2), tasks[1][0])|inserttabulations(), "%s. %s."|format(tasks[12][1]|charfill(2), tasks[12][0]))|expandtabulations() }}
+                                                                {{ tasks[13][1]|charfill(2) }}. {{ tasks[13][0] }}.
+        {{ tasks[2][1]|charfill(2) }}. {{ tasks[2][0] }}.
+        {{ tasks[3][1]|charfill(2) }}. {{ tasks[3][0] }}.
+        {{ tasks[4][1]|charfill(2) }}. {{ tasks[4][0] }}.
+        {{ tasks[5][1]|charfill(2) }}. {{ tasks[5][0] }}.
+        {{ tasks[6][1]|charfill(2) }}. {{ tasks[6][0] }}.
 
-        {{ numbers[7]|charfill(2) }}. {{ titles[7] }}.
-        {{ numbers[8]|charfill(2) }}. {{ titles[8] }}.
-        {{ numbers[9]|charfill(2) }}. {{ titles[9] }}.
-        {{ numbers[10]|charfill(2) }}. {{ titles[10] }}.
+        {{ tasks[7][1]|charfill(2) }}. {{ tasks[7][0] }}.
+        {{ tasks[8][1]|charfill(2) }}. {{ tasks[8][0] }}.
+        {{ tasks[9][1]|charfill(2) }}. {{ tasks[9][0] }}.
+        {{ tasks[10][1]|charfill(2) }}. {{ tasks[10][0] }}.
 
 
 
         ******************                                      ***************
         * TABLES EDITING *                                      * MATHEMATICS *
         ******************                                      ***************
-        {{ "%s%s%s"|format("15. %s."|format(titles[14]), "15. %s."|format(titles[14])|inserttabulations(), "21. %s."|format(titles[20]))|expandtabulations() }}
-        {{ "%s%s%s"|format("16. %s."|format(titles[15]), "16. %s."|format(titles[15])|inserttabulations(), "22. %s."|format(titles[21]))|expandtabulations() }}
+        {{ "%s%s%s"|format("%s. %s."|format(tasks[14][1]|charfill(2), tasks[14][0]), "%s. %s."|format(tasks[14][1]|charfill(2), tasks[14][0])|inserttabulations(), "%s. %s."|format(tasks[11][1]|charfill(2), tasks[21][0]))|expandtabulations() }}
+        {{ "%s%s%s"|format("%s. %s."|format(tasks[15][1]|charfill(2), tasks[15][0]), "%s. %s."|format(tasks[15][1]|charfill(2), tasks[15][0])|inserttabulations(), "%s. %s."|format(tasks[12][1]|charfill(2), tasks[22][0]))|expandtabulations() }}
 
-        17. {{ titles[16] }}.
-        18. {{ titles[17] }}.
+        {{ tasks[16][1]|charfill(2) }}. {{ tasks[16][0] }}.
+        {{ tasks[17][1]|charfill(2) }}. {{ tasks[17][0] }}.
 
-        19. {{ titles[18] }}.
-        20. {{ titles[19] }}.
+        {{ tasks[18][1]|charfill(2) }}. {{ tasks[18][0] }}.
+        {{ tasks[19][1]|charfill(2) }}. {{ tasks[19][0] }}.
 
 
 
         ***************                                         *****************
         * AUDIO FILES *                                         * MISCELLANEOUS *
         ***************                                         *****************
-        {{ "%s%s%s"|format("23. %s."|format(titles[22]), "23. %s."|format(titles[22])|inserttabulations(), "27. %s."|format(titles[26]))|expandtabulations() }}
-        {{ "%s%s%s"|format("24. %s."|format(titles[23]), "24. %s."|format(titles[23])|inserttabulations(), "28. %s."|format(titles[27]))|expandtabulations() }}
-        25. {{ titles[24] }}.
-        26. {{ titles[25] }}.
+        {{ "%s%s%s"|format("%s. %s."|format(tasks[22][1]|charfill(2), tasks[22][0]), "%s. %s."|format(tasks[22][1]|charfill(2), tasks[22][0])|inserttabulations(), "%s. %s."|format(tasks[26][1]|charfill(2), tasks[26][0]))|expandtabulations() }}
+        {{ "%s%s%s"|format("%s. %s."|format(tasks[23][1]|charfill(2), tasks[23][0]), "%s. %s."|format(tasks[23][1]|charfill(2), tasks[23][0])|inserttabulations(), "%s. %s."|format(tasks[27][1]|charfill(2), tasks[27][0]))|expandtabulations() }}
+        25. {{ tasks[24] }}.
+        26. {{ tasks[25] }}.
 
 
 
         ********
         * EXIT *
         ********
-        99. {{ titles[26] }}.
-
-
-
-
+        {{ tasks[28][1]|charfill(2) }}. {{ tasks[28][0] }}.
