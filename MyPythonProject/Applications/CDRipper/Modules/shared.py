@@ -95,17 +95,11 @@ class AudioCD:
 
         # ----- Tracknumber / Totaltracks.
         if not missingattribute(self, "track"):
-            rtn = self.splitfield(self.track, r"^(\d{1,2})/(\d{1,2})")
-            if rtn:
-                self.tracknumber = rtn[0]
-                self.totaltracks = rtn[1]
+            self.tracknumber, self.totaltracks = self.splitfield(self.track, r"^(\d{1,2})/(\d{1,2})")
 
         # ----- Discnumber / Totaldiscs.
         if not missingattribute(self, "disc"):
-            rtn = self.splitfield(self.disc, r"^(\d{1,2})/(\d{1,2})")
-            if rtn:
-                self.discnumber = rtn[0]
-                self.totaldiscs = rtn[1]
+            self.discnumber, self.totaldiscs = self.splitfield(self.disc, r"^(\d{1,2})/(\d{1,2})")
 
         # ----- Genre.
         if not missingattribute(self, "artist"):
