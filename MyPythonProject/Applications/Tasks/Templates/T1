@@ -1,9 +1,10 @@
 
 
-        **********************************                      **************************
-        * BACKUP --> DIGITAL AUDIO FILES *                      * BACKUP --> OTHER TASKS *
-        **********************************                      **************************
-        {{ "%s. %s."|format(tasks[0].number|rjustify(2), tasks[0].title)|rtabulate() }}{{ "%s. %s."|format(tasks[11].number|rjustify(2), tasks[11].title) }}
+        **********************************                      **************************                              ******************
+        * BACKUP --> DIGITAL AUDIO FILES *                      * BACKUP --> OTHER TASKS *                              * TEST FUNCTIONS *
+        **********************************                      **************************                              ******************
+        {{ "%s. %s."|format(tasks[0].number|rjustify(2), tasks[0].title)|rtabulate() }}{{ "%s. %s."|format(tasks[11].number|rjustify(2), tasks[11].title)|rtabulate() }}
+        {{- "%s. %s."|format(tasks[29].number|rjustify(2), tasks[29].title) }}
         {{ "%s. %s."|format(tasks[1].number|rjustify(2), tasks[1].title)|rtabulate() }}{{ "%s. %s."|format(tasks[12].number|rjustify(2), tasks[12].title) }}
         {{ "%s. %s."|format(tasks[13].number|rjustify(2), tasks[13].title)|rjustify(tasks[13].length + column) }}
         {{ "%s. %s."|format(tasks[2].number|rjustify(2), tasks[2].title)|rtabulate() }}
