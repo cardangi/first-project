@@ -19,7 +19,7 @@
     ["DigitalAudio HTML fancy output", 18, 14],
     ["RippingLog JSON output", 19, 15],
     ["RippingLog HTML fancy output", 20, 16],
-    ["Display arithmetic sequence", 21, 14],
+    ["Display arithmetic sequence", 21, 17],
     ["Display geometric sequence", 22, 18],
     ["Import files to audio drive", 23, 19],
     ["Copy files from audio drive", 24, 20],
