@@ -25,11 +25,13 @@ def pprint(t):
         print(t)
 
 
-def inserttabulations(s, l=56, tab=4):
-    x = (l - len(s))//tab
+def rpadtabulations(s, l=56, tab=4):
+    if len(s) >= l:
+        return s
+    t = (l - len(s))//tab
     if (l - len(s)) % tab:
-        x += 1
-    return "\t"*x
+        t += 1
+    return "{0}{1}".format(s, "\t"*t)
 
 
 def expandtabulations(s, tab=4):
@@ -48,8 +50,9 @@ environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvar
 # ======================
 # Jinja2 custom filters.
 # ======================
-environment.filters["inserttabulations"] = inserttabulations
+environment.filters["rpadtabulations"] = rpadtabulations
 environment.filters["expandtabulations"] = expandtabulations
+environment.filters["rjustify"] = shared.rjustify
 
 
 # ================
