@@ -199,8 +199,8 @@ while True:
         if match1:
             list_files = [file for file in os.listdir(src) if fnmatch.fnmatch(file, "*.{0}".format(arguments.extension.lower()))]
             srcs = [os.path.join(src, file) for file in list_files]
-            dsts = ["{0}{1}".format(template3.substitute(year=match1.group(1), month=match1.group(2), day=match1.group(3), location=match1.group(4), disc=s2.grabdiscnumber(file, rex4)[1]), os.path.sep)
-                    for file in list_files if s2.grabdiscnumber(file, rex4)[0]]
+            dsts = ["{0}{1}".format(template3.substitute(year=match1.group(1), month=match1.group(2), day=match1.group(3), location=match1.group(4), disc=s2.grabdiscnumber(file, rex4).number), os.path.sep)
+                    for file in list_files if s2.grabdiscnumber(file, rex4).found]
             tmpl = template1.render(header=header, detail=sorted(list(zip(sorted(srcs), sorted(dsts))), key=lambda i: i[0]), mode=MODES["import"])
             inp, code = 3, 4
         elif not match1:
