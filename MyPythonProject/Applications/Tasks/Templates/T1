@@ -3,41 +3,41 @@
         **********************************                      **************************
         * BACKUP --> DIGITAL AUDIO FILES *                      * BACKUP --> OTHER TASKS *
         **********************************                      **************************
-        {{ "%s%s%s"|format("%s. %s."|format(tasks[0][1]|charfill(2), tasks[0][0]), "%s. %s."|format(tasks[0][1]|charfill(2), tasks[0][0])|inserttabulations(), "%s. %s."|format(tasks[11][1]|charfill(2), tasks[11][0]))|expandtabulations() }}
-        {{ "%s%s%s"|format("%s. %s."|format(tasks[1][1]|charfill(2), tasks[1][0]), "%s. %s."|format(tasks[1][1]|charfill(2), tasks[1][0])|inserttabulations(), "%s. %s."|format(tasks[12][1]|charfill(2), tasks[12][0]))|expandtabulations() }}
-                                                                {{ tasks[13][1]|charfill(2) }}. {{ tasks[13][0] }}.
-        {{ tasks[2][1]|charfill(2) }}. {{ tasks[2][0] }}.
-        {{ tasks[3][1]|charfill(2) }}. {{ tasks[3][0] }}.
-        {{ tasks[4][1]|charfill(2) }}. {{ tasks[4][0] }}.
-        {{ tasks[5][1]|charfill(2) }}. {{ tasks[5][0] }}.
-        {{ tasks[6][1]|charfill(2) }}. {{ tasks[6][0] }}.
+        {{ "%s. %s."|format(tasks[0][1]|rjustify(2), tasks[0][0])|rpadtabulations()|expandtabulations() }}{{ "%s. %s."|format(tasks[11][1]|rjustify(2), tasks[11][0]) }}
+        {{ "%s. %s."|format(tasks[1][1]|rjustify(2), tasks[1][0])|rpadtabulations()|expandtabulations() }}{{ "%s. %s."|format(tasks[12][1]|rjustify(2), tasks[12][0]) }}
+        {{ "%s. %s."|format(tasks[12][1]|rjustify(2), tasks[12][0])|rjustify("%s. %s."|format(tasks[12][1]|rjustify(2), tasks[12][0]|length() + 56) }}
+        {{ tasks[2][1]|rjustify(2) }}. {{ tasks[2][0] }}.
+        {{ tasks[3][1]|rjustify(2) }}. {{ tasks[3][0] }}.
+        {{ tasks[4][1]|rjustify(2) }}. {{ tasks[4][0] }}.
+        {{ tasks[5][1]|rjustify(2) }}. {{ tasks[5][0] }}.
+        {{ tasks[6][1]|rjustify(2) }}. {{ tasks[6][0] }}.
 
-        {{ tasks[7][1]|charfill(2) }}. {{ tasks[7][0] }}.
-        {{ tasks[8][1]|charfill(2) }}. {{ tasks[8][0] }}.
-        {{ tasks[9][1]|charfill(2) }}. {{ tasks[9][0] }}.
-        {{ tasks[10][1]|charfill(2) }}. {{ tasks[10][0] }}.
+        {{ tasks[7][1]|rjustify(2) }}. {{ tasks[7][0] }}.
+        {{ tasks[8][1]|rjustify(2) }}. {{ tasks[8][0] }}.
+        {{ tasks[9][1]|rjustify(2) }}. {{ tasks[9][0] }}.
+        {{ tasks[10][1]|rjustify(2) }}. {{ tasks[10][0] }}.
 
 
 
         ******************                                      ***************
         * TABLES EDITING *                                      * MATHEMATICS *
         ******************                                      ***************
-        {{ "%s%s%s"|format("%s. %s."|format(tasks[14][1]|charfill(2), tasks[14][0]), "%s. %s."|format(tasks[14][1]|charfill(2), tasks[14][0])|inserttabulations(), "%s. %s."|format(tasks[11][1]|charfill(2), tasks[21][0]))|expandtabulations() }}
-        {{ "%s%s%s"|format("%s. %s."|format(tasks[15][1]|charfill(2), tasks[15][0]), "%s. %s."|format(tasks[15][1]|charfill(2), tasks[15][0])|inserttabulations(), "%s. %s."|format(tasks[12][1]|charfill(2), tasks[22][0]))|expandtabulations() }}
+        {{ "%s. %s."|format(tasks[0][1]|rjustify(2), tasks[0][0])|rpadtabulations()|expandtabulations() }}{{ "%s. %s."|format(tasks[11][1]|rjustify(2), tasks[11][0]) }}
+        {{ "%s. %s."|format(tasks[1][1]|rjustify(2), tasks[1][0])|rpadtabulations()|expandtabulations() }}{{ "%s. %s."|format(tasks[12][1]|rjustify(2), tasks[12][0]) }}
 
-        {{ tasks[16][1]|charfill(2) }}. {{ tasks[16][0] }}.
-        {{ tasks[17][1]|charfill(2) }}. {{ tasks[17][0] }}.
+        {{ tasks[16][1]|rjustify(2) }}. {{ tasks[16][0] }}.
+        {{ tasks[17][1]|rjustify(2) }}. {{ tasks[17][0] }}.
 
-        {{ tasks[18][1]|charfill(2) }}. {{ tasks[18][0] }}.
-        {{ tasks[19][1]|charfill(2) }}. {{ tasks[19][0] }}.
+        {{ tasks[18][1]|rjustify(2) }}. {{ tasks[18][0] }}.
+        {{ tasks[19][1]|rjustify(2) }}. {{ tasks[19][0] }}.
 
 
 
         ***************                                         *****************
         * AUDIO FILES *                                         * MISCELLANEOUS *
         ***************                                         *****************
-        {{ "%s%s%s"|format("%s. %s."|format(tasks[22][1]|charfill(2), tasks[22][0]), "%s. %s."|format(tasks[22][1]|charfill(2), tasks[22][0])|inserttabulations(), "%s. %s."|format(tasks[26][1]|charfill(2), tasks[26][0]))|expandtabulations() }}
-        {{ "%s%s%s"|format("%s. %s."|format(tasks[23][1]|charfill(2), tasks[23][0]), "%s. %s."|format(tasks[23][1]|charfill(2), tasks[23][0])|inserttabulations(), "%s. %s."|format(tasks[27][1]|charfill(2), tasks[27][0]))|expandtabulations() }}
+        {{ "%s. %s."|format(tasks[0][1]|rjustify(2), tasks[0][0])|rpadtabulations()|expandtabulations() }}{{ "%s. %s."|format(tasks[11][1]|rjustify(2), tasks[11][0]) }}
+        {{ "%s. %s."|format(tasks[1][1]|rjustify(2), tasks[1][0])|rpadtabulations()|expandtabulations() }}{{ "%s. %s."|format(tasks[12][1]|rjustify(2), tasks[12][0]) }}
         25. {{ tasks[24] }}.
         26. {{ tasks[25] }}.
 
@@ -46,4 +46,4 @@
         ********
         * EXIT *
         ********
-        {{ tasks[28][1]|charfill(2) }}. {{ tasks[28][0] }}.
+        {{ tasks[28][1]|rjustify(2) }}. {{ tasks[28][0] }}.
