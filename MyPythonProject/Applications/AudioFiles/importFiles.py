@@ -111,8 +111,8 @@ HEADER, TITLES, MODES, INPUTS, CURWDIR, TABSIZE = "import audio files", \
 # Initializations.
 # ================
 mode, status, somefilesimported, curwdir, set_folders, list_folders, list_files, srcs, dsts = s1.WRITE, 100, False, CURWDIR, set(), [], [], "", ""
-titles = dict(zip([str(i) for i in range(1, len(TITLES) + 1)], TITLES))
-inputs = dict(zip([str(i) for i in range(1, len(INPUTS) + 1)], INPUTS))
+titles = dict([(str(num), title) for num, title in enumerate(TITLES, 1)])
+inputs = dict([(str(num), input) for num, input in enumerate(INPUTS, 1)])
 # -----
 step = 1
 header = Header()
