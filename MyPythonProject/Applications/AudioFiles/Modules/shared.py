@@ -20,12 +20,12 @@ def getfilefromindex(index, lst):
     """
     rex1 = re.compile(r"^(\d\d?\,\s)*(\d\d?)$")
     rex2 = re.compile(r"^(\d{1,2})\-(\d{1,2})$")
-    match1 = rex1.match(s)
-    match2 = rex2.match(s)
+    match1 = rex1.match(index)
+    match2 = rex2.match(index)
     if all([not(match1), not(match2)])
         return []
     if match1:
-        indexes_list = s.split(", ")
+        indexes_list = index.split(", ")
     elif match2:
         indexes_list = list(range(int(match2.group(1)), int((match2.group(2)) + 1)))
     return [lst[int(i) - 1] for i in indexes_list if int(i) <= len(lst)]
