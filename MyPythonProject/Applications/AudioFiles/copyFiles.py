@@ -1,10 +1,4 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
 import os
 import re
 import sys
@@ -12,12 +6,10 @@ import locale
 import itertools
 from subprocess import run, PIPE
 from jinja2 import Environment, FileSystemLoader
+from .. import shared as s1
+from .Modules import shared as s2
 
-
-# =================
-# Relative imports.
-# =================
-from .. import shared
+__author__ = 'Xavier ROSSET'
 
 
 # ==========================
@@ -35,7 +27,7 @@ ACCEPTEDEXTENSIONS, TEMP, XXCOPYLOG, OUTFILE, HEADER, TITLES, EXIT, TABSIZE = ["
                                                                               "xxcopy", \
                                                                               "copy  audio  files", \
                                                                               ["Set artist.", "Set extension.", "Set folder.", "Set files."], \
-                                                                              {"N": shared.BACK, "Y": shared.EXIT}, \
+                                                                              {"N": s1.BACK, "Y": s1.EXIT}, \
                                                                               10
 
 
@@ -47,7 +39,7 @@ def pprint(t):
     print(t)
 
 
-def getextensions(art, path=shared.MUSIC):
+def getextensions(art, path=s1.MUSIC):
     d, regex = {}, re.compile(r"\b{0}\b".format(art), re.IGNORECASE)
     for a, b, c in os.walk(path):
         if c:
@@ -55,24 +47,17 @@ def getextensions(art, path=shared.MUSIC):
                 for fil in c:
                     ext = os.path.splitext(fil)[1][1:].lower()
                     if ext in ACCEPTEDEXTENSIONS:
-                        if ext in d:
-                            d[ext] += 1
-                        else:
-                            d[ext] = 1
+                        d[ext] = d.get(ext, 0) + 1
     return d
 
 
-def getfolders(art, ext, path=shared.MUSIC):
+def getfolders(art, ext, path=s1.MUSIC):
     rex1 = re.compile(r"\b{0}\b".format(art), re.IGNORECASE)
     rex2 = re.compile(r".{0}$".format(ext), re.IGNORECASE)
     for a, b, c in os.walk(path):
         if rex1.search(a):
-            search = False
-            for fil in c:
-                if rex2.search(fil):
-                    search = True
-            if search:
-                yield(os.path.normpath(a))
+            for folder in set([os.path.normpath(a) for fil in c if rex2.search(fil)]):
+                yield(folder)
 
 
 def getdrives():
@@ -80,28 +65,6 @@ def getdrives():
     if process.returncode == 0:
         for drive in process.stdout.splitlines():
             yield drive.strip()
-
-
-def getfileindex(index, lst):
-    l = []
-    rex1 = re.compile(r"^\d{1,2}$")
-    rex2 = re.compile(r"^(\d{1,2})\-(\d{1,2})$")
-    for i in index.split(", "):
-        match = False
-        if not match:
-            match = rex1.match(i)
-            if match:
-                i = int(i)
-                if i <= len(lst):
-                    l.append(i)
-        if not match:
-            match = rex2.match(i)
-            if match:
-                if int(match.group(2)) >= int(match.group(1)):
-                    for j in range(int(match.group(1)), int(match.group(2))+1):
-                        if j <= len(lst):
-                            l.append(j)
-    return sorted(l)
 
 
 # ========
@@ -121,24 +84,26 @@ regex2 = re.compile(r"^[A-Z]:$")
 # ======================
 # Jinja2 environment(s).
 # ======================
-environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_pythonproject%"), "Applications", "AudioFiles", "Templates"), encoding=shared.DFTENCODING), trim_blocks=True, lstrip_blocks=True)
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_pythonproject%"), "Applications", "AudioFiles", "Templates"), encoding=s1.DFTENCODING),
+                          trim_blocks=True,
+                          lstrip_blocks=True)
 
 
 # ==========================
 # Jinja2 global variable(s).
 # ==========================
-environment.globals["now"] = shared.now()
-environment.globals["copyright"] = shared.COPYRIGHT
+environment.globals["now"] = s1.now()
+environment.globals["copyright"] = s1.COPYRIGHT
 
 
 # ========================
 # Jinja2 custom filter(s).
 # ========================
-environment.filters["integertostring"] = shared.integertostring
-environment.filters["repeatelement"] = shared.repeatelement
-environment.filters["sortedlist"] = shared.sortedlist
-environment.filters["ljustify"] = shared.ljustify
-environment.filters["rjustify"] = shared.rjustify
+environment.filters["integertostring"] = s1.integertostring
+environment.filters["repeatelement"] = s1.repeatelement
+environment.filters["sortedlist"] = s1.sortedlist
+environment.filters["ljustify"] = s1.ljustify
+environment.filters["rjustify"] = s1.rjustify
 
 
 # ===================
@@ -151,7 +116,7 @@ template2 = environment.get_template("XXCOPY")
 # ================
 # Initializations.
 # ================
-titles, mode, status = dict(zip([str(i) for i in range(1, 5)], TITLES)), shared.WRITE, 100
+titles, mode, status = dict(zip([str(i) for i in range(1, 5)], TITLES)), s1.WRITE, 100
 # -----
 step = 1
 header = Header()
@@ -161,7 +126,7 @@ header.title = titles[str(step)]
 tmpl = template1.render(header=header)
 code = 1
 # -----
-artist, extension, folder, command, indx_indivfiles, list_indivfiles, list_files, list_drives, mode_files, somesfilestocopy = "", "", "", "", [], [], [], [], "G", False
+artist, extension, folder, command, list_indivfiles, list_files, list_drives, mode_files, somesfilestocopy = "", "", "", "", [], [], [], "G", False
 
 
 # ===============
@@ -236,7 +201,7 @@ while True:
                 break
         folder = list_folders[choice-1][1]
         list_parents = list_folders[choice-1][1].split("\\")
-        list_files = list(enumerate([file for file in shared.filesinfolder(list((extension,)), folder)], start=1))
+        list_files = list(enumerate([file for file in s1.filesinfolder(list((extension,)), folder)], start=1))
         code += 1
         step += 1
         header.step = step
@@ -251,7 +216,7 @@ while True:
         while True:
             pprint(t=tmpl)
             choice = input("{0}\tWould you like to select individual files [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
-            if choice.upper() in shared.ACCEPTEDANSWERS:
+            if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         step += 1
         header.step = step
@@ -281,13 +246,13 @@ while True:
             pprint(t=tmpl)
             choice = input("{0}\tPlease enter file index [e.g. 1, 2, 5-7, 10]: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice:
-                indfiles_index = getfileindex(index=choice, lst=list_files)
-                if indfiles_index:
+                list_indivfiles = s2.getfilefromindex(indexes=choice, files=[file for num, file in list_files])
+                if list_indivfiles:
                     break
                 tmpl = template1.render(header=header, menu=list_files, message=list(("No correct indexes selected.",)))
                 continue
         mode_files = "I"
-        list_indivfiles = list(enumerate([list_files[i-1][1] for i in indfiles_index], start=1))
+        list_indivfiles = list(enumerate([file for file in sorted(list_indivfiles)], start=1))
         code = 99
         step += 1
         header.step = step
@@ -305,6 +270,7 @@ while True:
     elif code == 6:
         while True:
             pprint(t=tmpl)
+            print(list_indivfiles)
             choice = input("{0}\tPlease choose destination drive: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             try:
                 choice = int(choice)
@@ -347,17 +313,17 @@ while True:
         while True:
             pprint(t=tmpl)
             choice = input("{0}\tWould you like to copy files using the command(s) above [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
-            if choice.upper() in shared.ACCEPTEDANSWERS:
+            if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         code += 1
         step += 1
         header.step = step
         if choice.upper() == "Y":
-            with open(os.path.join(TEMP, OUTFILE), mode=mode, encoding=shared.DFTENCODING) as fw:
+            with open(os.path.join(TEMP, OUTFILE), mode=mode, encoding=s1.DFTENCODING) as fw:
                 for num, cmd in command:
                     fw.write("{0}\n".format(cmd))
             somesfilestocopy = True
-            mode = shared.APPEND
+            mode = s1.APPEND
             header.title = "Run copy command(s)."
             tmpl = template1.render(header=header)
         elif choice.upper() == "N" and somesfilestocopy:
@@ -375,7 +341,7 @@ while True:
         while True:
             pprint(t=tmpl)
             choice = input("{0}\tWould you like to run copy command(s) [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
-            if choice.upper() in shared.ACCEPTEDANSWERS:
+            if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "Y":
             status = 0
@@ -394,7 +360,7 @@ while True:
         while True:
             pprint(t=tmpl)
             choice = input("{0}\tWould you like to exit program [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
-            if choice.upper() in shared.ACCEPTEDANSWERS:
+            if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "Y":
             status = 99
