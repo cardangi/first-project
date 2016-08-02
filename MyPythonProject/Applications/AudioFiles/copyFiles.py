@@ -84,7 +84,9 @@ regex2 = re.compile(r"^[A-Z]:$")
 # ======================
 # Jinja2 environment(s).
 # ======================
-environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_pythonproject%"), "Applications", "AudioFiles", "Templates"), encoding=s1.DFTENCODING), trim_blocks=True, lstrip_blocks=True)
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_pythonproject%"), "Applications", "AudioFiles", "Templates"), encoding=s1.DFTENCODING),
+                          trim_blocks=True,
+                          lstrip_blocks=True)
 
 
 # ==========================
