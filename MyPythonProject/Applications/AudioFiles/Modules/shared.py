@@ -13,19 +13,21 @@ def grabdiscnumber(fil, rex):
     return Disc(False, None)
 
 
-def getfilefromindex(index, lst):
+def getfilefromindex(indexes, files):
     """
-    index: string with required indexes. "1, 2, 3" or "1-10" are only allowed.
-    lst: files list.
+    :param indexes: string with required indexes. "1, 2, 3" or "1-10" are only allowed.
+    :param files: files list.
+    :return: list of corresponding files.
     """
-    rex1 = re.compile(r"^(\d\d?\,\s)*(\d\d?)$")
+    indexes_list = []
+    rex1 = re.compile(r"^(\d\d?,\s)*(\d\d?)$")
     rex2 = re.compile(r"^(\d{1,2})\-(\d{1,2})$")
-    match1 = rex1.match(index)
-    match2 = rex2.match(index)
-    if all([not(match1), not(match2)])
+    match1 = rex1.match(indexes)
+    match2 = rex2.match(indexes)
+    if all([not match1, not match2]):
         return []
     if match1:
-        indexes_list = index.split(", ")
+        indexes_list = indexes.split(", ")
     elif match2:
-        indexes_list = list(range(int(match2.group(1)), int((match2.group(2)) + 1)))
-    return [lst[int(i) - 1] for i in indexes_list if int(i) <= len(lst)]
+        indexes_list = list(range(int(match2.group(1)), int(match2.group(2)) + 1))
+    return [files[int(i) - 1] for i in indexes_list if int(i) <= len(files)]
