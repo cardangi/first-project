@@ -38,6 +38,15 @@ REM ----------
 IF ERRORLEVEL 99 GOTO EXIT
 
 
+REM -----------------------------
+REM RoppingLog table maintenance.
+REM -----------------------------
+IF ERRORLEVEL 30 (
+    python G:\Computing\MyPythonProject\Database`RippingLog`dbRippingLog`L.py
+    GOTO MENU
+)
+
+
 REM -----------------------------------------------------------------
 REM Test function "Applications\CDRipper\test_canfilebeprocessed.py".
 REM -----------------------------------------------------------------

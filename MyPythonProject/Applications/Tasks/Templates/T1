@@ -20,9 +20,9 @@
 
 
 
-        ******************                                      **********************                                    ***************
-        * TABLES EDITING *                                      * TABLES MAINTENANCE *                                    * MATHEMATICS *
-        ******************                                      **********************                                    ***************
+        ******************                                      **********************                                  ***************
+        * TABLES EDITING *                                      * TABLES MAINTENANCE *                                  * MATHEMATICS *
+        ******************                                      **********************                                  ***************
         {{ "%s. %s."|format(tasks[14].number|rjustify(2), tasks[14].title)|rtabulate() }}{{ "%s. %s."|format(tasks[30].number|rjustify(2), tasks[30].title)|rtabulate() }}
         {{- "%s. %s."|format(tasks[20].number|rjustify(2), tasks[20].title) }}
         {{ "%s. %s."|format(tasks[15].number|rjustify(2), tasks[15].title)|rtabulate(l=112) }}{{ "%s. %s."|format(tasks[21].number|rjustify(2), tasks[21].title) }}
