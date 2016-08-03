@@ -38,6 +38,40 @@ REM ----------
 IF ERRORLEVEL 99 GOTO EXIT
 
 
+REM -----------------------------------------------------------------------
+REM Test function "Applications\AudioFiles\Testing\test_grabdiscnumber.py".
+REM -----------------------------------------------------------------------
+IF ERRORLEVEL 33 (
+    CLS
+    python -m Applications.AudioFiles.Testing.test_grabdiscnumber
+    PAUSE
+    GOTO MENU
+)
+
+
+REM -------------------------------------------------------------------------
+REM Test function "Applications\AudioFiles\Testing\test_getfilefromindex.py".
+REM ------------------------------------------------------------------------
+IF ERRORLEVEL 32 (
+    CLS
+    python -m Applications.AudioFiles.Testing.test_getfilefromindex
+    PAUSE
+    GOTO MENU
+)
+
+
+REM ----------------------------------------------------------------------
+REM Test function "Applications\AudioFiles\Testing\test_formatindexes.py".
+REM ----------------------------------------------------------------------
+IF ERRORLEVEL 31 (
+    CLS
+    ECHO toto
+    python -m Applications.AudioFiles.Testing.test_formatindexes
+    PAUSE
+    GOTO MENU
+)
+
+
 REM -----------------------------
 REM RoppingLog table maintenance.
 REM -----------------------------
