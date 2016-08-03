@@ -170,7 +170,7 @@ while True:
         header.title = titles[str(step)]
         set_folders = {os.path.dirname(file) for file in directorytree(directory=curwdir, rex=rex2)}
         if set_folders:
-            list_folders = sorted(list(zip(range(1, len(set_folders) + 1), sorted(set_folders))), key=lambda i: i[0])
+            list_folders = sorted(list(enumerate(sorted(set_folders), 1)), key=lambda i: i[0])
             tmpl = template1.render(header=header, menu=list_folders)
             inp, code = 2, 2
         elif not set_folders:
