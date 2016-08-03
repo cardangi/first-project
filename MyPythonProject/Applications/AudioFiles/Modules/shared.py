@@ -15,7 +15,7 @@ def grabdiscnumber(fil, rex):
 
 def getfilefromindex(indexes, files):
     """
-    :param indexes: string with required indexes. "1, 2, 3" is only allowed.
+    :param indexes: string only composed of digits separated by both a comma and a space ("1, 2, 3").
     :param files: files list.
     :return: list of corresponding files.
     """

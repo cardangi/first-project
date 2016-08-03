@@ -81,7 +81,7 @@ def formatindexes(f):
                     out.append(int(index))
                 elif match2:
                     out += list(range(int(match2.group(1)), int(match2.group(2)) + 1))
-        f(", ".join([str(i) for i in sorted(list(set(out)))]), files)
+        return f(", ".join([str(i) for i in sorted(list(set(out)))]), files)
 
     return dummy
 
@@ -132,6 +132,12 @@ template1 = environment.get_template("T1")
 template2 = environment.get_template("XXCOPY")
 
 
+# ===========
+# Decorators.
+# ===========
+getfilefromindex = formatindexes(s2.getfilefromindex)
+
+
 # ================
 # Initializations.
 # ================
@@ -146,9 +152,6 @@ tmpl = template1.render(header=header)
 code = 1
 # -----
 artist, extension, folder, command, list_indivfiles, list_files, list_drives, mode_files, somesfilestocopy = "", "", "", "", [], [], [], "G", False
-
-
-getfilefromindex = formatindexes(s2.getfilefromindex)
 
 
 # ===============
@@ -292,7 +295,6 @@ while True:
     elif code == 6:
         while True:
             pprint(t=tmpl)
-            print(list_indivfiles)
             choice = input("{0}\tPlease choose destination drive: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             try:
                 choice = int(choice)
