@@ -65,7 +65,6 @@ REM Test function "Applications\AudioFiles\Testing\test_formatindexes.py".
 REM ----------------------------------------------------------------------
 IF ERRORLEVEL 31 (
     CLS
-    ECHO toto
     python -m Applications.AudioFiles.Testing.test_formatindexes
     PAUSE
     GOTO MENU
