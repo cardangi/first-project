@@ -28,5 +28,6 @@
     ["Get Unix epoch", 28, 23],
     ["Convert Unix epoch", 29, 24],
     ["Exit", 99, 99],
-    ["Test 1", 15, 29]
+    ["Test 1", 15, 29],
+    ["Update RippingLog", 30, 30] 
 ]
