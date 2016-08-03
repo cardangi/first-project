@@ -1,6 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
-from unittest import TestCase
-from Applications.AudioFiles.Modules import shared
+from unittest import TestCase, main
+from ..Modules import shared
 
 __author__ = 'Xavier ROSSET'
 
@@ -36,3 +36,7 @@ class TestFormatindexes(TestCase):
 
     def test_tenth(self):
         self.assertEqual("1, 2, 3, 5, 6, 9, 10, 11, 12, 15, 16", shared.formatindexes("1-3, 5-6, 9-12, 15, 16"))
+
+
+if __name__ == '__main__':
+    main()
