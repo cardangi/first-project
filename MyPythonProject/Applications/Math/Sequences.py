@@ -1,20 +1,11 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
 import subprocess
 import argparse
 import sys
 import os
-
-
-# =================
-# Relative imports.
-# =================
 from .Modules import shared
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========
@@ -36,7 +27,7 @@ parser.add_argument("type", help="type of the sequence: arithmetic or geometric.
 # ==========
 # Constants.
 # ==========
-TITLEA, TITLEG = "DISPLAY ARITHMETIC SEQUENCE", "DISPLAY GEOMETRIC SEQUENCE"
+TITLEA, TITLEG, TITLES = "DISPLAY ARITHMETIC SEQUENCE", "DISPLAY GEOMETRIC SEQUENCE", ["{:>10}".format("indice"), "{:>18}".format("element"), "{:>10}".format("-"*len("indice")), "{:>18}".format("-"*len("element"))]
 
 
 # ================
@@ -87,7 +78,7 @@ if arguments.type == "A":
     while not difference:
         displayheader(head=header)
         print("   First term: {0}".format(firstterm))
-        print("   Terms: {0}\n".format(terms))
+        print("   Terms\t: {0}\n".format(terms).expandtabs(13))
         difference = input("   Please enter the common difference of the sequence: ")
         try:
             difference = int(difference)
@@ -102,7 +93,7 @@ elif arguments.type == "G":
     while not ratio:
         displayheader(head=header)
         print("   First term: {0}".format(firstterm))
-        print("   Terms: {0}\n".format(terms))
+        print("   Terms\t: {0}\n".format(terms).expandtabs(13))
         ratio = input("   Please enter the common ratio of the sequence: ")
         try:
             ratio = int(ratio)
@@ -117,11 +108,11 @@ choice = None
 while not choice:
     displayheader(head=header)
     print("   First term: {0}".format(firstterm))
-    print("   Terms: {0}".format(terms))
+    print("   Terms\t: {0}".format(terms).expandtabs(13))
     if arguments.type == "A":
-        print("   Difference: {0}\n".format(difference))
+        print("   Difference\t: {0}\n".format(difference).expandtabs(13))
     if arguments.type == "G":
-        print("   Ratio: {0}\n".format(ratio))
+        print("   Ratio\t: {0}\n".format(ratio).expandtabs(13))
     choice = input("   Display elements [E], series [S] or both [B]: ")
     if choice.upper() not in ["B", "E", "S"]:
         choice = None
@@ -132,31 +123,33 @@ while not choice:
 #     ----------------
 displayheader(head=header)
 print("   First term: {0}".format(firstterm))
-print("   Terms: {0}".format(terms))
+print("   Terms\t: {0}".format(terms).expandtabs(13))
 if arguments.type == "A":
-    print("   Difference: {0}".format(difference))
+    print("   Difference\t: {0}".format(difference).expandtabs(13))
 if arguments.type == "G":
-    print("   Ratio: {0}".format(ratio))
+    print("   Ratio\t: {0}".format(ratio).expandtabs(13))
 if choice.upper() in ["B", "E"]:
-    print("\n\n   The terms of the sequence are:\n\n\n{2}{3}\n{0}{1}\n{2}{3}".format("indice".upper().rjust(10), "element".upper().rjust(18), ("-"*len("indice")).rjust(10), ("-"*len("element")).rjust(18)))
+    print("\n\n   The terms of the sequence are:\n\n\n{d[2]}{d[3]}\n{d[0]}{d[1]}\n{d[2]}{d[3]}".format(d=TITLES))
 
 #  6a. Arithmetic sequence.
 if arguments.type == "A":
+    arithmetic = shared.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
     if choice.upper() in ["B", "E"]:
-        for i in shared.arithmeticsequence(firstterm=firstterm, difference=difference, terms=terms):
+        for i in arithmetic.sequence():
             print("{0}. {1}".format(str(j).rjust(9), ("%.2f" % i).rjust(17)))
             j += 1
     if choice.upper() in ["B", "S"]:
-        series = shared.arithmeticseries(firstterm=firstterm, difference=difference, terms=terms)
+        series = arithmetic.series()
 
 #  6b. Geometric sequence.
 elif arguments.type == "G":
+    geometric = shared.GeometricSequence(firstterm=firstterm, difference=difference, terms=terms)
     if choice.upper() in ["B", "E"]:
-        for i in shared.geometricsequence(firstterm=firstterm, ratio=ratio, terms=terms):
+        for i in geometric.sequence():
             print("{0}. {1}".format(str(j).rjust(9), ("%.2f" % i).rjust(17)))
             j += 1
     if choice.upper() in ["B", "S"]:
-        series = shared.geometricseries(firstterm=firstterm, ratio=ratio, terms=terms)
+        series = geometric.series()
 
 #  6c. Series if required.
 if choice.upper() in ["B", "S"]:
