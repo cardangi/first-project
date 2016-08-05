@@ -20,7 +20,10 @@ class ArithmeticSequence(object):
 
     @property
     def series(self):
-        return ((self._firstterm + self.sequence[len(self.sequence) - 1])/2)*self._terms
+        lastterm = 0
+        for term in self.sequence:
+            lastterm = term
+        return ((self._firstterm + lastterm)/2)*self._terms
 
 
 class GeometricSequence(object):
