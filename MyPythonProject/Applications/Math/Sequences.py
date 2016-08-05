@@ -2,8 +2,7 @@
 import subprocess
 import argparse
 import sys
-import os
-from .Modules import shared
+from Applications.Math.Modules import shared
 
 __author__ = 'Xavier ROSSET'
 
@@ -143,7 +142,7 @@ if arguments.type == "A":
 
 #  6b. Geometric sequence.
 elif arguments.type == "G":
-    geometric = shared.GeometricSequence(firstterm=firstterm, difference=difference, terms=terms)
+    geometric = shared.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
     if choice.upper() in ["B", "E"]:
         for i in geometric.sequence:
             print("{0}. {1}".format(str(j).rjust(9), ("%.2f" % i).rjust(17)))

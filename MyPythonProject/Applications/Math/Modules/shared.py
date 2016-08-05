@@ -41,9 +41,33 @@ class ArithmeticSequence(object):
     def series(self):
         return ((self._firstterm + self.lastterm)/2)*self.terms
 
-    @property
-    def terms(self):
-        return self._terms
+    # @property
+    # def firstterm(self):
+    #     return self._firstterm
+    #
+    # @firstterm.setter
+    # def firstterm(self, value):
+    #     self._firstterm = value
+    #
+    # @property
+    # def terms(self):
+    #     return self._terms
+    #
+    # @terms.setter
+    # def terms(self, value):
+    #     if value > 9999:
+    #         raise ValueError("Terms above 49999 are not allowed due to system limitations.")
+    #     self._terms = value
+    #
+    # @property
+    # def difference(self):
+    #     return self._difference
+    #
+    # @difference.setter
+    # def difference(self, value):
+    #     if not value:
+    #         raise ValueError("Difference must be greater than 0.")
+    #     self._difference = value
 
     @terms.setter
     def terms(self, value):
