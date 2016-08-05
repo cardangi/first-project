@@ -1,4 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
+from decimal import Decimal, getcontext, ROUND_HALF_UP
 import cmath
 
 __author__ = 'Xavier ROSSET'
@@ -6,31 +7,37 @@ __author__ = 'Xavier ROSSET'
 
 class Circle(object):
 
+    getcontext().prec = 6
+    getcontext().rounding = ROUND_HALF_UP
+    pi = Decimal(cmath.pi)
+
     def __init__(self, radius):
-        self._diameter = 0
+        self.diameter = 0
         self.radius = radius
 
     @property
     def radius(self):
-        return self._diameter/2
+        return self.diameter/2
 
     @radius.setter
     def radius(self, value):
-        self._diameter = value*2
+        self.diameter = Decimal(value)*2
 
     @property
     def perimeter(self):
-        return self._diameter*cmath.pi
+        return self.radius*2*self.pi
 
     @property
     def surface(self):
-        return cmath.pi*(self._diameter/2)**2
+        return self.pi*self.radius**2
 
 
 class ArithmeticSequence(object):
     """
     Compute arithmetic sequences.
     """
+    getcontext().prec = 12
+    getcontext().rounding = ROUND_HALF_UP
 
     def __init__(self, firstterm=1, difference=1, terms=10):
         """
@@ -41,13 +48,13 @@ class ArithmeticSequence(object):
         """
         self._terms = 0
         self._difference = 0
-        self._firstterm = firstterm
+        self._firstterm = Decimal(firstterm)
         self.difference = difference
         self.terms = terms
 
     @property
     def sequence(self):
-        for element in range(self._firstterm, self._firstterm + (self.difference*self.terms), self.difference):
+        for element in range(int(self._firstterm), int(self._firstterm + (self.difference*self.terms)), int(self.difference)):
             yield element
 
     @property
@@ -62,7 +69,7 @@ class ArithmeticSequence(object):
     def terms(self, value):
         if value > 49999:
             raise ValueError("Terms above 49999 are not allowed due to system limitations.")
-        self._terms = value
+        self._terms = Decimal(value)
 
     @property
     def difference(self):
@@ -72,7 +79,7 @@ class ArithmeticSequence(object):
     def difference(self, value):
         if value == 0:
             raise ValueError("Difference must be greater than 0.")
-        self._difference = value
+        self._difference = Decimal(value)
 
     @property
     def lastterm(self):
@@ -83,6 +90,8 @@ class GeometricSequence(object):
     """
     Compute geometric sequences.
     """
+    getcontext().prec = 16
+    getcontext().rounding = ROUND_HALF_UP
 
     def __init__(self, firstterm=1, ratio=2, terms=10):
         """
@@ -93,13 +102,13 @@ class GeometricSequence(object):
         """
         self._terms = 0
         self._ratio = 0
-        self._firstterm = firstterm
+        self._firstterm = Decimal(firstterm)
         self.terms = terms
         self.ratio = ratio
 
     @property
     def sequence(self):
-        for element in [self._firstterm*pow(self.ratio, element) for element in range(self.terms)]:
+        for element in [self._firstterm*pow(self.ratio, element) for element in range(int(self.terms))]:
             yield element
 
     @property
@@ -114,7 +123,7 @@ class GeometricSequence(object):
     def terms(self, value):
         if value > 1499:
             raise ValueError("Terms above 1499 are not allowed due to system limitations.")
-        self._terms = value
+        self._terms = Decimal(value)
 
     @property
     def ratio(self):
@@ -126,21 +135,4 @@ class GeometricSequence(object):
             raise ValueError("Ratio must be greater than 0.")
         if value > 100:
             raise ValueError("Ratio above 100 is not allowed due to system limitations.")
-        self._ratio = value
-
-
-if __name__ == "__main__":
-
-    c = Circle(10)
-    print(c.perimeter)
-    print(c.surface)
-
-    s = ArithmeticSequence()
-    for term in s.sequence:
-        print(term)
-    print(s.series)
-
-    s = GeometricSequence()
-    for term in s.sequence:
-        print(term)
-    print(s.series)
+        self._ratio = Decimal(value)
