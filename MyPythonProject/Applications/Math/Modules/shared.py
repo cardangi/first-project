@@ -1,6 +1,30 @@
 # -*- coding: ISO-8859-1 -*-
+import cmath
 
 __author__ = 'Xavier ROSSET'
+
+
+class Circle(object):
+
+    def __init__(self, radius):
+        self._diameter = 0
+        self.radius = radius
+
+    @property
+    def radius(self):
+        return self._diameter/2
+
+    @radius.setter
+    def radius(self, value):
+        self._diameter = value*2
+
+    @property
+    def perimeter(self):
+        return self._diameter*cmath.pi
+
+    @property
+    def surface(self):
+        return cmath.pi*(self._diameter/2)**2
 
 
 class ArithmeticSequence(object):
@@ -57,7 +81,7 @@ class GeometricSequence(object):
 
     @property
     def sequence(self):
-        return (term for term in self._firstterm*pow(self.ratio, i) for i in range(self.terms))
+        return (term for term in self._firstterm*pow(self.ratio, term) for i in range(self.terms))
 
     @property
     def series(self):
@@ -84,3 +108,9 @@ class GeometricSequence(object):
         if value > 100:
             raise ValueError("Ratio above 100 is not allowed due to system limitations.")
         self._ratio = value
+
+
+if __name__ == "__main__":
+    # c = Circle(10)
+    # print(c.diameter)
+    # print(c.radius)
