@@ -47,8 +47,8 @@ class ArithmeticSequence(object):
 
     @property
     def sequence(self):
-        for term in range(self._firstterm, self._firstterm + (self.difference*self.terms), self.difference):
-            yield term
+        for element in range(self._firstterm, self._firstterm + (self.difference*self.terms), self.difference):
+            yield element
 
     @property
     def series(self):
@@ -76,7 +76,7 @@ class ArithmeticSequence(object):
 
     @property
     def lastterm(self):
-        return list(reversed([term for term in self.sequence]))[0]
+        return list(reversed([element for element in self.sequence]))[0]
 
 
 class GeometricSequence(object):
@@ -99,7 +99,7 @@ class GeometricSequence(object):
 
     @property
     def sequence(self):
-        for element in [self._firstterm*pow(self.ratio, term) for term in range(self.terms)]:
+        for element in [self._firstterm*pow(self.ratio, element) for element in range(self.terms)]:
             yield element
 
     @property
