@@ -3,45 +3,26 @@
 __author__ = 'Xavier ROSSET'
 
 
-class ArithmeticSequence(object):
+class Circle(object):
 
-    def __init__(self, firstterm=1, difference=1, terms=10):
-        self.difference = difference
-        self.terms = terms
-        self._firstterm = firstterm
+    def __init__(self, radius):
+        self.radius = radius
 
     @property
-    def sequence(self):
-        for term in range(self._firstterm, self._firstterm + (self.difference*self.terms), self.difference):
-            yield term
+    def radius(self):
+        return self._diameter/2
 
-    @property
-    def series(self):
-        return ((self._firstterm + self.lastterm)/2)*self.terms
+    @radius.setter
+    def radius(self, value):
+        self._diameter = value*2
 
-    @property
-    def terms(self):
-        return self._terms
+    @perimeter
+    def perimeter(self):
+        return 2*math.pi*self.radius
 
-    @terms.setter
-    def terms(self, value):
-        if value > 49999:
-            raise ValueError("Terms above 49999 are not allowed due to system limitations.")
-        self._terms = value
-
-    @property
-    def difference(self):
-        return self._difference
-
-    @difference.setter
-    def difference(self, value):
-        if value == 0:
-            raise ValueError("Difference must be greater than 0.")
-        self._difference = value
-
-    @property
-    def lastterm(self):
-        return list(reversed([term for term in self.sequence]))[0]
+    @surface
+    def surface(self):
+        return math.pi*self.radius**2
 
 
 class GeometricSequence(object):
