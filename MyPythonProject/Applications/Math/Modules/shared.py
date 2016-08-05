@@ -83,13 +83,6 @@ class GeometricSequence(object):
     def sequence(self):
         for term in [self._firstterm*pow(self.ratio, term) for term in range(self.terms)]:
             yield term
-        # return (term for term in self._firstterm*pow(self.ratio, term) for i in range(self.terms))
-    # from math import pow
-    # l = list((firstterm,))
-    # for i in range(1, terms):
-    #     l.append(firstterm*pow(ratio, i))
-    # for term in l:
-    #     yield term
 
     @property
     def series(self):
