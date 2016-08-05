@@ -1,4 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
+from collections import deque
 
 __author__ = 'Xavier ROSSET'
 
@@ -16,14 +17,12 @@ class ArithmeticSequence(object):
 
     @property
     def sequence(self):
-        return (i for i in range(self._firstterm, self._firstterm + (self._difference*self._terms), self._difference))
+        for term in range(self._firstterm, self._firstterm + (self._difference*self._terms), self._difference):
+            yield term
 
     @property
     def series(self):
-        lastterm = 0
-        for term in self.sequence:
-            lastterm = term
-        return ((self._firstterm + lastterm)/2)*self._terms
+        return ((self._firstterm + list(reversed(deque([term for term in self.sequence])))[0])/2)*self._terms
 
 
 class GeometricSequence(object):
