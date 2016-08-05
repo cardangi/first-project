@@ -25,6 +25,47 @@ class Circle(object):
         return math.pi*self.radius**2
 
 
+class ArithmeticSequence(object):
+
+    def __init__(self, firstterm=1, difference=1, terms=10):
+        self.difference = difference
+        self.terms = terms
+        self._firstterm = firstterm
+
+    @property
+    def sequence(self):
+        for term in range(self._firstterm, self._firstterm + (self.difference*self.terms), self.difference):
+            yield term
+
+    @property
+    def series(self):
+        return ((self._firstterm + self.lastterm)/2)*self.terms
+
+    @property
+    def terms(self):
+        return self._terms
+
+    @terms.setter
+    def terms(self, value):
+        if value > 49999:
+            raise ValueError("Terms above 49999 are not allowed due to system limitations.")
+        self._terms = value
+
+    @property
+    def difference(self):
+        return self._difference
+
+    @difference.setter
+    def difference(self, value):
+        if value == 0:
+            raise ValueError("Difference must be greater than 0.")
+        self._difference = value
+
+    @property
+    def lastterm(self):
+        return list(reversed([term for term in self.sequence]))[0]
+
+
 class GeometricSequence(object):
 
     def __init__(self, firstterm=1, ratio=2, terms=10):
