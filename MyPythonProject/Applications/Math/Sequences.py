@@ -2,7 +2,7 @@
 import subprocess
 import argparse
 import sys
-from Applications.Math.Modules import shared
+from .Modules import shared
 
 __author__ = 'Xavier ROSSET'
 

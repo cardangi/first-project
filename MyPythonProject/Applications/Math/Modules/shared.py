@@ -28,8 +28,17 @@ class Circle(object):
 
 
 class ArithmeticSequence(object):
+    """
+    Compute arithmetic sequences.
+    """
 
     def __init__(self, firstterm=1, difference=1, terms=10):
+        """
+        :param firstterm: first term of the sequence.
+        :param difference: common difference between two consecutive terms of the sequence.
+        :param terms: number of calculated terms.
+        :return:
+        """
         self._terms = 0
         self._difference = 0
         self._firstterm = firstterm
@@ -71,8 +80,17 @@ class ArithmeticSequence(object):
 
 
 class GeometricSequence(object):
+    """
+    Compute geometric sequences.
+    """
 
     def __init__(self, firstterm=1, ratio=2, terms=10):
+        """
+        :param firstterm: first term of the sequence.
+        :param ratio: common ratio between two consecutive terms of the sequence.
+        :param terms: number of calculated terms.
+        :return:
+        """
         self._terms = 0
         self._ratio = 0
         self._firstterm = firstterm
@@ -81,8 +99,8 @@ class GeometricSequence(object):
 
     @property
     def sequence(self):
-        for term in [self._firstterm*pow(self.ratio, term) for term in range(self.terms)]:
-            yield term
+        for element in [self._firstterm*pow(self.ratio, term) for term in range(self.terms)]:
+            yield element
 
     @property
     def series(self):
