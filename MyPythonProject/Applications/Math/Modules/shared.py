@@ -81,7 +81,15 @@ class GeometricSequence(object):
 
     @property
     def sequence(self):
-        return (term for term in self._firstterm*pow(self.ratio, term) for i in range(self.terms))
+        for term in [self._firstterm*pow(self.ratio, term) for term in range(self.terms)]:
+            yield term
+        # return (term for term in self._firstterm*pow(self.ratio, term) for i in range(self.terms))
+    # from math import pow
+    # l = list((firstterm,))
+    # for i in range(1, terms):
+    #     l.append(firstterm*pow(ratio, i))
+    # for term in l:
+    #     yield term
 
     @property
     def series(self):
@@ -111,6 +119,17 @@ class GeometricSequence(object):
 
 
 if __name__ == "__main__":
-    # c = Circle(10)
-    # print(c.diameter)
-    # print(c.radius)
+
+    c = Circle(10)
+    print(c.perimeter)
+    print(c.surface)
+
+    s = ArithmeticSequence()
+    for term in s.sequence:
+        print(term)
+    print(s.series)
+
+    s = GeometricSequence()
+    for term in s.sequence:
+        print(term)
+    print(s.series)
