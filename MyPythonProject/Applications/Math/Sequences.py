@@ -135,21 +135,21 @@ if choice.upper() in ["B", "E"]:
 if arguments.type == "A":
     arithmetic = shared.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
     if choice.upper() in ["B", "E"]:
-        for i in arithmetic.sequence():
+        for i in arithmetic.sequence:
             print("{0}. {1}".format(str(j).rjust(9), ("%.2f" % i).rjust(17)))
             j += 1
     if choice.upper() in ["B", "S"]:
-        series = arithmetic.series()
+        series = arithmetic.series
 
 #  6b. Geometric sequence.
 elif arguments.type == "G":
     geometric = shared.GeometricSequence(firstterm=firstterm, difference=difference, terms=terms)
     if choice.upper() in ["B", "E"]:
-        for i in geometric.sequence():
+        for i in geometric.sequence:
             print("{0}. {1}".format(str(j).rjust(9), ("%.2f" % i).rjust(17)))
             j += 1
     if choice.upper() in ["B", "S"]:
-        series = geometric.series()
+        series = geometric.series
 
 #  6c. Series if required.
 if choice.upper() in ["B", "S"]:
