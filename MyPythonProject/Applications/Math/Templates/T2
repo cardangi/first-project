@@ -1,0 +1,8 @@
+{% extends "T1" %}
+
+{% block title %}
+
+   ***********************
+   * ARITHMETIC SEQUENCE *
+   ***********************
+{% endblock %}

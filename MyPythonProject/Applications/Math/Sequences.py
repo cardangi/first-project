@@ -1,9 +1,12 @@
 # -*- coding: ISO-8859-1 -*-
-from decimal import Decimal
+from jinja2 import Environment, FileSystemLoader
+from decimal import Decimal, InvalidOperation
 import subprocess
 import argparse
 import sys
-from .Modules import shared
+import os
+from .Modules import shared as s1
+from .. import shared as s2
 
 __author__ = 'Xavier ROSSET'
 
@@ -11,10 +14,8 @@ __author__ = 'Xavier ROSSET'
 # ==========
 # Functions.
 # ==========
-def displayheader(head=None):
+def cls():
     subprocess.run("CLS", shell=True)
-    if head:
-        print("\n{0}".format(head))
 
 
 # =================
@@ -24,20 +25,38 @@ parser = argparse.ArgumentParser()
 parser.add_argument("type", help="type of the sequence: arithmetic or geometric.", choices=["A", "G"])
 
 
+# ===================
+# Jinja2 environment.
+# ===================
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_pythonproject%"), "Applications", "Math", "Templates"), encoding=s2.DFTENCODING),
+                          trim_blocks=True,
+                          lstrip_blocks=True)
+
+
+# ======================
+# Jinja2 custom filters.
+# ======================
+environment.filters["integertostring"] = s2.integertostring
+environment.filters["rjustify"] = s2.rjustify
+
+
+# =================
+# Jinja2 templates.
+# =================
+t2 = environment.get_template("T2")
+t3 = environment.get_template("T3")
+
+
 # ==========
 # Constants.
 # ==========
-TITLEA, TITLEG, TITLES = "DISPLAY ARITHMETIC SEQUENCE", "DISPLAY GEOMETRIC SEQUENCE", ["{:>10}".format("indice"), "{:>18}".format("element"), "{:>10}".format("-"*len("indice")), "{:>18}".format("-"*len("element"))]
+TABSIZE, RAJUST, TEMPLATE = 10, 25, {"A": t2, "G": t3}
 
 
 # ================
 # Initializations.
 # ================
-j, firstterm, series, terms, difference, ratio, header, precision, arguments = 0, 0, 0, None, None, None, None, None, parser.parse_args()
-if arguments.type == "A":
-    header = "{0}\n{1}\n{0}\n\n".format(("*"*(len(TITLEA) + 4)).rjust(len(TITLEA) + 7), "* {0} *".format(TITLEA).rjust(len(TITLEA) + 7))
-if arguments.type == "G":
-    header = "{0}\n{1}\n{0}\n\n".format(("*"*(len(TITLEG) + 4)).rjust(len(TITLEG) + 7), "* {0} *".format(TITLEG).rjust(len(TITLEG) + 7))
+args, d, firstterm, terms, difference, ratio, precision, sequence, series, choice, arguments = [], {}, None, None, None, None, None, None, None, None, parser.parse_args()
 
 
 # ===============
@@ -49,24 +68,27 @@ if arguments.type == "G":
 #  1. First term of the sequence.
 #     ---------------------------
 while not firstterm:
-    displayheader(head=header)
+    cls()
+    print(TEMPLATE[arguments.type].render())
     firstterm = input("   Please enter the first terms of the sequence: ")
     try:
         firstterm = Decimal(firstterm)
-    except ValueError:
+    except (ValueError, InvalidOperation):
         firstterm = None
 
 
 #     --------------------------------
 #  2. Number of terms of the sequence.
 #     --------------------------------
+args.append(("First term", "{:>5}".format(firstterm)))
+d["arguments"] = args
 while not terms:
-    displayheader(head=header)
-    print("   First term: {0}\n".format(firstterm))
+    cls()
+    print(TEMPLATE[arguments.type].render(**d))
     terms = input("   Please enter the number of terms of the sequence: ")
     try:
         terms = Decimal(terms)
-    except ValueError:
+    except (ValueError, InvalidOperation):
         terms = None
 
 
@@ -74,14 +96,15 @@ while not terms:
 #  3. Common difference between two terms if arithmetic sequence expected.
 #     --------------------------------------------------------------------
 if arguments.type == "A":
+    args.append(("Terms\t".expandtabs(TABSIZE), "{:>5}".format(terms)))
+    d["arguments"] = args
     while not difference:
-        displayheader(head=header)
-        print("   First term: {0}".format(firstterm))
-        print("   Terms\t: {0}\n".format(terms).expandtabs(13))
+        cls()
+        print(TEMPLATE[arguments.type].render(**d))
         difference = input("   Please enter the common difference of the sequence: ")
         try:
             difference = Decimal(difference)
-        except ValueError:
+        except (ValueError, InvalidOperation):
             difference = None
 
 
@@ -89,95 +112,81 @@ if arguments.type == "A":
 #  4. Common ratio between two terms if geometric sequence expected.
 #     --------------------------------------------------------------
 elif arguments.type == "G":
+    args.append(("Terms\t".expandtabs(TABSIZE), "{:>5}".format(terms)))
+    d["arguments"] = args
     while not ratio:
-        displayheader(head=header)
-        print("   First term: {0}".format(firstterm))
-        print("   Terms\t: {0}\n".format(terms).expandtabs(13))
+        cls()
+        print(TEMPLATE[arguments.type].render(**d))
         ratio = input("   Please enter the common ratio of the sequence: ")
         try:
             ratio = Decimal(ratio)
-        except ValueError:
+        except (ValueError, InvalidOperation):
             ratio = None
 
 
 #     ----------
 #  5. Precision.
 #     ----------
+if arguments.type == "A":
+    args.append(("Difference", "{:>5}".format(difference)))
+elif arguments.type == "G":
+    args.append(("Ratio\t".expandtabs(TABSIZE), "{:>5}".format(ratio)))
+d["arguments"] = args
 while not precision:
-    displayheader(head=header)
-    print("   First term: {0}".format(firstterm))
-    print("   Terms\t: {0}".format(terms).expandtabs(13))
-    if arguments.type == "A":
-        print("   Difference: {0}\n".format(difference).expandtabs(13))
-    elif arguments.type == "G":
-        print("   Ratio\t: {0}\n".format(ratio).expandtabs(13))
+    cls()
+    print(TEMPLATE[arguments.type].render(**d))
     precision = input("   Please enter precision: ")
     try:
         precision = int(precision)
-    except ValueError:
+    except (ValueError, InvalidOperation):
         precision = None
 
 
 #     ---------------------------------
 #  6. Display elements, series or both?
 #     ---------------------------------
-choice = None
+args.append(("Precision\t".expandtabs(TABSIZE), "{:>5}".format(precision)))
+d["arguments"] = args
 while not choice:
-    displayheader(head=header)
-    print("   First term: {0}".format(firstterm))
-    print("   Terms\t: {0}".format(terms).expandtabs(13))
-    if arguments.type == "A":
-        print("   Difference: {0}".format(difference).expandtabs(13))
-    elif arguments.type == "G":
-        print("   Ratio\t: {0}".format(ratio).expandtabs(13))
-    print("   Precision\t: {0}\n".format(precision).expandtabs(13))
+    cls()
+    print(TEMPLATE[arguments.type].render(**d))
     choice = input("   Display elements [E], series [S] or both [B]: ")
     if choice.upper() not in ["B", "E", "S"]:
         choice = None
 
 
 #     ----------------
-#  7. Display results.
+#  7. Compute results.
 #     ----------------
-displayheader(head=header)
-print("   First term: {0}".format(firstterm))
-print("   Terms\t: {0}".format(terms).expandtabs(13))
 if arguments.type == "A":
-    print("   Difference: {0}".format(difference).expandtabs(13))
-if arguments.type == "G":
-    print("   Ratio\t: {0}".format(ratio).expandtabs(13))
-print("   Precision\t: {0}".format(precision).expandtabs(13))
-if choice.upper() in ["B", "E"]:
-    print("\n\n   The terms of the sequence are:\n\n\n{d[2]}{d[3]}\n{d[0]}{d[1]}\n{d[2]}{d[3]}".format(d=TITLES))
-
-#  7a. Arithmetic sequence.
-if arguments.type == "A":
-    arithmetic = shared.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
-    if choice.upper() in ["B", "E"]:
-        for i in arithmetic.sequence:
-            print("{0}. {1}".format("{:>9}".format(j), "{:>17.{precision}f}".format(i, precision=precision)))
-            j += 1
-    if choice.upper() in ["B", "S"]:
-        series = arithmetic.series
-
-#  7b. Geometric sequence.
+    arithmetic = s1.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
+    sequence = list(enumerate(["{:>{rajust}.{precision}f}".format(term, rajust=RAJUST, precision=precision) for term in arithmetic.sequence]))
+    series = arithmetic.series
 elif arguments.type == "G":
-    geometric = shared.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
-    if choice.upper() in ["B", "E"]:
-        for i in geometric.sequence:
-            print("{0}. {1}".format("{:>9}".format(j), "{:>17.{precision}f}".format(i, precision=precision)))
-            j += 1
-    if choice.upper() in ["B", "S"]:
-        series = geometric.series
-
-#  7c. Series if required.
-if choice.upper() in ["B", "S"]:
-    print("\n\n   The sum of the terms is: {:.{precision}f}\n\n".format(series, precision=precision))
+    geometric = s1.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
+    sequence = list(enumerate(["{:>{rajust}.{precision}f}".format(term, rajust=RAJUST, precision=precision) for term in geometric.sequence]))
+    series = geometric.series
 if choice.upper() == "E":
-    print("\n\n")
+    d["sequence"] = sequence
+    d["series"] = None
+elif choice.upper() == "S":
+    d["sequence"] = None
+    d["series"] = "{:.{precision}f}".format(series, precision=precision)
+elif choice.upper() == "B":
+    d["sequence"] = sequence
+    d["series"] = "{:.{precision}f}".format(series, precision=precision)
 
 
-#     -------------
-#  8. Exit program.
-#     -------------
+#     ----------------
+#  8. Display results.
+#     ----------------
+cls()
+print(TEMPLATE[arguments.type].render(**d))
+# print("\n\n   The terms of the sequence are:\n\n\n{d[2]}{d[3]}\n{d[0]}{d[1]}\n{d[2]}{d[3]}".format(d=TITLES))
+# print("\n\n   The sum of the terms is: {:.{precision}f}\n\n".format(series, precision=precision))
+
+
+# ===============
+# Exit algorithm.
+# ===============
 sys.exit(0)

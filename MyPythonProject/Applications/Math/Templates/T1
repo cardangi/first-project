@@ -1,0 +1,26 @@
+{% block title %}{% endblock %}
+
+{%- if arguments %}
+
+
+    {% for argument in arguments %}
+   {{ argument[0] }}: {{ argument[1] }}
+    {% endfor %}
+{% endif -%}
+
+{%- if sequence %}
+
+
+   ------                     ----
+   Indice                     Term
+   ------                     ----
+    {% for num, term in sequence %}
+   {{ num|integertostring()|rjustify(6) }}{{ term }}
+    {% endfor %}
+{% endif %}
+
+{%- if series %}
+
+
+   {{ series }}
+{% endif %}
