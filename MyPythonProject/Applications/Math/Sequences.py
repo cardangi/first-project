@@ -80,7 +80,7 @@ while not firstterm:
 #     --------------------------------
 #  2. Number of terms of the sequence.
 #     --------------------------------
-args.append(("First term", "{:>5}".format(firstterm)))
+args.append(("First term", s1.formatnumber(firstterm)))
 d["arguments"] = args
 while not terms:
     cls()
@@ -96,7 +96,7 @@ while not terms:
 #  3. Common difference between two terms if arithmetic sequence expected.
 #     --------------------------------------------------------------------
 if arguments.type == "A":
-    args.append(("Terms\t".expandtabs(TABSIZE), "{:>5}".format(terms)))
+    args.append(("Terms\t".expandtabs(TABSIZE), s1.formatnumber(terms)))
     d["arguments"] = args
     while not difference:
         cls()
@@ -112,7 +112,7 @@ if arguments.type == "A":
 #  4. Common ratio between two terms if geometric sequence expected.
 #     --------------------------------------------------------------
 elif arguments.type == "G":
-    args.append(("Terms\t".expandtabs(TABSIZE), "{:>5}".format(terms)))
+    args.append(("Terms\t".expandtabs(TABSIZE), s1.formatnumber(terms)))
     d["arguments"] = args
     while not ratio:
         cls()
@@ -128,14 +128,14 @@ elif arguments.type == "G":
 #  5. Precision.
 #     ----------
 if arguments.type == "A":
-    args.append(("Difference", "{:>5}".format(difference)))
+    args.append(("Difference", s1.formatnumber(difference)))
 elif arguments.type == "G":
-    args.append(("Ratio\t".expandtabs(TABSIZE), "{:>5}".format(ratio)))
+    args.append(("Ratio\t".expandtabs(TABSIZE), s1.formatnumber(ratio)))
 d["arguments"] = args
 while not precision:
     cls()
     print(TEMPLATE[arguments.type].render(**d))
-    precision = input("   Please enter precision: ")
+    precision = input("   Please enter results precision: ")
     try:
         precision = int(precision)
     except (ValueError, InvalidOperation):
@@ -145,7 +145,7 @@ while not precision:
 #     ---------------------------------
 #  6. Display elements, series or both?
 #     ---------------------------------
-args.append(("Precision\t".expandtabs(TABSIZE), "{:>5}".format(precision)))
+args.append(("Precision\t".expandtabs(TABSIZE), s1.formatnumber(precision)))
 d["arguments"] = args
 while not choice:
     cls()

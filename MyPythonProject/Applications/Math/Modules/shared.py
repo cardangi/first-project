@@ -136,3 +136,21 @@ class GeometricSequence(object):
         if value > 100:
             raise ValueError("Ratio above 100 is not allowed due to system limitations.")
         self._ratio = Decimal(value)
+
+
+def formatnumber(n, rajust=5):
+    """
+    :param n: decimal.Decimal type number.
+    :param rajust: right alignment given to number integer part.
+    :return: aligned number.
+    """
+    part1, part2 = None, None
+    numb = str(n)
+    part1 = "{:>{rajust}}".format(numb, rajust=rajust)
+    if "." in numb:
+        l = numb.split(".")
+        part1 = "{:>{rajust}}".format(l[0], rajust=rajust)
+        part2 = l[1]
+    if part2:
+        return "{0}.{1}".format(part1, part2)
+    return part1
