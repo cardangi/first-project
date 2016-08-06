@@ -11,6 +11,8 @@
 {%- if sequence %}
 
 
+   The terms of the sequence are:
+
    ------                     ----
    Indice                     Term
    ------                     ----
@@ -22,5 +24,6 @@
 {%- if series %}
 
 
-   {{ series }}
+
+   The sum of the terms is: {{ series }}
 {% endif %}

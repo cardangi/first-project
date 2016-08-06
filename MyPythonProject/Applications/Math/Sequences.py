@@ -70,7 +70,7 @@ args, d, firstterm, terms, difference, ratio, precision, sequence, series, choic
 while not firstterm:
     cls()
     print(TEMPLATE[arguments.type].render())
-    firstterm = input("   Please enter the first terms of the sequence: ")
+    firstterm = input("\n   Please enter the first terms of the sequence: ")
     try:
         firstterm = Decimal(firstterm)
     except (ValueError, InvalidOperation):
@@ -182,8 +182,7 @@ elif choice.upper() == "B":
 #     ----------------
 cls()
 print(TEMPLATE[arguments.type].render(**d))
-# print("\n\n   The terms of the sequence are:\n\n\n{d[2]}{d[3]}\n{d[0]}{d[1]}\n{d[2]}{d[3]}".format(d=TITLES))
-# print("\n\n   The sum of the terms is: {:.{precision}f}\n\n".format(series, precision=precision))
+input("\n   Press Enter to exit... ")
 
 
 # ===============

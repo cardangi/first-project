@@ -187,7 +187,6 @@ REM Display geometric sequence.
 REM ---------------------------
 IF ERRORLEVEL 18 (
     python Math`Sequences`L.py G
-    PAUSE
     GOTO MENU
 )
 
@@ -197,7 +196,6 @@ REM Display arithmetic sequence.
 REM ---------------------------
 IF ERRORLEVEL 17 (
     python Math`Sequences`L.py A
-    PAUSE
     GOTO MENU
 )
 
