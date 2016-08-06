@@ -54,8 +54,8 @@ class ArithmeticSequence(object):
 
     @property
     def sequence(self):
-        for element in range(int(self._firstterm), int(self._firstterm + (self.difference*self.terms)), int(self.difference)):
-            yield element
+        for i in range(int(self.terms)):
+            yield self._firstterm + i*self.difference
 
     @property
     def series(self):
