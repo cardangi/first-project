@@ -1,4 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
+from contextlib import contextmanager
 from datetime import datetime
 import argparse
 import sqlite3
@@ -25,32 +26,37 @@ parser.add_argument("fromfile", type=argparse.FileType(encoding=shared.DFTENCODI
 # ========
 # Classes.
 # ========
-class Boolean:
-    def __init__(self, b):
-        self.bool = b
+class Boolean(object):
+
+    def __init__(self, s):
+        self.bool = False
+        if s.upper() == "Y":
+            self.bool = True
+
+    def __repr__(self):
+        return "{0}".format(self.bool).lower()
 
 
 # ==========
 # Functions.
 # ==========
-def adapt_boolean(o):
-    if o.bool:
-        return 1
-    return 0
-sqlite3.register_adapter(Boolean, adapt_boolean)
+@contextmanager
+def connectto(db):
+    conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
+    conn.row_factory = sqlite3.Row
+    yield conn.cursor()
+    conn.commit()
+    conn.close()
 
 
-def convert_boolean(f):
-    if int(f):
-        return True
-    return False
-sqlite3.register_converter("boolean", convert_boolean)
+def adapt_boolean(b):
+    d = {False: 0, True: 1}
+    return d[b.bool]
 
 
-def convertstringtoboolean(s):
-    if s == "Y":
-        return True
-    return False
+def convert_boolean(i):
+    d = {0: False, 1: True}
+    return d[int(i)]
 
 
 def convertyeartointeger(s):
@@ -73,45 +79,37 @@ HEADERS = ["index", "albumsort", "titlesort", "artist", "year", "album", "genre"
 # Initializations.
 # ================
 arguments = parser.parse_args()
+sqlite3.register_adapter(Boolean, adapt_boolean)
+sqlite3.register_converter("boolean", convert_boolean)
 
 
 # ===============
 # Main algorithm.
 # ===============
+with connectto(shared.DATABASE) as c:
 
-# 1. Ouverture de la connexion à la base de données.
-conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
-conn.row_factory = sqlite3.Row
+    reader = csv.DictReader(arguments.fromfile, delimiter=";", fieldnames=HEADERS)
+    for row in reader:
 
-# 2. Traitement de la requête.
-reader = csv.DictReader(arguments.fromfile, delimiter=";", fieldnames=HEADERS)
-for row in reader:
+        # ALBUMS table.
+        tupalbum = (row["index"][:-11], row["artist"], int(row["year"]), row["album"], int(row["totaldiscs"]), row["genre"], Boolean(row["live"]), Boolean(row["bootleg"]), Boolean(row["incollection"]),
+                    row["language"], row["upc"], convertyeartointeger(row["encodingyear"]), datetime.now(), convertyeartointeger(row["origyear"]))
+        try:
+            c.execute("INSERT INTO albums (albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, created, origyear) "
+                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", tupalbum)
+        except sqlite3.IntegrityError:
+            pass
 
-    # ALBUMS table.
-    tupalbum = (row["index"][:-11], row["artist"], int(row["year"]), row["album"], int(row["totaldiscs"]), row["genre"], Boolean(convertstringtoboolean(row["live"])), Boolean(convertstringtoboolean(row["bootleg"])),
-                Boolean(convertstringtoboolean(row["incollection"])), row["language"], row["upc"], convertyeartointeger(row["encodingyear"]), datetime.now(), convertyeartointeger(row["origyear"]))
-    try:
-        conn.cursor().execute("INSERT INTO albums (albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, created, origyear)"
-                              " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", tupalbum)
-    except sqlite3.IntegrityError:
-        pass
+        # DISCS table.
+        tupdisc = (row["index"][:-11], int(row["discnumber"]), int(row["totaltracks"]), datetime.now())
+        try:
+            c.execute("INSERT INTO discs (albumid, discid, tracks, created) VALUES (?, ?, ?, ?)", tupdisc)
+        except sqlite3.IntegrityError:
+            pass
 
-    # DISCS table.
-    tupdisc = (row["index"][:-11], int(row["discnumber"]), int(row["totaltracks"]), datetime.now())
-    try:
-        conn.cursor().execute("INSERT INTO discs (albumid, discid, tracks, created) VALUES (?, ?, ?, ?)", tupdisc)
-    except sqlite3.IntegrityError:
-        pass
-
-    # TRACKS table.
-    tuptrack = (row["index"][:-11], int(row["discnumber"]), int(row["track"]), row["title"], datetime.now())
-    try:
-        conn.cursor().execute("INSERT INTO tracks (albumid, discid, trackid, title, created) VALUES (?, ?, ?, ?, ?)", tuptrack)
-    except sqlite3.IntegrityError:
-        pass
-
-# 3. Mise à jour de la base de données.
-conn.commit()
-
-# 4. Fermeture de la connexion à la base de données.
-conn.close()
+        # TRACKS table.
+        tuptrack = (row["index"][:-11], int(row["discnumber"]), int(row["track"]), row["title"], datetime.now())
+        try:
+            c.execute("INSERT INTO tracks (albumid, discid, trackid, title, created) VALUES (?, ?, ?, ?, ?)", tuptrack)
+        except sqlite3.IntegrityError:
+            pass
