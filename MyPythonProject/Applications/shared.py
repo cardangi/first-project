@@ -87,7 +87,7 @@ class Files(object):
     @fil.setter
     def fil(self, value):
         if not os.path.exists(value):
-            raise FileNotFoundError("File not found")
+            raise FileNotFoundError('Can\'t find "{0}". Please check both dirname and basename.'.format(value))
         self._fil = value
 
     @property
@@ -146,11 +146,15 @@ class Images(Files):
 
     @exif.setter
     def exif(self, value):
-        self._exif = self.getexif(Image.open(value))
-        if not self._exif:
-            raise ExifError(value, 'Can\'t grab metadata from')
-        if 36867 not in self._exif:
-            raise ExifError(value, 'Can\'t grab timestamp from')
+        try:
+            self._exif = self.getexif(Image.open(value))
+        except OSError:
+            raise OSError('Can\'t identify "{0}" as an image file.'.format(value))
+        else:
+            if not self._exif:
+                raise ExifError(value, 'Can\'t grab metadata from')
+            if 36867 not in self._exif:
+                raise ExifError(value, 'Can\'t grab timestamp from')
 
     @property
     def datetime(self):
