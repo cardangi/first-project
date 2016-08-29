@@ -292,7 +292,6 @@ def directorytree(tree):
 
 def dateformat(dt, template):
     """
-
     :param dt:
     :param template:
     :return:
@@ -316,7 +315,6 @@ def dateformat(dt, template):
 
 def extensioncount(extensions, folder=os.getcwd()):
     """
-
     :param extensions:
     :param folder:
     :return:
