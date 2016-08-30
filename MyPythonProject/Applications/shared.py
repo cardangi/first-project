@@ -25,8 +25,8 @@ locale.setlocale(locale.LC_ALL, "")
 # ==========
 APPEND = "a"
 WRITE = "w"
-AUTHOR = "Xavier ROSSET"
-CODING = "-*- coding: ISO-8859-1 -*-"
+# AUTHOR = "Xavier ROSSET"
+# CODING = "-*- coding: ISO-8859-1 -*-"
 DATABASE = r"g:\computing\database.db"
 LOG = r"g:\computing\log.log"
 DFTENCODING = "ISO-8859-1"
@@ -43,9 +43,9 @@ UTF8 = "UTF_8"
 UTF16 = "UTF_16LE"
 UTF16BOM = "\ufeff"
 COPYRIGHT = "\u00a9"
-DFTYEARREGEX = "20[012]\d"
+DFTYEARREGEX = "20[0-2]\d"
 DFTMONTHREGEX = "0[1-9]|1[0-2]"
-DFTDAYREGEX = "0[1-9]|[12][0-9]|3[01]"
+DFTDAYREGEX = "0[1-9]|[12]\d|3[01]"
 ACCEPTEDANSWERS = ["N", "Y"]
 ARECA = r'"C:\Program Files\Areca\areca_cl.exe"'
 MUSIC = "F:\\"
@@ -137,7 +137,8 @@ class Images(Files):
         super(Images, self).__init__(img)
         self._exif = None
         self.exif = img
-        for i in ["localtimestamp", "originaldatetime", "originalyear"]:
+        for i in ["localtimestamp", "originaldatetime", "originalyear", "originalmonth", "originalday", "originalhours", "originalminutes", "originalseconds", "dayoftheyear", "dayoftheweek", "defaultlocation",
+                  "defaultprefix"]:
             self._metadata[i] = getattr(self, i)
 
     @property
@@ -181,7 +182,7 @@ class Images(Files):
         return self.datetime.strftime("%d")
 
     @property
-    def originalhour(self):
+    def originalhours(self):
         return self.datetime.strftime("%H")
 
     @property
@@ -200,8 +201,13 @@ class Images(Files):
     def dayoftheweek(self):
         return self.datetime.strftime("%w")
 
-                # self.metadata["defaultlocation"] = self.defaultlocation(self.metadata["originalyear"], self.metadata["originalmonth"], self.metadata["originalday"])
-                # self.metadata["defaultprefix"] = "{}{}".format(self.metadata["originalyear"], str(self.metadata["originalmonth"]).zfill(2))
+    @property
+    def defaultlocation(self):
+        return self.defaultlocation(self.originalyear, self.originalmonth, self.originalday)
+
+    @property
+    def defaultprefix(self):
+        return "{0}{1}".format(self.originalyear, str(self.originalmonth).zfill(2))
 
     @property
     def make(self):
@@ -257,6 +263,22 @@ class Images(Files):
         return d
 
     @staticmethod
+    def defaultlocation(year, month, day):
+
+        defaultdrive = "h:\\"
+
+        # Cas 1 : "h:\CCYY\MM\DD".
+        if year in [2011, 2012]:
+            return os.path.join(defaultdrive, str(year), str(month).zfill(2), str(day).zfill(2))
+
+        # Cas 2 : "h:\CCYY\MM.DD".
+        elif year == 2014:
+            return os.path.join(defaultdrive, str(year), "{0}.{1}".format(str(month).zfill(2), str(day).zfill(2)))
+
+        # Cas 3 : "h:\CCYYMM".
+        return os.path.join(defaultdrive, "{0}{1}".format(year, str(month).zfill(2)))
+
+    @staticmethod
     def fixup(v):
         if len(v) == 1:
             return v[0]
@@ -283,7 +305,6 @@ class CustomFormatter(logging.Formatter):
 # ==========
 def directorytree(tree):
     """
-
     :param tree:
     :return:
     """
@@ -295,7 +316,6 @@ def directorytree(tree):
 
 def dateformat(dt, template):
     """
-
     :param dt:
     :param template:
     :return:
@@ -317,30 +337,29 @@ def dateformat(dt, template):
                                          )
 
 
-def extensioncount(extensions, folder=os.getcwd()):
-    """
-
-    :param extensions:
-    :param folder:
-    :return:
-    """
-    d, l = {}, []
-    if extensions:
-        l = sorted([i.lower() for i in extensions])
-    for root, folders, files in os.walk(folder):
-        for file in files:
-            select_file = False
-            ext = os.path.splitext(file)[1][1:].lower()
-            if not l:
-                select_file = True
-            elif l and ext in l:
-                select_file = True
-            if select_file:
-                if ext in d:
-                    d[ext.upper()] += 1
-                else:
-                    d[ext.upper()] = 1
-    return d
+# def extensioncount(extensions, folder=os.getcwd()):
+#     """
+#     :param extensions:
+#     :param folder:
+#     :return:
+#     """
+#     d, l = {}, []
+#     if extensions:
+#         l = sorted([i.lower() for i in extensions])
+#     for root, folders, files in os.walk(folder):
+#         for file in files:
+#             select_file = False
+#             ext = os.path.splitext(file)[1][1:].lower()
+#             if not l:
+#                 select_file = True
+#             elif l and ext in l:
+#                 select_file = True
+#             if select_file:
+#                 if ext in d:
+#                     d[ext.upper()] += 1
+#                 else:
+#                     d[ext.upper()] = 1
+#     return d
 
 
 def filesinfolder(extensions, folder=os.getcwd()):
