@@ -210,7 +210,7 @@ class Images(Files):
     @property
     def make(self):
         if 271 in self.exif:
-             return self.exif[271]
+            return self.exif[271]
 
     @property
     def model(self):
