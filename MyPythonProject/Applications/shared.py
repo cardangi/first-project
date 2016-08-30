@@ -1,23 +1,17 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier'
-
-
-# =================
-# Absolute imports.
-# =================
 import io
 import os
 import locale
 import logging
 import itertools
-import subprocess
 from pytz import timezone
 from string import Template
 from datetime import datetime
 from dateutil.tz import gettz
 from dateutil.parser import parse
 from PIL import Image, TiffImagePlugin
-from sortedcontainers import SortedDict
+
+__author__ = 'Xavier'
 
 
 # ==========================
@@ -31,8 +25,6 @@ locale.setlocale(locale.LC_ALL, "")
 # ==========
 APPEND = "a"
 WRITE = "w"
-AUTHOR = "Xavier ROSSET"
-CODING = "-*- coding: ISO-8859-1 -*-"
 DATABASE = r"g:\computing\database.db"
 LOG = r"g:\computing\log.log"
 DFTENCODING = "ISO-8859-1"
@@ -49,9 +41,9 @@ UTF8 = "UTF_8"
 UTF16 = "UTF_16LE"
 UTF16BOM = "\ufeff"
 COPYRIGHT = "\u00a9"
-DFTYEARREGEX = "20[012]\d"
+DFTYEARREGEX = "20[0-2]\d"
 DFTMONTHREGEX = "0[1-9]|1[0-2]"
-DFTDAYREGEX = "0[1-9]|[12][0-9]|3[01]"
+DFTDAYREGEX = "0[1-9]|[12]\d|3[01]"
 ACCEPTEDANSWERS = ["N", "Y"]
 ARECA = r'"C:\Program Files\Areca\areca_cl.exe"'
 MUSIC = "F:\\"
@@ -62,29 +54,67 @@ BACK = 12
 # ========
 # Classes.
 # ========
+class ImageError(OSError):
+    def __init__(self, file, error):
+        self.file = file
+        self.error = error
 
-class File:
 
-    attr = ("ctime", "mtime", "dirname", "basename", "extension", "parts")
+class ExifError(ImageError):
+    def __init__(self, file, error):
+        super(ExifError, self).__init__(file, error)
+
+
+class Files(object):
 
     def __contains__(self, itm):
-        return itm in list(self.metadata.keys())
+        return itm in self.metadata
 
     def __getitem__(self, itm):
         return self.metadata[itm]
 
     def __init__(self, fil):
-        self.metadata = SortedDict()
-        self.exists = os.path.exists(fil)
-        if self.exists:
-            self.index = 0
-            self.metadata["name"] = fil
-            self.metadata["dirname"] = os.path.dirname(fil)
-            self.metadata["basename"] = os.path.splitext(os.path.basename(fil))[0]
-            self.metadata["extension"] = os.path.splitext(fil)[1].strip(".")
-            self.metadata["parts"] = os.path.dirname(fil).split("\\")
-            self.metadata["ctime"] = int(os.path.getctime(fil))
-            self.metadata["mtime"] = int(os.path.getmtime(fil))
+        self._fil = None
+        self.fil = fil
+        self._metadata = {i: getattr(self, i) for i in ["ctime", "mtime", "dirname", "basename", "extension", "parts"]}
+
+    @property
+    def fil(self):
+        return self._fil
+
+    @fil.setter
+    def fil(self, value):
+        if not os.path.exists(value):
+            raise FileNotFoundError('Can\'t find "{0}". Please check both dirname and basename.'.format(value))
+        self._fil = value
+
+    @property
+    def dirname(self):
+        return os.path.dirname(self.fil)
+
+    @property
+    def basename(self):
+        return os.path.splitext(os.path.basename(self.fil))[0]
+
+    @property
+    def extension(self):
+        return os.path.splitext(self.fil)[1].strip(".")
+
+    @property
+    def parts(self):
+        return os.path.dirname(self.fil).split("\\")
+
+    @property
+    def ctime(self):
+        return int(os.path.getctime(self.fil))
+
+    @property
+    def mtime(self):
+        return int(os.path.getmtime(self.fil))
+
+    @property
+    def metadata(self):
+        return self._metadata
 
     def __iter__(self):
         for k, v in self.metadata.items():
@@ -96,58 +126,111 @@ class File:
     def __repr__(self):
         return repr(self.metadata)
 
-    def encrypt(self, dst, rcp):
-        return subprocess.call(["gpg", "--encrypt", "--output", os.path.join(dst, "{0}.{1}.gpg".format(self.metadata["basename"], self.metadata["extension"])), "--recipient", rcp,
-                                os.path.join(self.metadata["dirname"], "{0}.{1}".format(self.metadata["basename"], self.metadata["extension"]))])
 
-    def renameto(self, dirn=None, basn=None):
-        dir = self.metadata["dirname"]
-        bas = self.metadata["basename"]
-        if dirn:
-            dir = dirn
-        if basn:
-            bas = basn
-        return os.path.join(dir, "{0}.{1}".format(bas, self.metadata["extension"]))
-
-    def tags(self):
-        return list(self.metadata.keys())
-
-
-class Images(File):
+class Images(Files):
 
     tzinfos = {"CEST": gettz("Europe/Paris"), "CET": gettz("Europe/Paris")}
 
-    def __init__(self, fil):
-        super(Images, self).__init__(fil)
+    def __init__(self, img):
+        super(Images, self).__init__(img)
+        self._exif = None
+        self.exif = img
+        for i in ["localtimestamp", "originaldatetime", "originalyear", "originalmonth", "originalday", "originalhours", "originalminutes", "originalseconds", "dayoftheyear", "dayoftheweek", "defaultlocation",
+                  "defaultprefix"]:
+            self._metadata[i] = getattr(self, i)
+
+    @property
+    def exif(self):
+        return self._exif
+
+    @exif.setter
+    def exif(self, value):
         try:
-            self.exif = self.getexif(Image.open(fil))
+            self._exif = self.getexif(Image.open(value))
         except OSError:
-            self.exif = {}
-        if self.exif:
-            if 36867 in self.exif:
-                datetime = parse("{} CET".format(self.exif[36867].replace(":", "-", 2)), tzinfos=self.tzinfos)
-                self.metadata["localtimestamp"] = int(datetime.timestamp())
-                self.metadata["originaldatetime"] = datetime.strftime("%d/%m/%Y %H:%M:%S %Z%z")
-                self.metadata["originalyear"] = datetime.strftime("%Y")
-                self.metadata["originalmonth"] = datetime.strftime("%m")
-                self.metadata["originalday"] = datetime.strftime("%d")
-                self.metadata["originalhour"] = datetime.strftime("%H")
-                self.metadata["originalminutes"] = datetime.strftime("%M")
-                self.metadata["originalseconds"] = datetime.strftime("%S")
-                self.metadata["dayoftheyear"] = datetime.strftime("%j")
-                self.metadata["dayoftheweek"] = datetime.strftime("%w")
-                self.metadata["defaultlocation"] = self.defaultlocation(self.metadata["originalyear"], self.metadata["originalmonth"], self.metadata["originalday"])
-                self.metadata["defaultprefix"] = "{}{}".format(self.metadata["originalyear"], str(self.metadata["originalmonth"]).zfill(2))
-            if 271 in self.exif:
-                self.metadata["make"] = self.exif[271]
-            if 272 in self.exif:
-                self.metadata["model"] = self.exif[272]
-            if 40962 in self.exif:
-                self.metadata["width"] = self.exif[40962]
-            if 40963 in self.exif:
-                self.metadata["height"] = self.exif[40963]
-            if 33432 in self.exif:
-                self.metadata["copyright"] = self.exif[33432]
+            raise OSError('Can\'t identify "{0}" as an image file.'.format(value))
+        else:
+            if not self._exif:
+                raise ExifError(value, 'Can\'t grab metadata from')
+            if 36867 not in self._exif:
+                raise ExifError(value, 'Can\'t grab timestamp from')
+
+    @property
+    def datetime(self):
+        return parse("{0} CET".format(self.exif[36867].replace(":", "-", 2)), tzinfos=self.tzinfos)
+
+    @property
+    def localtimestamp(self):
+        return int(self.datetime.timestamp())
+
+    @property
+    def originaldatetime(self):
+        return self.datetime.strftime("%d/%m/%Y %H:%M:%S %Z%z")
+
+    @property
+    def originalyear(self):
+        return self.datetime.strftime("%Y")
+
+    @property
+    def originalmonth(self):
+        return self.datetime.strftime("%m")
+
+    @property
+    def originalday(self):
+        return self.datetime.strftime("%d")
+
+    @property
+    def originalhours(self):
+        return self.datetime.strftime("%H")
+
+    @property
+    def originalminutes(self):
+        return self.datetime.strftime("%M")
+
+    @property
+    def originalseconds(self):
+        return self.datetime.strftime("%S")
+
+    @property
+    def dayoftheyear(self):
+        return self.datetime.strftime("%j")
+
+    @property
+    def dayoftheweek(self):
+        return self.datetime.strftime("%w")
+
+    @property
+    def defaultlocation(self):
+        return self.defaultlocation(self.originalyear, self.originalmonth, self.originalday)
+
+    @property
+    def defaultprefix(self):
+        return "{0}{1}".format(self.originalyear, str(self.originalmonth).zfill(2))
+
+    @property
+    def make(self):
+        if 271 in self.exif:
+            return self.exif[271]
+
+    @property
+    def model(self):
+        if 272 in self.exif:
+            return self.exif[272]
+
+    @property
+    def width(self):
+        if 40962 in self.exif:
+            return self.exif[40962]
+
+    @property
+    def height(self):
+        if 40963 in self.exif:
+            return self.exif[40963]
+
+    @property
+    def copyright(self):
+        if 33432 in self.exif:
+            return self.exif[33432]
 
     @classmethod
     def getexif(cls, o):
@@ -186,7 +269,7 @@ class Images(File):
     @staticmethod
     def defaultlocation(year, month, day):
 
-        defaultdrive = "h:\\"
+        defaultdrive = MUSIC
 
         # Cas 1 : "h:\CCYY\MM\DD".
         if year in [2011, 2012]:
@@ -194,10 +277,10 @@ class Images(File):
 
         # Cas 2 : "h:\CCYY\MM.DD".
         elif year == 2014:
-            return os.path.join(defaultdrive, str(year), "{}.{}".format(str(month).zfill(2), str(day).zfill(2)))
+            return os.path.join(defaultdrive, str(year), "{0}.{1}".format(str(month).zfill(2), str(day).zfill(2)))
 
         # Cas 3 : "h:\CCYYMM".
-        return os.path.join(defaultdrive, "{}{}".format(year, str(month).zfill(2)))
+        return os.path.join(defaultdrive, "{0}{1}".format(year, str(month).zfill(2)))
 
 
 class CustomFormatter(logging.Formatter):
@@ -220,7 +303,6 @@ class CustomFormatter(logging.Formatter):
 # ==========
 def directorytree(tree):
     """
-
     :param tree:
     :return:
     """
@@ -232,7 +314,6 @@ def directorytree(tree):
 
 def dateformat(dt, template):
     """
-
     :param dt:
     :param template:
     :return:
@@ -252,32 +333,6 @@ def dateformat(dt, template):
                                          Y=dt.strftime("%Y"),
                                          Z=dt.strftime("%Z")
                                          )
-
-
-def extensioncount(extensions, folder=os.getcwd()):
-    """
-
-    :param extensions:
-    :param folder:
-    :return:
-    """
-    d, l = {}, []
-    if extensions:
-        l = sorted([i.lower() for i in extensions])
-    for root, folders, files in os.walk(folder):
-        for file in files:
-            select_file = False
-            ext = os.path.splitext(file)[1][1:].lower()
-            if not l:
-                select_file = True
-            elif l and ext in l:
-                select_file = True
-            if select_file:
-                if ext in d:
-                    d[ext.upper()] += 1
-                else:
-                    d[ext.upper()] = 1
-    return d
 
 
 def filesinfolder(extensions, folder=os.getcwd()):
