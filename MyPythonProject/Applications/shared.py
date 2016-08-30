@@ -1,23 +1,17 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier'
-
-
-# =================
-# Absolute imports.
-# =================
 import io
 import os
 import locale
 import logging
 import itertools
-import subprocess
 from pytz import timezone
 from string import Template
 from datetime import datetime
 from dateutil.tz import gettz
 from dateutil.parser import parse
 from PIL import Image, TiffImagePlugin
-from sortedcontainers import SortedDict
+
+__author__ = 'Xavier'
 
 
 # ==========================
