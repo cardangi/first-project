@@ -1,18 +1,4 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# ======================
-# Exemple d'utilisation.
-# ======================
-# python "G:\Documents\MyPythonProject\Launchers\Images\ImportL.py" -s nikon dir "D:\DCIM\174NIKON"
-# -s nikon . . . . . . . : désigne un masque permettant de filtrer les photos à importer.
-# dir "D:\DCIM\174NIKON" : désigne le répertoire source possédant les photos à importer.
-
-
-# =================
-# Absolute imports.
-# =================
 import os
 import re
 import sys
@@ -24,13 +10,18 @@ from datetime import datetime
 from sortedcontainers import SortedList
 from os.path import expandvars, isdir, join
 from jinja2 import Environment, PackageLoader
+from .. import shared as s1
+from .Modules import shared as s2
+
+__author__ = 'Xavier ROSSET'
 
 
-# =================
-# Relative imports.
-# =================
-from .. import shared as s1  # Applications/shared.py
-from .Modules import shared as s2  # Applications/Images/Modules/shared.py
+# =======================
+# How to use this script?
+# =======================
+# python "G:\Documents\MyPythonProject\Launchers\Images\ImportL.py" -s nikon dir "D:\DCIM\174NIKON"
+# -s nikon . . . . . . . : désigne un masque permettant de filtrer les photos à importer.
+# dir "D:\DCIM\174NIKON" : désigne le répertoire source possédant les photos à importer.
 
 
 # ==========================
@@ -47,14 +38,28 @@ class BatchRename(Template):
 
 
 # ==========
+# Constants.
+# ==========
+PATTERN = "^.+\.jpg$"
+PATTERNS = {"lumix": r"^p\d{7}\.jpg$", "canon": r"^_mg_\d{4}\.jpg$", "nikon": "^dscn\d{4}\.jpg$"}
+TEMPLATES = ["%{cy}%{m}_%{n}", "%{t}"]
+
+
+# ==========
 # Functions.
 # ==========
-def directory(d):
+def validdirectory(d):
     if not os.path.isdir(d):
-        raise argparse.ArgumentTypeError('"{}" is not a valid directory'.format(d))
+        raise argparse.ArgumentTypeError('"{0}" is not a valid directory'.format(d))
     if not os.access(d, os.R_OK):
-        raise argparse.ArgumentTypeError('"{}" is not a readable directory'.format(d))
+        raise argparse.ArgumentTypeError('"{0}" is not a readable directory'.format(d))
     return d
+
+
+def validtemplate(t):
+    if t not in TEMPLATES:
+        raise argparse.ArgumentTypeError('"{0}" is not a valid template'.format(t))
+    return t
 
 
 # =================
@@ -62,12 +67,12 @@ def directory(d):
 # =================
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--select")
-parser.add_argument("-t", "--template", nargs="?", default="%cy%{m}_%{n}")
+parser.add_argument("-t", "--template", nargs="?", default="%{cy}%{m}_%{n}", type=validtemplate)
 subparser = parser.add_subparsers(dest="input")
 parser_dir = subparser.add_parser("dir")
-parser_dir.add_argument("dir", type=directory)
+parser_dir.add_argument("dir", type=validdirectory)
 parser_fil = subparser.add_parser("fil")
-parser_fil.add_argument("fil", type=argparse.FileType(encoding=s1.Global()["latin1"]))
+parser_fil.add_argument("fil", type=argparse.FileType(encoding=s1.DFTENCODING))
 arguments = parser.parse_args()
 
 
@@ -76,14 +81,6 @@ arguments = parser.parse_args()
 # ========
 class Header:
     pass
-
-
-# ==========
-# Constants.
-# ==========
-PATTERN = "^.+\.jpg$"
-PATTERNS = {"lumix": r"^p\d{7}\.jpg$", "canon": r"^_mg_\d{4}\.jpg$", "nikon": "^dscn\d{4}\.jpg$"}
-TEMPLATES = ["%cy%{m}_%{n}", "%{t}"]
 
 
 # ================
@@ -98,15 +95,8 @@ l1, l2, o, p, t, sequence, first, template = SortedList(), [], "", None, BatchRe
 # ===============
 
 
-#    -------------
-# 1. Check inputs.
-#    -------------
-if arguments.template not in TEMPLATES:
-    sys.exit()
-
-
 #    --------------
-# 2. Check pattern.
+# 1. Check pattern.
 #    --------------
 if arguments.select:
     pattern = PATTERNS.get(arguments.select, arguments.select)
@@ -114,14 +104,22 @@ regex = re.compile(PATTERN, re.IGNORECASE)
 
 
 #    -----------------------
-# 3. Store files to process.
+# 2. Store files to process.
 #    -----------------------
 if arguments.input == "dir":
     if isdir(arguments.dir):
         for file in os.listdir(arguments.dir):
-            image = s1.Images(join(arguments.dir, file))
-            if regex.match(file) and image["localtimestamp"]:
-                l1.add(join(arguments.dir, file))
+            try:
+                image = s1.Images(join(arguments.dir, file))
+            except s1.ExifError as e:
+                pass
+            except (FileNotFoundError, OSError) as e:
+                pass
+            else:
+                if regex.match(file) and image.localtimestamp:
+                    l1.add(join(arguments.dir, file))
+    if l1:
+        l1 = sorted(l1)
 
 if arguments.input == "fil":
     for file in arguments.fil:
@@ -131,7 +129,7 @@ if arguments.input == "fil":
 
 
 #    --------------
-# 4. Process files.
+# 3. Process files.
 #    --------------
 
 #   Création d'une liste de tuples.

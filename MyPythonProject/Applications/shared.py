@@ -25,8 +25,8 @@ locale.setlocale(locale.LC_ALL, "")
 # ==========
 APPEND = "a"
 WRITE = "w"
-AUTHOR = "Xavier ROSSET"
-CODING = "-*- coding: ISO-8859-1 -*-"
+# AUTHOR = "Xavier ROSSET"
+# CODING = "-*- coding: ISO-8859-1 -*-"
 DATABASE = r"g:\computing\database.db"
 LOG = r"g:\computing\log.log"
 DFTENCODING = "ISO-8859-1"
@@ -43,9 +43,9 @@ UTF8 = "UTF_8"
 UTF16 = "UTF_16LE"
 UTF16BOM = "\ufeff"
 COPYRIGHT = "\u00a9"
-DFTYEARREGEX = "20[012]\d"
+DFTYEARREGEX = "20[0-2]\d"
 DFTMONTHREGEX = "0[1-9]|1[0-2]"
-DFTDAYREGEX = "0[1-9]|[12][0-9]|3[01]"
+DFTDAYREGEX = "0[1-9]|[12]\d|3[01]"
 ACCEPTEDANSWERS = ["N", "Y"]
 ARECA = r'"C:\Program Files\Areca\areca_cl.exe"'
 MUSIC = "F:\\"
@@ -137,7 +137,8 @@ class Images(Files):
         super(Images, self).__init__(img)
         self._exif = None
         self.exif = img
-        for i in ["localtimestamp", "originaldatetime", "originalyear"]:
+        for i in ["localtimestamp", "originaldatetime", "originalyear", "originalmonth", "originalday", "originalhours", "originalminutes", "originalseconds", "dayoftheyear", "dayoftheweek", "defaultlocation",
+                  "defaultprefix"]:
             self._metadata[i] = getattr(self, i)
 
     @property
@@ -171,6 +172,67 @@ class Images(Files):
     @property
     def originalyear(self):
         return self.datetime.strftime("%Y")
+
+    @property
+    def originalmonth(self):
+        return self.datetime.strftime("%m")
+
+    @property
+    def originalday(self):
+        return self.datetime.strftime("%d")
+
+    @property
+    def originalhours(self):
+        return self.datetime.strftime("%H")
+
+    @property
+    def originalminutes(self):
+        return self.datetime.strftime("%M")
+
+    @property
+    def originalseconds(self):
+        return self.datetime.strftime("%S")
+
+    @property
+    def dayoftheyear(self):
+        return self.datetime.strftime("%j")
+
+    @property
+    def dayoftheweek(self):
+        return self.datetime.strftime("%w")
+
+    @property
+    def defaultlocation(self):
+        return self.defaultlocation(self.originalyear, self.originalmonth, self.originalday)
+
+    @property
+    def defaultprefix(self):
+        return "{0}{1}".format(self.originalyear, str(self.originalmonth).zfill(2))
+
+    @property
+    def make(self):
+        if 271 in self.exif:
+             return self.exif[271]
+
+    @property
+    def model(self):
+        if 272 in self.exif:
+            return self.exif[272]
+
+    @property
+    def width(self):
+        if 40962 in self.exif:
+            return self.exif[40962]
+
+    @property
+    def height(self):
+        if 40963 in self.exif:
+            return self.exif[40963]
+
+    @property
+    def copyright(self):
+        if 33432 in self.exif:
+            return self.exif[33432]
 
     @classmethod
     def getexif(cls, o):
@@ -207,41 +269,7 @@ class Images(Files):
         return v
 
 
-# class Images(File):
-#
-#     tzinfos = {"CEST": gettz("Europe/Paris"), "CET": gettz("Europe/Paris")}
-#
-#     def __init__(self, fil):
-#         super(Images, self).__init__(fil)
-#         try:
-#             self.exif = self.getexif(Image.open(fil))
-#         except OSError:
-#             self.exif = {}
-#         if self.exif:
-#             if 36867 in self.exif:
-#                 datetime = parse("{} CET".format(self.exif[36867].replace(":", "-", 2)), tzinfos=self.tzinfos)
-#                 self.metadata["localtimestamp"] = int(datetime.timestamp())
-#                 self.metadata["originaldatetime"] = datetime.strftime("%d/%m/%Y %H:%M:%S %Z%z")
-#                 self.metadata["originalyear"] = datetime.strftime("%Y")
-#                 self.metadata["originalmonth"] = datetime.strftime("%m")
-#                 self.metadata["originalday"] = datetime.strftime("%d")
-#                 self.metadata["originalhour"] = datetime.strftime("%H")
-#                 self.metadata["originalminutes"] = datetime.strftime("%M")
-#                 self.metadata["originalseconds"] = datetime.strftime("%S")
-#                 self.metadata["dayoftheyear"] = datetime.strftime("%j")
-#                 self.metadata["dayoftheweek"] = datetime.strftime("%w")
-#                 self.metadata["defaultlocation"] = self.defaultlocation(self.metadata["originalyear"], self.metadata["originalmonth"], self.metadata["originalday"])
-#                 self.metadata["defaultprefix"] = "{}{}".format(self.metadata["originalyear"], str(self.metadata["originalmonth"]).zfill(2))
-#             if 271 in self.exif:
-#                 self.metadata["make"] = self.exif[271]
-#             if 272 in self.exif:
-#                 self.metadata["model"] = self.exif[272]
-#             if 40962 in self.exif:
-#                 self.metadata["width"] = self.exif[40962]
-#             if 40963 in self.exif:
-#                 self.metadata["height"] = self.exif[40963]
-#             if 33432 in self.exif:
-#                 self.metadata["copyright"] = self.exif[33432]
+        defaultdrive = MUSIC
 
     # @staticmethod
     # def defaultlocation(year, month, day):
@@ -258,6 +286,13 @@ class Images(Files):
     #
     #     # Cas 3 : "h:\CCYYMM".
     #     return os.path.join(defaultdrive, "{}{}".format(year, str(month).zfill(2)))
+
+        # Cas 2 : "h:\CCYY\MM.DD".
+        elif year == 2014:
+            return os.path.join(defaultdrive, str(year), "{0}.{1}".format(str(month).zfill(2), str(day).zfill(2)))
+
+        # Cas 3 : "h:\CCYYMM".
+        return os.path.join(defaultdrive, "{0}{1}".format(year, str(month).zfill(2)))
 
 
 class CustomFormatter(logging.Formatter):
@@ -280,7 +315,6 @@ class CustomFormatter(logging.Formatter):
 # ==========
 def directorytree(tree):
     """
-
     :param tree:
     :return:
     """
@@ -313,29 +347,29 @@ def dateformat(dt, template):
                                          )
 
 
-def extensioncount(extensions, folder=os.getcwd()):
-    """
-    :param extensions:
-    :param folder:
-    :return:
-    """
-    d, l = {}, []
-    if extensions:
-        l = sorted([i.lower() for i in extensions])
-    for root, folders, files in os.walk(folder):
-        for file in files:
-            select_file = False
-            ext = os.path.splitext(file)[1][1:].lower()
-            if not l:
-                select_file = True
-            elif l and ext in l:
-                select_file = True
-            if select_file:
-                if ext in d:
-                    d[ext.upper()] += 1
-                else:
-                    d[ext.upper()] = 1
-    return d
+# def extensioncount(extensions, folder=os.getcwd()):
+#     """
+#     :param extensions:
+#     :param folder:
+#     :return:
+#     """
+#     d, l = {}, []
+#     if extensions:
+#         l = sorted([i.lower() for i in extensions])
+#     for root, folders, files in os.walk(folder):
+#         for file in files:
+#             select_file = False
+#             ext = os.path.splitext(file)[1][1:].lower()
+#             if not l:
+#                 select_file = True
+#             elif l and ext in l:
+#                 select_file = True
+#             if select_file:
+#                 if ext in d:
+#                     d[ext.upper()] += 1
+#                 else:
+#                     d[ext.upper()] = 1
+#     return d
 
 
 def filesinfolder(extensions, folder=os.getcwd()):
