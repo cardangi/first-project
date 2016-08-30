@@ -10,7 +10,7 @@ from datetime import datetime
 from operator import itemgetter
 from os.path import normpath, splitext
 import xml.etree.ElementTree as ElementTree
-from sortedcontainers import SortedDict, SortedList
+from sortedcontainers import SortedDict
 from .. import shared as s1
 from .Modules import shared as s2
 
@@ -83,10 +83,9 @@ for fil in s1.directorytree(normpath(arguments.directory)):
         if art:
             art_list.append(art)
         if all([art, ext]):
-            if art in artext_dict:
-                artext_dict[art].append(ext)
-            else:
-                artext_dict[art] = list((ext,))
+            if art not in artext_dict:
+                artext_dict[art] = list()
+            artext_dict[art].append(ext)
 
 
 #     --------------------
@@ -96,10 +95,10 @@ for extension in ext_list:
     ext_count[extension] += 1
 
 #  Tri par nom croissant.
-ext_count1 = collections.OrderedDict(sorted(ext_count.items(), key=lambda i: i[0]))
+ext_count1 = collections.OrderedDict(sorted(ext_count.items(), key=itemgetter(0)))
 
 #  Tri par total décroissant et par nom croissant.
-ext_count2 = collections.OrderedDict(sorted(sorted(ext_count.items(), key=lambda i: i[0]), key=lambda i: i[1], reverse=True))
+ext_count2 = collections.OrderedDict(sorted(sorted(ext_count.items(), key=itemgetter(0)), key=itemgetter(1), reverse=True))
 
 
 #     ------------------
@@ -109,10 +108,10 @@ for artist in art_list:
     art_count[artist] += 1
 
 #  Tri par nom croissant.
-art_count1 = collections.OrderedDict(sorted(art_count.items(), key=lambda i: i[0]))
+art_count1 = collections.OrderedDict(sorted(art_count.items(), key=itemgetter(0)))
 
 #  Tri par total décroissant et par nom croissant.
-art_count2 = collections.OrderedDict(sorted(sorted(art_count.items(), key=lambda i: i[0]), key=lambda i: i[1], reverse=True))
+art_count2 = collections.OrderedDict(sorted(sorted(art_count.items(), key=itemgetter(0)), key=itemgetter(1), reverse=True))
 
 
 #     -----------------------------------
@@ -128,7 +127,7 @@ for artist in artext_dict.keys():
 
 #  Tri par extension croissante.
 for artist in artext_dict.keys():
-    artext_dict[artist] = collections.OrderedDict(sorted(artext_dict[artist].items(), key=lambda i: i[0]))
+    artext_dict[artist] = collections.OrderedDict(sorted(artext_dict[artist].items(), key=itemgetter(0)))
 
 #     ------
 #  4. Files.
@@ -136,26 +135,17 @@ for artist in artext_dict.keys():
 if reflist:
 
     # ----- Liste des fichiers. Tri par nom croissant.
-    templist1 = list(range(1, len(reflist) + 1))
-    templist2 = [fil for fil, dummy1, dummy2, dummy3 in SortedList(reflist)]
-    templist3 = [humantime for dummy1, dummy2, humantime, dummy3 in SortedList(reflist)]
-    lista = list(zip(templist1, templist2, templist3))
+    lista = [(a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(2)(item)) for item in sorted(reflist, key=itemgetter(0))], 1)]
 
     # ----- Liste des 50 fichiers créés dernièrement. Tri par date décroissante, puis nom croissant.
-    templist1 = list(range(1, 51))
-    templist2 = [fil for fil, dummy1, dummy2 in sorted([(fil, epoch, humantime) for fil, epoch, humantime, dummy1 in sorted(reflist, key=itemgetter(0))], key=itemgetter(1), reverse=True)[:50]]
-    templist3 = [humantime for dummy1, dummy2, humantime in sorted([(fil, epoch, humantime) for fil, epoch, humantime, dummy1 in sorted(reflist, key=itemgetter(0))], key=itemgetter(1), reverse=True)[:50]]
-    listb = list(zip(templist1, templist2, templist3))
+    listb = [(a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(2)(item)) for item in sorted(sorted(reflist, key=itemgetter(0)), key=itemgetter(1), reverse=True)[:50]], 1)]
 
 
 #     -----------
 #  5. Extensions.
 #     -----------
 if extensions:
-    templist1 = list(range(1, len(extensions) + 1))
-    templist2 = [key for key in sorted(list(extensions.keys()))]
-    templist3 = [extensions[key] for key in sorted(list(extensions.keys()))]
-    listc = list(zip(templist1, templist2, templist3))
+    listc = [(a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(extensions.items(), key=itemgetter(0))], 1)]
 
 
 #     --------
@@ -163,17 +153,11 @@ if extensions:
 #     --------
 if artists:
 
-    templist1 = list(range(1, len(artists) + 1))
-
     # ----- Liste des artistes. Tri par nom croissant.
-    templist2 = [key for key in sorted(list(artists.keys()))]
-    templist3 = [artists[key] for key in sorted(list(artists.keys()))]
-    listd = list(zip(templist1, templist2, templist3))
+    listd = [(a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(artists.items(), key=itemgetter(0))], 1)]
 
     # ----- Liste des artistes. Tri par ranking décroissant, puis nom croissant.
-    templist2 = [artist for artist, dummy in sorted([(key, artists[key]) for key in sorted(list(artists.keys()))], key=itemgetter(1), reverse=True)]
-    templist3 = [count for dummy, count in sorted([(key, artists[key]) for key in sorted(list(artists.keys()))], key=itemgetter(1), reverse=True)]
-    liste = list(zip(templist1, templist2, templist3))
+    liste = [(a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(sorted(artists.items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)], 1)]
 
 
 #     -----------
