@@ -25,8 +25,6 @@ locale.setlocale(locale.LC_ALL, "")
 # ==========
 APPEND = "a"
 WRITE = "w"
-# AUTHOR = "Xavier ROSSET"
-# CODING = "-*- coding: ISO-8859-1 -*-"
 DATABASE = r"g:\computing\database.db"
 LOG = r"g:\computing\log.log"
 DFTENCODING = "ISO-8859-1"
