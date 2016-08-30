@@ -1,24 +1,15 @@
 # -*- coding: utf-8 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
 from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
 from itertools import repeat
 from pytz import timezone
-import sqlite3
 import logging
 import locale
 import os
+from ... import shared as s1
+from ..Modules import shared as s2
 
-
-# =================
-# Relative imports.
-# =================
-from ... import shared
+__author__ = 'Xavier ROSSET'
 
 
 # ==========================
@@ -71,46 +62,31 @@ t5 = environment2.get_template("T5")
 #    ---------------
 #  1. Start logging.
 #    ---------------
-logger.info("{0} {1} {0}".format("".join(list(repeat("=", 50))), shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1)))
+logger.info("{0} {1} {0}".format("".join(list(repeat("=", 50))), s1.dateformat(datetime.now(tz=timezone(s1.DFTTIMEZONE)), s1.TEMPLATE1)))
 logger.info('START "%s".' % (os.path.basename(__file__),))
 
 
-#    -----------------------------------------------
-#  2. Ouverture de la connexion à la base de données.
-#    -----------------------------------------------
-conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
-conn.row_factory = sqlite3.Row
+#    -----------------
+#  2. Data extraction.
+#    -----------------
+with s2.connectto(s1.DATABASE) as c:
 
+    for album in c.execute("SELECT rowid, albumid, artist, year, album, discs, genre, upc FROM albums ORDER BY rowid"):
+        albums.append(album)
+        for disc in c.execute("SELECT rowid, albumid, discid FROM discs WHERE albumid=? ORDER BY rowid", (album["albumid"],)):
+            discs.append(disc)
+            for track in c.execute("SELECT rowid, albumid, discid, trackid, title FROM tracks WHERE albumid=? and discid=? ORDER BY rowid", (album["albumid"], disc["discid"])):
+                tracks.append(track)
 
-#    -----------------------
-#  3. Extraction des données.
-#    -----------------------
-for album in conn.cursor().execute("SELECT rowid, albumid, artist, year, album, discs, genre, upc FROM albums ORDER BY rowid"):
-    albums.append(album)
-    for disc in conn.cursor().execute("SELECT rowid, albumid, discid FROM discs WHERE albumid=? ORDER BY rowid", (album["albumid"],)):
-        discs.append(disc)
-        for track in conn.cursor().execute("SELECT rowid, albumid, discid, trackid, title FROM tracks WHERE albumid=? and discid=? ORDER BY rowid", (album["albumid"], disc["discid"])):
-            tracks.append(track)
-
-
-#    -----------------------------------------------
-#  4. Fermeture de la connexion à la base de données.
-#    -----------------------------------------------
-conn.close()
-
-
-#    ------------------------
-#  5. Restitution des données.
-#    ------------------------
-print(content.render(content="{0}{1}{2}".format(t3.render(id="albums", h2="albums", th=ALBUMS, tr=albums),
-                                                t4.render(id="discs", h2="discs", th=DISCS, tr=discs),
-                                                t5.render(id="tracks", h2="tracks", th=TRACKS, tr=tracks)
-                                                )
-                     )
-      )
+    print(content.render(content="{0}{1}{2}".format(t3.render(id="albums", h2="albums", th=ALBUMS, tr=albums),
+                                                    t4.render(id="discs", h2="discs", th=DISCS, tr=discs),
+                                                    t5.render(id="tracks", h2="tracks", th=TRACKS, tr=tracks)
+                                                    )
+                         )
+          )
 
 
 #    --------------
-#  6. Stop logging.
+#  3. Stop logging.
 #    --------------
 logger.info('END "%s".' % (os.path.basename(__file__),))
