@@ -119,14 +119,14 @@ art_count2 = collections.OrderedDict(sorted(sorted(art_count.items(), key=itemge
 #     -----------------------------------
 
 #  Total des extensions respectives à chaque artiste.
-for artist in artext_dict.keys():
+for artist in artext_dict:
     artext_count = collections.Counter()
     for extension in artext_dict[artist]:
         artext_count[extension] += 1
     artext_dict[artist] = artext_count
 
 #  Tri par extension croissante.
-for artist in artext_dict.keys():
+for artist in artext_dict:
     artext_dict[artist] = collections.OrderedDict(sorted(artext_dict[artist].items(), key=itemgetter(0)))
 
 #     ------
