@@ -5,6 +5,9 @@ import cmath
 __author__ = 'Xavier ROSSET'
 
 
+# ========
+# Classes.
+# ========
 class Circle(object):
 
     getcontext().prec = 6
@@ -138,19 +141,24 @@ class GeometricSequence(object):
         self._ratio = Decimal(value)
 
 
-def formatnumber(n, rajust=5):
+# ==========
+# Functions.
+# ==========
+def power_sum(x, n):
     """
-    :param n: decimal.Decimal type number.
-    :param rajust: right alignment given to number integer part.
-    :return: aligned number.
+    Return result of 1 + x**0 + x**1 + x**2 + x**3 + ... + x**n.
+    :param x: constant operand.
+    :param n: rising exponent.
+    :return: sum.
     """
-    part1, part2 = None, None
-    numb = str(n)
-    part1 = "{:>{rajust}}".format(numb, rajust=rajust)
-    if "." in numb:
-        l = numb.split(".")
-        part1 = "{:>{rajust}}".format(l[0], rajust=rajust)
-        part2 = l[1]
-    if part2:
-        return "{0}.{1}".format(part1, part2)
-    return part1
+    return (pow(Decimal(x), int(Decimal(n)) + Decimal(1)) - Decimal(1))/(Decimal(x) - Decimal(1))
+
+
+def sequence_sum(n):
+    """
+    Return result of 1 + 2 + 3 + 4 + ... + n.
+    :param n: rising operand.
+    :return: sum.
+    """
+    return (int(Decimal(n))*(int(Decimal(n)) + Decimal(1)))/Decimal(2)
+
