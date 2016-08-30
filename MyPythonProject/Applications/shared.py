@@ -25,8 +25,6 @@ locale.setlocale(locale.LC_ALL, "")
 # ==========
 APPEND = "a"
 WRITE = "w"
-# AUTHOR = "Xavier ROSSET"
-# CODING = "-*- coding: ISO-8859-1 -*-"
 DATABASE = r"g:\computing\database.db"
 LOG = r"g:\computing\log.log"
 DFTENCODING = "ISO-8859-1"
@@ -212,7 +210,7 @@ class Images(Files):
     @property
     def make(self):
         if 271 in self.exif:
-             return self.exif[271]
+            return self.exif[271]
 
     @property
     def model(self):
@@ -268,24 +266,14 @@ class Images(Files):
             return v[0]
         return v
 
+    @staticmethod
+    def defaultlocation(year, month, day):
 
         defaultdrive = MUSIC
 
-    # @staticmethod
-    # def defaultlocation(year, month, day):
-    #
-    #     defaultdrive = "h:\\"
-    #
-    #     # Cas 1 : "h:\CCYY\MM\DD".
-    #     if year in [2011, 2012]:
-    #         return os.path.join(defaultdrive, str(year), str(month).zfill(2), str(day).zfill(2))
-    #
-    #     # Cas 2 : "h:\CCYY\MM.DD".
-    #     elif year == 2014:
-    #         return os.path.join(defaultdrive, str(year), "{}.{}".format(str(month).zfill(2), str(day).zfill(2)))
-    #
-    #     # Cas 3 : "h:\CCYYMM".
-    #     return os.path.join(defaultdrive, "{}{}".format(year, str(month).zfill(2)))
+        # Cas 1 : "h:\CCYY\MM\DD".
+        if year in [2011, 2012]:
+            return os.path.join(defaultdrive, str(year), str(month).zfill(2), str(day).zfill(2))
 
         # Cas 2 : "h:\CCYY\MM.DD".
         elif year == 2014:
