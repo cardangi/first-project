@@ -172,6 +172,62 @@ class Images(Files):
     def originalyear(self):
         return self.datetime.strftime("%Y")
 
+    @property
+    def originalmonth(self):
+        return self.datetime.strftime("%m")
+
+    @property
+    def originalday(self):
+        return self.datetime.strftime("%d")
+
+    @property
+    def originalhour(self):
+        return self.datetime.strftime("%H")
+
+    @property
+    def originalminutes(self):
+        return self.datetime.strftime("%M")
+
+    @property
+    def originalseconds(self):
+        return self.datetime.strftime("%S")
+
+    @property
+    def dayoftheyear(self):
+        return self.datetime.strftime("%j")
+
+    @property
+    def dayoftheweek(self):
+        return self.datetime.strftime("%w")
+
+                # self.metadata["defaultlocation"] = self.defaultlocation(self.metadata["originalyear"], self.metadata["originalmonth"], self.metadata["originalday"])
+                # self.metadata["defaultprefix"] = "{}{}".format(self.metadata["originalyear"], str(self.metadata["originalmonth"]).zfill(2))
+
+    @property
+    def make(self):
+        if 271 in self.exif:
+             return self.exif[271]
+
+    @property
+    def model(self):
+        if 272 in self.exif:
+            return self.exif[272]
+
+    @property
+    def width(self):
+        if 40962 in self.exif:
+            return self.exif[40962]
+
+    @property
+    def height(self):
+        if 40963 in self.exif:
+            return self.exif[40963]
+
+    @property
+    def copyright(self):
+        if 33432 in self.exif:
+            return self.exif[33432]
+
     @classmethod
     def getexif(cls, o):
         """
