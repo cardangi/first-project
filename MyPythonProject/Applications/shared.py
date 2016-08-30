@@ -263,9 +263,15 @@ class Images(Files):
         return d
 
     @staticmethod
+    def fixup(v):
+        if len(v) == 1:
+            return v[0]
+        return v
+
+    @staticmethod
     def defaultlocation(year, month, day):
 
-        defaultdrive = "h:\\"
+        defaultdrive = MUSIC
 
         # Cas 1 : "h:\CCYY\MM\DD".
         if year in [2011, 2012]:
@@ -277,12 +283,6 @@ class Images(Files):
 
         # Cas 3 : "h:\CCYYMM".
         return os.path.join(defaultdrive, "{0}{1}".format(year, str(month).zfill(2)))
-
-    @staticmethod
-    def fixup(v):
-        if len(v) == 1:
-            return v[0]
-        return v
 
 
 class CustomFormatter(logging.Formatter):
