@@ -5,6 +5,9 @@ import cmath
 __author__ = 'Xavier ROSSET'
 
 
+# ========
+# Classes.
+# ========
 class Circle(object):
 
     getcontext().prec = 6
@@ -136,3 +139,26 @@ class GeometricSequence(object):
         if value > 100:
             raise ValueError("Ratio above 100 is not allowed due to system limitations.")
         self._ratio = Decimal(value)
+
+
+# ==========
+# Functions.
+# ==========
+def power_sum(x, n):
+    """
+    Return result of 1 + x**0 + x**1 + x**2 + x**3 + ... + x**n.
+    :param x: constant operand.
+    :param n: rising exponent.
+    :return: sum.
+    """
+    return (pow(Decimal(x), int(Decimal(n)) + Decimal(1)) - Decimal(1))/(Decimal(x) - Decimal(1))
+
+
+def sequence_sum(n):
+    """
+    Return result of 1 + 2 + 3 + 4 + ... + n.
+    :param n: rising operand.
+    :return: sum.
+    """
+    return (int(Decimal(n))*(int(Decimal(n)) + Decimal(1)))/Decimal(2)
+
