@@ -335,31 +335,6 @@ def dateformat(dt, template):
                                          )
 
 
-# def extensioncount(extensions, folder=os.getcwd()):
-#     """
-#     :param extensions:
-#     :param folder:
-#     :return:
-#     """
-#     d, l = {}, []
-#     if extensions:
-#         l = sorted([i.lower() for i in extensions])
-#     for root, folders, files in os.walk(folder):
-#         for file in files:
-#             select_file = False
-#             ext = os.path.splitext(file)[1][1:].lower()
-#             if not l:
-#                 select_file = True
-#             elif l and ext in l:
-#                 select_file = True
-#             if select_file:
-#                 if ext in d:
-#                     d[ext.upper()] += 1
-#                 else:
-#                     d[ext.upper()] = 1
-#     return d
-
-
 def filesinfolder(extensions, folder=os.getcwd()):
     l = []
     if extensions:
