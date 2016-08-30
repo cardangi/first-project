@@ -23,6 +23,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument("fromfile", type=argparse.FileType(encoding=s1.DFTENCODING))
 
 
+# ==========
+# Functions.
+# ==========
 def convertyeartointeger(s):
     import re
     regex = re.compile(r"^(?:19[6-9][0-9]|20(?:[0-9]){2})$")
@@ -43,8 +46,12 @@ HEADERS = ["index", "albumsort", "titlesort", "artist", "year", "album", "genre"
 # Initializations.
 # ================
 arguments = parser.parse_args()
+
+
+# ===============
+# SQLite adapter.
+# ===============
 sqlite3.register_adapter(s2.Boolean, s2.adapt_boolean)
-sqlite3.register_converter("boolean", s2.convert_boolean)
 
 
 # ===============
