@@ -115,7 +115,7 @@ class GeometricSequence(object):
 
     @property
     def sequence(self):
-        for element in map(mul, repeat(self._firstterm), list(map(pow, repeat(self.ratio), range(self.terms)))):
+        for element in map(mul, repeat(self._firstterm), map(pow, repeat(self.ratio), map(Decimal, range(self.terms)))):
             yield element
 
     @property
