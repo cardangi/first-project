@@ -27,17 +27,13 @@ parser.add_argument("type", help="type of the sequence: arithmetic or geometric.
 # ==========
 # Constants.
 # ==========
-TITLEA, TITLEG, TITLES = "DISPLAY ARITHMETIC SEQUENCE", "DISPLAY GEOMETRIC SEQUENCE", ["{0:>10}".format("indice"), "{0:>18}".format("element"), "{0:>10}".format("-"*len("indice")), "{0:>18}".format("-"*len("element"))]
+TITLE, TITLES = {"A": "DISPLAY ARITHMETIC SEQUENCE", "G": "DISPLAY GEOMETRIC SEQUENCE"}, ["{0:>10}".format("indice"), "{0:>18}".format("element"), "{0:>10}".format("-"*len("indice")), "{0:>18}".format("-"*len("element"))]
 
 
 # ================
 # Initializations.
 # ================
-j, firstterm, series, terms, difference, ratio, header, precision, arguments = 0, 0, 0, None, None, None, None, None, parser.parse_args()
-if arguments.type == "A":
-    header = "{0}\n{1}\n{0}\n\n".format(("*"*(len(TITLEA) + 4)).rjust(len(TITLEA) + 7), "* {0} *".format(TITLEA).rjust(len(TITLEA) + 7))
-if arguments.type == "G":
-    header = "{0}\n{1}\n{0}\n\n".format(("*"*(len(TITLEG) + 4)).rjust(len(TITLEG) + 7), "* {0} *".format(TITLEG).rjust(len(TITLEG) + 7))
+header, arguments = "{0:>{width1}s}\n{1:>{width2}s}\n{0:>{width1}s}\n\n".format("".join(list(itertools.repeat("*", len(TITLE[arguments.type]) + 4))), "* {0} *".format(TITLE[arguments.type]), width1=len(TITLE[arguments.type]) + 4 + 3, width2=len(TITLE[arguments.type]) + 3), parser.parse_args()
 
 
 # ===============
