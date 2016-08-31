@@ -1,6 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
-from decimal import Decimal
 from itertools import repeat
+from decimal import Decimal
 from operator import mul
 import cmath
 
