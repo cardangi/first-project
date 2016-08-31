@@ -32,11 +32,11 @@ class Circle(object):
 
     @property
     def perimeter(self):
-        return self.diameter*Decimal(self.pi)
+        return self.diameter*self.pi
 
     @property
     def surface(self):
-        return Decimal(self.pi)*self.radius**Decimal("2")
+        return self.pi*self.radius**2
 
 
 class ArithmeticSequence(object):
