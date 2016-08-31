@@ -43,13 +43,11 @@ class ArithmeticSequence(object):
     """
     Compute arithmetic sequences.
     """
-
     def __init__(self, firstterm=1, difference=1, terms=10):
         """
         :param firstterm: first term of the sequence.
         :param difference: common difference between two consecutive terms of the sequence.
         :param terms: number of returned terms.
-        :return:
         """
         self._terms = 0
         self._difference = 0
@@ -99,13 +97,11 @@ class GeometricSequence(object):
     """
     Compute geometric sequences.
     """
-
     def __init__(self, firstterm=1, ratio=2, terms=10):
         """
         :param firstterm: first term of the sequence.
         :param ratio: common ratio between two consecutive terms of the sequence.
         :param terms: number of returned terms.
-        :return:
         """
         self._terms = 0
         self._ratio = 0
@@ -153,7 +149,7 @@ def power_sum(x, n):
     Return result of 1 + x**1 + x**2 + x**3 + ... + x**n.
     :param x: constant operand.
     :param n: rising exponent.
-    :return: result of 1 + x**1 + x**2 + x**3 + ... + x**n.
+    :return: value of 1 + x**1 + x**2 + x**3 + ... + x**n.
     """
     return (pow(Decimal(x), int(Decimal(n)) + Decimal(1)) - Decimal(1))/(Decimal(x) - Decimal(1))
 
@@ -162,7 +158,6 @@ def sequence_sum(n):
     """
     Return result of 1 + 2 + 3 + 4 + ... + n.
     :param n: rising operand.
-    :return: result of 1 + 2 + 3 + 4 + ... + n.
+    :return: value of 1 + 2 + 3 + 4 + ... + n.
     """
     return (int(Decimal(n))*(int(Decimal(n)) + Decimal(1)))/Decimal(2)
-

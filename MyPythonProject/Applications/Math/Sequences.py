@@ -1,6 +1,7 @@
 # -*- coding: ISO-8859-1 -*-
 from decimal import Decimal
 import subprocess
+import itertools
 import argparse
 import sys
 from .Modules import shared
@@ -33,7 +34,11 @@ TITLE, TITLES = {"A": "DISPLAY ARITHMETIC SEQUENCE", "G": "DISPLAY GEOMETRIC SEQ
 # ================
 # Initializations.
 # ================
-header, arguments = "{0:>{width1}s}\n{1:>{width2}s}\n{0:>{width1}s}\n\n".format("".join(list(itertools.repeat("*", len(TITLE[arguments.type]) + 4))), "* {0} *".format(TITLE[arguments.type]), width1=len(TITLE[arguments.type]) + 4 + 3, width2=len(TITLE[arguments.type]) + 3), parser.parse_args()
+arguments = parser.parse_args()
+header = "{0:>{width1}s}\n{1:>{width2}s}\n{0:>{width1}s}\n\n".format("".join(list(itertools.repeat("*", len(TITLE[arguments.type]) + 4))),
+                                                                     "* {0} *".format(TITLE[arguments.type]),
+                                                                     width1=len(TITLE[arguments.type]) + 4 + 3,
+                                                                     width2=len(TITLE[arguments.type]) + 3)
 
 
 # ===============
