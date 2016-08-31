@@ -70,9 +70,12 @@ class ArithmeticSequence(object):
 
     @terms.setter
     def terms(self, value):
+        value = int(Decimal(value))
+        if value == 0:
+            raise ValueError("Terms must be greater than 0.")
         if value > 49999:
             raise ValueError("Terms must be lower than 50000 due to system limitations.")
-        self._terms = int(Decimal(value))
+        self._terms = value
 
     @property
     def difference(self):
@@ -80,9 +83,10 @@ class ArithmeticSequence(object):
 
     @difference.setter
     def difference(self, value):
-        if value == 0:
+        value = Decimal(value)
+        if value.compare(Decimal("0")) == Decimal("0"):
             raise ValueError("Difference must be greater than 0.")
-        self._difference = Decimal(value)
+        self._difference = value
 
     @property
     def lastterm(self):
@@ -124,9 +128,12 @@ class GeometricSequence(object):
 
     @terms.setter
     def terms(self, value):
+        value = int(Decimal(value))
+        if value == 0:
+            raise ValueError("Terms must be greater than 0.")
         if value > 1499:
             raise ValueError("Terms must be lower than 1500 due to system limitations.")
-        self._terms = int(Decimal(value))
+        self._terms = value
 
     @property
     def ratio(self):
@@ -134,11 +141,14 @@ class GeometricSequence(object):
 
     @ratio.setter
     def ratio(self, value):
-        if value == 0:
+        value = Decimal(value)
+        if value.compare(Decimal("0")) == Decimal("0"):
             raise ValueError("Ratio must be greater than 0.")
-        if value > 99:
+        if value.compare(Decimal("1")) == Decimal("0"):
+            raise ValueError("Ratio must be greater than 1.")
+        if value.compare(Decimal("99")) == Decimal("1"):
             raise ValueError("Ration must be lower than 100 due to system limitations.")
-        self._ratio = Decimal(value)
+        self._ratio = value
 
 
 # ==========

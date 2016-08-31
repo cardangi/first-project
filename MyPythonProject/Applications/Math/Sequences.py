@@ -72,6 +72,8 @@ while True:
         except ArithmeticError:
             continue
         else:
+            if terms == 0:
+                continue
             if arguments.type == "A" and terms > 49999:
                 continue
             if arguments.type == "G" and terms > 1499:
@@ -109,6 +111,8 @@ while True:
                 continue
             else:
                 if ratio.compare(Decimal("0")) == Decimal("0"):
+                    continue
+                if ratio.compare(Decimal("1")) == Decimal("0"):
                     continue
                 if ratio.compare(Decimal("99")) == Decimal("1"):
                     continue
@@ -168,29 +172,21 @@ while True:
 
         #  7a. Arithmetic sequence.
         if arguments.type == "A":
-            try:
-                arithmetic = s1.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
-            except ValueError:
-                break
-            else:
-                if choice.upper() in ["B", "E"]:
-                    for index, element in enumerate(arithmetic.sequence):
-                        print("{0:>10} {1:>17.{precision}f}".format(index, element, precision=precision))
-                if choice.upper() in ["B", "S"]:
-                    series = arithmetic.series
+            arithmetic = s1.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
+            if choice.upper() in ["B", "E"]:
+                for index, element in enumerate(arithmetic.sequence):
+                    print("{0:>10} {1:>17.{precision}f}".format(index, element, precision=precision))
+            if choice.upper() in ["B", "S"]:
+                series = arithmetic.series
 
         #  7b. Geometric sequence.
         elif arguments.type == "G":
-            try:
-                geometric = s1.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
-            except ValueError:
-                break
-            else:
-                if choice.upper() in ["B", "E"]:
-                    for index, element in enumerate(geometric.sequence):
-                        print("{0:>10} {1:>17.{precision}f}".format(index, element, precision=precision))
-                if choice.upper() in ["B", "S"]:
-                    series = geometric.series
+            geometric = s1.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
+            if choice.upper() in ["B", "E"]:
+                for index, element in enumerate(geometric.sequence):
+                    print("{0:>10} {1:>17.{precision}f}".format(index, element, precision=precision))
+            if choice.upper() in ["B", "S"]:
+                series = geometric.series
 
         #  7c. Series.
         print("\n\n")
