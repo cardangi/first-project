@@ -145,10 +145,14 @@ class GeometricSequence(object):
         if value.compare(Decimal("0")) == Decimal("0"):
             raise ValueError("Ratio must be greater than 0.")
         if value.compare(Decimal("1")) == Decimal("0"):
-            raise ValueError("Ratio must be greater than 1.")
+            raise ValueError("Ratio must be different from 1.")
         if value.compare(Decimal("99")) == Decimal("1"):
             raise ValueError("Ration must be lower than 100 due to system limitations.")
         self._ratio = value
+
+    @property
+    def lastterm(self):
+        return list(reversed(list(self.sequence)))[0]
 
 
 # ==========
