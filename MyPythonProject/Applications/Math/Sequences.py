@@ -27,7 +27,7 @@ parser.add_argument("type", help="type of the sequence: arithmetic or geometric.
 # ==========
 # Constants.
 # ==========
-TITLEA, TITLEG, TITLES = "DISPLAY ARITHMETIC SEQUENCE", "DISPLAY GEOMETRIC SEQUENCE", ["{:>10}".format("indice"), "{:>18}".format("element"), "{:>10}".format("-"*len("indice")), "{:>18}".format("-"*len("element"))]
+TITLEA, TITLEG, TITLES = "DISPLAY ARITHMETIC SEQUENCE", "DISPLAY GEOMETRIC SEQUENCE", ["{0:>10}".format("indice"), "{0:>18}".format("element"), "{0:>10}".format("-"*len("indice")), "{0:>18}".format("-"*len("element"))]
 
 
 # ================
@@ -48,41 +48,50 @@ if arguments.type == "G":
 #     ---------------------------
 #  1. First term of the sequence.
 #     ---------------------------
-while not firstterm:
+while True:
     displayheader(head=header)
-    firstterm = input("   Please enter the first terms of the sequence: ")
     try:
-        firstterm = Decimal(firstterm)
-    except ValueError:
-        firstterm = None
+        firstterm = Decimal(input("   Please enter the first terms of the sequence: "))
+    except ArithmeticError:
+        continue
+    else:
+        break
 
 
 #     --------------------------------
 #  2. Number of terms of the sequence.
 #     --------------------------------
-while not terms:
+while True:
     displayheader(head=header)
     print("   First term: {0}\n".format(firstterm))
-    terms = input("   Please enter the number of terms of the sequence: ")
     try:
-        terms = Decimal(terms)
-    except ValueError:
-        terms = None
+        terms = int(Decimal(input("   Please enter the number of terms of the sequence: ")))
+    except ArithmeticError:
+        continue
+    else:
+        if arguments.type == "A" and terms > 49999:
+            continue
+        if arguments.type == "G" and terms > 1499:
+            continue
+        break
 
 
 #     --------------------------------------------------------------------
 #  3. Common difference between two terms if arithmetic sequence expected.
 #     --------------------------------------------------------------------
 if arguments.type == "A":
-    while not difference:
+    while True:
         displayheader(head=header)
         print("   First term: {0}".format(firstterm))
         print("   Terms\t: {0}\n".format(terms).expandtabs(13))
-        difference = input("   Please enter the common difference of the sequence: ")
         try:
-            difference = Decimal(difference)
-        except ValueError:
-            difference = None
+            difference = Decimal(input("   Please enter the common difference of the sequence: "))
+        except ArithmeticError:
+            continue
+        else:
+            if difference.compare(Decimal("0")) == Decimal("0"):
+                continue
+            break
 
 
 #     --------------------------------------------------------------
@@ -93,17 +102,22 @@ elif arguments.type == "G":
         displayheader(head=header)
         print("   First term: {0}".format(firstterm))
         print("   Terms\t: {0}\n".format(terms).expandtabs(13))
-        ratio = input("   Please enter the common ratio of the sequence: ")
         try:
-            ratio = Decimal(ratio)
-        except ValueError:
-            ratio = None
+            ratio = Decimal(input("   Please enter the common ratio of the sequence: "))
+        except ArithmeticError:
+            continue
+        else:
+            if ratio.compare(Decimal("0")) == Decimal("0"):
+                continue
+            if ratio.compare(Decimal("99")) == Decimal("1"):
+                continue
+            break
 
 
 #     ----------
 #  5. Precision.
 #     ----------
-while not precision:
+while True:
     displayheader(head=header)
     print("   First term: {0}".format(firstterm))
     print("   Terms\t: {0}".format(terms).expandtabs(13))
@@ -113,16 +127,17 @@ while not precision:
         print("   Ratio\t: {0}\n".format(ratio).expandtabs(13))
     precision = input("   Please enter precision: ")
     try:
-        precision = int(precision)
-    except ValueError:
-        precision = None
+        precision = int(Decimal(precision))
+    except ArithmeticError:
+        continue
+    else:
+        break
 
 
 #     ---------------------------------
 #  6. Display elements, series or both?
 #     ---------------------------------
-choice = None
-while not choice:
+while True:
     displayheader(head=header)
     print("   First term: {0}".format(firstterm))
     print("   Terms\t: {0}".format(terms).expandtabs(13))
@@ -133,7 +148,8 @@ while not choice:
     print("   Precision\t: {0}\n".format(precision).expandtabs(13))
     choice = input("   Display elements [E], series [S] or both [B]: ")
     if choice.upper() not in ["B", "E", "S"]:
-        choice = None
+        continue
+    break
 
 
 #     ----------------
@@ -150,31 +166,39 @@ print("   Precision\t: {0}".format(precision).expandtabs(13))
 if choice.upper() in ["B", "E"]:
     print("\n\n   The terms of the sequence are:\n\n\n{d[2]}{d[3]}\n{d[0]}{d[1]}\n{d[2]}{d[3]}".format(d=TITLES))
 
-#  7a. Arithmetic sequence.
-if arguments.type == "A":
-    arithmetic = shared.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
-    if choice.upper() in ["B", "E"]:
-        for i in arithmetic.sequence:
-            print("{0}. {1}".format("{:>9}".format(j), "{:>17.{precision}f}".format(i, precision=precision)))
-            j += 1
-    if choice.upper() in ["B", "S"]:
-        series = arithmetic.series
+while True:
 
-#  7b. Geometric sequence.
-elif arguments.type == "G":
-    geometric = shared.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
-    if choice.upper() in ["B", "E"]:
-        for i in geometric.sequence:
-            print("{0}. {1}".format("{:>9}".format(j), "{:>17.{precision}f}".format(i, precision=precision)))
-            j += 1
-    if choice.upper() in ["B", "S"]:
-        series = geometric.series
+    #  7a. Arithmetic sequence.
+    if arguments.type == "A":
+        try:
+            arithmetic = shared.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
+        except ValueError:
+            break
+        else:
+            if choice.upper() in ["B", "E"]:
+                for index, element in enumerate(arithmetic.sequence):
+                    print("{0:>9}. {1:>17.{precision}f}".format(index, element, precision=precision))
+            if choice.upper() in ["B", "S"]:
+                series = arithmetic.series
 
-#  7c. Series if required.
-if choice.upper() in ["B", "S"]:
-    print("\n\n   The sum of the terms is: {:.{precision}f}\n\n".format(series, precision=precision))
-if choice.upper() == "E":
-    print("\n\n")
+    #  7b. Geometric sequence.
+    elif arguments.type == "G":
+        try:
+            geometric = shared.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
+        except ValueError:
+            break
+        else:
+            if choice.upper() in ["B", "E"]:
+                for index, element in enumerate(geometric.sequence):
+                    print("{0:>9}. {1:>17.{precision}f}".format(index, element, precision=precision))
+            if choice.upper() in ["B", "S"]:
+                series = geometric.series
+
+    #  7c. Series if required.
+    if choice.upper() in ["B", "S"]:
+        print("\n\n   The sum of the terms is: {0:.{precision}f}\n\n".format(series, precision=precision))
+    if choice.upper() == "E":
+        print("\n\n")
 
 
 #     -------------
