@@ -204,7 +204,6 @@ while True:
     #     ----------------
     while True:
         print(clearscreen())
-
         if choice.upper() in ["B", "E"]:
             print("\n\n   The terms of the sequence are:\n\n\n{d[2]}{d[3]}\n{d[0]}{d[1]}\n{d[2]}{d[3]}".format(d=TITLES))
 
