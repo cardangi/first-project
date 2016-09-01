@@ -1,5 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 from decimal import Decimal
+from functools import wraps
 import subprocess
 import itertools
 import argparse
@@ -10,13 +11,51 @@ from .. import shared as s2
 __author__ = 'Xavier ROSSET'
 
 
+# ========
+# Classes.
+# ========
+class FirstDecorator(object):
+    """
+    Docstring.
+    """
+    def __init__(self, datatoprint):
+        self.datatoprint = datatoprint
+
+    def __call__(self, func):
+
+        @wraps(func)
+        def noname():
+            func()
+            print(self.datatoprint)
+
+        return noname
+
+
+class SecondDecorator(object):
+    """
+    Docstring.
+    """
+    def __init__(self, *args):
+        self.args = args
+
+    def __call__(self, func):
+
+        @wraps(func)
+        def noname():
+            func()
+            for label, value in *self.args:
+                print("{0:>{width}s}: {1}\n".format(self.label, self.value, width=len(self.label) + 3))
+
+        return noname
+
 # ==========
 # Functions.
 # ==========
-def displayheader(head=None):
+def clearscreen():
+    """
+    Docstring
+    """
     subprocess.run("CLS", shell=True)
-    if head:
-        print("\n{0}".format(head))
 
 
 # =================
@@ -53,7 +92,7 @@ while True:
     #  1. First term of the sequence.
     #     ---------------------------
     while True:
-        displayheader(head=header)
+        FirstDecorator(header)(clearscreen)()
         try:
             firstterm = Decimal(input("   Please enter the first terms of the sequence: "))
         except ArithmeticError:
@@ -65,8 +104,7 @@ while True:
     #  2. Number of terms of the sequence.
     #     --------------------------------
     while True:
-        displayheader(head=header)
-        print("   First term: {0}\n".format(firstterm))
+        SecondDecorator(("First term", firstterm),)(FirstDecorator(header)(clearscreen))()
         try:
             terms = int(Decimal(input("   Please enter the number of terms of the sequence: ")))
         except ArithmeticError:
@@ -80,14 +118,13 @@ while True:
                 continue
             break
 
+    while True:
+        SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms))(FirstDecorator(header)(clearscreen))()
+
     #     --------------------------------------------------------------------
     #  3. Common difference between two terms if arithmetic sequence expected.
     #     --------------------------------------------------------------------
-    if arguments.type == "A":
-        while True:
-            displayheader(head=header)
-            print("   First term: {0}".format(firstterm))
-            print("   Terms\t: {0}\n".format(terms).expandtabs(13))
+        if arguments.type == "A":
             try:
                 difference = Decimal(input("   Please enter the common difference of the sequence: "))
             except ArithmeticError:
@@ -100,11 +137,7 @@ while True:
     #     --------------------------------------------------------------
     #  4. Common ratio between two terms if geometric sequence expected.
     #     --------------------------------------------------------------
-    elif arguments.type == "G":
-        while True:
-            displayheader(head=header)
-            print("   First term: {0}".format(firstterm))
-            print("   Terms\t: {0}\n".format(terms).expandtabs(13))
+        elif arguments.type == "G":
             try:
                 ratio = Decimal(input("   Please enter the common ratio of the sequence: "))
             except ArithmeticError:
@@ -122,13 +155,11 @@ while True:
     #  5. Precision.
     #     ----------
     while True:
-        displayheader(head=header)
-        print("   First term: {0}".format(firstterm))
-        print("   Terms\t: {0}".format(terms).expandtabs(13))
+        FirstDecorator(header)(clearscreen)()
         if arguments.type == "A":
-            print("   Difference: {0}\n".format(difference).expandtabs(13))
+            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Difference", difference))(FirstDecorator(header)(clearscreen))()
         elif arguments.type == "G":
-            print("   Ratio\t: {0}\n".format(ratio).expandtabs(13))
+            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Ratio\t".expandtabs(13), ratio))(FirstDecorator(header)(clearscreen))()
         precision = input("   Please enter precision: ")
         try:
             precision = int(Decimal(precision))
@@ -141,14 +172,10 @@ while True:
     #  6. Display elements, series or both?
     #     ---------------------------------
     while True:
-        displayheader(head=header)
-        print("   First term: {0}".format(firstterm))
-        print("   Terms\t: {0}".format(terms).expandtabs(13))
         if arguments.type == "A":
-            print("   Difference: {0}".format(difference).expandtabs(13))
+            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Difference", difference), ("Precision\t".expandtabs(13), precision))(FirstDecorator(header)(clearscreen))()
         elif arguments.type == "G":
-            print("   Ratio\t: {0}".format(ratio).expandtabs(13))
-        print("   Precision\t: {0}\n".format(precision).expandtabs(13))
+            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Ratio\t".expandtabs(13), ratio), ("Precision\t".expandtabs(13), precision))(FirstDecorator(header)(clearscreen))()
         choice = input("   Display elements [E], series [S] or both [B]: ")
         if choice.upper() not in ["B", "E", "S"]:
             continue
@@ -159,36 +186,30 @@ while True:
     #     ----------------
     while True:
 
-        displayheader(head=header)
-        print("   First term: {0}".format(firstterm))
-        print("   Terms\t: {0}".format(terms).expandtabs(13))
         if arguments.type == "A":
-            print("   Difference: {0}".format(difference).expandtabs(13))
-        if arguments.type == "G":
-            print("   Ratio\t: {0}".format(ratio).expandtabs(13))
-        print("   Precision\t: {0}".format(precision).expandtabs(13))
+            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Difference", difference), ("Precision\t".expandtabs(13), precision))(FirstDecorator(header)(clearscreen))()
+        elif arguments.type == "G":
+            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Ratio\t".expandtabs(13), ratio), ("Precision\t".expandtabs(13), precision))(FirstDecorator(header)(clearscreen))()
+
         if choice.upper() in ["B", "E"]:
             print("\n\n   The terms of the sequence are:\n\n\n{d[2]}{d[3]}\n{d[0]}{d[1]}\n{d[2]}{d[3]}".format(d=TITLES))
 
         #  7a. Arithmetic sequence.
         if arguments.type == "A":
-            arithmetic = s1.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
-            if choice.upper() in ["B", "E"]:
-                for index, element in enumerate(arithmetic.sequence):
-                    print("{0:>10} {1:>17.{precision}f}".format(index, element, precision=precision))
-            if choice.upper() in ["B", "S"]:
-                series = arithmetic.series
+            sequence = s1.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
 
         #  7b. Geometric sequence.
         elif arguments.type == "G":
-            geometric = s1.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
-            if choice.upper() in ["B", "E"]:
-                for index, element in enumerate(geometric.sequence):
-                    print("{0:>10} {1:>17.{precision}f}".format(index, element, precision=precision))
-            if choice.upper() in ["B", "S"]:
-                series = geometric.series
+            sequence = s1.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
 
-        #  7c. Series.
+        #  7c. Sequence.
+        if choice.upper() in ["B", "E"]:
+            for index, element in enumerate(sequence.sequence):
+                print("{0:>10} {1:>17.{precision}f}".format(index, element, precision=precision))
+        if choice.upper() in ["B", "S"]:
+            series = sequence.series
+
+        #  7d. Series.
         print("\n\n")
         if choice.upper() in ["B", "S"]:
             print("   The sum of the terms is: {0:.{precision}f}\n\n".format(series, precision=precision))
