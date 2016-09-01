@@ -180,7 +180,7 @@ while True:
         if arguments.type == "A":
             print(clearscreen("Difference", difference))
         elif arguments.type == "G":
-            print(clearscreen("Ration\t".expandtabs(TABSIZE), ratio))
+            print(clearscreen("Ratio\t".expandtabs(TABSIZE), ratio))
         precision = input("   Please enter precision: ")
         try:
             precision = int(Decimal(precision))
