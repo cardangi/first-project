@@ -11,6 +11,35 @@ from .. import shared as s2
 __author__ = 'Xavier ROSSET'
 
 
+# =================
+# Arguments parser.
+# =================
+parser = argparse.ArgumentParser()
+parser.add_argument("type", help="type of the sequence: arithmetic or geometric.", choices=["A", "G"])
+
+
+# ==========
+# Constants.
+# ==========
+TITLE, TITLES, TABSIZE = {"A": "DISPLAY ARITHMETIC SEQUENCE", "G": "DISPLAY GEOMETRIC SEQUENCE"}, \
+                         ["{0:>10s}".format("indice"), "{0:>18s}".format("element"), "{0:>10s}".format("-"*len("indice")), "{0:>18s}".format("-"*len("element"))], \
+                         13
+
+
+# =================
+# Initialization 1.
+# =================
+firstterm, terms, difference, ratio, precision, choice, series, arguments = None, None, None, None, None, None, None, parser.parse_args()
+
+
+# =================
+# Initialization 2.
+# =================
+header = "{0:>{width}s}\n{1:>{width}s}\n{0:>{width}s}".format("".join(list(itertools.repeat("*", len(TITLE[arguments.type]) + 4))),
+                                                              "* {0} *".format(TITLE[arguments.type]),
+                                                              width=len(TITLE[arguments.type]) + 4 + 3)
+
+
 # ========
 # Classes.
 # ========
@@ -18,18 +47,26 @@ class FirstDecorator(object):
     """
     Docstring.
     """
-    def __init__(self, datatoprint):
-        self.datatoprint = datatoprint
+    def __init__(self, arg):
+        self._header = ""
+        self.header = arg
+
+    @property
+    def header(self):
+        return self._header
+
+    @header.setter
+    def header(self, arg):
+        self._header = arg
 
     def __call__(self, func):
 
         @wraps(func)
-        def noname():
+        def wrapper():
             func()
-            return self.datatoprint
+            return "\n{0}\n\n".format(self.header)
 
-        return noname
-
+        return wrapper
 
 
 class SecondDecorator(object):
@@ -37,23 +74,23 @@ class SecondDecorator(object):
     Docstring.
     """
     def __init__(self):
-        self.index = 0
-        self.saved = dict()
+        self._index = 0
+        self._saved = dict()
 
     def __call__(self, func):
 
         @wraps(func)
-        def noname(*args):
-            template = "{0:>{width}s}: {1}\n"
-            func()
-            for key in sorted(self.saved.keys(), key=int):
-                return template.format(self.saved[key][0], self.saved[key][1], width=len(self.saved[key][0]) + 3))
+        def wrapper(*args):
+            result = func()
+            for key in sorted(self._saved.keys(), key=int):
+                result = "{0}\n{1:>{width}s}: {2}".format(result, self._saved[key][0], self._saved[key][1], width=len(self._saved[key][0]) + 3)
             if args:
-                self.index += 1
-                self.saved[str(self.index)] = args
-                return template.format(args[0], args[1], width=len(args[0]) + 3))
+                self._index += 1
+                self._saved[str(self._index)] = args
+                result = "{0}\n{1:>{width}s}: {2}\n\n".format(result, args[0], args[1], width=len(args[0]) + 3)
+            return result
 
-        return noname
+        return wrapper
 
 
 # ==========
@@ -68,34 +105,9 @@ def clearscreen():
     subprocess.run("CLS", shell=True)
 
 
-# =================
-# Arguments parser.
-# =================
-parser = argparse.ArgumentParser()
-parser.add_argument("type", help="type of the sequence: arithmetic or geometric.", choices=["A", "G"])
-
-
-# ==========
-# Constants.
-# ==========
-TITLE, TITLES = {"A": "DISPLAY ARITHMETIC SEQUENCE", "G": "DISPLAY GEOMETRIC SEQUENCE"}, ["{0:>10s}".format("indice"),
-                                                                                          "{0:>18s}".format("element"),
-                                                                                          "{0:>10s}".format("-"*len("indice")),
-                                                                                          "{0:>18s}".format("-"*len("element"))]
-
-
-# ================
-# Initializations.
-# ================
-firstterm, terms, difference, ratio, precision, choice, series, arguments = None, None, None, None, None, None, None, parser.parse_args()
-
-
 # ===============
 # Main algorithm.
 # ===============
-header = "{0:>{width}s}\n{1:>{width}s}\n{0:>{width}s}\n\n".format("".join(list(itertools.repeat("*", len(TITLE[arguments.type]) + 4))),
-                                                                  "* {0} *".format(TITLE[arguments.type]),
-                                                                  width=len(TITLE[arguments.type]) + 4 + 3)
 while True:
 
     #     ---------------------------
@@ -129,7 +141,7 @@ while True:
             break
 
     while True:
-        print(clearscreen("Terms\t".expandtabs(13), terms))
+        print(clearscreen("Terms\t".expandtabs(TABSIZE), terms))
 
     #     --------------------------------------------------------------------
     #  3. Common difference between two terms if arithmetic sequence expected.
@@ -165,11 +177,10 @@ while True:
     #  5. Precision.
     #     ----------
     while True:
-        FirstDecorator(header)(clearscreen)()
         if arguments.type == "A":
-            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Difference", difference))(FirstDecorator(header)(clearscreen))()
+            print(clearscreen("Difference", difference))
         elif arguments.type == "G":
-            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Ratio\t".expandtabs(13), ratio))(FirstDecorator(header)(clearscreen))()
+            print(clearscreen("Ration\t".expandtabs(TABSIZE), ratio))
         precision = input("   Please enter precision: ")
         try:
             precision = int(Decimal(precision))
@@ -182,10 +193,7 @@ while True:
     #  6. Display elements, series or both?
     #     ---------------------------------
     while True:
-        if arguments.type == "A":
-            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Difference", difference), ("Precision\t".expandtabs(13), precision))(FirstDecorator(header)(clearscreen))()
-        elif arguments.type == "G":
-            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Ratio\t".expandtabs(13), ratio), ("Precision\t".expandtabs(13), precision))(FirstDecorator(header)(clearscreen))()
+        print(clearscreen("Precision\t".expandtabs(TABSIZE), precision))
         choice = input("   Display elements [E], series [S] or both [B]: ")
         if choice.upper() not in ["B", "E", "S"]:
             continue
@@ -195,11 +203,7 @@ while True:
     #  7. Display results.
     #     ----------------
     while True:
-
-        if arguments.type == "A":
-            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Difference", difference), ("Precision\t".expandtabs(13), precision))(FirstDecorator(header)(clearscreen))()
-        elif arguments.type == "G":
-            SecondDecorator(("First term", firstterm), ("Terms\t".expandtabs(13), terms), ("Ratio\t".expandtabs(13), ratio), ("Precision\t".expandtabs(13), precision))(FirstDecorator(header)(clearscreen))()
+        print(clearscreen())
 
         if choice.upper() in ["B", "E"]:
             print("\n\n   The terms of the sequence are:\n\n\n{d[2]}{d[3]}\n{d[0]}{d[1]}\n{d[2]}{d[3]}".format(d=TITLES))
