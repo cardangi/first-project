@@ -23,7 +23,7 @@ parser.add_argument("type", help="type of the sequence: arithmetic or geometric.
 # ==========
 TITLE, TITLES, TABSIZE = {"A": "DISPLAY ARITHMETIC SEQUENCE", "G": "DISPLAY GEOMETRIC SEQUENCE"}, \
                          ["{0:>10s}".format("indice"), "{0:>18s}".format("element"), "{0:>10s}".format("-"*len("indice")), "{0:>18s}".format("-"*len("element"))], \
-                         13
+                         10
 
 
 # =================
