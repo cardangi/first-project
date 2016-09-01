@@ -223,16 +223,15 @@ while True:
             series = sequence.series
 
         #  7d. Series.
-        print("\n\n")
         if choice.upper() in ["B", "S"]:
-            print("   The sum of the terms is: {0:.{precision}f}\n\n".format(series, precision=precision))
+            print("\n\n   The sum of the terms is: {0:.{precision}f}".format(series, precision=precision))
         break
 
     #     -------------
     #  8. Exit program.
     #     -------------
     while True:
-        choice = input("   Exit program [Y/N]? ")
+        choice = input("\n\n   Exit program [Y/N]? ")
         if choice.upper() not in s2.ACCEPTEDANSWERS:
             continue
         break
