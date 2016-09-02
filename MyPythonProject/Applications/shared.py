@@ -298,6 +298,20 @@ class CustomFormatter(logging.Formatter):
         return s
 
 
+class Header(object):
+
+    def __init__(self, header, steps, step=1):
+        self._header = header
+        self._steps = steps
+        self._step = step
+        self._index = 0
+
+    def __call__(self):
+        self._index += 1
+        self._step += 1
+        return self._header, self._step - 1, self._steps[self._index - 1]
+
+
 # ==========
 # Functions.
 # ==========
