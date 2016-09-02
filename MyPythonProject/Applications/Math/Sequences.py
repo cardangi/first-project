@@ -103,6 +103,9 @@ class Sequence(object)
         self._objtype = None
         self.objtype = arg
 
+    def __call__(self, *args)
+        return self.objtype(*args)
+
     @property
     def objtype(self):
         return self._objtype
@@ -110,9 +113,6 @@ class Sequence(object)
     @objtype.setter
     def objtype(self, arg):
         self._objtype = arg
-
-    def __call__(self, *args)
-        return self.objtype(*args)
 
 
 # ==========
