@@ -24,6 +24,7 @@ parser.add_argument("type", help="type of the sequence: arithmetic or geometric.
 TITLE, TITLES, TABSIZE = {"A": "DISPLAY ARITHMETIC SEQUENCE", "G": "DISPLAY GEOMETRIC SEQUENCE"}, \
                          ["{0:>10s}".format("indice"), "{0:>18s}".format("element"), "{0:>10s}".format("-"*len("indice")), "{0:>18s}".format("-"*len("element"))], \
                          10
+SEQUENCES = {"A": s1.ArithmeticSequence, "G": s1.GeometricSequence}
 
 
 # =================
@@ -94,6 +95,24 @@ class Memoizer(object):
             return "{0}\n\n{1}".format(header, detail)
 
         return wrapper
+
+
+class Sequence(object)
+
+    def __init__(self, arg):
+        self._objtype = None
+        self.objtype = arg
+
+    @property
+    def objtype(self):
+        return self._objtype
+
+    @objtype.setter
+    def objtype(self, arg):
+        self._objtype = arg
+
+    def __call__(self, *args)
+        return self.objtype(*args)
 
 
 # ==========
@@ -208,11 +227,10 @@ while True:
 
     #  7a. Arithmetic sequence.
     if arguments.type == "A":
-        sequence = s1.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
-
-    #  7b. Geometric sequence.
+        args = (firstterm, difference, terms)
     elif arguments.type == "G":
-        sequence = s1.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
+        args = (firstterm, ratio, terms)
+    sequence = Sequence(SEQUENCES[arguments.type])(*args)
 
     #     ----------------
     #  8. Display results.
