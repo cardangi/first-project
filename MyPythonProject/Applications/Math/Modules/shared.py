@@ -1,5 +1,7 @@
 # -*- coding: ISO-8859-1 -*-
-from decimal import Decimal, getcontext, ROUND_HALF_UP
+from itertools import repeat
+from decimal import Decimal
+from operator import mul
 import cmath
 
 __author__ = 'Xavier ROSSET'
@@ -10,25 +12,27 @@ __author__ = 'Xavier ROSSET'
 # ========
 class Circle(object):
 
-    getcontext().prec = 6
-    getcontext().rounding = ROUND_HALF_UP
     pi = Decimal(cmath.pi)
 
     def __init__(self, radius):
-        self.diameter = 0
+        self._diameter = 0
         self.radius = radius
 
     @property
+    def diameter(self):
+        return self._diameter
+
+    @property
     def radius(self):
-        return self.diameter/2
+        return self._diameter/Decimal("2")
 
     @radius.setter
     def radius(self, value):
-        self.diameter = Decimal(value)*2
+        self._diameter = Decimal(value)*Decimal("2")
 
     @property
     def perimeter(self):
-        return self.radius*2*self.pi
+        return self.diameter*self.pi
 
     @property
     def surface(self):
@@ -39,25 +43,21 @@ class ArithmeticSequence(object):
     """
     Compute arithmetic sequences.
     """
-    getcontext().prec = 12
-    getcontext().rounding = ROUND_HALF_UP
-
     def __init__(self, firstterm=1, difference=1, terms=10):
         """
         :param firstterm: first term of the sequence.
         :param difference: common difference between two consecutive terms of the sequence.
-        :param terms: number of calculated terms.
-        :return:
+        :param terms: number of returned terms.
         """
         self._terms = 0
         self._difference = 0
         self._firstterm = Decimal(firstterm)
-        self.difference = difference
         self.terms = terms
+        self.difference = difference
 
     @property
     def sequence(self):
-        for i in range(int(self.terms)):
+        for i in range(self.terms):
             yield self._firstterm + i*self.difference
 
     @property
@@ -70,9 +70,12 @@ class ArithmeticSequence(object):
 
     @terms.setter
     def terms(self, value):
+        value = int(Decimal(value))
+        if value == 0:
+            raise ValueError("Terms must be greater than 0.")
         if value > 49999:
-            raise ValueError("Terms above 49999 are not allowed due to system limitations.")
-        self._terms = Decimal(value)
+            raise ValueError("Terms must be lower than 50000 due to system limitations.")
+        self._terms = value
 
     @property
     def difference(self):
@@ -80,28 +83,29 @@ class ArithmeticSequence(object):
 
     @difference.setter
     def difference(self, value):
-        if value == 0:
+        value = Decimal(value)
+        if value.compare(Decimal("0")) == Decimal("0"):
             raise ValueError("Difference must be greater than 0.")
-        self._difference = Decimal(value)
+        self._difference = value
 
     @property
     def lastterm(self):
-        return list(reversed([element for element in self.sequence]))[0]
+        return list(reversed(list(self.sequence)))[0]
+
+    @classmethod
+    def fromsequence(cls, seq):
+        return cls(seq[0], seq[1] - seq[0], len(seq))
 
 
 class GeometricSequence(object):
     """
     Compute geometric sequences.
     """
-    getcontext().prec = 16
-    getcontext().rounding = ROUND_HALF_UP
-
     def __init__(self, firstterm=1, ratio=2, terms=10):
         """
         :param firstterm: first term of the sequence.
         :param ratio: common ratio between two consecutive terms of the sequence.
-        :param terms: number of calculated terms.
-        :return:
+        :param terms: number of returned terms.
         """
         self._terms = 0
         self._ratio = 0
@@ -111,7 +115,7 @@ class GeometricSequence(object):
 
     @property
     def sequence(self):
-        for element in [self._firstterm*pow(self.ratio, element) for element in range(int(self.terms))]:
+        for element in map(mul, repeat(self._firstterm), map(pow, repeat(self.ratio), map(Decimal, range(self.terms)))):
             yield element
 
     @property
@@ -124,9 +128,12 @@ class GeometricSequence(object):
 
     @terms.setter
     def terms(self, value):
+        value = int(Decimal(value))
+        if value == 0:
+            raise ValueError("Terms must be greater than 0.")
         if value > 1499:
-            raise ValueError("Terms above 1499 are not allowed due to system limitations.")
-        self._terms = Decimal(value)
+            raise ValueError("Terms must be lower than 1500 due to system limitations.")
+        self._terms = value
 
     @property
     def ratio(self):
@@ -134,11 +141,18 @@ class GeometricSequence(object):
 
     @ratio.setter
     def ratio(self, value):
-        if value == 0:
+        value = Decimal(value)
+        if value.compare(Decimal("0")) == Decimal("0"):
             raise ValueError("Ratio must be greater than 0.")
-        if value > 100:
-            raise ValueError("Ratio above 100 is not allowed due to system limitations.")
-        self._ratio = Decimal(value)
+        if value.compare(Decimal("1")) == Decimal("0"):
+            raise ValueError("Ratio must be different from 1.")
+        if value.compare(Decimal("99")) == Decimal("1"):
+            raise ValueError("Ration must be lower than 100 due to system limitations.")
+        self._ratio = value
+
+    @property
+    def lastterm(self):
+        return list(reversed(list(self.sequence)))[0]
 
 
 # ==========
@@ -146,10 +160,10 @@ class GeometricSequence(object):
 # ==========
 def power_sum(x, n):
     """
-    Return result of 1 + x**0 + x**1 + x**2 + x**3 + ... + x**n.
+    Return result of 1 + x**1 + x**2 + x**3 + ... + x**n.
     :param x: constant operand.
     :param n: rising exponent.
-    :return: sum.
+    :return: value of 1 + x**1 + x**2 + x**3 + ... + x**n.
     """
     return (pow(Decimal(x), int(Decimal(n)) + Decimal(1)) - Decimal(1))/(Decimal(x) - Decimal(1))
 
@@ -158,7 +172,6 @@ def sequence_sum(n):
     """
     Return result of 1 + 2 + 3 + 4 + ... + n.
     :param n: rising operand.
-    :return: sum.
+    :return: value of 1 + 2 + 3 + 4 + ... + n.
     """
     return (int(Decimal(n))*(int(Decimal(n)) + Decimal(1)))/Decimal(2)
-
