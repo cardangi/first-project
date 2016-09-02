@@ -21,10 +21,10 @@ parser.add_argument("type", help="type of the sequence: arithmetic or geometric.
 # ==========
 # Constants.
 # ==========
-TITLE, TITLES, TABSIZE = {"A": "DISPLAY ARITHMETIC SEQUENCE", "G": "DISPLAY GEOMETRIC SEQUENCE"}, \
-                         ["{0:>10s}".format("indice"), "{0:>18s}".format("element"), "{0:>10s}".format("-"*len("indice")), "{0:>18s}".format("-"*len("element"))], \
-                         10
-SEQUENCES = {"A": s1.ArithmeticSequence, "G": s1.GeometricSequence}
+TITLE, TITLES, SEQUENCES, TABSIZE = {"A": "DISPLAY ARITHMETIC SEQUENCE", "G": "DISPLAY GEOMETRIC SEQUENCE"}, \
+                                    ["{0:>10s}".format("indice"), "{0:>18s}".format("element"), "{0:>10s}".format("-"*len("indice")), "{0:>18s}".format("-"*len("element"))], \
+                                    {"A": s1.ArithmeticSequence, "G": s1.GeometricSequence}, \
+                                    10
 
 
 # =================
@@ -82,28 +82,28 @@ class Memoizer(object):
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            header, detail, template = func(), "", "{0}\n{1:>{width}s}: {2}"
+            lheader, ldetail, template = func(), "", "{0}\n{1:>{width}s}: {2}"
             for key in sorted(self._saved.keys(), key=int):
-                detail = template.format(detail, self._saved[key][0], self._saved[key][1], width=len(self._saved[key][0]) + 3)
+                ldetail = template.format(ldetail, self._saved[key][0], self._saved[key][1], width=len(self._saved[key][0]) + 3)
             if args:
                 self._index += 1
                 self._saved[str(self._index)] = args
-                detail = template.format(detail, args[0], args[1], width=len(args[0]) + 3)
+                ldetail = template.format(ldetail, args[0], args[1], width=len(args[0]) + 3)
             if kwargs.get("reset", False):
                 self._index = 0
                 self._saved = dict()
-            return "{0}\n\n{1}".format(header, detail)
+            return "{0}\n\n{1}".format(lheader, ldetail)
 
         return wrapper
 
 
-class Sequence(object)
+class Sequence(object):
 
     def __init__(self, arg):
         self._objtype = None
         self.objtype = arg
 
-    def __call__(self, *args)
+    def __call__(self, *args):
         return self.objtype(*args)
 
     @property
@@ -150,7 +150,7 @@ while True:
     while True:
         print(clearscreen("First term", firstterm))
         try:
-            terms = int(Decimal(input("   Please enter the number of terms of the sequence: ")))
+            terms = int(Decimal(input("\n\n   Please enter the number of terms of the sequence: ")))
         except ArithmeticError:
             continue
         else:
@@ -170,7 +170,7 @@ while True:
     #     --------------------------------------------------------------------
         if arguments.type == "A":
             try:
-                difference = Decimal(input("   Please enter the common difference of the sequence: "))
+                difference = Decimal(input("\n\n   Please enter the common difference of the sequence: "))
             except ArithmeticError:
                 continue
             else:
@@ -183,7 +183,7 @@ while True:
     #     --------------------------------------------------------------
         elif arguments.type == "G":
             try:
-                ratio = Decimal(input("   Please enter the common ratio of the sequence: "))
+                ratio = Decimal(input("\n\n   Please enter the common ratio of the sequence: "))
             except ArithmeticError:
                 continue
             else:
@@ -203,7 +203,7 @@ while True:
             print(clearscreen("Difference", difference))
         elif arguments.type == "G":
             print(clearscreen("Ratio\t".expandtabs(TABSIZE), ratio))
-        precision = input("   Please enter precision: ")
+        precision = input("\n\n   Please enter precision: ")
         try:
             precision = int(Decimal(precision))
         except ArithmeticError:
@@ -216,7 +216,7 @@ while True:
     #     ---------------------------------
     while True:
         print(clearscreen("Precision\t".expandtabs(TABSIZE), precision))
-        choice = input("   Display elements [E], series [S] or both [B]: ")
+        choice = input("\n\n   Display elements [E], series [S] or both [B]: ")
         if choice.upper() not in ["B", "E", "S"]:
             continue
         break
@@ -226,6 +226,7 @@ while True:
     #     -----------------
 
     #  7a. Arithmetic sequence.
+    args = tuple()
     if arguments.type == "A":
         args = (firstterm, difference, terms)
     elif arguments.type == "G":
