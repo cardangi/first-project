@@ -1,8 +1,0 @@
-{% extends "T1" %}
-
-{% block title %}
-
-   **********************
-   * GEOMETRIC SEQUENCE *
-   **********************
-{% endblock %}
