@@ -1,4 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
+from collections import namedtuple
 from itertools import repeat
 from decimal import Decimal
 from operator import mul
@@ -175,3 +176,9 @@ def sequence_sum(n):
     :return: value of 1 + 2 + 3 + 4 + ... + n.
     """
     return (int(Decimal(n))*(int(Decimal(n)) + Decimal(1)))/Decimal(2)
+
+
+def coordinates(slope, intercept, x):
+    point = namedtuple("Point", "x y")
+    return point(Decimal(x), Decimal(slope)*Decimal(x) + Decimal(intercept))
+
