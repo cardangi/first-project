@@ -18,28 +18,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("type", help="type of the sequence: arithmetic or geometric.", choices=["A", "G"])
 
 
-# ===================
-# Jinja2 environment.
-# ===================
-environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_pythonproject%"), "Applications", "Math", "Templates"), encoding=s2.DFTENCODING),
-                          trim_blocks=True,
-                          lstrip_blocks=True)
-
-
-# ======================
-# Jinja2 custom filters.
-# ======================
-environment.filters["integertostring"] = s2.integertostring
-environment.filters["rjustify"] = s2.rjustify
-
-
-# =================
-# Jinja2 templates.
-# =================
-t2 = environment.get_template("T2")
-t3 = environment.get_template("T3")
-
-
 # ==========
 # Constants.
 # ==========
