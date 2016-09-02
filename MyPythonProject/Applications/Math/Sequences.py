@@ -80,7 +80,7 @@ class Memoizer(object):
     def __call__(self, func):
 
         @wraps(func)
-        def wrapper(*args):
+        def wrapper(*args, **kwargs):
             header, detail, template = func(), "", "{0}\n{1:>{width}s}: {2}"
             for key in sorted(self._saved.keys(), key=int):
                 detail = template.format(detail, self._saved[key][0], self._saved[key][1], width=len(self._saved[key][0]) + 3)
@@ -88,7 +88,10 @@ class Memoizer(object):
                 self._index += 1
                 self._saved[str(self._index)] = args
                 detail = template.format(detail, args[0], args[1], width=len(args[0]) + 3)
-            return "{0}\n\n{1}\n\n\n".format(header, detail)
+            if "reset" in kwargs:
+                self._index = 0
+                self._saved = dict()
+            return "{0}\n\n{1}".format(header, detail)
 
         return wrapper
 
@@ -199,36 +202,35 @@ while True:
             continue
         break
 
+    #     -----------------
+    #  7. Compute sequence.
+    #     -----------------
+
+    #  7a. Arithmetic sequence.
+    if arguments.type == "A":
+        sequence = s1.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
+
+    #  7b. Geometric sequence.
+    elif arguments.type == "G":
+        sequence = s1.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
+
     #     ----------------
-    #  7. Display results.
+    #  8. Display results.
     #     ----------------
-    while True:
-        print(clearscreen())
-        if choice.upper() in ["B", "E"]:
-            print("\n\n   The terms of the sequence are:\n\n\n{d[2]}{d[3]}\n{d[0]}{d[1]}\n{d[2]}{d[3]}".format(d=TITLES))
+    print(clearscreen(reset=True))
 
-        #  7a. Arithmetic sequence.
-        if arguments.type == "A":
-            sequence = s1.ArithmeticSequence(firstterm=firstterm, difference=difference, terms=terms)
+    #  8a. Sequence.
+    if choice.upper() in ["B", "E"]:
+        print("\n\n\n   The terms of the sequence are:\n\n\n{d[2]}{d[3]}\n{d[0]}{d[1]}\n{d[2]}{d[3]}".format(d=TITLES))
+        for index, element in enumerate(sequence.sequence):
+            print("{0:>10} {1:>17.{precision}f}".format(index, element, precision=precision))
 
-        #  7b. Geometric sequence.
-        elif arguments.type == "G":
-            sequence = s1.GeometricSequence(firstterm=firstterm, ratio=ratio, terms=terms)
-
-        #  7c. Sequence.
-        if choice.upper() in ["B", "E"]:
-            for index, element in enumerate(sequence.sequence):
-                print("{0:>10} {1:>17.{precision}f}".format(index, element, precision=precision))
-        if choice.upper() in ["B", "S"]:
-            series = sequence.series
-
-        #  7d. Series.
-        if choice.upper() in ["B", "S"]:
-            print("\n\n   The sum of the terms is: {0:.{precision}f}".format(series, precision=precision))
-        break
+    #  8b. Series.
+    if choice.upper() in ["B", "S"]:
+        print("\n\n\n   The sum of the terms is: {0:.{precision}f}".format(sequence.series, precision=precision))
 
     #     -------------
-    #  8. Exit program.
+    #  9. Exit program.
     #     -------------
     while True:
         choice = input("\n\n   Exit program [Y/N]? ")
