@@ -88,7 +88,7 @@ class Memoizer(object):
                 self._index += 1
                 self._saved[str(self._index)] = args
                 detail = template.format(detail, args[0], args[1], width=len(args[0]) + 3)
-            if "reset" in kwargs:
+            if kwargs.get("reset", False):
                 self._index = 0
                 self._saved = dict()
             return "{0}\n\n{1}".format(header, detail)
