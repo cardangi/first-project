@@ -43,7 +43,7 @@ header = "{0:>{width}s}\n{1:>{width}s}\n{0:>{width}s}".format("".join(list(itert
 # ========
 # Classes.
 # ========
-class FirstDecorator(object):
+class Header(object):
     """
     Docstring.
     """
@@ -64,12 +64,12 @@ class FirstDecorator(object):
         @wraps(func)
         def wrapper():
             func()
-            return "\n{0}\n\n".format(self.header)
+            return "\n{0}".format(self.header)
 
         return wrapper
 
 
-class SecondDecorator(object):
+class Memoizer(object):
     """
     Docstring.
     """
@@ -81,14 +81,14 @@ class SecondDecorator(object):
 
         @wraps(func)
         def wrapper(*args):
-            result = func()
+            header, detail, template = func(), "", "{0}\n{1:>{width}s}: {2}"
             for key in sorted(self._saved.keys(), key=int):
-                result = "{0}\n{1:>{width}s}: {2}".format(result, self._saved[key][0], self._saved[key][1], width=len(self._saved[key][0]) + 3)
+                detail = template.format(detail, self._saved[key][0], self._saved[key][1], width=len(self._saved[key][0]) + 3)
             if args:
                 self._index += 1
                 self._saved[str(self._index)] = args
-                result = "{0}\n{1:>{width}s}: {2}\n\n".format(result, args[0], args[1], width=len(args[0]) + 3)
-            return result
+                detail = template.format(detail, args[0], args[1], width=len(args[0]) + 3)
+            return "{0}\n\n{1}\n\n\n".format(header, detail)
 
         return wrapper
 
@@ -96,8 +96,8 @@ class SecondDecorator(object):
 # ==========
 # Functions.
 # ==========
-@SecondDecorator()
-@FirstDecorator(header)
+@Memoizer()
+@Header(header)
 def clearscreen():
     """
     Docstring
