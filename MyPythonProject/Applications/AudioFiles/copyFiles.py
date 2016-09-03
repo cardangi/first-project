@@ -4,6 +4,7 @@ import re
 import sys
 import locale
 import itertools
+from operator import itemgetter
 from subprocess import run, PIPE
 from jinja2 import Environment, FileSystemLoader
 from .. import shared as s1
@@ -56,8 +57,8 @@ def getfolders(art, ext, path=s1.MUSIC):
     rex2 = re.compile(r".{0}$".format(ext), re.IGNORECASE)
     for a, b, c in os.walk(path):
         if rex1.search(a):
-            for folder in set([os.path.normpath(a) for fil in c if rex2.search(fil)]):
-                yield(folder)
+            for fld in set([os.path.normpath(a) for fil in c if rex2.search(fil)]):
+                yield(fld)
 
 
 def getdrives():
@@ -67,23 +68,23 @@ def getdrives():
             yield drive.strip()
 
 
-def formatindexes(f):
-
-    def dummy(indexes, files):
-        out = []
-        rex1 = re.compile(r"^\d\d?$")
-        rex2 = re.compile(r"^(\d{1,2})\-(\d{1,2})$")
-        for index in indexes.split(", "):
-            match1 = rex1.match(index)
-            match2 = rex2.match(index)
-            if any([match1, match2]):
-                if match1:
-                    out.append(int(index))
-                elif match2:
-                    out += list(range(int(match2.group(1)), int(match2.group(2)) + 1))
-        return f(", ".join([str(i) for i in sorted(list(set(out)))]), files)
-
-    return dummy
+# def formatindexes(f):
+#
+#     def dummy(indexes, files):
+#         out = []
+#         rex1 = re.compile(r"^\d\d?$")
+#         rex2 = re.compile(r"^(\d{1,2})\-(\d{1,2})$")
+#         for index in indexes.split(", "):
+#             match1 = rex1.match(index)
+#             match2 = rex2.match(index)
+#             if any([match1, match2]):
+#                 if match1:
+#                     out.append(int(index))
+#                 elif match2:
+#                     out += list(range(int(match2.group(1)), int(match2.group(2)) + 1))
+#         return f(", ".join([str(i) for i in sorted(list(set(out)))]), files)
+#
+#     return dummy
 
 
 # ========
@@ -135,13 +136,13 @@ template2 = environment.get_template("XXCOPY")
 # ===========
 # Decorators.
 # ===========
-getfilefromindex = formatindexes(s2.getfilefromindex)
+# getfilefromindex = formatindexes(s2.getfilefromindex)
 
 
 # ================
 # Initializations.
 # ================
-titles, mode, status = dict(zip([str(i) for i in range(1, 5)], TITLES)), s1.WRITE, 100
+titles, mode, status = {str(num): title for num, title in enumerate(TITLES, 1)}, s1.WRITE, 100
 # -----
 step = 1
 header = Header()
@@ -201,7 +202,7 @@ while True:
                     continue
                 break
         extension = list_extensions[choice-1][1]
-        list_folders = list(enumerate([folder for folder in getfolders(artist, extension)], start=1))
+        list_folders = list(enumerate(list(getfolders(artist, extension)), start=1))
         code += 1
         step += 1
         header.step = step
@@ -226,7 +227,7 @@ while True:
                 break
         folder = list_folders[choice-1][1]
         list_parents = list_folders[choice-1][1].split("\\")
-        list_files = list(enumerate([file for file in s1.filesinfolder(list((extension,)), folder)], start=1))
+        list_files = list(enumerate(list(s1.filesinfolder(list((extension,)), folder)), start=1))
         code += 1
         step += 1
         header.step = step
@@ -271,13 +272,13 @@ while True:
             pprint(t=tmpl)
             choice = input("{0}\tPlease enter file index [e.g. 1, 2, 5-7, 10]: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice:
-                list_indivfiles = getfilefromindex(indexes=choice, files=[file for num, file in list_files])
+                list_indivfiles = [itemgetter(1)(fil) for fil in list_files if itemgetter(0)(fil) in map(int, s2.formatindexes(choice))]
                 if list_indivfiles:
                     break
                 tmpl = template1.render(header=header, menu=list_files, message=list(("No correct indexes selected.",)))
                 continue
         mode_files = "I"
-        list_indivfiles = list(enumerate([file for file in sorted(list_indivfiles)], start=1))
+        list_indivfiles = list(enumerate(sorted(list_indivfiles), start=1))
         code = 99
         step += 1
         header.step = step
