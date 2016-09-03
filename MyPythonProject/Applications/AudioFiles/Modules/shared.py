@@ -48,6 +48,7 @@ def grabdiscnumber(fil, rex):
 #     if match:
 #         indexes_list = indexes.split(", ")
 #     return [files[int(i) - 1] for i in indexes_list if int(i) <= len(files)]
+#     aaaaaaaaaaaaaaa
 
 
 def getrange(start, end):
