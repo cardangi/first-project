@@ -30,15 +30,14 @@ class Decorator(object):
 # Functions.
 # ==========
 def grabdiscnumber(fil, rex):
-    Disc = namedtuple("Disc", ["found", "number"])
+    disc = namedtuple("disc", ["found", "number"])
     match = rex.search(fil)
     if match:
-        return Disc(True, match.group(1))
-    return Disc(False, None)
+        return disc(True, match.group(1))
+    return disc(False, None)
 
 
 def getrange(start, end):
-    """Docstring"""
     for i in range(start, end):
         yield i
 
@@ -46,15 +45,15 @@ def getrange(start, end):
 def formatindexes(indexes):
 
     # Constants.
-    SEP = ", "
+    sep = ", "
 
     # Regular expressions.
     rex1 = re.compile(r"^\d\d?$")
     rex2 = re.compile(r"^\d\d?\-\d\d?$")
 
     # Algorithm.
-    if any([rex1.match(index) or rex2.match(index) for index in indexes.split(SEP)]):
-        out1 = [index for index in indexes.split(SEP) if rex1.match(index)]
-        out2 = list(itertools.chain.from_iterable([map(str, i) for i in [list(i) for i in [obj(getrange)() for obj in map(Decorator, [index for index in indexes.split(SEP) if rex2.match(index)])]]]))
+    if any([rex1.match(index) or rex2.match(index) for index in indexes.split(sep)]):
+        out1 = [index for index in indexes.split(sep) if rex1.match(index)]
+        out2 = list(itertools.chain.from_iterable([map(str, i) for i in [list(i) for i in [obj(getrange)() for obj in map(Decorator, [index for index in indexes.split(sep) if rex2.match(index)])]]]))
         return sorted(set(out1 + out2), key=int)
     return []
