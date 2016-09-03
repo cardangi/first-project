@@ -68,13 +68,6 @@ def getdrives():
             yield drive.strip()
 
 
-# ========
-# Classes.
-# ========
-class Header:
-    pass
-
-
 # ====================
 # Regular expressions.
 # ====================
@@ -117,17 +110,8 @@ template2 = environment.get_template("XXCOPY")
 # ================
 # Initializations.
 # ================
-titles, mode, status = {str(num): title for num, title in enumerate(TITLES, 1)}, s1.WRITE, 100
-# -----
-step = 1
-header = Header()
-header.main = HEADER
-header.step = step
-header.title = titles[str(step)]
-tmpl = template1.render(header=header)
-code = 1
-# -----
-artist, extension, folder, command, list_indivfiles, list_files, list_drives, mode_files, somesfilestocopy = "", "", "", "", [], [], [], "G", False
+titles, mode, status, code, header = {str(num): title for num, title in enumerate(TITLES, 1)}, s1.WRITE, 100, 1, s1.Header("copy  audio  files", ["Set artist.", "Set extension.", "Set folder.", "Set files."])
+artist, extension, folder, command, list_indivfiles, list_files, list_drives, mode_files, somesfilestocopy, tmpl = "", "", "", "", [], [], [], "G", False, template1.render(header=header())
 
 
 # ===============
