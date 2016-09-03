@@ -1,5 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 from unittest import TestCase, main
+from operator import itemgetter
 from ..Modules import shared
 
 __author__ = 'Xavier ROSSET'
@@ -8,34 +9,38 @@ __author__ = 'Xavier ROSSET'
 class TestFormatindexes(TestCase):
 
     def test_first(self):
-        self.assertEqual("1, 2, 3", shared.formatindexes("1, 2, 3"))
+        self.assertEqual(["1", "2", "3"], shared.formatindexes("1, 2, 3"))
 
     def test_second(self):
-        self.assertEqual("1, 2, 3", shared.formatindexes("1-3"))
+        self.assertEqual(["1", "2", "3"], shared.formatindexes("1-3"))
 
     def test_third(self):
-        self.assertEqual("1, 2, 3, 5, 6, 9, 10, 11, 12", shared.formatindexes("1-3, 5-6, 9-12"))
+        self.assertEqual(["1", "2", "3", "5", "6", "9", "10", "11", "12"], shared.formatindexes("1-3, 5-6, 9-12"))
 
     def test_fourth(self):
-        self.assertEqual("1, 2, 3, 15, 16", shared.formatindexes("1-3, 5-6-10, 15, 16"))
+        self.assertEqual(["1", "2", "3", "15", "16"], shared.formatindexes("1-3, 5-6-10, 15, 16"))
 
     def test_fifth(self):
-        self.assertEqual("1", shared.formatindexes("1"))
+        self.assertEqual(["1"], shared.formatindexes("1"))
 
     def test_sixth(self):
-        self.assertEqual("", shared.formatindexes("1,2"))
+        self.assertEqual([], shared.formatindexes("1,2"))
 
     def test_seventh(self):
-        self.assertEqual("", shared.formatindexes("1-2-3-4"))
+        self.assertEqual([], shared.formatindexes("1-2-3-4"))
 
     def test_eighth(self):
-        self.assertEqual("", shared.formatindexes("1 2 3 4"))
+        self.assertEqual([], shared.formatindexes("1 2 3 4"))
 
     def test_ninth(self):
-        self.assertEqual("", shared.formatindexes(""))
+        self.assertEqual([], shared.formatindexes(""))
 
     def test_tenth(self):
-        self.assertEqual("1, 2, 3, 5, 6, 9, 10, 11, 12, 15, 16", shared.formatindexes("1-3, 5-6, 9-12, 15, 16"))
+        self.assertEqual(["1", "2", "3", "5", "6", "9", "10", "11", "12", "15", "16"], shared.formatindexes("1-3, 5-6, 9-12, 15, 16"))
+
+    def test_eleventh(self):
+        alist = [(1, "file1"), (2, "file2"), (3, "file3"), (4, "file4"), (5, "file5"), (6, "file6"), (7, "file7"), (8, "file8"), (9, "file9"), (10, "file10")]
+        self.assertEqual(["file1", "file2", "file3", "file4", "file5", "file8", "file10"], [itemgetter(1)(fil) for fil in alist if itemgetter(0)(fil) in map(int, shared.formatindexes("1-5, 8, 10"))])
 
 
 if __name__ == '__main__':

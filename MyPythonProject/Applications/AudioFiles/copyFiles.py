@@ -68,25 +68,6 @@ def getdrives():
             yield drive.strip()
 
 
-# def formatindexes(f):
-#
-#     def dummy(indexes, files):
-#         out = []
-#         rex1 = re.compile(r"^\d\d?$")
-#         rex2 = re.compile(r"^(\d{1,2})\-(\d{1,2})$")
-#         for index in indexes.split(", "):
-#             match1 = rex1.match(index)
-#             match2 = rex2.match(index)
-#             if any([match1, match2]):
-#                 if match1:
-#                     out.append(int(index))
-#                 elif match2:
-#                     out += list(range(int(match2.group(1)), int(match2.group(2)) + 1))
-#         return f(", ".join([str(i) for i in sorted(list(set(out)))]), files)
-#
-#     return dummy
-
-
 # ========
 # Classes.
 # ========
@@ -131,12 +112,6 @@ environment.filters["rjustify"] = s1.rjustify
 # ===================
 template1 = environment.get_template("T1")
 template2 = environment.get_template("XXCOPY")
-
-
-# ===========
-# Decorators.
-# ===========
-# getfilefromindex = formatindexes(s2.getfilefromindex)
 
 
 # ================

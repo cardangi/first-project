@@ -37,20 +37,6 @@ def grabdiscnumber(fil, rex):
     return Disc(False, None)
 
 
-# def getfilefromindex(indexes, files):
-#     """
-#     :param indexes: string only composed of digits separated by both a comma and a space ("1, 2, 3").
-#     :param files: files list.
-#     :return: list of corresponding files.
-#     """
-#     indexes_list = []
-#     match = re.match(r"^(\d\d?,\s)*(\d\d?)$", indexes)
-#     if match:
-#         indexes_list = indexes.split(", ")
-#     return [files[int(i) - 1] for i in indexes_list if int(i) <= len(files)]
-#     aaaaaaaaaaaaaaa
-
-
 def getrange(start, end):
     """Docstring"""
     for i in range(start, end):
