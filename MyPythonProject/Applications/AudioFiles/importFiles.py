@@ -1,5 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 from jinja2 import Environment, FileSystemLoader
+from operator import itemgetter
 from string import Template
 import subprocess
 import itertools
@@ -170,7 +171,7 @@ while True:
         header.title = titles[str(step)]
         set_folders = {os.path.dirname(file) for file in directorytree(directory=curwdir, rex=rex2)}
         if set_folders:
-            list_folders = sorted(list(enumerate(sorted(set_folders), 1)), key=lambda i: i[0])
+            list_folders = sorted(enumerate(sorted(set_folders), 1), key=itemgetter(0))
             tmpl = template1.render(header=header, menu=list_folders)
             inp, code = 2, 2
         elif not set_folders:
@@ -203,7 +204,7 @@ while True:
             srcs = [os.path.join(src, file) for file in list_files]
             dsts = ["{0}{1}".format(template3.substitute(year=match1.group(1), month=match1.group(2), day=match1.group(3), location=match1.group(4), disc=s2.grabdiscnumber(file, rex4).number), os.path.sep)
                     for file in list_files if s2.grabdiscnumber(file, rex4).found]
-            tmpl = template1.render(header=header, detail=sorted(list(zip(sorted(srcs), sorted(dsts))), key=lambda i: i[0]), mode=MODES["import"])
+            tmpl = template1.render(header=header, detail=sorted(zip(sorted(srcs), sorted(dsts)), key=itemgetter(0)), mode=MODES["import"])
             inp, code = 3, 4
         elif not match1:
             tmpl = template1.render(header=header, message=list(('"{0}" doesn\'t match the expected pattern.'.format(src),)))
@@ -220,7 +221,7 @@ while True:
                 break
         if choice.upper() == "Y":
             with open(os.path.join(os.path.expandvars("%TEMP%"), "xxcopy.txt"), mode=mode, encoding=s1.DFTENCODING) as fw:
-                for src, dst in sorted(list(zip(srcs, dsts)), key=lambda i: i[0]):
+                for src, dst in sorted(zip(srcs, dsts), key=itemgetter(0)):
                     fw.write("{0}\n".format(template2.render(src=src, dst=dst, log=os.path.expandvars("%_XXCOPYLOG%"))))
             header.title = titles["4"]
             mode, inp, code, somefilesimported = s1.APPEND, 5, 5, True

@@ -8,6 +8,7 @@ from pytz import timezone
 from string import Template
 from datetime import datetime
 from dateutil.tz import gettz
+from operator import itemgetter
 from dateutil.parser import parse
 from PIL import Image, TiffImagePlugin
 
@@ -398,3 +399,7 @@ def getdatetime(epoch1, timzon, epoch2=None):
         epoch2 = epoch1
     for epoch in range(epoch1, epoch2 + 1):
         yield dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(epoch)).astimezone(timezone(timzon)), TEMPLATE3)
+
+
+def enumeratesortedlistcontent(thatlist):
+    return sorted(enumerate(sorted(thatlist), 1), key=itemgetter(0))
