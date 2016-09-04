@@ -403,3 +403,7 @@ def getdatetime(epoch1, timzon, epoch2=None):
 
 def enumeratesortedlistcontent(thatlist):
     return sorted(enumerate(sorted(thatlist), 1), key=itemgetter(0))
+
+
+def enumeratetupleslist(thatlist):
+    return [(a, b, c) for a, (b, c) in enumerate(sorted(thatlist, key=itemgetter(0)), 1)]
