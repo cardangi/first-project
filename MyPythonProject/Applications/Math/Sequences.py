@@ -1,4 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
+from operator import itemgetter
 from decimal import Decimal
 from functools import wraps
 import subprocess
@@ -86,9 +87,10 @@ class Memoizer(object):
             for key in sorted(self._saved.keys(), key=int):
                 ldetail = template.format(ldetail, self._saved[key][0], self._saved[key][1], width=len(self._saved[key][0]) + 3)
             if args:
-                self._index += 1
-                self._saved[str(self._index)] = args
-                ldetail = template.format(ldetail, args[0], args[1], width=len(args[0]) + 3)
+                if args[0] not in list(itemgetter(0)(itemgetter(1)(i)) for i in self._saved.items()):
+                    self._index += 1
+                    self._saved[str(self._index)] = args
+                    ldetail = template.format(ldetail, args[0], args[1], width=len(args[0]) + 3)
             if kwargs.get("reset", False):
                 self._index = 0
                 self._saved = dict()
