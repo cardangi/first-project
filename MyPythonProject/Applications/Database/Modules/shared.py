@@ -26,7 +26,7 @@ class Boolean(object):
 def connectto(db):
     conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = sqlite3.Row
-    yield conn.cursor()
+    yield conn
     conn.commit()
     conn.close()
 
