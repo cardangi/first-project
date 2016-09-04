@@ -46,15 +46,15 @@ def getrange(start, end):
 def formatindexes(indexes):
 
     # Constants.
-    SEP = ", "
+    sep = ", "
 
     # Regular expressions.
     rex1 = re.compile(r"^\d\d?$")
     rex2 = re.compile(r"^\d\d?\-\d\d?$")
 
     # Algorithm.
-    if any([rex1.match(index) or rex2.match(index) for index in indexes.split(SEP)]):
-        out1 = [index for index in indexes.split(SEP) if rex1.match(index)]
-        out2 = list(itertools.chain.from_iterable([map(str, i) for i in [list(i) for i in [obj(getrange)() for obj in map(Decorator, [index for index in indexes.split(SEP) if rex2.match(index)])]]]))
+    if any([rex1.match(index) or rex2.match(index) for index in indexes.split(sep)]):
+        out1 = [index for index in indexes.split(sep) if rex1.match(index)]
+        out2 = list(itertools.chain.from_iterable([map(str, i) for i in [list(i) for i in [obj(getrange)() for obj in map(Decorator, [index for index in indexes.split(sep) if rex2.match(index)])]]]))
         return sorted(set(out1 + out2), key=int)
     return []
