@@ -1,4 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
+
 from unittest import TestCase
 from Applications import shared
 
