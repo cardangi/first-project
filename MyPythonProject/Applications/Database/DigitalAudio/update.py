@@ -1,8 +1,8 @@
 # -*- coding: ISO-8859-1 -*-
 import argparse
-import sqlite3
 import locale
-from ... import shared
+from ... import shared as s1
+from ..Modules import shared as s2
 
 __author__ = 'Xavier ROSSET'
 
@@ -56,47 +56,44 @@ update, where, args, arguments = "", "", (), parser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
+with s2.connectto(s1.DATABASE) as c:
 
-#  1. Ouverture de la connexion à la base de données.
-conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
-conn.row_factory = sqlite3.Row
+    #     -------------
+    #  1. Clause "set".
+    #     -------------
+    if arguments.table == "albums":
+        if arguments.artist:
+            update = "{0}artist=?, ".format(update)
+            args += (arguments.artist,)
+        if arguments.year:
+            update = "{0}year=?, ".format(update)
+            args += (arguments.year,)
+        if arguments.album:
+            update = "{0}album=?, ".format(update)
+            args += (arguments.album,)
+        if arguments.genre:
+            update = "{0}genre=?, ".format(update)
+            args += (arguments.genre,)
 
-#  2. Construction de la clause "set".
-if arguments.table == "albums":
-    if arguments.artist:
-        update = "{0}artist=?, ".format(update)
-        args += (arguments.artist,)
-    if arguments.year:
-        update = "{0}year=?, ".format(update)
-        args += (arguments.year,)
-    if arguments.album:
-        update = "{0}album=?, ".format(update)
-        args += (arguments.album,)
-    if arguments.genre:
-        update = "{0}genre=?, ".format(update)
-        args += (arguments.genre,)
+    elif arguments.table == "discs":
+        if arguments.field:
+            update = "{0}field=?, ".format(update)
+            args += (arguments.toto,)
 
-elif arguments.table == "discs":
-    if arguments.field:
-        update = "{0}field=?, ".format(update)
-        args += (arguments.toto,)
+    elif arguments.table == "tracks":
+        if arguments.title:
+            update = "{0}title=?, ".format(update)
+            args += (arguments.title,)
 
-elif arguments.table == "tracks":
-    if arguments.title:
-        update = "{0}title=?, ".format(update)
-        args += (arguments.title,)
+    #     ---------------
+    #  2. Clause "where".
+    #     ---------------
+    for id in arguments.uid:
+        where = "{0}?, ".format(where)
+        args += (id,)
 
-#  3. Construction de la clause "where".
-for id in arguments.uid:
-    where = "{0}?, ".format(where)
-    args += (id,)
-
-#  4. Exécution de la requête.
-if update:
-    conn.cursor().execute("UPDATE {0} SET {1} WHERE rowid IN ({2})".format(arguments.table, update[:-2], where[:-2]), args)
-
-#  5. Mise à jour de la base de données.
-conn.commit()
-
-#  6. Fermeture de la connexion à la base de données.
-conn.close()
+    #     ------------------------
+    #  3. Exécution de la requête.
+    #     ------------------------
+    if update:
+        c.execute("UPDATE {0} SET {1} WHERE rowid IN ({2})".format(arguments.table, update[:-2], where[:-2]), args)
