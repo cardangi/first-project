@@ -4,6 +4,7 @@ import re
 import sys
 import locale
 import itertools
+from functools import wraps
 from operator import itemgetter
 from subprocess import run, PIPE
 from collections import namedtuple
@@ -33,9 +34,19 @@ ACCEPTEDEXTENSIONS, TEMP, XXCOPYLOG, OUTFILE, TABSIZE = ["flac", "mp3", "m4a", "
 # ==========
 # Functions.
 # ==========
-def pprint(t):
+def renderheader(func):
+
+    @wraps(func)
+    def wrapper(t):
+        func()
+        return t
+
+    return wrapper
+
+
+@renderheader
+def clearscreen():
     run("CLS", shell=True)
-    print(t)
 
 
 def getextensions(art, path=s1.MUSIC):
@@ -132,7 +143,7 @@ while True:
         head = header()
         tmpl = template1.render(header=nt(*head))
         while True:
-            pprint(t=tmpl)
+            print(clearscreen(t=tmpl))
             artist = input("{0}\tPlease enter artist: ".format("".join(list(itertools.repeat("\n", 4)))).expandtabs(TABSIZE))
             if artist:
                 if regex1.match(artist):
@@ -155,7 +166,7 @@ while True:
     #     Then grab available folders.
     elif code == 2:
         while True:
-            pprint(t=tmpl)
+            print(clearscreen(t=tmpl))
             try:
                 choice = int(input("{0}\tPlease choose extension: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
             except ValueError:
@@ -175,7 +186,7 @@ while True:
     #     Then grab available files.
     elif code == 3:
         while True:
-            pprint(t=tmpl)
+            print(clearscreen(t=tmpl))
             try:
                 choice = int(input("{0}\tPlease choose folder: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
             except ValueError:
@@ -196,7 +207,7 @@ while True:
     #     Then grab available destination drives.
     elif code == 4:
         while True:
-            pprint(t=tmpl)
+            print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to select individual files [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
@@ -227,7 +238,7 @@ while True:
     #     Then grab available destination drives.
     elif code == 5:
         while True:
-            pprint(t=tmpl)
+            print(clearscreen(t=tmpl))
             choice = input("{0}\tPlease enter file index [e.g. 1, 2, 5-7, 10]: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice:
                 list_indivfiles = [itemgetter(1)(fil) for fil in list_files if itemgetter(0)(fil) in map(int, s2.formatindexes(choice))]
@@ -249,7 +260,7 @@ while True:
     #     Then write copy command to temporary working file.
     elif code == 6:
         while True:
-            pprint(t=tmpl)
+            print(clearscreen(t=tmpl))
             try:
                 choice = int(input("{0}\tPlease choose destination drive: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
             except ValueError:
@@ -286,7 +297,7 @@ while True:
     #     Then run copy command(s).
     elif code == 7:
         while True:
-            pprint(t=tmpl)
+            print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to copy files using the command(s) above [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
@@ -311,7 +322,7 @@ while True:
     #     -----------------
     elif code == 8:
         while True:
-            pprint(t=tmpl)
+            print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to run copy command(s) [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
@@ -327,7 +338,7 @@ while True:
     #     -------------
     elif code == 99:
         while True:
-            pprint(t=tmpl)
+            print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to exit program [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
