@@ -1,5 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 import argparse
+import sqlite3
 import locale
 from ... import shared as s1
 from ..Modules import shared as s2
@@ -31,6 +32,12 @@ parser.add_argument("uid", type=int, nargs="+")
 # Initializations.
 # ================
 where, discs, args, arguments = "", [], (), parser.parse_args()
+
+
+# ==============
+# SQL converter.
+# ==============
+sqlite3.register_converter("boolean", s2.convert_boolean)
 
 
 # ===============
