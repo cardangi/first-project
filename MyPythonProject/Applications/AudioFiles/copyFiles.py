@@ -6,6 +6,7 @@ import locale
 import itertools
 from operator import itemgetter
 from subprocess import run, PIPE
+from collections import namedtuple
 from jinja2 import Environment, FileSystemLoader
 from .. import shared as s1
 from .Modules import shared as s2
@@ -22,14 +23,11 @@ locale.setlocale(locale.LC_ALL, "")
 # ==========
 # Constants.
 # ==========
-ACCEPTEDEXTENSIONS, TEMP, XXCOPYLOG, OUTFILE, HEADER, TITLES, EXIT, TABSIZE = ["flac", "mp3", "m4a", "ogg"], \
-                                                                              os.path.expandvars("%TEMP%"), \
-                                                                              os.path.expandvars("%_XXCOPYLOG%"), \
-                                                                              "xxcopy", \
-                                                                              "copy  audio  files", \
-                                                                              ["Set artist.", "Set extension.", "Set folder.", "Set files."], \
-                                                                              {"N": s1.BACK, "Y": s1.EXIT}, \
-                                                                              10
+ACCEPTEDEXTENSIONS, TEMP, XXCOPYLOG, OUTFILE, TABSIZE = ["flac", "mp3", "m4a", "ogg"], \
+                                                        os.path.expandvars("%TEMP%"), \
+                                                        os.path.expandvars("%_XXCOPYLOG%"), \
+                                                        "xxcopy", \
+                                                        10
 
 
 # ==========
@@ -107,11 +105,17 @@ template1 = environment.get_template("T1")
 template2 = environment.get_template("XXCOPY")
 
 
-# ================
-# Initializations.
-# ================
-titles, mode, status, code, header = {str(num): title for num, title in enumerate(TITLES, 1)}, s1.WRITE, 100, 1, s1.Header("copy  audio  files", ["Set artist.", "Set extension.", "Set folder.", "Set files."])
-artist, extension, folder, command, list_indivfiles, list_files, list_drives, mode_files, somesfilestocopy, tmpl = "", "", "", "", [], [], [], "G", False, template1.render(header=header())
+# ==================
+# Initializations 1.
+# ==================
+mode, status, code, tmpl, choice = s1.WRITE, 100, 1, None, None
+artist, extension, folder, command, list_indivfiles, list_files, list_drives, somesfilestocopy = "", "", "", "", [], [], [], False
+
+
+# ==================
+# Initializations 2.
+# ==================
+nt = namedtuple("nt", "maintitle step title")
 
 
 # ===============
@@ -124,25 +128,26 @@ while True:
     #     -----------
     #     Then grab available extensions.
     if code == 1:
+        header = s1.Header("copy  audio  files", ["Set artist.", "Set extension.", "Set folder.", "Set files."])
+        head = header()
+        tmpl = template1.render(header=nt(*head))
         while True:
             pprint(t=tmpl)
             artist = input("{0}\tPlease enter artist: ".format("".join(list(itertools.repeat("\n", 4)))).expandtabs(TABSIZE))
             if artist:
                 if regex1.match(artist):
                     break
-                tmpl = template1.render(header=header, message=list(('"{0}" is not a valid input.'.format(artist),)))
+                tmpl = template1.render(header=nt(*head), message=list(('"{0}" is not a valid input.'.format(artist),)))
                 continue
-            tmpl = template1.render(header=header)
+            tmpl = template1.render(header=nt(*head))
             continue
         list_extensions = list(enumerate([key.upper() for key in sorted(getextensions(artist).keys())], start=1))
-        tmpl = template1.render(header=header, message=list(('No audio files found for "{0}".'.format(artist),)))
+        head = header()
         code = 99
+        tmpl = template1.render(header=nt(*head), message=list(('No audio files found for "{0}".'.format(artist),)))
         if list_extensions:
             code = 2
-            step += 1
-            header.step = step
-            header.title = titles[str(step)]
-            tmpl = template1.render(header=header, menu=list_extensions)
+            tmpl = template1.render(header=nt(*head), menu=list_extensions)
 
     #     --------------
     #  2. Set extension.
@@ -151,9 +156,8 @@ while True:
     elif code == 2:
         while True:
             pprint(t=tmpl)
-            choice = input("{0}\tPlease choose extension: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             try:
-                choice = int(choice)
+                choice = int(input("{0}\tPlease choose extension: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
             except ValueError:
                 continue
             else:
@@ -163,10 +167,7 @@ while True:
         extension = list_extensions[choice-1][1]
         list_folders = list(enumerate(list(getfolders(artist, extension)), start=1))
         code += 1
-        step += 1
-        header.step = step
-        header.title = titles[str(step)]
-        tmpl = template1.render(header=header, menu=list_folders)
+        tmpl = template1.render(header=nt(*header()), menu=list_folders)
 
     #     -----------
     #  3. Set folder.
@@ -175,9 +176,8 @@ while True:
     elif code == 3:
         while True:
             pprint(t=tmpl)
-            choice = input("{0}\tPlease choose folder: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             try:
-                choice = int(choice)
+                choice = int(input("{0}\tPlease choose folder: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
             except ValueError:
                 continue
             else:
@@ -188,10 +188,7 @@ while True:
         list_parents = list_folders[choice-1][1].split("\\")
         list_files = list(enumerate(list(s1.filesinfolder(list((extension,)), folder)), start=1))
         code += 1
-        step += 1
-        header.step = step
-        header.title = titles[str(step)]
-        tmpl = template1.render(header=header, menu=list_files)
+        tmpl = template1.render(header=nt(*header()), menu=list_files)
 
     #     ----------
     #  4. Set files.
@@ -203,23 +200,25 @@ while True:
             choice = input("{0}\tWould you like to select individual files [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
-        step += 1
-        header.step = step
+        list_drives = list(enumerate([drive for drive in getdrives() if regex2.match(drive)], start=1))
 
         #  4a. Global.
         if choice.upper() == "N":
-            header.title = "Set destination drive."
-            list_drives = list(enumerate([drive for drive in getdrives() if regex2.match(drive)], start=1))
-            tmpl = template1.render(header=header, message=list(("An issue was encountered while grabbing available destination drives.",)))
+            header = s1.Header("copy  audio  files", ["Set destination drive.", "Copy files.", "Run copy command(s).", "Exit program."], 5)
+            mode_files = "G"
+            head = header()
+            tmpl = template1.render(header=nt(*head), message=list(("An issue was encountered while grabbing available destination drives.",)))
             code = 99
             if list_drives:
-                tmpl = template1.render(header=header, menu=list_drives)
+                tmpl = template1.render(header=nt(*head), menu=list_drives)
                 code = 6
 
     #  4a. Individual.
         elif choice.upper() == "Y":
-            header.title = "Set individual files."
-            tmpl = template1.render(header=header, menu=list_files)
+            header = s1.Header("copy  audio  files", ["Set individual files.", "Set destination drive.", "Copy files.", "Run copy command(s).", "Exit program."], 5)
+            mode_files = "I"
+            head = header()
+            tmpl = template1.render(header=nt(*head), menu=list_files)
             code += 1
 
     #     ---------------------
@@ -234,19 +233,15 @@ while True:
                 list_indivfiles = [itemgetter(1)(fil) for fil in list_files if itemgetter(0)(fil) in map(int, s2.formatindexes(choice))]
                 if list_indivfiles:
                     break
-                tmpl = template1.render(header=header, menu=list_files, message=list(("No correct indexes selected.",)))
+                tmpl = template1.render(header=nt(*head), menu=list_files, message=list(("No correct indexes selected.",)))
                 continue
-        mode_files = "I"
         list_indivfiles = list(enumerate(sorted(list_indivfiles), start=1))
+        head = header()
         code = 99
-        step += 1
-        header.step = step
-        header.title = "Set destination drive."
-        list_drives = list(enumerate([drive for drive in getdrives() if regex2.match(drive)], start=1))
-        tmpl = template1.render(header=header, message=list(("An issue was encountered while grabbing available destination drives.",)))
+        tmpl = template1.render(header=nt(*head), message=list(("An issue was encountered while grabbing available destination drives.",)))
         if list_drives:
             code = 6
-            tmpl = template1.render(header=header, menu=list_drives)
+            tmpl = template1.render(header=nt(*head), menu=list_drives)
 
     #     ----------------------
     #  6. Set destination drive.
@@ -255,9 +250,8 @@ while True:
     elif code == 6:
         while True:
             pprint(t=tmpl)
-            choice = input("{0}\tPlease choose destination drive: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             try:
-                choice = int(choice)
+                choice = int(input("{0}\tPlease choose destination drive: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
             except ValueError:
                 continue
             else:
@@ -284,10 +278,7 @@ while True:
                                      )
                            )
         code += 1
-        step += 1
-        header.step = step
-        header.title = "Copy files."
-        tmpl = template1.render(header=header, menu=command)
+        tmpl = template1.render(header=nt(*header()), menu=command)
 
     #     ---------------------------------------------
     #  7. Write copy command to temporary working file.
@@ -300,22 +291,19 @@ while True:
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         code += 1
-        step += 1
-        header.step = step
         if choice.upper() == "Y":
             with open(os.path.join(TEMP, OUTFILE), mode=mode, encoding=s1.DFTENCODING) as fw:
                 for num, cmd in command:
                     fw.write("{0}\n".format(cmd))
             somesfilestocopy = True
             mode = s1.APPEND
-            header.title = "Run copy command(s)."
-            tmpl = template1.render(header=header)
+            tmpl = template1.render(header=nt(*header()))
         elif choice.upper() == "N" and somesfilestocopy:
-            header.title = "Run copy command(s)."
-            tmpl = template1.render(header=header)
+            tmpl = template1.render(header=nt(*header()))
         elif choice.upper() == "N" and not somesfilestocopy:
-            header.title = "Exit program."
-            tmpl = template1.render(header=header)
+            header = s1.Header("copy  audio  files", ["Exit program."], 8)
+            head = header()
+            tmpl = template1.render(header=nt(*head))
             code = 99
 
     #     -----------------
@@ -332,10 +320,7 @@ while True:
             break
         elif choice.upper() == "N":
             code = 99
-            step += 1
-            header.step = step
-            header.title = "Exit program."
-            tmpl = template1.render(header=header)
+            tmpl = template1.render(header=nt(*header()))
 
     #     -------------
     #  9. Exit program.
@@ -350,10 +335,7 @@ while True:
             status = 99
             break
         elif choice.upper() == "N":
-            code, step = 1, 1
-            header.step = step
-            header.title = titles[str(step)]
-            tmpl = template1.render(header=header)
+            code = 1
 
 
 # =============

@@ -1,14 +1,14 @@
 {% set p1 %}
-    {% for element in "*"|repeatelement(header.main|length() + 2*10) -%}
+    {% for element in "*"|repeatelement(header.maintitle|length() + 2*10) -%}
         {{ element }}
     {%- endfor %}
 {% endset %}
 {% set p2 %}
-    {% for element in " "|repeatelement(header.main|length() + 2*10) -%}
+    {% for element in " "|repeatelement(header.maintitle|length() + 2*10) -%}
         {{ element }}
     {%- endfor %}
 {% endset %}
-{% set p3 = header.main|ljustify(header.main|length() + 10)|rjustify(header.main|length() + 2*10) %}
+{% set p3 = header.maintitle|ljustify(header.maintitle|length() + 10)|rjustify(header.maintitle|length() + 2*10) %}
 {% set space = " " %}
 
 {{ "**%s**"|format(p1)|center() }}
