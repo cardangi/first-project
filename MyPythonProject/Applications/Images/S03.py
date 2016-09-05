@@ -13,6 +13,7 @@ __author__ = 'Xavier ROSSET'
 # ==========
 # Functions.
 # ==========
+@contextmanager
 def chgcurdir(d):
     wcdir = os.getcwd()
     os.chdir(d)
