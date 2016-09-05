@@ -10,11 +10,11 @@ parent_logger = logging.getLogger(__package__)
 parent_logger.setLevel(logging.DEBUG)
 
 # Create handler.
-handler = logging.handlers.RotatingFileHandler(shared.Global()["log"], backupCount=5, maxBytes=500000)
+handler = logging.handlers.RotatingFileHandler(shared.LOG, backupCount=5, maxBytes=500000)
 handler.setLevel(logging.DEBUG)
 
 # Create Formatter.
-formatter = shared.CustomFormatter(shared.Global()["logpattern"])
+formatter = shared.CustomFormatter(shared.LOGPATTERN)
 
 # Add formatter to handler
 handler.setFormatter(formatter)
