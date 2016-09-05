@@ -46,6 +46,6 @@ for month in set([itemgetter(1)(item) for item in reflist]):
     dst = os.path.join(r"H:\\", month)
     if not os.path.exists(dst):
         copytree(src, dst, ignore=IgnoreBut(r"^{0}{1}\B_\B[^\.]+\.jpg$".format(month, shared.DFTREGEXDAY)))
-        wihg chgcurdir(dst):
+        with chgcurdir(dst):
             for file in os.listdir(dst):
                 os.rename(file, dateutil.parse(file).timestamp())
