@@ -55,15 +55,18 @@ class ImageData(object):
             else:
                 c = str(int(c) + 1)
             a, b, c = tuple(map(int, (a, b, c)))
-            return timezone("Europe/Paris").localize(parser.parse("{0}{1}".format(a, b))).timestamp()*1000 + c
-        return None
+            return s, timezone("Europe/Paris").localize(parser.parse("{0}{1}".format(a, b))).timestamp()*1000 + c
+        return None, None
 
 
 if __name__ == "__main__":
 
-	reflist = [(fil, month) in map(OriginalMonth(pattern), list(shared.filesinfolder(["jpg"], folder=src))) if fil]
+	reflist = [(fil, month) for fil, month in map(OriginalMonth(pattern), list(shared.filesinfolder(["jpg"], folder=src))) if fil]
 
     # tzinfos = {"CET": tz.gettz("Europe/Paris"), "CEST": tz.gettz("Europe/Paris")}
     # print([(a, timezone("Europe/Paris").localize(b).timestamp()*1000 + c) for
            # a, b, c in [(itemgetter(0)(i), parser.parse("{0}{1}".format(itemgetter(1)(i), itemgetter(2)(i)), tzinfos=tzinfos), itemgetter(3)(i))
                  # for i in sorted(sorted(sorted(map(GetImageData(pattern), ["20160527_095934.jpg", r"20160304_101202(0).jpg", r"20160304_101202.jpg"]), key=itemgetter(3)), key=itemgetter(2)), key=itemgetter(1)) if itemgetter(0)]])
+	files = os.listdir()
+	for item in [(fil, timestamp) for fil, timestamp in map(ImageData(pattern), files) if fil]:
+		os.rename(src=itemgetter(0)(item), dst=src=itemgetter(1)(item))
