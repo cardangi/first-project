@@ -7,6 +7,7 @@ import logging
 import itertools
 from pytz import timezone
 from string import Template
+from dateutil import parser
 from datetime import datetime
 from dateutil.tz import gettz
 from operator import itemgetter
@@ -284,6 +285,59 @@ class Images(Files):
 
         # Cas 3 : "h:\CCYYMM".
         return os.path.join(defaultdrive, "{0}{1}".format(year, str(month).zfill(2)))
+
+
+class SamsungS5(Images):
+
+    pattern = r"^({0})({1})({2})\B_\B(\d{{6}})(?:\((\d)\))?\.jpg$".format(DFTYEARREGEX, DFTMONTHREGEX, DFTDAYREGEX)
+    regex = re.compile(pattern, re.IGNORECASE)
+
+    def __init__(self, img):
+        super(SamsungS5, self).__init__(img)
+        self._name = ""
+        self._timestamp = 0
+        self.name = img
+        self.timestamp = DFTTIMEZONE
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, arg):
+        self._name = arg
+
+    @property
+    def match(self):
+        match = self.regex.match(os.path.basename(self.name))
+        if match:
+            return True
+        return False
+
+    @property
+    def index(self):
+        match = self.regex.match(os.path.basename(self.name))
+        if match:
+            index = match.group(5)
+            if not index:
+                index = "0"
+            else:
+                index = str(int(index) + 1)
+            return int(index)
+        return None
+
+    @property
+    def timestamp(self):
+        return self._timestamp
+
+    @timestamp.setter
+    def timestamp(self, tz):
+        self._timestamp = int(timezone(tz).localize(parser.parse("{0}{1}{2}{3}{4}{5}".format(self.originalyear,
+                                                                                             self.originalmonth,
+                                                                                             self.originalday,
+                                                                                             self.originalhours,
+                                                                                             self.originalminutes,
+                                                                                             self.originalseconds))).timestamp())*1000 + self.index
 
 
 class CustomFormatter(logging.Formatter):

@@ -1,73 +1,30 @@
 # -*- coding: ISO-8859-1 -*-
-import re
-from pytz import timezone
-from itertools import repeat
-from dateutil import parser, tz
+import os
 from operator import itemgetter
 from Applications import shared
 
 __author__ = 'Xavier ROSSET'
 
 
-pattern = r"^((?:{0})(?:{1}))(?:{2})\B_\B\d{{6}}(?:\(\d\))?\.jpg$".format(shared.DFTYEARREGEX, shared.DFTMONTHREGEX, shared.DFTDAYREGEX)
+src = r"G:\Videos\Samsung S5"
+# print(reflist)
+# tzinfos = {"CET": tz.gettz("Europe/Paris"), "CEST": tz.gettz("Europe/Paris")}
+# print([(a, timezone("Europe/Paris").localize(b).timestamp()*1000 + c) for
+       # a, b, c in [(itemgetter(0)(i), parser.parse("{0}{1}".format(itemgetter(1)(i), itemgetter(2)(i)), tzinfos=tzinfos), itemgetter(3)(i))
+             # for i in sorted(sorted(sorted(map(GetImageData(pattern), ["20160527_095934.jpg", r"20160304_101202(0).jpg", r"20160304_101202.jpg"]), key=itemgetter(3)), key=itemgetter(2)), key=itemgetter(1)) if itemgetter(0)]])
+# files = os.listdir()
+# for item in [(fil, timestamp) for fil, timestamp in map(ImageData(pattern), files, repeat(timezone("Europe/Paris"))) if fil]:
+#     os.rename(src=itemgetter(0)(item), dst=src=itemgetter(1)(item))
 
-
-class OriginalMonth(object):
-
-    def __init__(self, pattern):
-        self._regex = None
-        self.regex = pattern
-
-    @property
-    def regex(self):
-        return self._regex
-
-    @regex.setter
-    def regex(self, arg):
-        self._regex = re.compile(arg, re.IGNORECASE)
-
-    def __call__(self, s):
-        match = self.regex.match(s)
-        if match
-            return s, match.group(1)
-        return None, None
-
-
-class ImageData(object):
-
-    def __init__(self, pattern):
-        self._regex = None
-        self.regex = pattern
-
-    @property
-    def regex(self):
-        return self._regex
-
-    @regex.setter
-    def regex(self, arg):
-        self._regex = re.compile(arg, re.IGNORECASE)
-
-    def __call__(self, s, tz):
-        match = self.regex.match(s)
-        if match
-            a, b, c = re.split(r"\D", s)[:3]
-            if not c:
-                c = "0"
-            else:
-                c = str(int(c) + 1)
-            a, b, c = tuple(map(int, (a, b, c)))
-            return s, tz.localize(parser.parse("{0}{1}".format(a, b))).timestamp()*1000 + c
-        return None, None
-
-
-if __name__ == "__main__":
-
-    reflist = [(fil, month) for fil, month in map(OriginalMonth(pattern), list(shared.filesinfolder(["jpg"], folder=src))) if fil]
-
-    # tzinfos = {"CET": tz.gettz("Europe/Paris"), "CEST": tz.gettz("Europe/Paris")}
-    # print([(a, timezone("Europe/Paris").localize(b).timestamp()*1000 + c) for
-           # a, b, c in [(itemgetter(0)(i), parser.parse("{0}{1}".format(itemgetter(1)(i), itemgetter(2)(i)), tzinfos=tzinfos), itemgetter(3)(i))
-                 # for i in sorted(sorted(sorted(map(GetImageData(pattern), ["20160527_095934.jpg", r"20160304_101202(0).jpg", r"20160304_101202.jpg"]), key=itemgetter(3)), key=itemgetter(2)), key=itemgetter(1)) if itemgetter(0)]])
-    files = os.listdir()
-    for item in [(fil, timestamp) for fil, timestamp in map(ImageData(pattern), files, repeat(timezone("Europe/Paris"))) if fil]:
-        os.rename(src=itemgetter(0)(item), dst=src=itemgetter(1)(item))
+reflist = list()
+for fil in shared.filesinfolder(["jpg"], folder=src):
+    try:
+        obj = shared.SamsungS5(fil)
+    except shared.ExifError:
+        pass
+    else:
+        reflist.append((fil, obj))
+months = set(["{0}{1}".format(itemgetter(1)(i).originalyear, itemgetter(1)(i).originalmonth) for i in reflist if itemgetter(1)(i).match])
+files = [(os.path.basename(itemgetter(0)(i)) , itemgetter(1)(i).timestamp) for i in reflist if itemgetter(1)(i).match]
+print(months)
+print(files)
