@@ -1,6 +1,7 @@
 # -*- coding: ISO-8859-1 -*-
 import re
 from pytz import timezone
+from itertools import repeat
 from dateutil import parser, tz
 from operator import itemgetter
 from Applications import shared
@@ -46,7 +47,7 @@ class ImageData(object):
     def regex(self, arg):
         self._regex = re.compile(arg, re.IGNORECASE)
 
-    def __call__(self, s):
+    def __call__(self, s, tz):
         match = self.regex.match(s)
         if match
             a, b, c = re.split(r"\D", s)[:3]
@@ -55,18 +56,18 @@ class ImageData(object):
             else:
                 c = str(int(c) + 1)
             a, b, c = tuple(map(int, (a, b, c)))
-            return s, timezone("Europe/Paris").localize(parser.parse("{0}{1}".format(a, b))).timestamp()*1000 + c
+            return s, tz.localize(parser.parse("{0}{1}".format(a, b))).timestamp()*1000 + c
         return None, None
 
 
 if __name__ == "__main__":
 
-	reflist = [(fil, month) for fil, month in map(OriginalMonth(pattern), list(shared.filesinfolder(["jpg"], folder=src))) if fil]
+    reflist = [(fil, month) for fil, month in map(OriginalMonth(pattern), list(shared.filesinfolder(["jpg"], folder=src))) if fil]
 
     # tzinfos = {"CET": tz.gettz("Europe/Paris"), "CEST": tz.gettz("Europe/Paris")}
     # print([(a, timezone("Europe/Paris").localize(b).timestamp()*1000 + c) for
            # a, b, c in [(itemgetter(0)(i), parser.parse("{0}{1}".format(itemgetter(1)(i), itemgetter(2)(i)), tzinfos=tzinfos), itemgetter(3)(i))
                  # for i in sorted(sorted(sorted(map(GetImageData(pattern), ["20160527_095934.jpg", r"20160304_101202(0).jpg", r"20160304_101202.jpg"]), key=itemgetter(3)), key=itemgetter(2)), key=itemgetter(1)) if itemgetter(0)]])
-	files = os.listdir()
-	for item in [(fil, timestamp) for fil, timestamp in map(ImageData(pattern), files) if fil]:
-		os.rename(src=itemgetter(0)(item), dst=src=itemgetter(1)(item))
+    files = os.listdir()
+    for item in [(fil, timestamp) for fil, timestamp in map(ImageData(pattern), files, repeat(timezone("Europe/Paris"))) if fil]:
+        os.rename(src=itemgetter(0)(item), dst=src=itemgetter(1)(item))
