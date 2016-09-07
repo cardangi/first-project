@@ -2,36 +2,97 @@
 import os
 from collections import Counter
 from operator import itemgetter
+from contextlib import contextmanager
 from Applications import shared
 
 __author__ = 'Xavier ROSSET'
 
 
-src = r"G:\Videos\Samsung S5"
-# print(reflist)
-# tzinfos = {"CET": tz.gettz("Europe/Paris"), "CEST": tz.gettz("Europe/Paris")}
-# print([(a, timezone("Europe/Paris").localize(b).timestamp()*1000 + c) for
-       # a, b, c in [(itemgetter(0)(i), parser.parse("{0}{1}".format(itemgetter(1)(i), itemgetter(2)(i)), tzinfos=tzinfos), itemgetter(3)(i))
-             # for i in sorted(sorted(sorted(map(GetImageData(pattern), ["20160527_095934.jpg", r"20160304_101202(0).jpg", r"20160304_101202.jpg"]), key=itemgetter(3)), key=itemgetter(2)), key=itemgetter(1)) if itemgetter(0)]])
-# files = os.listdir()
-# for item in [(fil, timestamp) for fil, timestamp in map(ImageData(pattern), files, repeat(timezone("Europe/Paris"))) if fil]:
-#     os.rename(src=itemgetter(0)(item), dst=src=itemgetter(1)(item))
+# ========
+# Classes.
+# ========
+class IgnoreBut(object):
 
-reflist = list()
-rejected = list()
-for fil in shared.filesinfolder(["jpg"], folder=src):
+    def __init__(self, *patterns):
+        self._patterns = patterns
+
+    def __call__(self, path, content):
+        l = list()
+        for item in content:
+            for pattern in self._patterns:
+                match = re.match(pattern, item)
+                if match:
+                    break
+            else:
+                l.append(item)
+        return l
+
+
+# ==========
+# Functions.
+# ==========
+@contextmanager
+def chgcurdir(d):
+    wcdir = os.getcwd()
+    if not os.path.exists(d):
+        yield True
+    elif os.path.exists(d):
+        if not os.path.isidr(d):
+            yield True
+        elif os.path.isidr(d):
+            os.chdir(d)
+            yield False
+            os.chdir(wcdir)
+
+
+# ==========
+# Constants.
+# ==========
+SRC = r"G:\Videos\Samsung S5"
+
+
+# ================
+# Initializations.
+# ================
+included, excluded = list(), list()
+
+
+# ===============
+# Main algorithm.
+# ===============
+
+
+#  1. Get files.
+for fil in shared.imagesinfolder(["jpg"], folder=SRC):
     try:
         obj = shared.SamsungS5(fil)
     except shared.ExifError:
-        rejected.append(fil)
+        excluded.append(fil)
     else:
-        reflist.append((fil, obj))
-months = ["{0}{1}".format(itemgetter(1)(i).originalyear, itemgetter(1)(i).originalmonth) for i in reflist if itemgetter(1)(i).match]
-files = [(os.path.basename(itemgetter(0)(i)), itemgetter(1)(i).timestamp) for i in reflist if itemgetter(1)(i).match]
-print(months)
-print(files)
-c = Counter(months)
-print(c)
-print(list(c))
-print(sum(c.values()))
-print(rejected)
+        included.append((fil, obj))
+
+
+#  2. Group by month.
+c = Counter(["{0}{1}".format(itemgetter(1)(i).originalyear, itemgetter(1)(i).originalmonth) for i in included if itemgetter(1)(i).match])
+
+
+#  3. Copy and rename.
+for month in sorted(list(c), key=int):
+    included, curdir = list(), os.path.join(r"H:\\", month)
+    if not os.path.exists(curdir):
+
+        # Copy.
+        copytree(SRC, curdir, ignore=IgnoreBut(r"^({0})({1})\B_\B(\d{{6}})(?:\((\d)\))?\.jpg$".format(curdir, DFTDAYREGEX)))
+
+        # Rename.
+        with chgcurdir(curdir) as exception:
+            if not exception:
+                for fil in shared.imagesinfolder(["jpg"]):
+                    try:
+                        obj = shared.SamsungS5(fil)
+                    except shared.ExifError:
+                        pass
+                    else:
+                        included.append((fil, obj))
+                for src, dst in included:
+                    os.rename(src=src, dst="{0}.jpg".format(dst))
