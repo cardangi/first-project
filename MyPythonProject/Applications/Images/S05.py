@@ -61,17 +61,6 @@ def validpath(p):
     return p
 
 
-def decorator(func):
-    def wrapper(char="="):
-        return "{0} {1} {0}".format(char*50, func())
-    return wrapper
-
-
-@decorator
-def now():
-    return shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1)
-
-
 # =================
 # Arguments parser.
 # =================
@@ -96,7 +85,6 @@ included, excluded, arguments = list(), list(), parser.parse_args()
 # ==============
 # Log arguments.
 # ==============
-# logger.info(now())
 logger.info("{0:=^140s}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
 logger.info('START "%s".' % (os.path.basename(__file__),))
 logger.debug("Source directory.")
