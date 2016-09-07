@@ -1,7 +1,11 @@
 # -*- coding: ISO-8859-1 -*-
 import os
+import re
+import shutil
 import logging
 import argparse
+from pytz import timezone
+from datetime import datetime
 from collections import Counter
 from operator import itemgetter
 from contextlib import contextmanager
@@ -45,9 +49,9 @@ def chgcurdir(d):
     if not os.path.exists(d):
         yield True
     elif os.path.exists(d):
-        if not os.path.isidr(d):
+        if not os.path.isdir(d):
             yield True
-        elif os.path.isidr(d):
+        elif os.path.isdir(d):
             os.chdir(d)
             yield False
             os.chdir(wcdir)
@@ -99,7 +103,7 @@ logger.debug('\t"{0}".'.format(arguments.src).expandtabs(3))
 #     ----------
 #  1. Get files.
 #     ----------
-for fil in shared.imagesinfolder(["jpg"], folder=arguments.src):
+for fil in shared.filesinfolder(["jpg"], folder=arguments.src):
     try:
         obj = shared.SamsungS5(fil)
     except shared.ExifError:
@@ -134,7 +138,7 @@ for month in sorted(list(c), key=int):
         logger.debug('\tSource\t\t: "{0}".'.format(arguments.src).expandtabs(3))
         logger.debug('\tDestination : "{0}".'.format(curdir).expandtabs(3))
         logger.debug('\tFiles\t\t\t : {0:>4d} file(s) to copy.'.format(c[curdir]).expandtabs(3))
-        copytree(arguments.src, curdir, ignore=IgnoreBut(r"^({0})({1})\B_\B(\d{{6}})(?:\((\d)\))?\.jpg$".format(curdir, DFTDAYREGEX)))
+        shutil.copytree(arguments.src, curdir, ignore=IgnoreBut(r"^({0})({1})\B_\B(\d{{6}})(?:\((\d)\))?\.jpg$".format(curdir, shared.DFTDAYREGEX)))
 
         # Rename.
         if arguments.rename:
@@ -142,7 +146,7 @@ for month in sorted(list(c), key=int):
                 logger.debug("Change current working directory.")
                 logger.debug('\t"{0}" set as current working directory.'.format(curdir).expandtabs(3))
                 if not exception:
-                    for fil in shared.imagesinfolder(["jpg"]):
+                    for fil in shared.filesinfolder(["jpg"]):
                         try:
                             obj = shared.SamsungS5(fil)
                         except shared.ExifError:
@@ -155,7 +159,7 @@ for month in sorted(list(c), key=int):
                         logger.debug('\tAfter : "{0}.jpg".'.format(dst).expandtabs(3))
                         if not arguments.test:
                             try:
-                                os.rename(arguments.src=arguments.src, dst="{0}.jpg".format(dst))
+                                os.rename(src=arguments.src, dst="{0}.jpg".format(dst))
                             except OSError:
                                 logger.debug("\tRename failed.".expandtabs(4))
                             else:

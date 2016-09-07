@@ -1,3 +1,11 @@
+# -*- coding: ISO-8859-1 -*-
+from operator import itemgetter
+from collections import Counter
+from itertools import count
+
+__author__ = 'Xavier ROSSET'
+
+
 def toto(x, i):
     return x*1000 + i
 
