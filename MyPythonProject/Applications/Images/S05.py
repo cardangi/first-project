@@ -69,15 +69,15 @@ def validpath(p):
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("src", type=validpath)
-parser.add_argument("--rename", action="store_true")
-parser.add_argument("--test", action="store_true")
+parser.add_argument("source", type=validpath)
+parser.add_argument("-r", "--rename", action="store_true")
+parser.add_argument("-t", "--test", action="store_true")
 
 
 # ==========
 # Constants.
 # ==========
-# arguments.src = r"G:\Videos\Samsung S5"
+TABSIZE = 3
 
 
 # ================
@@ -92,7 +92,7 @@ included, excluded, arguments = list(), list(), parser.parse_args()
 logger.info("{0:=^140s}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
 logger.info('START "{0}".'.format(os.path.basename(__file__)))
 logger.debug("Source directory.")
-logger.debug('\t"{0}".'.format(arguments.src).expandtabs(3))
+logger.debug('\t"{0}".'.format(arguments.source).expandtabs(TABSIZE))
 
 
 # ===============
@@ -103,7 +103,7 @@ logger.debug('\t"{0}".'.format(arguments.src).expandtabs(3))
 #     ----------
 #  1. Get files.
 #     ----------
-for fil in shared.filesinfolder(["jpg"], folder=arguments.src):
+for fil in shared.filesinfolder(["jpg"], folder=arguments.source):
     try:
         obj = shared.SamsungS5(fil)
     except shared.ExifError:
@@ -123,7 +123,7 @@ c = Counter(["{0}{1}".format(itemgetter(1)(i).originalyear, itemgetter(1)(i).ori
 #     ---------------
 logger.debug("{0:>4d} file(s) found.".format(sum(c.values())))
 for month in sorted(list(c), key=int):
-    logger.debug("\t{0}: {1:>4d} file(s).".format(month, c[month]))
+    logger.debug("\t{0}: {1:>4d} file(s).".format(month, c[month]).expandtabs(TABSIZE))
 
 
 #     ----------------
@@ -135,16 +135,16 @@ for month in sorted(list(c), key=int):
 
         # Copy.
         logger.debug('Copy files using "shutil.copytree".')
-        logger.debug('\tSource\t\t: "{0}".'.format(arguments.src).expandtabs(3))
-        logger.debug('\tDestination : "{0}".'.format(curdir).expandtabs(3))
-        logger.debug('\tFiles\t\t\t : {0:>4d} file(s) to copy.'.format(c[month]).expandtabs(3))
-        shutil.copytree(arguments.src, curdir, ignore=IgnoreBut(r"^({0})({1})\B_\B(\d{{6}})(?:\((\d)\))?\.jpg$".format(month, shared.DFTDAYREGEX)))
+        logger.debug('\tSource\t\t: "{0}".'.format(arguments.source).expandtabs(TABSIZE))
+        logger.debug('\tDestination : "{0}".'.format(curdir).expandtabs(TABSIZE))
+        logger.debug('\tFiles\t\t\t: {0:>4d} file(s) to copy.'.format(c[month]).expandtabs(TABSIZE))
+        shutil.copytree(arguments.source, curdir, ignore=IgnoreBut(r"^({0})({1})\B_\B(\d{{6}})(?:\((\d)\))?\.jpg$".format(month, shared.DFTDAYREGEX)))
 
         # Rename.
         if arguments.rename:
             with chgcurdir(curdir) as exception:
                 logger.debug("Change current working directory.")
-                logger.debug('\t"{0}" set as current working directory.'.format(curdir).expandtabs(3))
+                logger.debug('\t"{0}" set as current working directory.'.format(curdir).expandtabs(TABSIZE))
                 if not exception:
                     for fil in shared.filesinfolder(["jpg"]):
                         try:
@@ -152,14 +152,14 @@ for month in sorted(list(c), key=int):
                         except shared.ExifError:
                             pass
                         else:
-                            included.append((fil, obj))
-                    for arguments.src, dst in included:
+                            included.append((os.path.basename(fil), obj.timestamp))
+                    for src, dst in included:
                         logger.debug("Rename file.")
-                        logger.debug('\tBefore: "{0}".'.format(arguments.src).expandtabs(3))
-                        logger.debug('\tAfter : "{0}.jpg".'.format(dst).expandtabs(3))
+                        logger.debug('\tBefore: "{0}".'.format(src).expandtabs(TABSIZE))
+                        logger.debug('\tAfter : "{0}.jpg".'.format(dst).expandtabs(TABSIZE))
                         if not arguments.test:
                             try:
-                                os.rename(src=arguments.src, dst="{0}.jpg".format(dst))
+                                os.rename(src=src, dst="{0}.jpg".format(dst))
                             except OSError:
                                 logger.debug("\tRename failed.".expandtabs(4))
                             else:
