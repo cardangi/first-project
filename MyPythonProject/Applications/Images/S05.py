@@ -130,15 +130,15 @@ for month in sorted(list(c), key=int):
 #  4. Copy and rename.
 #     ----------------
 for month in sorted(list(c), key=int):
-    included, curdir = list(), os.path.join(r"H:\\", month)
+    included, curdir = list(), os.path.normpath(os.path.join(r"H:\\", month))
     if not os.path.exists(curdir):
 
         # Copy.
         logger.debug('Copy files using "shutil.copytree".')
         logger.debug('\tSource\t\t: "{0}".'.format(arguments.src).expandtabs(3))
         logger.debug('\tDestination : "{0}".'.format(curdir).expandtabs(3))
-        logger.debug('\tFiles\t\t\t : {0:>4d} file(s) to copy.'.format(c[curdir]).expandtabs(3))
-        shutil.copytree(arguments.src, curdir, ignore=IgnoreBut(r"^({0})({1})\B_\B(\d{{6}})(?:\((\d)\))?\.jpg$".format(curdir, shared.DFTDAYREGEX)))
+        logger.debug('\tFiles\t\t\t : {0:>4d} file(s) to copy.'.format(c[month]).expandtabs(3))
+        shutil.copytree(arguments.src, curdir, ignore=IgnoreBut(r"^({0})({1})\B_\B(\d{{6}})(?:\((\d)\))?\.jpg$".format(month, shared.DFTDAYREGEX)))
 
         # Rename.
         if arguments.rename:
