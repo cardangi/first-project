@@ -295,9 +295,7 @@ class SamsungS5(Images):
     def __init__(self, img):
         super(SamsungS5, self).__init__(img)
         self._name = ""
-        self._timestamp = 0
         self.name = img
-        self.timestamp = DFTTIMEZONE
 
     @property
     def name(self):
@@ -328,16 +326,12 @@ class SamsungS5(Images):
 
     @property
     def timestamp(self):
-        return self._timestamp
-
-    @timestamp.setter
-    def timestamp(self, tz):
-        self._timestamp = int(timezone(tz).localize(parser.parse("{0}{1}{2}{3}{4}{5}".format(self.originalyear,
-                                                                                             self.originalmonth,
-                                                                                             self.originalday,
-                                                                                             self.originalhours,
-                                                                                             self.originalminutes,
-                                                                                             self.originalseconds))).timestamp())*1000 + self.index
+        return int(timezone(DFTTIMEZONE).localize(parser.parse("{0}{1}{2}{3}{4}{5}".format(self.originalyear,
+                                                                                           self.originalmonth,
+                                                                                           self.originalday,
+                                                                                           self.originalhours,
+                                                                                           self.originalminutes,
+                                                                                           self.originalseconds))).timestamp())*1000 + self.index
 
 
 class CustomFormatter(logging.Formatter):

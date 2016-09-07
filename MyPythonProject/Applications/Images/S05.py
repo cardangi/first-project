@@ -1,5 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 import os
+from collections import Counter
 from operator import itemgetter
 from Applications import shared
 
@@ -17,14 +18,20 @@ src = r"G:\Videos\Samsung S5"
 #     os.rename(src=itemgetter(0)(item), dst=src=itemgetter(1)(item))
 
 reflist = list()
+rejected = list()
 for fil in shared.filesinfolder(["jpg"], folder=src):
     try:
         obj = shared.SamsungS5(fil)
     except shared.ExifError:
-        pass
+        rejected.append(fil)
     else:
         reflist.append((fil, obj))
-months = set(["{0}{1}".format(itemgetter(1)(i).originalyear, itemgetter(1)(i).originalmonth) for i in reflist if itemgetter(1)(i).match])
-files = [(os.path.basename(itemgetter(0)(i)) , itemgetter(1)(i).timestamp) for i in reflist if itemgetter(1)(i).match]
+months = ["{0}{1}".format(itemgetter(1)(i).originalyear, itemgetter(1)(i).originalmonth) for i in reflist if itemgetter(1)(i).match]
+files = [(os.path.basename(itemgetter(0)(i)), itemgetter(1)(i).timestamp) for i in reflist if itemgetter(1)(i).match]
 print(months)
 print(files)
+c = Counter(months)
+print(c)
+print(list(c))
+print(sum(c.values()))
+print(rejected)
