@@ -334,6 +334,41 @@ class SamsungS5(Images):
                                                                                            self.originalseconds))).timestamp())*1000 + self.index
 
 
+class Lumix(Images):
+
+    pattern = r"^IMG_\B\d{5}\.jpg$"
+    regex = re.compile(pattern)
+
+    def __init__(self, img):
+        super(Lumix, self).__init__(img)
+        self._name = ""
+        self.name = img
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, arg):
+        self._name = arg
+
+    @property
+    def match(self):
+        match = self.regex.match(os.path.basename(self.name))
+        if match:
+            return True
+        return False
+
+    @property
+    def timestamp(self):
+        return int(timezone(DFTTIMEZONE).localize(parser.parse("{0}{1}{2}{3}{4}{5}".format(self.originalyear,
+                                                                                           self.originalmonth,
+                                                                                           self.originalday,
+                                                                                           self.originalhours,
+                                                                                           self.originalminutes,
+                                                                                           self.originalseconds))).timestamp())
+
+
 class CustomFormatter(logging.Formatter):
 
     converter = datetime.fromtimestamp
