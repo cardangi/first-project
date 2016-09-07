@@ -86,7 +86,7 @@ included, excluded, arguments = list(), list(), parser.parse_args()
 # Log arguments.
 # ==============
 logger.info("{0:=^140s}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
-logger.info('START "%s".' % (os.path.basename(__file__),))
+logger.info('START "{0}".'.format(os.path.basename(__file__)))
 logger.debug("Source directory.")
 logger.debug('\t"{0}".'.format(arguments.src).expandtabs(3))
 
@@ -165,4 +165,4 @@ for month in sorted(list(c), key=int):
 # ===============
 # Exit algorithm.
 # ===============
-logger.info('END "%s".' % (os.path.basename(__file__),))
+logger.info('END "{0}".'.format(os.path.basename(__file__)))
