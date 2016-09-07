@@ -13,7 +13,7 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Logging.
 # ========
-logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
+logger = logging.getLogger("{0}.{1}".format(__package__, os.path.basename(__file__)))
 
 
 # ========
