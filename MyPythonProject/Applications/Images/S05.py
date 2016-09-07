@@ -146,7 +146,7 @@ for month in sorted(list(c), key=int):
                 logger.debug("Change current working directory.")
                 logger.debug('\t"{0}" set as current working directory.'.format(curdir).expandtabs(TABSIZE))
                 if not exception:
-                    for fil in shared.filesinfolder(["jpg"]):
+                    for fil in shared.filesinfolder(["jpg"]):  # la fonction utilise %_PYTHONPROJECT% comme cwd !
                         try:
                             obj = shared.SamsungS5(fil)
                         except shared.ExifError:
