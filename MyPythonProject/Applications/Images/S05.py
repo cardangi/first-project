@@ -75,19 +75,11 @@ def chgcurdir(d):
             os.chdir(wcdir)
 
 
-def validpath(p):
-    if not os.path.exists(p):
-        raise argparse.ArgumentTypeError('"{0}" doesn\'t exist'.format(p))
-    if not os.path.isdir(p):
-        raise argparse.ArgumentTypeError('"{0}" is not a directory'.format(p))
-    return p
-
-
 # =================
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("source", type=validpath)
+parser.add_argument("source", type=shared.validpath)
 parser.add_argument("-r", "--rename", action="store_true")
 parser.add_argument("-t", "--test", action="store_true")
 
