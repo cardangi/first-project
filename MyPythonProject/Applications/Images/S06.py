@@ -2,6 +2,7 @@
 from operator import itemgetter
 from collections import Counter
 from itertools import count
+from Applications import shared
 
 __author__ = 'Xavier ROSSET'
 
@@ -17,4 +18,12 @@ for key in y:
     z1 += l2
 
 print(sorted(z1, key=itemgetter(1)))
+
+
+obj = shared.Images(r"H:\201005\201005_00400.jpg")
+print(sorted(obj.exif.keys()))
+print(obj.exif[37500])
+print(obj.exif[37520])
+print(obj.exif[37521])
+print(obj.exif[37522])
 

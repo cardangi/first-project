@@ -4,6 +4,7 @@ import os
 import re
 import locale
 import logging
+import argparse
 import itertools
 from pytz import timezone
 from string import Template
@@ -140,7 +141,7 @@ class Images(Files):
         self._exif = None
         self.exif = img
         for i in ["localtimestamp", "originaldatetime", "originalyear", "originalmonth", "originalday", "originalhours", "originalminutes", "originalseconds", "dayoftheyear", "dayoftheweek", "defaultlocation",
-                  "defaultprefix"]:
+                  "defaultprefix", "originalsubseconds"]:
             self._metadata[i] = getattr(self, i)
 
     @property
@@ -151,13 +152,15 @@ class Images(Files):
     def exif(self, value):
         try:
             self._exif = self.getexif(Image.open(value))
+        except ExifError:
+            raise ExifError(value, "Can\'t grab exif tags from")
         except OSError:
             raise OSError('Can\'t identify "{0}" as an image file.'.format(value))
         else:
             if not self._exif:
-                raise ExifError(value, 'Can\'t grab metadata from')
+                raise ExifError(value, "Can\'t grab metadata from")
             if 36867 not in self._exif:
-                raise ExifError(value, 'Can\'t grab timestamp from')
+                raise ExifError(value, "Can\'t grab timestamp from")
 
     @property
     def datetime(self):
@@ -196,6 +199,10 @@ class Images(Files):
         return self.datetime.strftime("%S")
 
     @property
+    def originalsubseconds(self):
+        return self.exif.get(37521, 0)
+
+    @property
     def dayoftheyear(self):
         return self.datetime.strftime("%j")
 
@@ -213,28 +220,23 @@ class Images(Files):
 
     @property
     def make(self):
-        if 271 in self.exif:
-            return self.exif[271]
+        return self.exif.get(271, "")
 
     @property
     def model(self):
-        if 272 in self.exif:
-            return self.exif[272]
+        return self.exif.get(272, "")
 
     @property
     def width(self):
-        if 40962 in self.exif:
-            return self.exif[40962]
+        return self.exif.get(40962, 0)
 
     @property
     def height(self):
-        if 40963 in self.exif:
-            return self.exif[40963]
+        return self.exif.get(40963, 0)
 
     @property
     def copyright(self):
-        if 33432 in self.exif:
-            return self.exif[33432]
+        return self.exif.get(33432, "")
 
     @classmethod
     def getexif(cls, o):
@@ -246,7 +248,7 @@ class Images(Files):
         try:
             data = o.info["exif"]
         except KeyError:
-            return None
+            raise ExifError
         file = io.BytesIO(data[6:])
         head = file.read(8)
         info = TiffImagePlugin.ImageFileDirectory(head)
