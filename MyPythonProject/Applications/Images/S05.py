@@ -25,18 +25,28 @@ logger = logging.getLogger("{0}.{1}".format(__package__, os.path.basename(__file
 # ========
 class IgnoreBut(object):
 
-    def __init__(self, *patterns):
-        self._patterns = patterns
+    def __init__(self, ccyymm):
+        self._ccyymm = ""
+        self.ccyymm = ccyymm
+
+    @property
+    def ccyymm(self):
+        return self._ccyymm
+
+    @ccyymm.setter
+    def ccyymm(self, arg):
+        self._ccyymm = arg
 
     def __call__(self, path, content):
         l = list()
         for item in content:
-            for pattern in self._patterns:
-                match = re.match(pattern, item)
-                if match:
-                    break
+            try:
+                obj = shared.SamsungS5(os.path.join(path, item))
+            except shared.ExifError:
+                pass
             else:
-                l.append(item)
+                if "{0}{1}".format(obj.originalyear, obj.originalmonth) != self.ccyymm:
+                    included.append(fil)
         return l
 
 
