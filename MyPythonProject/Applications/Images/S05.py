@@ -148,7 +148,7 @@ for month in sorted(list(c), key=int):
 #  4. Copy and rename.
 #     ----------------
 for month in sorted(list(c), key=int):
-    included, curdir = list(), os.path.normpath(os.path.join(r"H:\\", month))
+    torename, curdir = list(), os.path.normpath(os.path.join(r"H:\\", month))
     if not os.path.exists(curdir):
 
         # Copy.
@@ -167,8 +167,8 @@ for month in sorted(list(c), key=int):
                     for fil in shared.filesinfolder(["jpg"], folder=curdir):
                         basname = os.path.basename(fil)
                         if basname in images:
-                            included.append((basname, images[basname].timestamp))
-                    for src, dst in included:
+                            torename.append((basname, images[basname].timestamp))
+                    for src, dst in torename:
                         logger.debug("Rename file.")
                         logger.debug('\tBefore: "{0}".'.format(src).expandtabs(TABSIZE))
                         logger.debug('\tAfter : "{0}.jpg".'.format(dst).expandtabs(TABSIZE))
