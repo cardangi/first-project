@@ -158,7 +158,7 @@ for month in sorted(list(c), key=int):
         shutil.copytree(arguments.source, curdir, ignore=IgnoreBut(curdir, collection=images))
 
     if os.path.exists(curdir):
-        templist = [img for img in images.values() if img.month == curdir]
+        templist = sorted([img for img in images.values() if img.month == curdir], key=itemgetter(0))
         logger.debug('Copy {1:>4d} file(s) to "{0}" using "shutil.copy2".'.format(curdir, len(templist)))
         for item in enumerate(templist, start=1):
             logger.debug('\t{1:>4d}. "{0}".'.format(itemgetter(1)(item).path, itemgetter(0)(item)).expandtabs(TABSIZE))
