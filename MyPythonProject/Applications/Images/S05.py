@@ -165,9 +165,9 @@ for month in sorted(list(c), key=int):
                 logger.debug('\t"{0}" set as current working directory.'.format(curdir).expandtabs(TABSIZE))
                 if not exception:
                     for fil in shared.filesinfolder(["jpg"], folder=curdir):
-                        basnam = os.path.basename(fil)
-                        if basnam in images:
-                            included.append((basnam, images[basnam].timestamp))
+                        basname = os.path.basename(fil)
+                        if basname in images:
+                            included.append((basname, images[basname].timestamp))
                     for src, dst in included:
                         logger.debug("Rename file.")
                         logger.debug('\tBefore: "{0}".'.format(src).expandtabs(TABSIZE))
