@@ -161,7 +161,6 @@ for month in sorted(list(c), key=int):
         # Rename.
         if arguments.rename:
             with chgcurdir(curdir) as exception:
-                logger.debug("Change current working directory.")
                 logger.debug('\t"{0}" set as current working directory.'.format(curdir).expandtabs(TABSIZE))
                 if not exception:
                     for fil in shared.filesinfolder(["jpg"], folder=curdir):
