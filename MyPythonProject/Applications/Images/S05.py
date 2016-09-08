@@ -150,7 +150,7 @@ for month in sorted(list(c), key=int):
 for month in sorted(list(c), key=int):
     torename, curdir = list(), os.path.normpath(os.path.join(r"H:\\", month))
 
-    # Copy.
+    # 4a. Copy.
     if not os.path.exists(curdir):
         logger.debug('Copy {0:<4d} file(s) using "shutil.copytree".'.format(c[month]))
         logger.debug('\tSource\t\t: "{0}".'.format(arguments.source).expandtabs(TABSIZE))
@@ -164,7 +164,7 @@ for month in sorted(list(c), key=int):
             logger.debug('\t{1:>4d}. "{0}".'.format(itemgetter(1)(item).path, itemgetter(0)(item)).expandtabs(TABSIZE))
             shutil.copy2(src=itemgetter(1)(item).path, dst=curdir)
 
-    # Rename.
+    # 4b. Rename.
     if arguments.rename:
         with chgcurdir(curdir) as exception:
             logger.debug("Change current working directory.")
