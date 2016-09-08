@@ -567,6 +567,14 @@ class Bootleg(Track):
 # ==========
 # Functions.
 # ==========
+def validpath(p):
+    if not os.path.exists(p):
+        raise argparse.ArgumentTypeError('"{0}" doesn\'t exist'.format(p))
+    if not os.path.isdir(p):
+        raise argparse.ArgumentTypeError('"{0}" is not a directory'.format(p))
+    return p
+
+
 def directorytree(tree):
     """
     :param tree:
