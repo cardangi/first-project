@@ -152,7 +152,7 @@ for month in sorted(list(c), key=int):
 
     # 4a. Copy.
     if not os.path.exists(curdir):
-        logger.debug('Copy {0:<4d} file(s) using "shutil.copytree".'.format(c[month]))
+        logger.debug('Copy {0:>4d} file(s) using "shutil.copytree".'.format(c[month]))
         logger.debug('\tSource\t\t: "{0}".'.format(arguments.source).expandtabs(TABSIZE))
         logger.debug('\tDestination : "{0}".'.format(curdir).expandtabs(TABSIZE))
         shutil.copytree(arguments.source, curdir, ignore=IgnoreBut(curdir, collection=images))
