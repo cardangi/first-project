@@ -6,9 +6,9 @@ import logging
 import argparse
 from pytz import timezone
 from datetime import datetime
-from collections import Counter
 from operator import itemgetter
 from contextlib import contextmanager
+from collections import Counter, namedtuple
 from Applications import shared
 
 __author__ = 'Xavier ROSSET'
@@ -25,28 +25,36 @@ logger = logging.getLogger("{0}.{1}".format(__package__, os.path.basename(__file
 # ========
 class IgnoreBut(object):
 
-    def __init__(self, ccyymm):
-        self._ccyymm = ""
-        self.ccyymm = ccyymm
+    def __init__(self, month, collection):
+        self._month = ""
+        self._collection = {}
+        self.month = month
+        self.collection = collection
 
     @property
-    def ccyymm(self):
-        return self._ccyymm
+    def month(self):
+        return self._month
 
-    @ccyymm.setter
-    def ccyymm(self, arg):
-        self._ccyymm = arg
+    @month.setter
+    def month(self, arg):
+        self._month = arg
+
+    @property
+    def collection(self):
+        return self._collection
+
+    @collection.setter
+    def collection(self, arg):
+        self._collection = arg
 
     def __call__(self, path, content):
         l = list()
         for item in content:
-            try:
-                obj = shared.SamsungS5(os.path.join(path, item))
-            except shared.ExifError:
-                pass
-            else:
-                if "{0}{1}".format(obj.originalyear, obj.originalmonth) != self.ccyymm:
-                    included.append(fil)
+            if item not in self.collection:
+                l.append(item)
+                continue
+            if self.collection[item].month != self.month:
+                l.append(item)
         return l
 
 
@@ -93,7 +101,7 @@ TABSIZE = 3
 # ================
 # Initializations.
 # ================
-included, excluded, arguments = list(), list(), parser.parse_args()
+images, excluded, image, arguments = dict(), list(), namedtuple("image", "path timestamp month"), parser.parse_args()
 
 
 # ==============
@@ -119,13 +127,13 @@ for fil in shared.filesinfolder(["jpg"], folder=arguments.source):
     except shared.ExifError:
         excluded.append(fil)
     else:
-        included.append((fil, obj))
+        images[os.path.basename(fil)] = image(fil, obj.timestamp, "{0}{1}".format(obj.originalyear, obj.originalmonth))
 
 
 #     ---------------
 #  2. Group by month.
 #     ---------------
-c = Counter(["{0}{1}".format(itemgetter(1)(i).originalyear, itemgetter(1)(i).originalmonth) for i in included if itemgetter(1)(i).match])
+c = Counter([i.month for i in images.values()])
 
 
 #     ---------------
@@ -148,7 +156,7 @@ for month in sorted(list(c), key=int):
         logger.debug('\tSource\t\t: "{0}".'.format(arguments.source).expandtabs(TABSIZE))
         logger.debug('\tDestination : "{0}".'.format(curdir).expandtabs(TABSIZE))
         logger.debug('\tFiles\t\t\t: {0:>4d} file(s) to copy.'.format(c[month]).expandtabs(TABSIZE))
-        shutil.copytree(arguments.source, curdir, ignore=IgnoreBut(r"^({0})({1})\B_\B(\d{{6}})(?:\((\d)\))?\.jpg$".format(month, shared.DFTDAYREGEX)))
+        shutil.copytree(arguments.source, curdir, ignore=IgnoreBut(curdir, collection=images))
 
         # Rename.
         if arguments.rename:
@@ -157,12 +165,9 @@ for month in sorted(list(c), key=int):
                 logger.debug('\t"{0}" set as current working directory.'.format(curdir).expandtabs(TABSIZE))
                 if not exception:
                     for fil in shared.filesinfolder(["jpg"], folder=curdir):
-                        try:
-                            obj = shared.SamsungS5(fil)
-                        except shared.ExifError:
-                            pass
-                        else:
-                            included.append((os.path.basename(fil), obj.timestamp))
+                        basnam = os.path.basename(fil)
+                        if basnam in images:
+                            included.append((basnam, images[basnam].timestamp))
                     for src, dst in included:
                         logger.debug("Rename file.")
                         logger.debug('\tBefore: "{0}".'.format(src).expandtabs(TABSIZE))
