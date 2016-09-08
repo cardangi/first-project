@@ -75,11 +75,19 @@ def chgcurdir(d):
             os.chdir(wcdir)
 
 
+def validpath(p):
+    if not os.path.exists(p):
+        raise argparse.ArgumentTypeError('"{0}" doesn\'t exist'.format(p))
+    if not os.path.isdir(p):
+        raise argparse.ArgumentTypeError('"{0}" is not a directory'.format(p))
+    return p
+
+
 # =================
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("source", type=shared.validpath)
+parser.add_argument("source", type=validpath)
 parser.add_argument("-r", "--rename", action="store_true")
 parser.add_argument("-t", "--test", action="store_true")
 
@@ -141,35 +149,42 @@ for month in sorted(list(c), key=int):
 #     ----------------
 for month in sorted(list(c), key=int):
     torename, curdir = list(), os.path.normpath(os.path.join(r"H:\\", month))
-    if not os.path.exists(curdir):
 
-        # Copy.
-        logger.debug('Copy files using "shutil.copytree".')
+    # Copy.
+    if not os.path.exists(curdir):
+        logger.debug('Copy {0:<4d} file(s) using "shutil.copytree".'.format(c[month]))
         logger.debug('\tSource\t\t: "{0}".'.format(arguments.source).expandtabs(TABSIZE))
         logger.debug('\tDestination : "{0}".'.format(curdir).expandtabs(TABSIZE))
-        logger.debug('\tFiles\t\t\t: {0:>4d} file(s) to copy.'.format(c[month]).expandtabs(TABSIZE))
         shutil.copytree(arguments.source, curdir, ignore=IgnoreBut(curdir, collection=images))
 
-        # Rename.
-        if arguments.rename:
-            with chgcurdir(curdir) as exception:
-                logger.debug('\t"{0}" set as current working directory.'.format(curdir).expandtabs(TABSIZE))
-                if not exception:
-                    for fil in shared.filesinfolder(["jpg"], folder=curdir):
-                        basname = os.path.basename(fil)
-                        if basname in images:
-                            torename.append((basname, images[basname].timestamp))
-                    for src, dst in torename:
-                        logger.debug("Rename file.")
-                        logger.debug('\tBefore: "{0}".'.format(src).expandtabs(TABSIZE))
-                        logger.debug('\tAfter : "{0}.jpg".'.format(dst).expandtabs(TABSIZE))
-                        if not arguments.test:
-                            try:
-                                os.rename(src=src, dst="{0}.jpg".format(dst))
-                            except OSError:
-                                logger.debug("\tRename failed.".expandtabs(4))
-                            else:
-                                logger.debug("\tRename succeeded.".expandtabs(4))
+    if os.path.exists(curdir):
+        templist = [img for img in images.values() if img.month == curdir]
+        logger.debug('Copy {1:>4d} file(s) to "{0}" using "shutil.copy2".'.format(curdir, len(templist)))
+        for item in enumerate(templist, start=1):
+            logger.debug('\t{1:>4d}. "{0}".'.format(itemgetter(1)(item).path, itemgetter(0)(item)).expandtabs(TABSIZE))
+            shutil.copy2(src=itemgetter(1)(item).path, dst=curdir)
+
+    # Rename.
+    if arguments.rename:
+        with chgcurdir(curdir) as exception:
+            logger.debug("Change current working directory.")
+            logger.debug('\t"{0}" set as current working directory.'.format(curdir).expandtabs(TABSIZE))
+            if not exception:
+                for fil in shared.filesinfolder(["jpg"], folder=curdir):
+                    basname = os.path.basename(fil)
+                    if basname in images:
+                        torename.append((basname, images[basname].timestamp))
+                for src, dst in torename:
+                    logger.debug("Rename file.")
+                    logger.debug('\tBefore: "{0}".'.format(src).expandtabs(TABSIZE))
+                    logger.debug('\tAfter : "{0}.jpg".'.format(dst).expandtabs(TABSIZE))
+                    if not arguments.test:
+                        try:
+                            os.rename(src=src, dst="{0}.jpg".format(dst))
+                        except OSError:
+                            logger.debug("\tRename failed.".expandtabs(4))
+                        else:
+                            logger.debug("\tRename succeeded.".expandtabs(4))
 
 
 # ===============
