@@ -554,7 +554,7 @@ def repeatelement(elem, n):
 
 
 def sortedlist(l):
-    for i, j in sorted(l, key=lambda a: a[0]):
+    for i, j in sorted(l, key=itemgetter(0)):
         yield i, j
 
 
