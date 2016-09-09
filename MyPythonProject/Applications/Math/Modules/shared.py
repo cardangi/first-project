@@ -179,6 +179,6 @@ def sequence_sum(n):
 
 
 def coordinates(slope, intercept, x):
-    point = namedtuple("Point", "x y")
+    point = namedtuple("point", "x y")
     return point(Decimal(x), Decimal(slope)*Decimal(x) + Decimal(intercept))
 
