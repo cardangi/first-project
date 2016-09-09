@@ -54,4 +54,7 @@ class ImagesCollection(object):
 
 x = ImagesCollection([("file1", 1234567890000, "201605"), ("file2", 1234567890000, "201605"), ("file3", 1234567890000, "201605"), ("file4", 1234567891000, "201605")])
 for i in x:
-    os.rename(src=itemgetter(0)(i), dst=itemgetter(1)(i))
+    try:
+        os.rename(src=itemgetter(0)(i), dst=itemgetter(1)(i))
+    except OSError:
+        pass
