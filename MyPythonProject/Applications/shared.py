@@ -559,9 +559,9 @@ def enumeratetupleslist(thatlist):
     return [(a, b, c) for a, (b, c) in enumerate(sorted(thatlist, key=itemgetter(0)), 1)]
 
 
-# ========================
-# Jinja2 Customed filters.
-# ========================
+# ==========================
+# Jinja2 Customized filters.
+# ==========================
 def integertostring(intg):
     return str(intg)
 
