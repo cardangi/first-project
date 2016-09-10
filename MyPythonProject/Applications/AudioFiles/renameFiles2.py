@@ -171,7 +171,7 @@ else:
 match = regex1.search(arguments.directory)
 if match:
     part1 = "{0}{1}{2}".format(match.group(1), match.group(2), match.group(3))
-    for file in shared.filesinfolder(extensions=arguments.extensions, folder=arguments.directory):
+    for file in shared.filesinfolder(*arguments.extensions, folder=arguments.directory):
         disc, track = "", ""
         match2 = regex2.search(file)
         match3 = regex3.search(file)

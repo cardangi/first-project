@@ -197,7 +197,7 @@ while True:
                 break
         folder = list_folders[choice-1][1]
         list_parents = list_folders[choice-1][1].split("\\")
-        list_files = list(enumerate(list(s1.filesinfolder(list((extension,)), folder)), start=1))
+        list_files = list(enumerate(list(s1.filesinfolder(extension, folder)), start=1))
         code += 1
         tmpl = template1.render(header=nt(*header()), menu=list_files)
 

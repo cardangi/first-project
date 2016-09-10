@@ -61,7 +61,7 @@ arguments = parser.parse_args()
 #  1. Liste distincte des dates de dernière modification.
 #     ---------------------------------------------------
 folders = sorted([folder for folder in {shared.dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(os.path.getmtime(file))).astimezone(timezone(shared.DFTTIMEZONE)), shared.TEMPLATE5)
-                                        for file in shared.filesinfolder(arguments.extensions, folder=arguments.src)}])
+                                        for file in shared.filesinfolder(*arguments.extensions, folder=arguments.src)}])
 
 
 #     -------------------------
@@ -77,7 +77,7 @@ for folder in folders:
 #     -------------------
 #  3. Copie des fichiers.
 #     -------------------
-for file in shared.filesinfolder(arguments.extensions, folder=arguments.src):
+for file in shared.filesinfolder(*arguments.extensions, folder=arguments.src):
     dst = os.path.join(arguments.dst, shared.dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(os.path.getmtime(file))).astimezone(timezone(shared.DFTTIMEZONE)), shared.TEMPLATE5))
     logger.debug("Copy file.")
     logger.debug('\tSource     : "{0}".'.format(file).expandtabs(3))

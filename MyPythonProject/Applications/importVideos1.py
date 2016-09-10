@@ -171,7 +171,7 @@ while True:
     #     ----------------
     #  5. Grab files list.
     #     ----------------
-    list_files = list(enumerate(sorted([file for file in shared.filesinfolder(list_extensions, folder=source)]), start=1))
+    list_files = list(enumerate(sorted([file for file in shared.filesinfolder(*list_extensions, folder=source)]), start=1))
 
     #     -------------------
     #  6. Display files list.
