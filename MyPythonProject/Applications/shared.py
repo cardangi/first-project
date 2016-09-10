@@ -547,11 +547,8 @@ def filesinfolder(*extensions, folder=os.getcwd()):
                 yield os.path.join(root, file)
 
 
-def getdatetime(epoch1, timzon, epoch2=None):
-    if not epoch2:
-        epoch2 = epoch1
-    for epoch in range(epoch1, epoch2 + 1):
-        yield dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(epoch)).astimezone(timezone(timzon)), TEMPLATE3)
+def getdatetime(epoch, timzon):
+    return dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(epoch)).astimezone(timezone(timzon)), TEMPLATE3)
 
 
 def enumeratesortedlistcontent(thatlist):
