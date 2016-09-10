@@ -116,7 +116,7 @@ if arguments.start <= arguments.end:
     lengths.insert(0, 12)
 
     #  3b. Get epoch human representation.
-    epochlist = [list(i) for i in zip(*[list(map(shared.getdatetime, range(arguments.start, arguments.end + 1), repeat(zone))) for zone in zones])]
+    epochlist = [list(i) for i in zip(*[list(map(shared.getdatetime, epoch, repeat(zone))) for zone in zones])]
     for i in range(len(epoch)):
         epochlist[i].insert(0, epoch[i])
         epochlist[i].insert(1, shared.dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(epoch[i])), shared.TEMPLATE3))
