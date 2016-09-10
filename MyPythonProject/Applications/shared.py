@@ -289,21 +289,6 @@ class Images(Files):
         return os.path.join(defaultdrive, "{0}{1}".format(year, str(month).zfill(2)))
 
 
-class CustomFormatter(logging.Formatter):
-
-    converter = datetime.fromtimestamp
-    default_time_format = "%d/%m/%Y %H:%M:%S"
-    default_localizedtime_format = "%Z%z"
-    default_format = "%s %s,%03d %s"
-
-    def formatTime(self, record, datefmt=None):
-        ct = self.converter(record.created, tz=timezone(DFTTIMEZONE))
-        s = self.default_format % (ct.strftime("%A"), ct.strftime(self.default_time_format), record.msecs, ct.strftime(self.default_localizedtime_format))
-        if datefmt:
-            s = ct.strftime(datefmt)
-        return s
-
-
 class Header(object):
 
     def __init__(self, header, steps, step=1):
@@ -484,6 +469,21 @@ class Bootleg(Track):
         return datacorrect
 
 
+class CustomFormatter(logging.Formatter):
+
+    converter = datetime.fromtimestamp
+    default_time_format = "%d/%m/%Y %H:%M:%S"
+    default_localizedtime_format = "%Z%z"
+    default_format = "%s %s,%03d %s"
+
+    def formatTime(self, record, datefmt=None):
+        ct = self.converter(record.created, tz=timezone(DFTTIMEZONE))
+        s = self.default_format % (ct.strftime("%A"), ct.strftime(self.default_time_format), record.msecs, ct.strftime(self.default_localizedtime_format))
+        if datefmt:
+            s = ct.strftime(datefmt)
+        return s
+
+
 # ==========
 # Functions.
 # ==========
@@ -547,6 +547,24 @@ def filesinfolder(*extensions, folder=os.getcwd()):
                 yield os.path.join(root, file)
 
 
+def getdatetime(epoch1, timzon, epoch2=None):
+    if not epoch2:
+        epoch2 = epoch1
+    for epoch in range(epoch1, epoch2 + 1):
+        yield dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(epoch)).astimezone(timezone(timzon)), TEMPLATE3)
+
+
+def enumeratesortedlistcontent(thatlist):
+    return sorted(enumerate(sorted(thatlist), 1), key=itemgetter(0))
+
+
+def enumeratetupleslist(thatlist):
+    return [(a, b, c) for a, (b, c) in enumerate(sorted(thatlist, key=itemgetter(0)), 1)]
+
+
+# ========================
+# Jinja2 Customed filters.
+# ========================
 def integertostring(intg):
     return str(intg)
 
@@ -571,18 +589,3 @@ def sortedlist(l):
 
 def now():
     return dateformat(UTC.localize(datetime.utcnow()).astimezone(LOCAL), TEMPLATE4)
-
-
-def getdatetime(epoch1, timzon, epoch2=None):
-    if not epoch2:
-        epoch2 = epoch1
-    for epoch in range(epoch1, epoch2 + 1):
-        yield dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(epoch)).astimezone(timezone(timzon)), TEMPLATE3)
-
-
-def enumeratesortedlistcontent(thatlist):
-    return sorted(enumerate(sorted(thatlist), 1), key=itemgetter(0))
-
-
-def enumeratetupleslist(thatlist):
-    return [(a, b, c) for a, (b, c) in enumerate(sorted(thatlist, key=itemgetter(0)), 1)]
