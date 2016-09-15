@@ -1,5 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 from itertools import accumulate, repeat
+from contextlib import contextmanager
 from collections import namedtuple
 from operator import itemgetter
 from datetime import datetime
@@ -104,13 +105,21 @@ class Log(object):
         self._index = arg
 
     def __call__(self, src, dst):
-        self._index += 1
-        return '{index:>4d}. Rename "{src}" to "{dst}".'.format(index=self._index, src=src, dst=dst)
+        self.index += 1
+        return '{index:>4d}. Rename "{src}" to "{dst}".'.format(index=self.index, src=src, dst=dst)
 
 
 # ==========
 # Functions.
 # ==========
+@contextmanager
+def folderdecorator(s):
+    sep = "".join(list(repeat("-", len(s))))
+    logger.info(sep)
+    yield
+    logger.info(sep)
+
+
 def year(y):
     import re
     regex = re.compile(r"^(?=\d{4})20[0-2]\d$")
@@ -198,12 +207,12 @@ for year in arguments.year:
                 try:
                     assert [int(i.sequence) for i in map(func1, map(os.path.basename, files))] == ranges
                 except AssertionError:
-                    info = '"{0}": renaming needed.'.format(curdir)
-                    logger.info("".join(list(repeat("-", len(info)))))
-                    logger.info(info)
-                    logger.info("".join(list(repeat("-", len(info)))))
+                    msg = '"{0}": renaming needed.'.format(curdir)
+                    with folderdecorator(msg):
+                        logger.info(msg)
                     with shared.chgcurdir(curdir):
 
+                        log.index = 0
                         for arg in args:
                             msg = log(src=itemgetter(0)(arg), dst=itemgetter(1)(arg))
                             if not arguments.test:
@@ -212,6 +221,7 @@ for year in arguments.year:
                                 msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
                             logger.info(msg)
 
+                        log.index = 0
                         for arg in args:
                             msg = log(src=itemgetter(1)(arg), dst=itemgetter(2)(arg))
                             if not arguments.test:
@@ -222,21 +232,20 @@ for year in arguments.year:
 
                     continue
 
-                info = '"{0}": no renaming needed.'.format(curdir)
-                logger.info("".join(list(repeat("-", len(info)))))
-                logger.info(info)
-                logger.info("".join(list(repeat("-", len(info)))))
+                msg = '"{0}": no renaming needed.'.format(curdir)
+                with folderdecorator(msg):
+                    logger.info(msg)
                 continue
 
             #    ---------------------------------------------------------------
             # 2. Aucun fichier du répertoire ne répond au masque "CCYYMM_xxxxx".
             #    ---------------------------------------------------------------
             if all([not i.match for i in map(func1, map(os.path.basename, files))]):
-                info = '"{0}": renaming needed.'.format(curdir)
-                logger.info("".join(list(repeat("-", len(info)))))
-                logger.info(info)
-                logger.info("".join(list(repeat("-", len(info)))))
+                msg = '"{0}": renaming needed.'.format(curdir)
+                with folderdecorator(msg):
+                    logger.info(msg)
                 with shared.chgcurdir(curdir):
+                    log.index = 0
                     for arg in args:
                         msg = log(src=itemgetter(0)(arg), dst=itemgetter(2)(arg))
                         if not arguments.test:
@@ -249,12 +258,12 @@ for year in arguments.year:
             #    ------------------------------------------------------------------
             # 3. Au moins un fichier du répertoire répond au masque "CCYYMM_xxxxx".
             #    ------------------------------------------------------------------
-            info = '"{0}": renaming needed.'.format(curdir)
-            logger.info("".join(list(repeat("-", len(info)))))
-            logger.info(info)
-            logger.info("".join(list(repeat("-", len(info)))))
+            msg = '"{0}": renaming needed.'.format(curdir)
+            with folderdecorator(msg):
+                logger.info(msg)
             with shared.chgcurdir(curdir):
 
+                log.index = 0
                 for arg in args:
                     msg = log(src=itemgetter(0)(arg), dst=itemgetter(1)(arg))
                     if not arguments.test:
@@ -263,6 +272,7 @@ for year in arguments.year:
                         msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
                     logger.info(msg)
 
+                log.index = 0
                 for arg in args:
                     msg = log(src=itemgetter(1)(arg), dst=itemgetter(2)(arg))
                     if not arguments.test:
