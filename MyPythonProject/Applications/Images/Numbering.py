@@ -113,7 +113,7 @@ class Log(object):
 # Functions.
 # ==========
 @contextmanager
-def folderdecorator(s):
+def messagedecorator(s):
     sep = "".join(list(repeat("-", len(s))))
     logger.info(sep)
     yield
@@ -208,7 +208,7 @@ for year in arguments.year:
                     assert [int(i.sequence) for i in map(func1, map(os.path.basename, files))] == ranges
                 except AssertionError:
                     msg = '"{0}": renaming needed.'.format(curdir)
-                    with folderdecorator(msg):
+                    with messagedecorator(msg):
                         logger.info(msg)
                     with shared.chgcurdir(curdir):
 
@@ -233,7 +233,7 @@ for year in arguments.year:
                     continue
 
                 msg = '"{0}": no renaming needed.'.format(curdir)
-                with folderdecorator(msg):
+                with messagedecorator(msg):
                     logger.info(msg)
                 continue
 
@@ -242,7 +242,7 @@ for year in arguments.year:
             #    ---------------------------------------------------------------
             if all([not i.match for i in map(func1, map(os.path.basename, files))]):
                 msg = '"{0}": renaming needed.'.format(curdir)
-                with folderdecorator(msg):
+                with messagedecorator(msg):
                     logger.info(msg)
                 with shared.chgcurdir(curdir):
                     log.index = 0
@@ -259,7 +259,7 @@ for year in arguments.year:
             # 3. Au moins un fichier du répertoire répond au masque "CCYYMM_xxxxx".
             #    ------------------------------------------------------------------
             msg = '"{0}": renaming needed.'.format(curdir)
-            with folderdecorator(msg):
+            with messagedecorator(msg):
                 logger.info(msg)
             with shared.chgcurdir(curdir):
 
