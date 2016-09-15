@@ -1,42 +1,111 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
-import sys
-import glob
-import locale
-import argparse
-from pytz import timezone
-from string import Template
+from itertools import accumulate, repeat
+from collections import namedtuple
+from operator import itemgetter
 from datetime import datetime
-from jinja2 import Environment, PackageLoader
-from os.path import exists, expandvars, join, normpath
-
-
-# =================
-# Relative imports.
-# =================
+from pytz import timezone
+import argparse
+import logging
+import glob
+import sys
+import os
+import re
 from .. import shared
 
-
-# ==========================
-# Define French environment.
-# ==========================
-locale.setlocale(locale.LC_ALL, "")
+__author__ = 'Xavier ROSSET'
 
 
 # ========
 # Classes.
 # ========
-class BatchRename(Template):
-    delimiter = "%"
+class ImagesCollection(object):
+
+    def __init__(self, year):
+        self._year = ""
+        self._index = 0
+        self.year = year
+
+    @property
+    def year(self):
+        return self._year
+
+    @year.setter
+    def year(self, arg):
+        value = str(arg)
+        match = re.match(r"^(?=\d{4})20[0-2]\d$", value)
+        if not match:
+            raise ValueError('"{0}" is not a valid year'.format(arg))
+        self._year = value
+
+    @property
+    def keys(self):
+        return sorted(dict(self.func3(self.year)).keys(), key=int)
+
+    @property
+    def values(self):
+        return list(accumulate(self.func1(self.func2(dict(self.func3(self.year))))))
+
+    @staticmethod
+    def func3(arg):
+        """
+        Return [("201001", ["file", "file2", "file3"]), ("201002", ["file", "file2", "file3"])]
+        :param arg: month.
+        :return: files grouped by month.
+        """
+        collection = list()
+        for i in range(1, 13):
+            month = "{0}{1:0>2}".format(arg, i)
+            if os.path.exists(os.path.normpath(os.path.join(r"H:\\", month))):
+                collection.append((month, list(glob.iglob(os.path.normpath(os.path.join(r"h:\\", month, r"*.jpg"))))))
+        return collection
+
+    @staticmethod
+    def func2(arg):
+        """
+        Return {"201001": 100, "201002": 200}.
+        :param arg: dictionnary of files grouped by month.
+        :return: counts by month.
+        """
+        return {key: len(arg[key]) for key in arg.keys()}
+
+    @staticmethod
+    def func1(arg):
+        """
+        Return [100, 200].
+        :param arg: dictionnary of files grouped by month.
+        :return: counts list.
+        """
+        return [arg[key] for key in sorted(arg.keys(), key=int)]
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self._index += 1
+        if self._index > len(self.values):
+            raise StopIteration
+        if self._index == 1:
+            return self.keys[self._index - 1], list(range(1, self.values[self._index - 1] + 1))
+        return self.keys[self._index - 1], list(range(self.values[self._index - 2] + 1, self.values[self._index - 1] + 1))
 
 
-class Header:
-    pass
+class Log(object):
+
+    def __init__(self, index=0):
+        self._index = 0
+        self.index = index
+
+    @property
+    def index(self):
+        return self._index
+
+    @index.setter
+    def index(self, arg):
+        self._index = arg
+
+    def __call__(self, src, dst):
+        self._index += 1
+        return '{index:>4d}. Rename "{src}" to "{dst}".'.format(index=self._index, src=src, dst=dst)
 
 
 # ==========
@@ -44,88 +113,178 @@ class Header:
 # ==========
 def year(y):
     import re
-    regex = re.compile(r"^20[01][0-9]$")
+    regex = re.compile(r"^(?=\d{4})20[0-2]\d$")
     if not regex.match(y):
-        raise argparse.ArgumentTypeError('"{}" is not a valid year'.format(y))
+        raise argparse.ArgumentTypeError('"{0}" is not a valid year'.format(y))
     return y
+
+
+def func1(s):
+    match = re.match(r"(?i)^\d{6}\B_\B(\d{5})\.jpg", s)
+    if match:
+        return nt(True, match.group(1))
+    return nt(False, None)
+
+
+def func2(s):
+    return "ren_{0}".format(os.path.basename(s))
+
+
+def func3(s, i):
+    return "{0}_{1:0>5d}.jpg".format(s, i)
+
+
+def rename(src, dst):
+    try:
+        os.rename(src=src, dst=dst)
+    except OSError:
+        return True
+    else:
+        return False
+
+
+# ========
+# Logging.
+# ========
+logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 
 
 # =================
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("year", type=year)
-parser.add_argument("-t", "--template", nargs="?", default="%cy%{m}_%{n}")
-parser.add_argument("-s", "--start", nargs="?", type=int, default=1)
-arguments = parser.parse_args()
+parser.add_argument("year", type=year, nargs="+")
+parser.add_argument("-t", "--test", action="store_true")
 
 
 # ==========
 # Constants.
 # ==========
-TEMPLATES = ["%cy%{m}_%{n}", "%{t}"]
+RESULTS, MODES = {True: "Failed", False: "Succeeded"}, {True: "test mode.", False: "rename mode."}
 
 
 # ================
 # Initializations.
 # ================
-l1, l2, l3, t1, t2, template = [], [], [], BatchRename(arguments.template), Template("${newname}ren"),\
-                               Environment(loader=PackageLoader("Applications.Images", "Templates"), trim_blocks=True, keep_trailing_newline=True).get_template("Numbering")
+status, nt, results, log, arguments = 99, namedtuple("nt", "match sequence"), [], Log(), parser.parse_args()
+
+
+# ==============
+# Start logging.
+# ==============
+logger.info("{0:=^140s}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
+logger.info('START "%s".' % (os.path.basename(__file__),))
+logger.info(MODES[arguments.test].upper())
 
 
 # ===============
 # Main algorithm.
 # ===============
+for year in arguments.year:
+    try:
+        obj = ImagesCollection(year)
+    except ValueError as exception:
+        logger.info("Value error: {0}.".format(exception))
+    else:
+        for key, ranges in obj:
+            curdir = os.path.normpath(os.path.join(r"h:\\", key))
+            files = sorted(glob.glob(os.path.normpath(os.path.join(r"h:\\", key, r"*.jpg"))))
+            args = list(zip(map(os.path.basename, files), map(func2, files), map(func3, repeat(key), ranges)))
+
+            #    -------------------------------------------------------------------
+            # 1. Tous les fichiers du répertoire répondent au masque "CCYYMM_xxxxx".
+            #    -------------------------------------------------------------------
+            if all([i.match for i in map(func1, map(os.path.basename, files))]):
+                try:
+                    assert [int(i.sequence) for i in map(func1, map(os.path.basename, files))] == ranges
+                except AssertionError:
+                    info = '"{0}": renaming needed.'.format(curdir)
+                    logger.info("".join(list(repeat("-", len(info)))))
+                    logger.info(info)
+                    logger.info("".join(list(repeat("-", len(info)))))
+                    with shared.chgcurdir(curdir):
+
+                        for arg in args:
+                            msg = log(src=itemgetter(0)(arg), dst=itemgetter(1)(arg))
+                            if not arguments.test:
+                                result = rename(src=itemgetter(0)(arg), dst=itemgetter(1)(arg))
+                                results.append(result)
+                                msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
+                            logger.info(msg)
+
+                        for arg in args:
+                            msg = log(src=itemgetter(1)(arg), dst=itemgetter(2)(arg))
+                            if not arguments.test:
+                                result = rename(src=itemgetter(1)(arg), dst=itemgetter(2)(arg))
+                                results.append(result)
+                                msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
+                            logger.info(msg)
+
+                    continue
+
+                info = '"{0}": no renaming needed.'.format(curdir)
+                logger.info("".join(list(repeat("-", len(info)))))
+                logger.info(info)
+                logger.info("".join(list(repeat("-", len(info)))))
+                continue
+
+            #    ---------------------------------------------------------------
+            # 2. Aucun fichier du répertoire ne répond au masque "CCYYMM_xxxxx".
+            #    ---------------------------------------------------------------
+            if all([not i.match for i in map(func1, map(os.path.basename, files))]):
+                info = '"{0}": renaming needed.'.format(curdir)
+                logger.info("".join(list(repeat("-", len(info)))))
+                logger.info(info)
+                logger.info("".join(list(repeat("-", len(info)))))
+                with shared.chgcurdir(curdir):
+                    for arg in args:
+                        msg = log(src=itemgetter(0)(arg), dst=itemgetter(2)(arg))
+                        if not arguments.test:
+                            result = rename(src=itemgetter(0)(arg), dst=itemgetter(2)(arg))
+                            results.append(result)
+                            msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
+                        logger.info(msg)
+                continue
+
+            #    ------------------------------------------------------------------
+            # 3. Au moins un fichier du répertoire répond au masque "CCYYMM_xxxxx".
+            #    ------------------------------------------------------------------
+            info = '"{0}": renaming needed.'.format(curdir)
+            logger.info("".join(list(repeat("-", len(info)))))
+            logger.info(info)
+            logger.info("".join(list(repeat("-", len(info)))))
+            with shared.chgcurdir(curdir):
+
+                for arg in args:
+                    msg = log(src=itemgetter(0)(arg), dst=itemgetter(1)(arg))
+                    if not arguments.test:
+                        result = rename(src=itemgetter(0)(arg), dst=itemgetter(1)(arg))
+                        results.append(result)
+                        msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
+                    logger.info(msg)
+
+                for arg in args:
+                    msg = log(src=itemgetter(1)(arg), dst=itemgetter(2)(arg))
+                    if not arguments.test:
+                        result = rename(src=itemgetter(1)(arg), dst=itemgetter(2)(arg))
+                        results.append(result)
+                        msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
+                    logger.info(msg)
+
+            continue
 
 
-# --> 1. Fin de l'algorithme si le template reçu n'est pas valide.
-if arguments.template not in TEMPLATES:
-    sys.exit()
+# =============
+# Stop logging.
+# =============
+logger.info('END "%s".' % (os.path.basename(__file__),))
 
 
-# --> 2. Sélection des fichiers images.
-for i in range(1, 13):
-    curdir = normpath(join("h:/", "{0}{1}".format(arguments.year, str(i).zfill(2))))
-    if exists(curdir):
-        with shared.chgcurdir(curdir):
-            for file in glob.glob("*.jpg"):
-                img = shared.Images(join(curdir, file))
-                if img["localtimestamp"]:
-                    l1.append((join(curdir, file), img["localtimestamp"], img["originalyear"], img["originalmonth"]))
-
-
-# --> 3. Tri des fichiers images par timestamp croissant.
-# --> 4. Renommage des fichiers pour éviter tout doublon rejeté par l'OS. Le préfixe "ren" est ajouté.
-# --> 5. Séquencage des fichiers.
-if l1:
-
-    # --
-    # 3.
-    # --
-    lsorted = sorted(l1, key=lambda x: x[1])
-
-    # --
-    # 4.
-    # --
-    for tup in lsorted:
-        img = shared.File(tup[0])
-        l2.append((tup[0], img.renameto(basn=t2.substitute(newname=img["basename"]))))
-
-    # --
-    # 5.
-    # --
-    for sequence, (file, localtimestamp, originalyear, originalmonth) in enumerate(lsorted, start=arguments.start):
-        img = shared.Images(file)
-        l3.append((img.renameto(basn=t2.substitute(newname=img["basename"])), img.renameto(dirn=img["defaultlocation"], basn=t1.substitute(cy=originalyear, m=originalmonth, n=str(sequence).zfill(5), t=localtimestamp))))
-
-
-# --> 6. Constitution du script python.
-if l2 and l3:
-    # -----
-    header = Header()
-    header.coding = shared.CODING
-    header.author = '__author__ = "%s"' % (shared.AUTHOR,)
-    header.today = shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1)
-    # -----
-    with open(join(expandvars("%temp%"), shared.PYSCRIPT), shared.WRITE, encoding=shared.DFTENCODING) as fw:
-        fw.write(template.render(header=header, list1=l2, list2=l3))
+# ===============
+# Exit algorithm.
+# ===============
+if not arguments.test:
+    if all(results):
+        status = 0
+    sys.exit(status)
+sys.exit(0)

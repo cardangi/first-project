@@ -8,13 +8,13 @@ import argparse
 import itertools
 from pytz import timezone
 from string import Template
-from dateutil import parser
 from datetime import datetime
 from dateutil.tz import gettz
 from operator import itemgetter
 from dateutil.parser import parse
 from collections import namedtuple
 from PIL import Image, TiffImagePlugin
+from contextlib import contextmanager
 
 __author__ = 'Xavier'
 
@@ -487,6 +487,14 @@ class CustomFormatter(logging.Formatter):
 # ==========
 # Functions.
 # ==========
+@contextmanager
+def chgcurdir(d):
+    wcdir = os.getcwd()
+    os.chdir(d)
+    yield
+    os.chdir(wcdir)
+
+
 def validpath(p):
     if not os.path.exists(p):
         raise argparse.ArgumentTypeError('"{0}" doesn\'t exist'.format(p))
