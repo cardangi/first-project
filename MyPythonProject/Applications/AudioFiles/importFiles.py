@@ -45,10 +45,9 @@ class TagError(MutagenError):
 
 class Track(MutableMapping):
 
-    regex = re.compile(r"^({year})/({month})/({day}) ([^,]+, [a-z]+)$".format(year=shared.DFTYEARREGEX,  month=shared.DFTMONTHREGEX, day=shared.DFTDAYREGEX), re.IGNORECASE)
+    regex = re.compile(r"^(({year})/({month})/({day})) ([^,]+, [a-z]+)$".format(year=shared.DFTYEARREGEX,  month=shared.DFTMONTHREGEX, day=shared.DFTDAYREGEX), re.IGNORECASE)
 
     def __init__(self, fil):
-        self._index = 0
         self._metadata = dict()
         self.metadata = fil
 
@@ -80,10 +79,10 @@ class Track(MutableMapping):
             raise TagError(os.path.normpath(arg), "discnumber", "isn\'t available.")
         if "tracknumber" not in audio:
             raise TagError(os.path.normpath(arg), "tracknumber", "isn\'t available.")
-        if not self.regex.match(audio["album"]):
+        if not self.regex.match(audio["album"][0]):
             raise TagError(os.path.normpath(arg), "album", "doesn\'t respect the expected pattern.")
         for key in audio:
-            self._metadata[key] = self.fixup(audio[key])
+            self._metadata[key] = audio[key][0]
 
     @property
     def discnumber(self):
@@ -101,57 +100,53 @@ class Track(MutableMapping):
     def year(self):
         match = self.regex.match(self.metadata["album"])
         if match:
-            return int(match.group(1))
+            return int(match.group(2))
 
     @property
     def month(self):
         match = self.regex.match(self.metadata["album"])
         if match:
-            return int(match.group(2))
+            return int(match.group(3))
 
     @property
     def day(self):
         match = self.regex.match(self.metadata["album"])
         if match:
-            return int(match.group(3))
+            return int(match.group(4))
 
     @property
     def date(self):
-        return int(self.metadata["album"].replace("/", ""))
+        match = self.regex.match(self.metadata["album"])
+        if match:
+            return int(match.group(1).replace("/", ""))
 
     @property
     def location(self):
         match = self.regex.match(self.metadata["album"])
         if match:
-            return match.group(4)
-
-    @staticmethod
-    def fixup(v):
-        if len(v) == 1:
-            return v[0]
-        return v
+            return match.group(5)
 
 
 class InvalidFile(object):
 
-    def __init__(self, collection, day, location, number):
+    def __init__(self, collection, date, location, disc):
         self._collection = collection
+        self._date = date
         self._location = location
-        self._number = number
-        self._day = day
+        self._disc = disc
 
     def __call__(self, path, fils):
         o = []
-        for fil in fils:
+        for fil in [os.path.join(path, fil) for fil in fils]:
             exclude = True
-            if fil in collection:
+            if fil in self._collection:
                 exclude = False
                 try:
-                    assert (collection[fil].date, collection[fil].location, collection[fil].disc) == (self.day, self.location, self.number)
+                    assert (self._collection[fil].date, self._collection[fil].location, self._collection[fil].discnumber) == (self._date, self._location, self._disc)
                 except AssertionError:
                     exclude = True
             if exclude:
-                o.append(fil)
+                o.append(os.path.basename(fil))
         return o
 
 
@@ -182,7 +177,7 @@ def directorytree(directory, rex=None):
             yield os.path.join(root, file)
 
 
-def toto(fil):
+def getflacobject(fil):
     try:
         audiofil = Track(fil)
     except (TagError, MutagenError):
@@ -237,7 +232,7 @@ MODES, CURWDIR, TABSIZE = {"copy": "copied", "import": "imported"}, os.path.join
 # ==================
 # Initializations 1.
 # ==================
-index, code, status, curwdir, tracks, args, tmpl, choice, src, arguments = 0, 1, 100, CURWDIR, [], [], "", "", None, parser.parse_args()
+index, code, status, curwdir, tracks, files, args, tmpl, choice, src, arguments = 0, 1, 100, CURWDIR, [], {}, [], "", "", None, parser.parse_args()
 
 
 # ==================
@@ -285,7 +280,7 @@ while True:
                     break
                 tmpl = template1.render(header=nt(*head))
         list_folders = sorted({os.path.dirname(file) for file in directorytree(directory=curwdir, rex=regex)})
-        head = header()  # On passe à l'étape 2.
+        head = header()
         code = 99
         tmpl = template1.render(header=nt(*head), message=list(("No folders found.",)))
         if list_folders:
@@ -312,23 +307,22 @@ while True:
                     break
             tmpl = template1.render(header=nt(*head), menu=enumerate(list_folders, 1))
         src = list_folders[index - 1]
-        tracks = [(
-                     fil,
-                     track,
-                     track.date,
-                     track.location,
-                     track.discnumber,
-                     template3.substitute(year=track.year, month=track.month, day=track.day, location=track.location, disc=track.discnumber)
-                 )
-                 for fil, track in map(toto, [os.path.join(src, fil) for fil in os.listdir(src) if fnmatch.fnmatch(fil, "*.{0}".format(arguments.extension.lower()))]) if track
-                 ]
-        files = dict([(itemgetter(0)(item), itemgetter(1)(item)) for item in tracks])
-        head = header()  # On passe à l'étape 3.
+        tracks = [(fil,
+                   track,
+                   track.date,
+                   track.location,
+                   track.discnumber,
+                   template3.substitute(year=track.year, month="{0:0>2}".format(track.month), day="{0:0>2}".format(track.day), location=track.location, disc=track.discnumber)
+                   )
+                  for fil, track in map(getflacobject, [os.path.join(src, fil) for fil in os.listdir(src) if fnmatch.fnmatch(fil, "*.{0}".format(arguments.extension.lower()))]) if track
+                  ]
+        files.update(dict([(itemgetter(0)(item), itemgetter(1)(item)) for item in tracks]))
+        head = header()
         code = 99
-        tmpl = template1.render(header=nt(*head), message=list(('No files found in "{0}".'.format(src.folder),)))
+        tmpl = template1.render(header=nt(*head), message=list(('No files found in "{0}".'.format(src),)))
         if tracks:
             code = 3
-            tmpl = template1.render(header=nt(*head), detail=[itemgetter(0)(item), os.path.join(itemgetter(5)(item), os.path.basename(itemgetter(0)(item)))) for item in tracks])
+            tmpl = template1.render(header=nt(*head), detail=[(itemgetter(0)(item), os.path.join(itemgetter(5)(item), os.path.basename(itemgetter(0)(item)))) for item in tracks])
 
     #     -------------
     #  3. Import files.
@@ -364,8 +358,12 @@ while True:
             tmpl = template1.render(header=nt(*head))
         elif choice.upper() == "Y":
             for src, dst, day, location, disc in sorted(sorted(sorted(args, key=itemgetter(4)), key=itemgetter(3)), key=itemgetter(2)):
-                copytree(src=src, dst=dst, ignore=InvalidFile(files, day, location, disc))
-            status = 0
+                try:
+                    copytree(src=src, dst=dst, ignore=InvalidFile(files, day, location, disc))
+                except FileExistsError:
+                    pass
+                else:
+                    status = 0
             break
 
     #     -------------
