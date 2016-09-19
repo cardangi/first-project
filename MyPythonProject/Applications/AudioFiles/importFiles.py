@@ -36,70 +36,6 @@ parser.add_argument("extension")
 # ========
 # Classes.
 # ========
-# class Folder(object):
-#
-#     regex = re.compile(r"\b({year})\b\-\b({month})\b\-\b({day})\b \b([a-z, ]+)$".format(year=shared.DFTYEARREGEX, month=shared.DFTMONTHREGEX, day=shared.DFTDAYREGEX), re.IGNORECASE)
-#
-#     def __init__(self, fld):
-#         self._month = 0
-#         self._year = 0
-#         self._day = 0
-#         self._location = ""
-#         self._folder = ""
-#         self.folder = fld
-#
-#     @property
-#     def year(self):
-#         return self._year
-#
-#     @property
-#     def month(self):
-#         return self._month
-#
-#     @property
-#     def day(self):
-#         return self._day
-#
-#     @property
-#     def location(self):
-#         return self._location
-#
-#     @property
-#     def folder(self):
-#         return self._folder
-#
-#     @folder.setter
-#     def folder(self, arg):
-#         match = self.regex.search(arg)
-#         if not match:
-#             raise SyntaxError('"{0}" doesn\'t respect the expected pattern.'.format(arg))
-#         self._folder = arg
-#         self._year = match.group(1)
-#         self._month = match.group(2)
-#         self._day = match.group(3)
-#         # self._location = match.group(4)
-
-
-# class Track(object):
-#
-#     regex = re.compile(r"[a-z]\B(?:1[1-9])(?:{month})(?:{day})d(\d)\B_".format(month=shared.DFTMONTHREGEX, day=shared.DFTDAYREGEX), re.IGNORECASE)
-#
-#     def __init__(self, s):
-#         self._discnumber = 0
-#         self.discnumber = s
-#
-#     @property
-#     def discnumber(self):
-#         return self._discnumber
-#
-#     @discnumber.setter
-#     def discnumber(self, arg):
-#         match = self.regex.search(arg)
-#         if not match:
-#             raise SyntaxError('"{0}" doesn\'t respect the expected pattern.'.format(arg))
-#         self._discnumber = match.group(1)
-
-
 class TagError(MutagenError):
     def __init__(self, fil, tag, msg):
         self.fil = fil
@@ -194,29 +130,20 @@ class Track(MutableMapping):
 
 class InvalidFile(object):
 
-    regex = re.compile(r"[a-z]\B(?:1[1-9])(?:{month})(?:{day})d(\d)\B_".format(month=shared.DFTMONTHREGEX, day=shared.DFTDAYREGEX), re.IGNORECASE)
+    def __init__(self, collection, day, location, number):
+        self._collection = collection
+        self._location = location
+        self._number = number
+        self._day = day
 
-    def __init__(self, number=1):
-        self._number = 0
-        self.number = number
-
-    @property
-    def number(self):
-        return self._number
-
-    @number.setter
-    def number(self, arg):
-        self._number = str(arg)
-
-    def __call__(self, path, files):
+    def __call__(self, path, fils):
         o = []
-        for fil in files:
+        for fil in fils:
             exclude = True
-            match = self.regex.search(fil)
-            if match:
+            if fil in collection:
                 exclude = False
                 try:
-                    assert match.group(1) == self.number
+                    assert (int("{0}{1}{2}".format(collection[fil].year, collection[fil].month, collection[fil].day)), collection[fil].location, collection[fil].disc) == (self.day, self.location, self.number)
                 except AssertionError:
                     exclude = True
             if exclude:
@@ -354,7 +281,7 @@ while True:
                     break
                 tmpl = template1.render(header=nt(*head))
         list_folders = sorted({os.path.dirname(file) for file in directorytree(directory=curwdir, rex=regex)})
-        head = header()
+        head = header()  # On passe à l'étape 2.
         code = 99
         tmpl = template1.render(header=nt(*head), message=list(("No folders found.",)))
         if list_folders:
@@ -380,45 +307,24 @@ while True:
                         continue
                     break
             tmpl = template1.render(header=nt(*head), menu=enumerate(list_folders, 1))
-        head = header()
-
-        #  2.a. Grab metadata from selected folder.
-        # try:
-        #     src = Folder(list_folders[index - 1])
-        # except SyntaxError as err:
-        #     code = 99
-        #     tmpl = template1.render(header=header, message=list((err,)))
-
-        #  2.b. Then store file destination.
-        # else:
         src = list_folders[index - 1]
-        # for fil in os.listdir(src):
-        #     if fnmatch.fnmatch(fil, "*.{0}".format(arguments.extension.lower())):
-        #         track = toto(os.path.join(src, fil))
-        #         if track:
-                # try:
-                #     track = Track(fil)
-                # except SyntaxError:
-                #     pass
-                # else:
-                #     tracks.append((fil,
-                #                    "{year}{month:0>2d}{day:0>2d}".format(year=track.year, month=track.month, day=track.day),
-                #                    track.discnumber,
-                #                    template3.substitute(year=track.year, month=track.month, day=track.day, location=track.location, disc=track.discnumber)
-                #                    ))
-        track = [(
+        tracks = [(
                      fil,
-                     "{year}{month:0>2d}{day:0>2d}".format(year=track.year, month=track.month, day=track.day),
+                     track,
+                     int("{year}{month:0>2d}{day:0>2d}".format(year=track.year, month=track.month, day=track.day)),
+                     track.location,
                      track.discnumber,
                      template3.substitute(year=track.year, month=track.month, day=track.day, location=track.location, disc=track.discnumber)
                  )
                  for fil, track in map(toto, [os.path.join(src, fil) for fil in os.listdir(src) if fnmatch.fnmatch(fil, "*.{0}".format(arguments.extension.lower()))]) if track
                  ]
+        files = dict([(itemgetter(0)(item), itemgetter(1)(item)) for item in tracks])
+        head = header()  # On passe à l'étape 3.
         code = 99
         tmpl = template1.render(header=nt(*head), message=list(('No files found in "{0}".'.format(src.folder),)))
         if tracks:
             code = 3
-            tmpl = template1.render(header=nt(*head), detail=[(os.path.join(src.folder, itemgetter(0)(item)), os.path.join(itemgetter(2)(item), itemgetter(0)(item))) for item in tracks])
+            tmpl = template1.render(header=nt(*head), detail=[itemgetter(0)(item), os.path.join(itemgetter(5)(item), os.path.basename(itemgetter(0)(item)))) for item in tracks])
 
     #     -------------
     #  3. Import files.
@@ -432,8 +338,8 @@ while True:
         head = header()
         code = 4
         if choice.upper() == "Y":
-            for disc, dst in zip(sorted(map(int, {itemgetter(1)(item) for item in tracks})), sorted({itemgetter(2)(item) for item in tracks})):
-                args.append((src.folder, dst, disc))
+            for day, location, disc, dst in {(itemgetter(2)(item), itemgetter(3)(item), itemgetter(4)(item), itemgetter(5)(item)) for item in tracks}:
+                args.append((src, dst, day, location, disc))
         elif choice.upper() == "N" and not args:
             head = shared.Header("import  audio  files", ["Exit program."], 4)()
             code = 99
@@ -453,11 +359,8 @@ while True:
             code = 99
             tmpl = template1.render(header=nt(*head))
         elif choice.upper() == "Y":
-            for src, dst, disc in args:
-                if disc is None:
-                    copytree(src=src, dst=dst)
-                elif disc is not None:
-                    copytree(src=src, dst=dst, ignore=InvalidFile(disc))
+            for src, dst, day, location, disc in args:
+                copytree(src=src, dst=dst, ignore=InvalidFile(files, day, location, disc))
             status = 0
             break
 
