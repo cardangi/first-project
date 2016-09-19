@@ -342,7 +342,7 @@ while True:
         head = header()
         code = 4
         if choice.upper() == "Y":
-            for day, location, disc, dst in sorted(sorted(sorted({(itemgetter(2)(item), itemgetter(3)(item), itemgetter(4)(item), itemgetter(5)(item)) for item in tracks}, key=itemgetter(2)), key=itemgetter(1)), key=itemgetter(0)):
+            for day, location, disc, dst in {(itemgetter(2)(item), itemgetter(3)(item), itemgetter(4)(item), itemgetter(5)(item)) for item in tracks}:
                 args.append((src, dst, day, location, disc))
         elif choice.upper() == "N" and not args:
             head = shared.Header("import  audio  files", ["Exit program."], 4)()
@@ -363,7 +363,7 @@ while True:
             code = 99
             tmpl = template1.render(header=nt(*head))
         elif choice.upper() == "Y":
-            for src, dst, day, location, disc in args:
+            for src, dst, day, location, disc in sorted(sorted(sorted(args, key=itemgetter(2)), key=itemgetter(1)), key=itemgetter(0)):
                 copytree(src=src, dst=dst, ignore=InvalidFile(files, day, location, disc))
             status = 0
             break
