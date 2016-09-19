@@ -74,16 +74,16 @@ class Track(MutableMapping):
     @metadata.setter
     def metadata(self, arg):
         audio = FLAC(arg)
-        for key in audio.keys():
-            self._metadata[key] = self.fixup(audio[key])
-        if "album" not in self._metadata:
+        if "album" not in audio:
             raise TagError(os.path.normpath(arg), "album", "isn\'t available.")
-        if "discnumber" not in self._metadata:
+        if "discnumber" not in audio:
             raise TagError(os.path.normpath(arg), "discnumber", "isn\'t available.")
-        if "tracknumber" not in self._metadata:
+        if "tracknumber" not in audio:
             raise TagError(os.path.normpath(arg), "tracknumber", "isn\'t available.")
-        if not self.regex.match(self.metadata["album"]):
+        if not self.regex.match(audio["album"]):
             raise TagError(os.path.normpath(arg), "album", "doesn\'t respect the expected pattern.")
+        for key in audio:
+            self._metadata[key] = self.fixup(audio[key])
 
     @property
     def discnumber(self):
