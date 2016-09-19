@@ -116,6 +116,10 @@ class Track(MutableMapping):
             return int(match.group(3))
 
     @property
+    def date(self):
+        return int(self.metadata["album"].replace("/", ""))
+
+    @property
     def location(self):
         match = self.regex.match(self.metadata["album"])
         if match:
@@ -143,7 +147,7 @@ class InvalidFile(object):
             if fil in collection:
                 exclude = False
                 try:
-                    assert (int("{0}{1}{2}".format(collection[fil].year, collection[fil].month, collection[fil].day)), collection[fil].location, collection[fil].disc) == (self.day, self.location, self.number)
+                    assert (collection[fil].date, collection[fil].location, collection[fil].disc) == (self.day, self.location, self.number)
                 except AssertionError:
                     exclude = True
             if exclude:
@@ -311,7 +315,7 @@ while True:
         tracks = [(
                      fil,
                      track,
-                     int("{year}{month:0>2d}{day:0>2d}".format(year=track.year, month=track.month, day=track.day)),
+                     track.date,
                      track.location,
                      track.discnumber,
                      template3.substitute(year=track.year, month=track.month, day=track.day, location=track.location, disc=track.discnumber)
