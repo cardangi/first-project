@@ -29,12 +29,12 @@ class Decorator(object):
 # ==========
 # Functions.
 # ==========
-def grabdiscnumber(fil, rex):
-    disc = namedtuple("disc", ["found", "number"])
-    match = rex.search(fil)
-    if match:
-        return disc(True, match.group(1))
-    return disc(False, None)
+# def grabdiscnumber(fil, rex):
+#     disc = namedtuple("disc", ["found", "number"])
+#     match = rex.search(fil)
+#     if match:
+#         return disc(True, match.group(1))
+#     return disc(False, None)
 
 
 def getrange(start, end):
