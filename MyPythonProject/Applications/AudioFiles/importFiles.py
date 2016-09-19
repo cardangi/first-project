@@ -363,7 +363,7 @@ while True:
             code = 99
             tmpl = template1.render(header=nt(*head))
         elif choice.upper() == "Y":
-            for src, dst, day, location, disc in sorted(sorted(sorted(args, key=itemgetter(2)), key=itemgetter(1)), key=itemgetter(0)):
+            for src, dst, day, location, disc in sorted(sorted(sorted(args, key=itemgetter(4)), key=itemgetter(3)), key=itemgetter(2)):
                 copytree(src=src, dst=dst, ignore=InvalidFile(files, day, location, disc))
             status = 0
             break
