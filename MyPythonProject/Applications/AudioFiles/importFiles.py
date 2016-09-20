@@ -81,8 +81,7 @@ class Track(MutableMapping):
             raise TagError(os.path.normpath(arg), "tracknumber", "isn\'t available.")
         if not self.regex.match(audio["album"][0]):
             raise TagError(os.path.normpath(arg), "album", "doesn\'t respect the expected pattern.")
-        for key in audio:
-            self._metadata[key] = audio[key][0]
+        self._metadata = {key: audio[key][0] for key in audio}
 
     @property
     def discnumber(self):
