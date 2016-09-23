@@ -33,8 +33,7 @@ class ImagesCollection(object):
     @year.setter
     def year(self, arg):
         value = str(arg)
-        match = re.match(r"^(?=\d{4})20[0-2]\d$", value)
-        if not match:
+        if not re.match(r"^(?=\d{4})20[0-2]\d$", value):
             raise ValueError('"{0}" is not a valid year'.format(arg))
         self._year = value
 
