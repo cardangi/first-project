@@ -1,9 +1,10 @@
 # -*- coding: ISO-8859-1 -*-
-from collections import namedtuple, MutableMapping
+from collections import namedtuple, MutableMapping, Counter
 from jinja2 import Environment, FileSystemLoader
+from operator import itemgetter, ne
 from mutagen import MutagenError
-from operator import itemgetter
 from mutagen.flac import FLAC
+from itertools import repeat
 from string import Template
 from functools import wraps
 from shutil import copytree
@@ -230,7 +231,7 @@ MODES, CURWDIR, TABSIZE = {"copy": "copied", "import": "imported"}, os.path.join
 # ==================
 # Initializations 1.
 # ==================
-index, code, status, curwdir, tracks, files, args, tmpl, choice, src, arguments = 0, 1, 100, CURWDIR, [], {}, [], "", "", None, parser.parse_args()
+index, code, status, curwdir, tracks, files, args, statuss, tmpl, choice, src, arguments = 0, 1, 100, CURWDIR, [], {}, [], [], "", "", None, parser.parse_args()
 
 
 # ==================
@@ -258,6 +259,7 @@ while True:
         head = header()
         tmpl = template1.render(header=nt(*head), message=list(('Current directory is: "{0}"'.format(CURWDIR),)))
         tracks.clear()
+        statuss.clear()
         while True:
             print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to change the current directory [Y/N]? ".format(justify).expandtabs(TABSIZE))
@@ -355,13 +357,23 @@ while True:
             code = 99
             tmpl = template1.render(header=nt(*head))
         elif choice.upper() == "Y":
+            status = 0
             for src, dst, day, location, disc in sorted(sorted(sorted(args, key=itemgetter(4)), key=itemgetter(3)), key=itemgetter(2)):
                 try:
                     copytree(src=src, dst=dst, ignore=InvalidFile(files, day, location, disc))
                 except FileExistsError:
-                    pass
+                    statuss.append(100)
                 else:
-                    status = 0
+                    statuss.append(0)
+
+            # All commands failed. Return code is 99.
+            if all(map(ne, statuss, repeat(0))):
+                status = 99
+
+            # At least one command failed. Return code is the number of succeeded copies.
+            elif any(map(ne, statuss, repeat(0))):
+                status = Counter(statuss)[0]
+
             break
 
     #     -------------
