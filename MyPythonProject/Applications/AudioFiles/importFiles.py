@@ -213,13 +213,12 @@ environment.filters["rjustify"] = shared.rjustify
 # Jinja2 template(s).
 # ===================
 template1 = environment.get_template("T1")
-template2 = environment.get_template("XXCOPY")
 
 
 # ================
 # Local templates.
 # ================
-template3 = Template(r"F:\S\Springsteen, Bruce\2\$year\$month.$day - $location\CD$disc\1.Free Lossless Audio Codec")
+template2 = Template(r"F:\S\Springsteen, Bruce\2\$year\$month.$day - $location\CD$disc\1.Free Lossless Audio Codec")
 
 
 # ==========
@@ -311,7 +310,7 @@ while True:
                    track.date,
                    track.location,
                    track.discnumber,
-                   template3.substitute(year=track.year, month="{0:0>2}".format(track.month), day="{0:0>2}".format(track.day), location=track.location, disc=track.discnumber)
+                   template2.substitute(year=track.year, month="{0:0>2}".format(track.month), day="{0:0>2}".format(track.day), location=track.location, disc=track.discnumber)
                    )
                   for fil, track in map(getflacobject, [os.path.join(src, fil) for fil in os.listdir(src) if fnmatch.fnmatch(fil, "*.{0}".format(arguments.extension.lower()))]) if track
                   ]
