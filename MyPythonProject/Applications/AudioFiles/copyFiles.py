@@ -225,7 +225,7 @@ while True:
                 break
         album = nt2(*albums[choice-1][1])
         files = list(zip(itertools.count(1), fileslist(album.tracks)))  # liste respectant le schéma : [(1, "file1"), (2 "file2"), (3, "file3")]
-        tracks = list(tracklist(album.tracks))
+        tracks = list(trackslist(album.tracks))
         code += 1
         tmpl = template1.render(header=nt1(*header()), menu=list(enumerate(tracks, 1)))
 
