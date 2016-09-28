@@ -78,19 +78,19 @@ def getdrives():
             yield drive.strip()
 
 
-def albumslist(coll):  # "coll" est une liste respectant le schéma suivant : [("2.20160422.1.13", "album", {"D1.T06.NNN": (1, 6, "title", "track path")})].
+def albumslist(coll):  # "coll" est une liste respectant le schéma suivant : [("2.20160422.1.13", "album", {"D1.T06.NNN": (1, 6, "title", "file")})].
     for album in coll:
         yield itemgetter(1)(album)
 
 
-def trackslist(coll):  # "coll" est un dictionnaire respectant le schéma suivant : {"D1.T06.NNN": (1, 6, "title", "track path")}.
+def trackslist(coll):  # "coll" est un dictionnaire respectant le schéma suivant : {"D1.T06.NNN": (1, 6, "title", "file")}.
     nt = namedtuple("nt", "disc track title file")
     for trackid in sorted(coll):
         track = nt(*coll[trackid])
         yield track.title
 
 
-def fileslist(coll):  # "coll" est un dictionnaire respectant le schéma suivant : {"D1.T06.NNN": (1, 6, "title", "track path")}.
+def fileslist(coll):  # "coll" est un dictionnaire respectant le schéma suivant : {"D1.T06.NNN": (1, 6, "title", "file")}.
     nt = namedtuple("nt", "disc track title file")
     for trackid in sorted(coll):
         track = nt(*coll[trackid])
