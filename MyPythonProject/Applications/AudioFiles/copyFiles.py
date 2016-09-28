@@ -298,7 +298,7 @@ while True:
                     continue
                 break
         drive = "{0}{1}".format(drives[choice-1][1], os.path.sep)
-        files = dict([(itemgetter(0)(item), (itemgetter(1)(item), os.path.normpath(template3.substitute(drv=drive, dir=artist)))) for item in files])  # dictionnaire respectant le schéma : {1: ("file1", "path1"), 2: ("file2", "path2"), 3: ("file3", "path3")}
+        files = dict([(itemgetter(0)(item), (itemgetter(1)(item), os.path.normpath(template3.substitute(drv=drive, dir=artist)))) for item in files])  # dictionnaire respectant le schéma : {1: ("src1", "dst1"), 2: ("src2", "dst2"), 3: ("src3", "dst3")}
         # directory = "{0}{1}".format(os.path.normpath(os.path.join("{0}{1}".format(drives[choice-1][1], os.path.sep), list_parents[1], list_parents[2])), os.path.sep)
         if mode_files == "G":
             command = list(enumerate(list((template2.render(src=os.path.normpath("{0}{1}*.{2}".format(album, os.path.sep, extension.lower())),
