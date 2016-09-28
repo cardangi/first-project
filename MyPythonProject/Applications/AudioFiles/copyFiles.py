@@ -216,7 +216,7 @@ while True:
         while True:
             print1(clearscreen(t=tmpl))
             try:
-                choice = int1(input("{0}\tPlease choose folder: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
+                choice = int1(input("{0}\tPlease choose album: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
             except ValueError:
                 continue
             else:
