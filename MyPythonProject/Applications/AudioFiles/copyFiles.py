@@ -224,7 +224,7 @@ while True:
                     continue
                 break
         album = nt2(*albums[choice-1][1])
-        files = list(zip(itertools.count(1), fileslist(album.tracks)))  # liste respectant le schéma : [(1, "path1"), (2 "path2"), (3, "path3")]
+        files = list(zip(itertools.count(1), fileslist(album.tracks)))  # liste respectant le schéma : [(1, "file1"), (2 "file2"), (3, "file3")]
         tracks = list(tracklist(album.tracks))
         code += 1
         tmpl = template1.render(header=nt1(*header()), menu=list(enumerate(tracks, 1)))
@@ -298,7 +298,7 @@ while True:
                     continue
                 break
         drive = "{0}{1}".format(drives[choice-1][1], os.path.sep)
-        files = dict([(itemgetter(0)(item), (itemgetter(1)(item), os.path.normpath(template3.substitute(drv=drive, dir=artist)))) for item in files])
+        files = dict([(itemgetter(0)(item), (itemgetter(1)(item), os.path.normpath(template3.substitute(drv=drive, dir=artist)))) for item in files])  # dictionnaire respectant le schéma : {1: ("file1", "path1"), 2: ("file2", "path2"), 3: ("file3", "path3")}
         # directory = "{0}{1}".format(os.path.normpath(os.path.join("{0}{1}".format(drives[choice-1][1], os.path.sep), list_parents[1], list_parents[2])), os.path.sep)
         if mode_files == "G":
             command = list(enumerate(list((template2.render(src=os.path.normpath("{0}{1}*.{2}".format(album, os.path.sep, extension.lower())),
