@@ -484,6 +484,110 @@ class CustomFormatter(logging.Formatter):
         return s
 
 
+class AudioFiles(object):
+
+    OBJ = {"flac": FLAC, "mp3": MP3}
+
+    def __init__(self, coll):
+        self._coll = coll
+
+    def __call__(self, *args, key=None, value=None):
+
+        albums, tracks = deque(), deque()
+
+        #  1. Check "typ".
+        if all([arg not in ["flac", "mp3"] for arg in args]):
+            raise ValueError
+
+        #  2. Check "key".
+        k = key
+        if key:
+            if type(key) is not str:
+                raise ValueError
+            if key not in ["album", "artist", "title"]:
+                raise ValueError
+
+        #  3. Check "value".
+        v = value
+        if value:
+            if type(value) not in [str, list, tuple]:
+                raise ValueError
+            if type(value) in [list, tuple]:
+                v = "|".join(value)
+
+        #  4. Check both "key" and "value".
+        if any([item is not None for item in (key, value)]) and not all([item is not None for item in (key, value)]):
+            raise ValueError
+
+        #  5. Grab audio metadata.
+        regex = re.compile("({0})".format(v), re.IGNORECASE)
+        for arg in args:
+            for file in self.coll:
+                try:
+                    audiofil = self.OBJ[arg](file)
+                except MutagenError:
+                    continue
+                if "artistsort" not in audiofil:
+                    continue
+                if "albumsort" not in audiofil:
+                    continue
+                if "titlesort" not in audiofil:
+                    continue
+                if "artist" not in audiofil:
+                    continue
+                if "album" not in audiofil:
+                    continue
+                if "discnumber" not in audiofil:
+                    continue
+                if "tracknumber" not in audiofil:
+                    continue
+                if "title" not in audiofil:
+                    continue
+                search, getfile = regex.search(audiofil[k][0]), True
+                if not search:
+                    getfile = False
+                if getfile:
+                    albums.append(("{artistsort}.{albumsort}".format(artistsort=audiofil["artistsort"][0], albumsort=audiofil["albumsort"][0]), audiofil["album"][0]))
+                    tracks.append((
+                        ("{artistsort}.{albumsort}".format(artistsort=audiofil["artistsort"][0], albumsort=audiofil["albumsort"][0]), audiofil["titlesort"][0]),
+                        (
+                            audiofil["discnumber"][0],
+                            audiofil["tracknumber"][0],
+                            audiofil["title"][0],
+                            file
+                        )
+                    ))
+
+        #  6. Set output.
+        tracks = {itemgetter(0)(item): dict([(itemgetter(1)(itemgetter(0)(track)), (itemgetter(0)(itemgetter(1)(track)),
+                                                                                    itemgetter(1)(itemgetter(1)(track)),
+                                                                                    itemgetter(2)(itemgetter(1)(track)),
+                                                                                    itemgetter(3)(itemgetter(1)(track)))
+                                              )
+                                             for track in sorted(sorted(tracks, key=sortedbytracks), key=sortedbyalbums)
+                                             if itemgetter(0)(itemgetter(0)(track)) == itemgetter(0)(item)])
+                  for item in sorted(set(albums), key=itemgetter(0))}
+        albums = dict(albums)
+
+        #  7. Yield output.
+        for item in sorted(tracks):
+            yield item, albums[item], tracks[item]
+
+    @property
+    def coll(self):
+        return self._coll
+
+    @coll.setter
+    def coll(self, arg):
+        if not isinstance(arg, Iterable):
+            raise ValueError
+        self._coll = sorted(arg)
+
+    @classmethod
+    def fromfolder(cls, *args, folder):
+        return cls(list(shared.filesinfolder(*args, folder=folder)))
+
+
 # ==========
 # Functions.
 # ==========
