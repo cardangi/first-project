@@ -584,7 +584,8 @@ class AudioFiles(object):
 
     @property
     def albums(self):
-        return sorted(self._albums)
+        for album in sorted(self._albums):
+            yield self._albums[album]
 
     @classmethod
     def fromfolder(cls, *args, folder):
