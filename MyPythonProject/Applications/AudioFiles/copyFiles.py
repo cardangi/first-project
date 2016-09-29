@@ -5,7 +5,7 @@ import sys
 import locale
 import itertools
 from functools import wraps
-from string import template
+from string import Template
 from operator import itemgetter
 from subprocess import run, PIPE
 from collections import namedtuple
@@ -62,15 +62,6 @@ def getextensions(art, path=s1.MUSIC):
     return d
 
 
-# def getalbums(art, ext, path=s1.MUSIC):
-    # rex1 = re.compile(r"\b{0}\b".format(art), re.IGNORECASE)
-    # rex2 = re.compile(r".{0}$".format(ext), re.IGNORECASE)
-    # for a, b, c in os.walk(path):
-        # if rex1.search(a):
-            # for fld in set([os.path.normpath(a) for fil in c if rex2.search(fil)]):
-                # yield(fld)
-
-
 def getdrives():
     process = run("WMIC LOGICALDISK GET CAPTION", stdout=PIPE, universal_newlines=True)
     if process.returncode == 0:
@@ -78,19 +69,19 @@ def getdrives():
             yield drive.strip()
 
 
-def albumslist(coll):  # "coll" est une liste respectant le schÃ©ma suivant : [("2.20160422.1.13", "album", {"D1.T06.NNN": (1, 6, "title", "file")})].
+def albumslist(coll):  # "coll" est une liste respectant le schéma suivant : [("2.20160422.1.13", "album", {"D1.T06.NNN": (1, 6, "title", "file")})].
     for album in coll:
         yield itemgetter(1)(album)
 
 
-def trackslist(coll):  # "coll" est un dictionnaire respectant le schÃ©ma suivant : {"D1.T06.NNN": (1, 6, "title", "file")}.
+def trackslist(coll):  # "coll" est un dictionnaire respectant le schéma suivant : {"D1.T06.NNN": (1, 6, "title", "file")}.
     nt = namedtuple("nt", "disc track title file")
     for trackid in sorted(coll):
         track = nt(*coll[trackid])
         yield track.title
 
 
-def fileslist(coll):  # "coll" est un dictionnaire respectant le schÃ©ma suivant : {"D1.T06.NNN": (1, 6, "title", "file")}.
+def fileslist(coll):  # "coll" est un dictionnaire respectant le schéma suivant : {"D1.T06.NNN": (1, 6, "title", "file")}.
     nt = namedtuple("nt", "disc track title file")
     for trackid in sorted(coll):
         track = nt(*coll[trackid])
@@ -107,7 +98,7 @@ regex2 = re.compile(r"^[A-Z]:$")
 # ======================
 # Jinja2 environment1(s).
 # ======================
-environment = Environment1(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_pythonproject%"), "Applications", "AudioFiles", "Templates"), encoding=s1.DFTENCODING),
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_pythonproject%"), "Applications", "AudioFiles", "Templates"), encoding=s1.DFTENCODING), 
                           trim_blocks=True,
                           lstrip_blocks=True)
 
@@ -153,7 +144,7 @@ nt2 = namedtuple("nt2", "albumsort album tracks")
 # ==================
 # Initializations 3.
 # ==================
-template3 = template("{$drv}{$dir}")
+template3 = Template("{$drv}{$dir}")
 
 
 # ===============
@@ -170,7 +161,7 @@ while True:
         head = header()
         tmpl = template1.render(header=nt1(*head))
         while True:
-            print1(clearscreen(t=tmpl))
+            print(clearscreen(t=tmpl))
             artist = input("{0}\tPlease enter artist: ".format("".join(list(itertools.repeat("\n", 4)))).expandtabs(TABSIZE))
             if artist:
                 if regex1.match(artist):
@@ -193,9 +184,9 @@ while True:
     #     Then grab available albums.
     elif code == 2:
         while True:
-            print1(clearscreen(t=tmpl))
+            print(clearscreen(t=tmpl))
             try:
-                choice = int1(input("{0}\tPlease choose extension: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
+                choice = int(input("{0}\tPlease choose extension: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
             except ValueError:
                 continue
             else:
@@ -214,9 +205,9 @@ while True:
     #     Then grab available tracks.
     elif code == 3:
         while True:
-            print1(clearscreen(t=tmpl))
+            print(clearscreen(t=tmpl))
             try:
-                choice = int1(input("{0}\tPlease choose album: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
+                choice = int(input("{0}\tPlease choose album: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
             except ValueError:
                 continue
             else:
@@ -224,7 +215,7 @@ while True:
                     continue
                 break
         album = nt2(*albums[choice-1][1])
-        files = list(zip(itertools.count(1), fileslist(album.tracks)))  # liste respectant le schÃ©ma : [(1, "file1"), (2 "file2"), (3, "file3")]
+        files = list(zip(itertools.count(1), fileslist(album.tracks)))  # liste respectant le schéma : [(1, "file1"), (2 "file2"), (3, "file3")]
         tracks = list(trackslist(album.tracks))
         code += 1
         tmpl = template1.render(header=nt1(*header()), menu=list(enumerate(tracks, 1)))
@@ -235,7 +226,7 @@ while True:
     #     Then grab available destination drives.
     elif code == 4:
         while True:
-            print1(clearscreen(t=tmpl))
+            print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to select individual files [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
@@ -266,7 +257,7 @@ while True:
     #     Then grab available destination drives.
     # elif code == 5:
         # while True:
-            # print1(clearscreen(t=tmpl))
+            # print(clearscreen(t=tmpl))
             # choice = input("{0}\tPlease enter file index [e.g. 1, 2, 5-7, 10]: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             # if choice:
                 # list_indivfiles = [itemgetter(1)(fil) for fil in tracks if itemgetter(0)(fil) in map(int, s2.formatindexes(choice))]
@@ -288,9 +279,9 @@ while True:
     #     Then write copy command to temporary working file.
     elif code == 6:
         while True:
-            print1(clearscreen(t=tmpl))
+            print(clearscreen(t=tmpl))
             try:
-                choice = int1(input("{0}\tPlease choose destination drive: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
+                choice = int(input("{0}\tPlease choose destination drive: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
             except ValueError:
                 continue
             else:
@@ -298,7 +289,7 @@ while True:
                     continue
                 break
         drive = "{0}{1}".format(drives[choice-1][1], os.path.sep)
-        files = dict([(itemgetter(0)(item), (itemgetter(1)(item), os.path.normpath(template3.substitute(drv=drive, dir=artist)))) for item in files])  # dictionnaire respectant le schÃ©ma : {1: ("src1", "dst1"), 2: ("src2", "dst2"), 3: ("src3", "dst3")}
+        files = dict([(itemgetter(0)(item), (itemgetter(1)(item), os.path.normpath(template3.substitute(drv=drive, dir=artist)))) for item in files])  # dictionnaire respectant le schéma : {1: ("src1", "dst1"), 2: ("src2", "dst2"), 3: ("src3", "dst3")}
         # directory = "{0}{1}".format(os.path.normpath(os.path.join("{0}{1}".format(drives[choice-1][1], os.path.sep), list_parents[1], list_parents[2])), os.path.sep)
         if mode_files == "G":
             command = list(enumerate(list((template2.render(src=os.path.normpath("{0}{1}*.{2}".format(album, os.path.sep, extension.lower())),
@@ -327,7 +318,7 @@ while True:
     #     Then run copy command(s).
     elif code == 7:
         while True:
-            print1(clearscreen(t=tmpl))
+            print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to copy files using the command(s) above [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
@@ -352,7 +343,7 @@ while True:
     #     -----------------
     elif code == 8:
         while True:
-            print1(clearscreen(t=tmpl))
+            print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to run copy command(s) [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
@@ -368,7 +359,7 @@ while True:
     #     -------------
     elif code == 99:
         while True:
-            print1(clearscreen(t=tmpl))
+            print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to exit program [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
