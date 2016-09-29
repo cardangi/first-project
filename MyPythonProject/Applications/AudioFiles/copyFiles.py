@@ -206,7 +206,7 @@ while True:
         collection = s1.AudioFiles.fromfolder(extension, folder=s1.MUSIC)
         albums = list(collection(extension, key="artist", value=[artist]))
         code += 1
-        tmpl = template1.render(header=nt1(*header()), menu=list(enumerate(albums, 1)))
+        tmpl = template1.render(header=nt1(*header()), menu=list(enumerate([itemgetter(1)(item) for item in albums], 1)))
 
     #     ----------
     #  3. Set album.
