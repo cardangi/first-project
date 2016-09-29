@@ -7,14 +7,18 @@ import logging
 import argparse
 import itertools
 from pytz import timezone
+from mutagen.mp3 import MP3
 from string import Template
 from datetime import datetime
+from mutagen.flac import FLAC
 from dateutil.tz import gettz
 from operator import itemgetter
+from mutagen import MutagenError
+from collections import Iterable
 from dateutil.parser import parse
-from collections import namedtuple
-from PIL import Image, TiffImagePlugin
 from contextlib import contextmanager
+from PIL import Image, TiffImagePlugin
+from collections import namedtuple, deque
 
 __author__ = 'Xavier'
 
@@ -558,14 +562,14 @@ class AudioFiles(object):
                     ))
 
         #  6. Set output.
-        self_.tracks = {itemgetter(0)(item): dict([(itemgetter(1)(itemgetter(0)(track)), (itemgetter(0)(itemgetter(1)(track)),
-                                                                                    itemgetter(1)(itemgetter(1)(track)),
-                                                                                    itemgetter(2)(itemgetter(1)(track)),
-                                                                                    itemgetter(3)(itemgetter(1)(track)))
-                                              )
-                                             for track in sorted(sorted(tracks, key=sortedbytracks), key=sortedbyalbums)
-                                             if itemgetter(0)(itemgetter(0)(track)) == itemgetter(0)(item)])
-                  for item in sorted(set(albums), key=itemgetter(0))}
+        self._tracks = {itemgetter(0)(item): dict([(itemgetter(1)(itemgetter(0)(track)), (itemgetter(0)(itemgetter(1)(track)),
+                                                                                          itemgetter(1)(itemgetter(1)(track)),
+                                                                                          itemgetter(2)(itemgetter(1)(track)),
+                                                                                          itemgetter(3)(itemgetter(1)(track)))
+                                                    )
+                                                   for track in sorted(sorted(tracks, key=sortedbytracks), key=sortedbyalbums)
+                                                   if itemgetter(0)(itemgetter(0)(track)) == itemgetter(0)(item)])
+                        for item in sorted(set(albums), key=itemgetter(0))}
         self._albums = dict(albums)
 
         #  7. Yield output.
@@ -589,7 +593,7 @@ class AudioFiles(object):
 
     @classmethod
     def fromfolder(cls, *args, folder):
-        return cls(list(shared.filesinfolder(*args, folder=folder)))
+        return cls(list(filesinfolder(*args, folder=folder)))
 
 
 # ==========
@@ -702,3 +706,11 @@ def repeatelement(elem, n):
 
 def now():
     return dateformat(UTC.localize(datetime.utcnow()).astimezone(LOCAL), TEMPLATE4)
+
+
+def sortedbytracks(*args):
+    return itemgetter(1)(itemgetter(0)(args))
+
+
+def sortedbyalbums(*args):
+    return itemgetter(0)(itemgetter(0)(args))

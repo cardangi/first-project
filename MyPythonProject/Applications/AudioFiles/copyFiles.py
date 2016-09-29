@@ -11,7 +11,7 @@ from subprocess import run, PIPE
 from collections import namedtuple
 from jinja2 import Environment, FileSystemLoader
 from .. import shared as s1
-from .Modules import shared as s2
+# from .Modules import shared as s2
 
 __author__ = 'Xavier ROSSET'
 
@@ -170,13 +170,13 @@ while True:
                 continue
             tmpl = template1.render(header=nt1(*head))
             continue
-        list_extensions = list(enumerate([key.upper() for key in sorted(getextensions(artist).keys())], start=1))
+        list_extensions = [key.upper() for key in sorted(getextensions(artist).keys())]
         head = header()
         code = 99
         tmpl = template1.render(header=nt1(*head), message=list(('No audio files found for "{0}".'.format(artist),)))
         if list_extensions:
             code = 2
-            tmpl = template1.render(header=nt1(*head), menu=list_extensions)
+            tmpl = template1.render(header=nt1(*head), menu=enumerate(list_extensions, 1))
 
     #     --------------
     #  2. Set extension.
@@ -197,7 +197,7 @@ while True:
         collection = s1.AudioFiles.fromfolder(extension, folder=s1.MUSIC)
         albums = list(collection(extension, key="artist", value=[artist]))
         code += 1
-        tmpl = template1.render(header=nt1(*header()), menu=list(enumerate([itemgetter(1)(item) for item in albums], 1)))
+        tmpl = template1.render(header=nt1(*header()), menu=enumerate([itemgetter(1)(item) for item in albums], 1))
 
     #     ----------
     #  3. Set album.
@@ -218,7 +218,7 @@ while True:
         files = list(zip(itertools.count(1), fileslist(album.tracks)))  # liste respectant le schéma : [(1, "file1"), (2 "file2"), (3, "file3")]
         tracks = list(trackslist(album.tracks))
         code += 1
-        tmpl = template1.render(header=nt1(*header()), menu=list(enumerate(tracks, 1)))
+        tmpl = template1.render(header=nt1(*header()), menu=enumerate(tracks, 1))
 
     #     -----------
     #  4. Set tracks.
@@ -240,7 +240,7 @@ while True:
             tmpl = template1.render(header=nt1(*head), message=list(("An issue was encountered while grabbing available destination drives.",)))
             code = 99
             if drives:
-                tmpl = template1.render(header=nt1(*head), menu=list(enumerate(drives, 1))
+                tmpl = template1.render(header=nt1(*head), menu=enumerate(drives, 1))
                 code = 6
 
     #  4a. Individual.
@@ -277,40 +277,40 @@ while True:
     #  6. Set destination drive.
     #     ----------------------
     #     Then write copy command to temporary working file.
-    elif code == 6:
-        while True:
-            print(clearscreen(t=tmpl))
-            try:
-                choice = int(input("{0}\tPlease choose destination drive: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
-            except ValueError:
-                continue
-            else:
-                if choice > len(drives):
-                    continue
-                break
-        drive = "{0}{1}".format(drives[choice-1][1], os.path.sep)
-        files = dict([(itemgetter(0)(item), (itemgetter(1)(item), os.path.normpath(template3.substitute(drv=drive, dir=artist)))) for item in files])  # dictionnaire respectant le schéma : {1: ("src1", "dst1"), 2: ("src2", "dst2"), 3: ("src3", "dst3")}
-        # directory = "{0}{1}".format(os.path.normpath(os.path.join("{0}{1}".format(drives[choice-1][1], os.path.sep), list_parents[1], list_parents[2])), os.path.sep)
-        if mode_files == "G":
-            command = list(enumerate(list((template2.render(src=os.path.normpath("{0}{1}*.{2}".format(album, os.path.sep, extension.lower())),
-                                                            dst=directory,
-                                                            dir=TEMP,
-                                                            lst="xxcopy.lst",
-                                                            log=XXCOPYLOG),)),
-                                     start=1
-                                     )
-                           )
-        elif mode_files == "I":
-            command = list(enumerate(sorted([template2.render(src=fil,
-                                                              dst=directory,
-                                                              dir=TEMP,
-                                                              lst="xxcopy.lst",
-                                                              log=XXCOPYLOG) for num, fil in list_indivfiles]),
-                                     start=1
-                                     )
-                           )
-        code += 1
-        tmpl = template1.render(header=nt1(*header()), menu=command)
+    # elif code == 6:
+    #     while True:
+    #         print(clearscreen(t=tmpl))
+    #         try:
+    #             choice = int(input("{0}\tPlease choose destination drive: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
+    #         except ValueError:
+    #             continue
+    #         else:
+    #             if choice > len(drives):
+    #                 continue
+    #             break
+    #     drive = "{0}{1}".format(drives[choice-1][1], os.path.sep)
+    #     files = dict([(itemgetter(0)(item), (itemgetter(1)(item), os.path.normpath(template3.substitute(drv=drive, dir=artist)))) for item in files])  # dictionnaire respectant le schéma : {1: ("src1", "dst1"), 2: ("src2", "dst2"), 3: ("src3", "dst3")}
+    #     # directory = "{0}{1}".format(os.path.normpath(os.path.join("{0}{1}".format(drives[choice-1][1], os.path.sep), list_parents[1], list_parents[2])), os.path.sep)
+    #     if mode_files == "G":
+    #         command = list(enumerate(list((template2.render(src=os.path.normpath("{0}{1}*.{2}".format(album, os.path.sep, extension.lower())),
+    #                                                         dst=directory,
+    #                                                         dir=TEMP,
+    #                                                         lst="xxcopy.lst",
+    #                                                         log=XXCOPYLOG),)),
+    #                                  start=1
+    #                                  )
+    #                        )
+    #     elif mode_files == "I":
+    #         command = list(enumerate(sorted([template2.render(src=fil,
+    #                                                           dst=directory,
+    #                                                           dir=TEMP,
+    #                                                           lst="xxcopy.lst",
+    #                                                           log=XXCOPYLOG) for num, fil in list_indivfiles]),
+    #                                  start=1
+    #                                  )
+    #                        )
+    #     code += 1
+    #     tmpl = template1.render(header=nt1(*header()), menu=command)
 
     #     ---------------------------------------------
     #  7. Write copy command to temporary working file.
