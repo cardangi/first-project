@@ -495,7 +495,8 @@ class AudioFiles(object):
     def __init__(self, coll):
         self._albums = None
         self._tracks = None
-        self._coll = coll
+        self._coll = None
+        self.coll = coll
 
     def __call__(self, *args, key=None, value=None):
 
@@ -567,7 +568,7 @@ class AudioFiles(object):
                                                                                           itemgetter(2)(itemgetter(1)(track)),
                                                                                           itemgetter(3)(itemgetter(1)(track)))
                                                     )
-                                                   for track in sorted(sorted(tracks, key=sortedbytracks), key=sortedbyalbums)
+                                                   for track in sorted(sorted(tracks, key=self.sortedbytracks), key=self.sortedbyalbums)
                                                    if itemgetter(0)(itemgetter(0)(track)) == itemgetter(0)(item)])
                         for item in sorted(set(albums), key=itemgetter(0))}
         self._albums = dict(albums)
@@ -594,6 +595,14 @@ class AudioFiles(object):
     @classmethod
     def fromfolder(cls, *args, folder):
         return cls(list(filesinfolder(*args, folder=folder)))
+
+    @staticmethod
+    def sortedbytracks(*args):
+        return itemgetter(1)(itemgetter(0)(args))
+
+    @staticmethod
+    def sortedbyalbums(*args):
+        return itemgetter(0)(itemgetter(0)(args))
 
 
 # ==========
@@ -706,11 +715,3 @@ def repeatelement(elem, n):
 
 def now():
     return dateformat(UTC.localize(datetime.utcnow()).astimezone(LOCAL), TEMPLATE4)
-
-
-def sortedbytracks(*args):
-    return itemgetter(1)(itemgetter(0)(args))
-
-
-def sortedbyalbums(*args):
-    return itemgetter(0)(itemgetter(0)(args))
