@@ -489,6 +489,8 @@ class AudioFiles(object):
     OBJ = {"flac": FLAC, "mp3": MP3}
 
     def __init__(self, coll):
+        self._albums = None
+        self._tracks = None
         self._coll = coll
 
     def __call__(self, *args, key=None, value=None):
@@ -501,16 +503,13 @@ class AudioFiles(object):
 
         #  2. Check "key".
         k = key
-        if key:
-            if type(key) is not str:
-                raise ValueError
-            if key not in ["album", "artist", "title"]:
-                raise ValueError
+        if key and key not in ["album", "artist", "title"]:
+            raise ValueError
 
         #  3. Check "value".
         v = value
         if value:
-            if type(value) not in [str, list, tuple]:
+            if not isinstance(value, Iterable):
                 raise ValueError
             if type(value) in [list, tuple]:
                 v = "|".join(value)
@@ -559,7 +558,7 @@ class AudioFiles(object):
                     ))
 
         #  6. Set output.
-        tracks = {itemgetter(0)(item): dict([(itemgetter(1)(itemgetter(0)(track)), (itemgetter(0)(itemgetter(1)(track)),
+        self_.tracks = {itemgetter(0)(item): dict([(itemgetter(1)(itemgetter(0)(track)), (itemgetter(0)(itemgetter(1)(track)),
                                                                                     itemgetter(1)(itemgetter(1)(track)),
                                                                                     itemgetter(2)(itemgetter(1)(track)),
                                                                                     itemgetter(3)(itemgetter(1)(track)))
@@ -567,10 +566,10 @@ class AudioFiles(object):
                                              for track in sorted(sorted(tracks, key=sortedbytracks), key=sortedbyalbums)
                                              if itemgetter(0)(itemgetter(0)(track)) == itemgetter(0)(item)])
                   for item in sorted(set(albums), key=itemgetter(0))}
-        albums = dict(albums)
+        self._albums = dict(albums)
 
         #  7. Yield output.
-        for item in sorted(tracks):
+        for item in sorted(self._tracks):
             yield item, albums[item], tracks[item]
 
     @property
@@ -582,6 +581,10 @@ class AudioFiles(object):
         if not isinstance(arg, Iterable):
             raise ValueError
         self._coll = sorted(arg)
+
+    @property
+    def albums(self):
+        return sorted(self._albums)
 
     @classmethod
     def fromfolder(cls, *args, folder):
