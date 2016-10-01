@@ -205,7 +205,6 @@ environment.globals["copyright"] = shared.COPYRIGHT
 # ========================
 environment.filters["integertostring"] = shared.integertostring
 environment.filters["repeatelement"] = shared.repeatelement
-# environment.filters["sortedlist"] = shared.sortedlist
 environment.filters["ljustify"] = shared.ljustify
 environment.filters["rjustify"] = shared.rjustify
 
@@ -225,7 +224,7 @@ template2 = Template(r"F:\S\Springsteen, Bruce\2\$year\$month.$day - $location\C
 # ==========
 # Constants.
 # ==========
-MODES, CURWDIR, TABSIZE1, TABSIZE2 = {"copy": "copied", "import": "imported"}, os.path.join(os.path.expandvars("%_MYMUSIC%"), r"Bruce Springsteen & The E Street Band"), 10, 4
+CURWDIR, TABSIZE1, TABSIZE2 = os.path.join(os.path.expandvars("%_MYMUSIC%"), r"Bruce Springsteen & The E Street Band"), 10, 4
 
 
 # ==================
