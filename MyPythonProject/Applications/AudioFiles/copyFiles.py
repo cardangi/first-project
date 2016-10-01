@@ -11,7 +11,6 @@ from subprocess import run, PIPE
 from collections import namedtuple
 from jinja2 import Environment, FileSystemLoader
 from .. import shared as s1
-# from .Modules import shared as s2
 
 __author__ = 'Xavier ROSSET'
 
@@ -114,7 +113,6 @@ environment.globals["copyright"] = s1.COPYRIGHT
 # ========================
 environment.filters["integertostring"] = s1.integertostring
 environment.filters["repeatelement"] = s1.repeatelement
-environment.filters["sortedlist"] = s1.sortedlist
 environment.filters["ljustify"] = s1.ljustify
 environment.filters["rjustify"] = s1.rjustify
 
