@@ -285,7 +285,7 @@ while True:
         tmpl = template1.render(header=nt(*head), message=list(("No folders found.",)))
         if list_folders:
             code = 2
-            tmpl = template1.render(header=nt(*head), menu=enumerate(list_folders, 1))
+            tmpl = template1.render(header=nt(*head), list1=list_folders)
 
     #     ---------------------------------
     #  2. Grab available files from folder.
@@ -298,14 +298,14 @@ while True:
                 try:
                     index = int(choice)
                 except ValueError:
-                    tmpl = template1.render(header=nt(*head), menu=enumerate(list_folders, 1), message=list(('"{0}" is not a valid input'.format(choice),)))
+                    tmpl = template1.render(header=nt(*head), list1=list_folders, message=list(('"{0}" is not a valid input'.format(choice),)))
                     continue
                 else:
                     if index > len(list_folders):
-                        tmpl = template1.render(header=nt(*head), menu=enumerate(list_folders, 1), message=list(('"{0}" is not a valid input'.format(choice),)))
+                        tmpl = template1.render(header=nt(*head), list1=list_folders, message=list(('"{0}" is not a valid input'.format(choice),)))
                         continue
                     break
-            tmpl = template1.render(header=nt(*head), menu=enumerate(list_folders, 1))
+            tmpl = template1.render(header=nt(*head), list1=list_folders)
         src = list_folders[index - 1]
         tracks = [(fil,
                    track,
@@ -322,7 +322,7 @@ while True:
         tmpl = template1.render(header=nt(*head), message=list(('No files found in "{0}".'.format(src),)))
         if tracks:
             code = 3
-            tmpl = template1.render(header=nt(*head), detail=[(itemgetter(0)(item), os.path.join(itemgetter(5)(item), os.path.basename(itemgetter(0)(item)))) for item in tracks])
+            tmpl = template1.render(header=nt(*head), list2=[(itemgetter(0)(item), os.path.join(itemgetter(5)(item), os.path.basename(itemgetter(0)(item)))) for item in tracks])
 
     #     -------------
     #  3. Import files.

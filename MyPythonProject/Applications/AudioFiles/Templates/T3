@@ -1,14 +1,8 @@
-{% for a, b in menu|sortedlist() %}
-    {% if a is number %}
-        {% if loop.first %}
+{% for item in list1|sortedlist() %}
+    {% if loop.first %}
 
 
 
-        {% endif %}
-          {{ a|integertostring()|rjustify(2) }}
-        {%- if b -%}
-            .{{ space -}}
-        {% endif -%}
-            {{ b }}
     {% endif %}
+      {{ loop.index|integertostring()|rjustify(2) }}. {{ item }}
 {% endfor %}

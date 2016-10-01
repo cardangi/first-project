@@ -31,22 +31,16 @@
         {% endif -%}
         {{ header.title|default() }}
 
-{%- if message %}
-    {% if message is iterable %}
-        {% include "T2" %}
-    {% endif %}
+{%- if message is iterable %}
+    {% include "T2" %}
 {% endif %}
 
-{%- if menu %}
-    {% if menu is iterable %}
-        {% include "T3" %}
-    {% endif %}
+{%- if list1 is iterable %}
+    {% include "T3" %}
 {% endif %}
 
-{%- if detail %}
-    {% if detail is iterable %}
-        {% include "T4" %}
-    {% endif %}
+{%- if list2 is iterable %}
+    {% include "T4" %}
 {% endif %}
 
 {%- if results %}

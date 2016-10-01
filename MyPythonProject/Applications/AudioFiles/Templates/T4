@@ -1,11 +1,15 @@
-{% for src, dst in detail %}
+{% for item in list2|sortedlist() %}
     {% if loop.first %}
 
 
     {% endif %}
 
-          {{ loop.index|integertostring()|rjustify(3) }}. Source     : "{{ src }}"
-               Destination: "{{ dst }}"
+          {{ loop.index|integertostring()|rjustify(3) }}. {{ item[0] }}
+            {% if loop.length > 1 %}
+                {% for i in range(1, loop.length)
+               {{ item[i] }}
+                {% endfor %}
+           {% endif %}
     {% if loop.last %}
 
 
