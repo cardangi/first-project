@@ -1,18 +1,13 @@
-{% for item in list2|sortedlist() %}
+{% for item in list2 %}
     {% if loop.first %}
 
 
     {% endif %}
 
-          {{ loop.index|integertostring()|rjustify(3) }}. {{ item[0] }}
-            {% if loop.length > 1 %}
-                {% for i in range(1, loop.length)
-               {{ item[i] }}
-                {% endfor %}
-           {% endif %}
-    {% if loop.last %}
-
-
-          {{ loop.length|integertostring()|rjustify(3) }} file(s) ready to be {{ mode }}.
-    {% endif %}
+      {{ loop.index|integertostring()|rjustify(3) }}. {{ item[0] }}
+        {% if item|length() > 1 %}
+            {% for i in range(1, item|length()) %}
+           {{ item[i] }}
+            {% endfor %}
+       {% endif %}
 {% endfor %}

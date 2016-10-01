@@ -1,8 +1,8 @@
-{% for item in list1|sortedlist() %}
+{% for item in list1 %}
     {% if loop.first %}
 
 
 
     {% endif %}
-      {{ loop.index|integertostring()|rjustify(2) }}. {{ item }}
+      {{ loop.index|integertostring()|rjustify(3) }}. {{ item }}
 {% endfor %}

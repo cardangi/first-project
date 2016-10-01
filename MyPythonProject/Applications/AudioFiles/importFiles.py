@@ -205,7 +205,7 @@ environment.globals["copyright"] = shared.COPYRIGHT
 # ========================
 environment.filters["integertostring"] = shared.integertostring
 environment.filters["repeatelement"] = shared.repeatelement
-environment.filters["sortedlist"] = shared.sortedlist
+# environment.filters["sortedlist"] = shared.sortedlist
 environment.filters["ljustify"] = shared.ljustify
 environment.filters["rjustify"] = shared.rjustify
 
@@ -225,7 +225,7 @@ template2 = Template(r"F:\S\Springsteen, Bruce\2\$year\$month.$day - $location\C
 # ==========
 # Constants.
 # ==========
-MODES, CURWDIR, TABSIZE = {"copy": "copied", "import": "imported"}, os.path.join(os.path.expandvars("%_MYMUSIC%"), r"Bruce Springsteen & The E Street Band"), 10
+MODES, CURWDIR, TABSIZE1, TABSIZE2 = {"copy": "copied", "import": "imported"}, os.path.join(os.path.expandvars("%_MYMUSIC%"), r"Bruce Springsteen & The E Street Band"), 10, 4
 
 
 # ==================
@@ -257,32 +257,32 @@ while True:
     if code == 1:
         header = shared.Header("import  audio  files", ["Set current directory.", "Set folder.", "Import files.", "Run import.", "Exit program."])
         head = header()
-        tmpl = template1.render(header=nt(*head), message=list(('Current directory is: "{0}"'.format(CURWDIR),)))
+        tmpl = template1.render(header=nt(*head), message=['Current directory is: "{0}"'.format(CURWDIR)])
         tracks.clear()
         statuss.clear()
         while True:
             print(clearscreen(t=tmpl))
-            choice = input("{0}\tWould you like to change the current directory [Y/N]? ".format(justify).expandtabs(TABSIZE))
+            choice = input("{0}\tWould you like to change the current directory [Y/N]? ".format(justify).expandtabs(TABSIZE1))
             if choice.upper() in shared.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "Y":
             tmpl = template1.render(header=nt(*head))
             while True:
                 print(clearscreen(t=tmpl))
-                curwdir = input("{0}\tPlease enter directory: ".format(justify).expandtabs(TABSIZE))
+                curwdir = input("{0}\tPlease enter directory: ".format(justify).expandtabs(TABSIZE1))
                 if curwdir:
                     if not os.path.exists(curwdir):
-                        tmpl = template1.render(header=nt(*head), message=list(('"{0}" is not a valid directory!'.format(curwdir),)))
+                        tmpl = template1.render(header=nt(*head), message=['"{0}" is not a valid directory!'.format(curwdir)])
                         continue
                     if not os.path.isdir(curwdir):
-                        tmpl = template1.render(header=nt(*head), message=list(('"{0}" is not a valid directory!'.format(curwdir),)))
+                        tmpl = template1.render(header=nt(*head), message=['"{0}" is not a valid directory!'.format(curwdir)])
                         continue
                     break
                 tmpl = template1.render(header=nt(*head))
         list_folders = sorted({os.path.dirname(file) for file in directorytree(directory=curwdir, rex=regex)})
         head = header()
         code = 99
-        tmpl = template1.render(header=nt(*head), message=list(("No folders found.",)))
+        tmpl = template1.render(header=nt(*head), message=["No folders found."])
         if list_folders:
             code = 2
             tmpl = template1.render(header=nt(*head), list1=list_folders)
@@ -293,16 +293,16 @@ while True:
     elif code == 2:
         while True:
             print(clearscreen(t=tmpl))
-            choice = input("{0}\tPlease choose source folder: ".format(justify).expandtabs(TABSIZE))
+            choice = input("{0}\tPlease choose source folder: ".format(justify).expandtabs(TABSIZE1))
             if choice:
                 try:
                     index = int(choice)
                 except ValueError:
-                    tmpl = template1.render(header=nt(*head), list1=list_folders, message=list(('"{0}" is not a valid input'.format(choice),)))
+                    tmpl = template1.render(header=nt(*head), list1=list_folders, message=['"{0}" is not a valid input'.format(choice)])
                     continue
                 else:
                     if index > len(list_folders):
-                        tmpl = template1.render(header=nt(*head), list1=list_folders, message=list(('"{0}" is not a valid input'.format(choice),)))
+                        tmpl = template1.render(header=nt(*head), list1=list_folders, message=['"{0}" is not a valid input'.format(choice)])
                         continue
                     break
             tmpl = template1.render(header=nt(*head), list1=list_folders)
@@ -319,10 +319,18 @@ while True:
         files.update(dict([(itemgetter(0)(item), itemgetter(1)(item)) for item in tracks]))
         head = header()
         code = 99
-        tmpl = template1.render(header=nt(*head), message=list(('No files found in "{0}".'.format(src),)))
+        tmpl = template1.render(header=nt(*head), message=['No files found in "{0}".'.format(src)])
         if tracks:
             code = 3
-            tmpl = template1.render(header=nt(*head), list2=[(itemgetter(0)(item), os.path.join(itemgetter(5)(item), os.path.basename(itemgetter(0)(item)))) for item in tracks])
+            tmpl = template1.render(header=nt(*head),
+                                    list2=[
+                                        (
+                                            "Source\t\t: {0}".format(itemgetter(0)(item)).expandtabs(TABSIZE2),
+                                            "Destination\t: {0}".format(os.path.join(itemgetter(5)(item), os.path.basename(itemgetter(0)(item)))).expandtabs(TABSIZE2)
+                                        )
+                                        for item in tracks],
+                                    trailer=["{0:>3d} files ready to be imported.".format(len(tracks))]
+                                    )
 
     #     -------------
     #  3. Import files.
@@ -330,7 +338,7 @@ while True:
     elif code == 3:
         while True:
             print(clearscreen(t=tmpl))
-            choice = input("{0}\tWould you like to import files [Y/N]? ".format(justify).expandtabs(TABSIZE))
+            choice = input("{0}\tWould you like to import files [Y/N]? ".format(justify).expandtabs(TABSIZE1))
             if choice.upper() in shared.ACCEPTEDANSWERS:
                 break
         head = header()
@@ -349,7 +357,7 @@ while True:
     elif code == 4:
         while True:
             print(clearscreen(t=tmpl))
-            choice = input("{0}\tWould you like to run import [Y/N]? ".format(justify).expandtabs(TABSIZE))
+            choice = input("{0}\tWould you like to run import [Y/N]? ".format(justify).expandtabs(TABSIZE1))
             if choice.upper() in shared.ACCEPTEDANSWERS:
                 break
         head = header()
@@ -382,7 +390,7 @@ while True:
     elif code == 99:
         while True:
             print(clearscreen(t=tmpl))
-            choice = input("{0}\tWould you like to exit program [Y/N]? ".format(justify).expandtabs(TABSIZE))
+            choice = input("{0}\tWould you like to exit program [Y/N]? ".format(justify).expandtabs(TABSIZE1))
             if choice.upper() in shared.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "N":

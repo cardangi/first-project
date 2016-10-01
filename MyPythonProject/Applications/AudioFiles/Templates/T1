@@ -43,13 +43,6 @@
     {% include "T4" %}
 {% endif %}
 
-{%- if results %}
-    {% if results|attr("display") is defined %}
-        {% if results.display %}
-
-
-     {{ results.mode|capitalize() }} succeeded for {{ results.successes|integertostring()|rjustify(3) }}/{{ results.files }} files.
-     {{ results.mode|capitalize() }} failed    for {{ results.fails|integertostring()|rjustify(3) }}/{{ results.files }} files.
-        {% endif %}
-    {% endif %}
+{%- if trailer is iterable %}
+    {% include "T5" %}
 {% endif %}
