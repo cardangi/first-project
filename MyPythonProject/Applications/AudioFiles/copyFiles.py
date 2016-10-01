@@ -3,14 +3,17 @@ import os
 import re
 import sys
 import locale
+import logging
 import itertools
-from functools import wraps
+from pytz import timezone
 from string import Template
+from functools import wraps
+from datetime import datetime
 from operator import itemgetter
 from subprocess import run, PIPE
 from collections import namedtuple
 from jinja2 import Environment, FileSystemLoader
-from .. import shared as s1
+from .. import shared
 
 __author__ = 'Xavier ROSSET'
 
@@ -19,6 +22,12 @@ __author__ = 'Xavier ROSSET'
 # Define French environment.
 # ==========================
 locale.setlocale(locale.LC_ALL, "")
+
+
+# ========
+# Logging.
+# ========
+logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 
 
 # ==========
@@ -49,7 +58,7 @@ def clearscreen():
     run("CLS", shell=True)
 
 
-def getextensions(art, path=s1.MUSIC):
+def getextensions(art, path=shared.MUSIC):
     d, regex = {}, re.compile(r"\b{0}\b".format(art), re.IGNORECASE)
     for a, b, c in os.walk(path):
         if c:
@@ -86,6 +95,16 @@ def justify(repeat=2):
     return "".join(list(itertools.repeat("\n", repeat)))
 
 
+def getparents(f):
+    nt = namedtuple("nt", "found destination")
+    try:
+        fil = shared.Files(f)
+    except FileNotFoundError:
+        return nt(False, None)
+    else:
+        return nt(True, os.path.join(fil.parts[1], fil.parts[2]))
+
+
 # ====================
 # Regular expressions.
 # ====================
@@ -96,7 +115,7 @@ regex2 = re.compile(r"^[A-Z]:$")
 # ======================
 # Jinja2 environment1(s).
 # ======================
-environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_pythonproject%"), "Applications", "AudioFiles", "Templates"), encoding=s1.DFTENCODING), 
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_pythonproject%"), "Applications", "AudioFiles", "Templates"), encoding=shared.DFTENCODING),
                           trim_blocks=True,
                           lstrip_blocks=True)
 
@@ -104,17 +123,17 @@ environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvar
 # ==========================
 # Jinja2 global variable(s).
 # ==========================
-environment.globals["now"] = s1.now()
-environment.globals["copyright"] = s1.COPYRIGHT
+environment.globals["now"] = shared.now()
+environment.globals["copyright"] = shared.COPYRIGHT
 
 
 # ========================
 # Jinja2 custom filter(s).
 # ========================
-environment.filters["integertostring"] = s1.integertostring
-environment.filters["repeatelement"] = s1.repeatelement
-environment.filters["ljustify"] = s1.ljustify
-environment.filters["rjustify"] = s1.rjustify
+environment.filters["integertostring"] = shared.integertostring
+environment.filters["repeatelement"] = shared.repeatelement
+environment.filters["ljustify"] = shared.ljustify
+environment.filters["rjustify"] = shared.rjustify
 
 
 # ===================
@@ -127,8 +146,8 @@ template2 = environment.get_template("XXCOPY")
 # ==================
 # Initializations 1.
 # ==================
-mode, status, code, tmpl, choice = s1.WRITE, 100, 1, None, None
-artist, extension, folder, command, list_indivfiles, tracks, drives, somesfilestocopy = "", "", "", "", [], [], [], False
+mode, status, code, tmpl, choice = shared.WRITE, 100, 1, None, None
+artist, extension, folder, command, list_indivfiles, files, tracks, drives, somesfilestocopy = "", "", "", "", [], [], [], [], False
 
 
 # ==================
@@ -141,7 +160,14 @@ nt2 = namedtuple("nt2", "albumsort album tracks")
 # ==================
 # Initializations 3.
 # ==================
-template3 = Template("{$drv}{$dir}")
+template3 = Template("${drv}\${dir}")
+
+
+# ==============
+# Start logging.
+# ==============
+logger.info("{0:=^140s}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
+logger.info('START "{0}".'.format(os.path.basename(__file__)))
 
 
 # ===============
@@ -154,7 +180,7 @@ while True:
     #     -----------
     #     Then grab available extensions.
     if code == 1:
-        header = s1.Header("copy  audio  files", ["Set artist.", "Set extension.", "Set folder.", "Set files."])
+        header = shared.Header("copy  audio  files", ["Set artist.", "Set extension.", "Set folder.", "Set files."])
         head = header()
         tmpl = template1.render(header=nt1(*head))
         while True:
@@ -191,11 +217,11 @@ while True:
                     continue
                 break
         extension = extensions[choice-1]
-        collection = s1.AudioFiles.fromfolder(extension, folder=s1.MUSIC)
+        collection = shared.AudioFiles.fromfolder(extension, folder=shared.MUSIC)
         try:
             albums = list(collection(extension, key="artist", value=[artist]))
         except ValueError as err:
-            header = s1.Header("copy  audio  files", ["Exit program."], 3)
+            header = shared.Header("copy  audio  files", ["Exit program."], 3)
             code = 99
             tmpl = template1.render(header=nt1(*header()), message=[err])
         else:
@@ -218,8 +244,19 @@ while True:
                     continue
                 break
         album = nt2(*albums[choice-1])
-        files = list(zip(itertools.count(1), fileslist(album.tracks)))  # liste respectant le schéma : [(1, "file1"), (2 "file2"), (3, "file3")]
+
+        # Files list.
+        files = list(fileslist(album.tracks))  # liste respectant le schéma : ["file1", "file2", "file3"]
+        logger.debug("Selected files")
+        for file in files:
+            logger.debug('"{0}"'.format(os.path.normpath(file)))
+
+        # tracks list
         tracks = list(trackslist(album.tracks))
+        logger.debug("Selected tracks")
+        for track in tracks:
+            logger.debug('"{0}"'.format(track))
+
         code += 1
         tmpl = template1.render(header=nt1(*header()), list1=tracks)
 
@@ -231,25 +268,24 @@ while True:
         while True:
             print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to select individual files [Y/N]? ".format(justify()).expandtabs(TABSIZE))
-            if choice.upper() in s1.ACCEPTEDANSWERS:
+            if choice.upper() in shared.ACCEPTEDANSWERS:
                 break
         drives = [drive for drive in getdrives() if regex2.match(drive)]
 
         #  4a. Global.
         if choice.upper() in ["N", "Y"]:
-            header = s1.Header("copy  audio  files", ["Set destination drive.", "Copy files.", "Run copy command(s).", "Exit program."], 5)
+            header = shared.Header("copy  audio  files", ["Set destination drive.", "Copy files.", "Run copy command(s).", "Exit program."], 5)
             mode_files = "G"
             head = header()
             tmpl = template1.render(header=nt1(*head), message=["An issue was encountered while grabbing available destination drives."])
             code = 99
             if drives:
                 tmpl = template1.render(header=nt1(*head), list1=drives)
-                # code = 6
-                code = 7
+                code = 6
 
     #  4a. Individual.
         # elif choice.upper() == "Y":
-            # header = s1.Header("copy  audio  files", ["Set individual files.", "Set destination drive.", "Copy files.", "Run copy command(s).", "Exit program."], 5)
+            # header = shared.Header("copy  audio  files", ["Set individual files.", "Set destination drive.", "Copy files.", "Run copy command(s).", "Exit program."], 5)
             # mode_files = "I"
             # head = header()
             # tmpl = template1.render(header=nt1(*head), list1=tracks)
@@ -281,19 +317,25 @@ while True:
     #  6. Set destination drive.
     #     ----------------------
     #     Then write copy command to temporary working file.
-    # elif code == 6:
-    #     while True:
-    #         print(clearscreen(t=tmpl))
-    #         try:
-    #             choice = int(input("{0}\tPlease choose destination drive: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
-    #         except ValueError:
-    #             continue
-    #         else:
-    #             if choice > len(drives):
-    #                 continue
-    #             break
-    #     drive = "{0}{1}".format(drives[choice-1][1], os.path.sep)
-    #     files = dict([(itemgetter(0)(item), (itemgetter(1)(item), os.path.normpath(template3.substitute(drv=drive, dir=artist)))) for item in files])  # dictionnaire respectant le schéma : {1: ("src1", "dst1"), 2: ("src2", "dst2"), 3: ("src3", "dst3")}
+    elif code == 6:
+        while True:
+            print(clearscreen(t=tmpl))
+            try:
+                choice = int(input("{0}\tPlease choose destination drive: ".format(justify()).expandtabs(TABSIZE)))
+            except ValueError:
+                continue
+            else:
+                if choice > len(drives):
+                    continue
+                break
+        # drive = drives[choice-1]
+        files = [(file, os.path.normpath(template3.substitute(drv=drives[choice-1], dir=getparents(file).destination))) for file in files if getparents(file).found]
+        # liste respectant le schéma : [("src1", "dst1"), ("src2", "dst2"), ("src3", "dst3")]
+        logger.debug("Destination files")
+        for src, dst in files:
+            logger.debug('"{0}"'.format(os.path.normpath(src)))
+            logger.debug('"{0}"'.format(os.path.normpath(dst)))
+        code = 99
     #     # directory = "{0}{1}".format(os.path.normpath(os.path.join("{0}{1}".format(drives[choice-1][1], os.path.sep), list_parents[1], list_parents[2])), os.path.sep)
     #     if mode_files == "G":
     #         command = list(enumerate(list((template2.render(src=os.path.normpath("{0}{1}*.{2}".format(album, os.path.sep, extension.lower())),
@@ -324,20 +366,20 @@ while True:
         while True:
             print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to copy files using the command(s) above [Y/N]? ".format(justify()).expandtabs(TABSIZE))
-            if choice.upper() in s1.ACCEPTEDANSWERS:
+            if choice.upper() in shared.ACCEPTEDANSWERS:
                 break
         code += 1
         if choice.upper() == "Y":
-            with open(os.path.join(TEMP, OUTFILE), mode=mode, encoding=s1.DFTENCODING) as fw:
+            with open(os.path.join(TEMP, OUTFILE), mode=mode, encoding=shared.DFTENCODING) as fw:
                 for num, cmd in command:
                     fw.write("{0}\n".format(cmd))
             somesfilestocopy = True
-            mode = s1.APPEND
+            mode = shared.APPEND
             tmpl = template1.render(header=nt1(*header()))
         elif choice.upper() == "N" and somesfilestocopy:
             tmpl = template1.render(header=nt1(*header()))
         elif choice.upper() == "N" and not somesfilestocopy:
-            header = s1.Header("copy  audio  files", ["Exit program."], 8)
+            header = shared.Header("copy  audio  files", ["Exit program."], 8)
             head = header()
             tmpl = template1.render(header=nt1(*head))
             code = 99
@@ -349,7 +391,7 @@ while True:
         while True:
             print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to run copy command(s) [Y/N]? ".format(justify()).expandtabs(TABSIZE))
-            if choice.upper() in s1.ACCEPTEDANSWERS:
+            if choice.upper() in shared.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "Y":
             status = 0
@@ -365,7 +407,7 @@ while True:
         while True:
             print(clearscreen(t=tmpl))
             choice = input("{0}\tWould you like to exit program [Y/N]? ".format(justify()).expandtabs(TABSIZE))
-            if choice.upper() in s1.ACCEPTEDANSWERS:
+            if choice.upper() in shared.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "Y":
             status = 99
