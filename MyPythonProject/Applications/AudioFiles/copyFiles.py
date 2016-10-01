@@ -69,11 +69,6 @@ def getdrives():
             yield drive.strip()
 
 
-def albumslist(coll):  # "coll" est une liste respectant le schéma suivant : [("2.20160422.1.13", "album", {"D1.T06.NNN": (1, 6, "title", "file")})].
-    for album in coll:
-        yield itemgetter(1)(album)
-
-
 def trackslist(coll):  # "coll" est un dictionnaire respectant le schéma suivant : {"D1.T06.NNN": (1, 6, "title", "file")}.
     nt = namedtuple("nt", "disc track title file")
     for trackid in sorted(coll):
@@ -86,6 +81,10 @@ def fileslist(coll):  # "coll" est un dictionnaire respectant le schéma suivant 
     for trackid in sorted(coll):
         track = nt(*coll[trackid])
         yield track.file
+
+
+def justify(repeat=2):
+    return "".join(list(itertools.repeat("\n", repeat)))
 
 
 # ====================
@@ -162,21 +161,21 @@ while True:
         tmpl = template1.render(header=nt1(*head))
         while True:
             print(clearscreen(t=tmpl))
-            artist = input("{0}\tPlease enter artist: ".format("".join(list(itertools.repeat("\n", 4)))).expandtabs(TABSIZE))
+            artist = input("{0}\tPlease enter artist: ".format(justify(4)).expandtabs(TABSIZE))
             if artist:
                 if regex1.match(artist):
                     break
-                tmpl = template1.render(header=nt1(*head), message=list(('"{0}" is not a valid input.'.format(artist),)))
+                tmpl = template1.render(header=nt1(*head), message=['"{0}" is not a valid input.'.format(artist)])
                 continue
             tmpl = template1.render(header=nt1(*head))
             continue
-        list_extensions = [key.upper() for key in sorted(getextensions(artist).keys())]
+        extensions = sorted([key.upper() for key in sorted(getextensions(artist).keys())])
         head = header()
         code = 99
-        tmpl = template1.render(header=nt1(*head), message=list(('No audio files found for "{0}".'.format(artist),)))
-        if list_extensions:
+        tmpl = template1.render(header=nt1(*head), message=['No audio files found for "{0}".'.format(artist)])
+        if extensions:
             code = 2
-            tmpl = template1.render(header=nt1(*head), menu=enumerate(list_extensions, 1))
+            tmpl = template1.render(header=nt1(*head), list1=extensions)
 
     #     --------------
     #  2. Set extension.
@@ -186,18 +185,24 @@ while True:
         while True:
             print(clearscreen(t=tmpl))
             try:
-                choice = int(input("{0}\tPlease choose extension: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
+                choice = int(input("{0}\tPlease choose extension: ".format(justify()).expandtabs(TABSIZE)))
             except ValueError:
                 continue
             else:
-                if choice > len(list_extensions):
+                if choice > len(extensions):
                     continue
                 break
-        extension = list_extensions[choice-1][1]
+        extension = extensions[choice-1]
         collection = s1.AudioFiles.fromfolder(extension, folder=s1.MUSIC)
-        albums = list(collection(extension, key="artist", value=[artist]))
-        code += 1
-        tmpl = template1.render(header=nt1(*header()), menu=enumerate([itemgetter(1)(item) for item in albums], 1))
+        try:
+            albums = list(collection(extension, key="artist", value=[artist]))
+        except ValueError as err:
+            header = s1.Header("copy  audio  files", ["Exit program."], 3)
+            code = 99
+            tmpl = template1.render(header=nt1(*header()), message=[err])
+        else:
+            code += 1
+            tmpl = template1.render(header=nt1(*header()), list1=[itemgetter(1)(item) for item in albums])
 
     #     ----------
     #  3. Set album.
@@ -207,18 +212,18 @@ while True:
         while True:
             print(clearscreen(t=tmpl))
             try:
-                choice = int(input("{0}\tPlease choose album: ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE)))
+                choice = int(input("{0}\tPlease choose album: ".format(justify()).expandtabs(TABSIZE)))
             except ValueError:
                 continue
             else:
                 if choice > len(albums):
                     continue
                 break
-        album = nt2(*albums[choice-1][1])
+        album = nt2(*albums[choice-1])
         files = list(zip(itertools.count(1), fileslist(album.tracks)))  # liste respectant le schéma : [(1, "file1"), (2 "file2"), (3, "file3")]
         tracks = list(trackslist(album.tracks))
         code += 1
-        tmpl = template1.render(header=nt1(*header()), menu=enumerate(tracks, 1))
+        tmpl = template1.render(header=nt1(*header()), list1=tracks)
 
     #     -----------
     #  4. Set tracks.
@@ -227,7 +232,7 @@ while True:
     elif code == 4:
         while True:
             print(clearscreen(t=tmpl))
-            choice = input("{0}\tWould you like to select individual files [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
+            choice = input("{0}\tWould you like to select individual files [Y/N]? ".format(justify()).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         drives = [drive for drive in getdrives() if regex2.match(drive)]
@@ -237,18 +242,19 @@ while True:
             header = s1.Header("copy  audio  files", ["Set destination drive.", "Copy files.", "Run copy command(s).", "Exit program."], 5)
             mode_files = "G"
             head = header()
-            tmpl = template1.render(header=nt1(*head), message=list(("An issue was encountered while grabbing available destination drives.",)))
+            tmpl = template1.render(header=nt1(*head), message=["An issue was encountered while grabbing available destination drives."])
             code = 99
             if drives:
-                tmpl = template1.render(header=nt1(*head), menu=enumerate(drives, 1))
-                code = 6
+                tmpl = template1.render(header=nt1(*head), list1=drives)
+                # code = 6
+                code = 7
 
     #  4a. Individual.
         # elif choice.upper() == "Y":
             # header = s1.Header("copy  audio  files", ["Set individual files.", "Set destination drive.", "Copy files.", "Run copy command(s).", "Exit program."], 5)
             # mode_files = "I"
             # head = header()
-            # tmpl = template1.render(header=nt1(*head), menu=tracks)
+            # tmpl = template1.render(header=nt1(*head), list1=tracks)
             # code += 1
 
     #     ---------------------
@@ -263,7 +269,7 @@ while True:
                 # list_indivfiles = [itemgetter(1)(fil) for fil in tracks if itemgetter(0)(fil) in map(int, s2.formatindexes(choice))]
                 # if list_indivfiles:
                     # break
-                # tmpl = template1.render(header=nt1(*head), menu=tracks, message=list(("No correct indexes selected.",)))
+                # tmpl = template1.render(header=nt1(*head), list1=tracks, message=list(("No correct indexes selected.",)))
                 # continue
         # list_indivfiles = list(enumerate(sorted(list_indivfiles), start=1))
         # head = header()
@@ -271,7 +277,7 @@ while True:
         # tmpl = template1.render(header=nt1(*head), message=list(("An issue was encountered while grabbing available destination drives.",)))
         # if drives:
             # code = 6
-            # tmpl = template1.render(header=nt1(*head), menu=drives)
+            # tmpl = template1.render(header=nt1(*head), list1=drives)
 
     #     ----------------------
     #  6. Set destination drive.
@@ -310,7 +316,7 @@ while True:
     #                                  )
     #                        )
     #     code += 1
-    #     tmpl = template1.render(header=nt1(*header()), menu=command)
+    #     tmpl = template1.render(header=nt1(*header()), list1=command)
 
     #     ---------------------------------------------
     #  7. Write copy command to temporary working file.
@@ -319,7 +325,7 @@ while True:
     elif code == 7:
         while True:
             print(clearscreen(t=tmpl))
-            choice = input("{0}\tWould you like to copy files using the command(s) above [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
+            choice = input("{0}\tWould you like to copy files using the command(s) above [Y/N]? ".format(justify()).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         code += 1
@@ -344,7 +350,7 @@ while True:
     elif code == 8:
         while True:
             print(clearscreen(t=tmpl))
-            choice = input("{0}\tWould you like to run copy command(s) [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
+            choice = input("{0}\tWould you like to run copy command(s) [Y/N]? ".format(justify()).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "Y":
@@ -360,7 +366,7 @@ while True:
     elif code == 99:
         while True:
             print(clearscreen(t=tmpl))
-            choice = input("{0}\tWould you like to exit program [Y/N]? ".format("".join(list(itertools.repeat("\n", 2)))).expandtabs(TABSIZE))
+            choice = input("{0}\tWould you like to exit program [Y/N]? ".format(justify()).expandtabs(TABSIZE))
             if choice.upper() in s1.ACCEPTEDANSWERS:
                 break
         if choice.upper() == "Y":

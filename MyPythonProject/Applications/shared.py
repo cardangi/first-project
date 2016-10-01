@@ -503,32 +503,35 @@ class AudioFiles(object):
         albums, tracks = deque(), deque()
 
         #  1. Check "typ".
-        if all([arg not in ["flac", "mp3"] for arg in args]):
-            raise ValueError
+        if all([arg.lower() not in ["flac", "mp3"] for arg in args]):
+            raise ValueError('Invalid filter. {0} received whereas only "flac" and "mp3" are accepted.'.format(list(args)))
 
         #  2. Check "key".
         k = key
-        if key and key not in ["album", "artist", "title"]:
-            raise ValueError
+        if key and key.lower() not in ["album", "artist", "title"]:
+            raise ValueError('Invalid argument. "{0}" received whereas only "album", "artist" and "title" are accepted.'.format(key))
 
         #  3. Check "value".
         v = value
         if value:
             if not isinstance(value, Iterable):
-                raise ValueError
+                raise ValueError('"{0}" is not iterable.'.format(value))
             if type(value) in [list, tuple]:
                 v = "|".join(value)
 
         #  4. Check both "key" and "value".
         if any([item is not None for item in (key, value)]) and not all([item is not None for item in (key, value)]):
-            raise ValueError
+            if not key:
+                raise ValueError("Filter key is missing.")
+            elif not value:
+                raise ValueError("Filter value is missing.")
 
         #  5. Grab audio metadata.
         regex = re.compile("({0})".format(v), re.IGNORECASE)
         for arg in args:
             for file in self.coll:
                 try:
-                    audiofil = self.OBJ[arg](file)
+                    audiofil = self.OBJ[arg.lower()](file)
                 except MutagenError:
                     continue
                 if "artistsort" not in audiofil:
@@ -575,7 +578,7 @@ class AudioFiles(object):
 
         #  7. Yield output.
         for item in sorted(self._tracks):
-            yield item, albums[item], tracks[item]
+            yield item, self._albums[item], self._tracks[item]
 
     @property
     def coll(self):
