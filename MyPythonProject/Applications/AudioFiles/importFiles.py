@@ -242,7 +242,7 @@ justify, nt = "".join(list(itertools.repeat("\n", 3))), namedtuple("nt", "mainti
 # ====================
 # Regular expressions.
 # ====================
-regex = re.compile(r"\b({0})\b\-\b({1})\b\-\b({2})\b \b([a-z, ]+)\\[^\\\.]+\.(?:{3})$".format(shared.DFTYEARREGEX, shared.DFTMONTHREGEX, shared.DFTDAYREGEX, arguments.extension), re.IGNORECASE)
+regex = re.compile(r"\b({0})\b-\b({1})\b-\b({2})\b \b([a-z, ]+)\\[^\\.]+\.(?:{3})$".format(shared.DFTYEARREGEX, shared.DFTMONTHREGEX, shared.DFTDAYREGEX, arguments.extension), re.IGNORECASE)
 
 
 # ===============
