@@ -341,8 +341,7 @@ while True:
                         continue
                     break
                 tmpl = template1.render(header=nt(*head))
-        collection = AudioFiles.fromfolder(folder=curwdir)
-        artists = [(k, list(v)) for k, v in groupby(collection, key=groupbyartist)]
+        artists = [(k, list(v)) for k, v in groupby(AudioFiles.fromfolder(folder=curwdir), key=groupbyartist)]
         kartists = [itemgetter(0)(artist) for artist in artists]
         head = header()
         code = 2
