@@ -24,8 +24,8 @@ def myfunc5(lst):
     return all([eq(x, 5) for x in lst])
 
 
-assert myfunc1([1, 2, 3, 4, 5, 6, 7, 8]) == True
-assert myfunc2([1, 2, 3, 4, 5, 6, 7, 8]) == False
-assert myfunc3([1, 2, 3, 4, 5, 6, 7, 8]) == True
-assert myfunc4([1, 2, 3, 4, 5, 6, 7, 8]) == True
-assert myfunc5([1, 2, 3, 4, 5, 6, 7, 8]) == False
+assert myfunc1([1, 2, 3, 4, 5, 6, 7, 8]) is True
+assert myfunc2([1, 2, 3, 4, 5, 6, 7, 8]) is False
+assert myfunc3([1, 2, 3, 4, 5, 6, 7, 8]) is True
+assert myfunc4([1, 2, 3, 4, 5, 6, 7, 8]) is True
+assert myfunc5([1, 2, 3, 4, 5, 6, 7, 8]) is False

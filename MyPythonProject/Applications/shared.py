@@ -7,17 +7,17 @@ import logging
 import argparse
 import itertools
 from pytz import timezone
-from mutagen.mp3 import MP3
+# from mutagen.mp3 import MP3
 from string import Template
 from datetime import datetime
-from mutagen.flac import FLAC
+# from mutagen.flac import FLAC
 from dateutil.tz import gettz
 from operator import itemgetter
-from mutagen import MutagenError
 from collections import Iterable
 from dateutil.parser import parse
 from contextlib import contextmanager
 from PIL import Image, TiffImagePlugin
+from mutagen import File, MutagenError
 from collections import namedtuple, deque
 
 __author__ = 'Xavier'
@@ -490,7 +490,7 @@ class CustomFormatter(logging.Formatter):
 
 class AudioFiles(object):
 
-    OBJ = {"flac": FLAC, "mp3": MP3}
+    # OBJ = {"flac": FLAC, "mp3": MP3}
 
     def __init__(self, coll):
         self._albums = None
@@ -531,7 +531,7 @@ class AudioFiles(object):
         for arg in args:
             for file in self.coll:
                 try:
-                    audiofil = self.OBJ[arg.lower()](file)
+                    audiofil = File(file)
                 except MutagenError:
                     continue
                 if "artistsort" not in audiofil:
