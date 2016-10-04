@@ -7,18 +7,14 @@ import logging
 import argparse
 import itertools
 from pytz import timezone
-# from mutagen.mp3 import MP3
 from string import Template
 from datetime import datetime
-# from mutagen.flac import FLAC
 from dateutil.tz import gettz
 from operator import itemgetter
-from collections import Iterable
 from dateutil.parser import parse
+from collections import namedtuple
 from contextlib import contextmanager
 from PIL import Image, TiffImagePlugin
-from mutagen import File, MutagenError
-from collections import namedtuple, deque
 
 __author__ = 'Xavier'
 
@@ -486,126 +482,6 @@ class CustomFormatter(logging.Formatter):
         if datefmt:
             s = ct.strftime(datefmt)
         return s
-
-
-class AudioFiles(object):
-
-    # OBJ = {"flac": FLAC, "mp3": MP3}
-
-    def __init__(self, coll):
-        self._albums = None
-        self._tracks = None
-        self._coll = None
-        self.coll = coll
-
-    def __call__(self, *args, key=None, value=None):
-
-        albums, tracks = deque(), deque()
-
-        #  1. Check "typ".
-        if all([arg.lower() not in ["flac", "mp3"] for arg in args]):
-            raise ValueError('Invalid filter. {0} received whereas only "flac" and "mp3" are accepted.'.format(list(args)))
-
-        #  2. Check "key".
-        k = key
-        if key and key.lower() not in ["album", "artist", "title"]:
-            raise ValueError('Invalid argument. "{0}" received whereas only "album", "artist" and "title" are accepted.'.format(key))
-
-        #  3. Check "value".
-        v = value
-        if value:
-            if not isinstance(value, Iterable):
-                raise ValueError('"{0}" is not iterable.'.format(value))
-            if type(value) in [list, tuple]:
-                v = "|".join(value)
-
-        #  4. Check both "key" and "value".
-        if any([item is not None for item in (key, value)]) and not all([item is not None for item in (key, value)]):
-            if not key:
-                raise ValueError("Filter key is missing.")
-            elif not value:
-                raise ValueError("Filter value is missing.")
-
-        #  5. Grab audio metadata.
-        regex = re.compile("({0})".format(v), re.IGNORECASE)
-        for arg in args:
-            for file in self.coll:
-                try:
-                    audiofil = File(file)
-                except MutagenError:
-                    continue
-                if "artistsort" not in audiofil:
-                    continue
-                if "albumsort" not in audiofil:
-                    continue
-                if "titlesort" not in audiofil:
-                    continue
-                if "artist" not in audiofil:
-                    continue
-                if "album" not in audiofil:
-                    continue
-                if "discnumber" not in audiofil:
-                    continue
-                if "tracknumber" not in audiofil:
-                    continue
-                if "title" not in audiofil:
-                    continue
-                search, getfile = regex.search(audiofil[k][0]), True
-                if not search:
-                    getfile = False
-                if getfile:
-                    albums.append(("{artistsort}.{albumsort}".format(artistsort=audiofil["artistsort"][0], albumsort=audiofil["albumsort"][0]), audiofil["album"][0]))
-                    tracks.append((
-                        ("{artistsort}.{albumsort}".format(artistsort=audiofil["artistsort"][0], albumsort=audiofil["albumsort"][0]), audiofil["titlesort"][0]),
-                        (
-                            audiofil["discnumber"][0],
-                            audiofil["tracknumber"][0],
-                            audiofil["title"][0],
-                            file
-                        )
-                    ))
-
-        #  6. Set output.
-        self._tracks = {itemgetter(0)(item): dict([(itemgetter(1)(itemgetter(0)(track)), (itemgetter(0)(itemgetter(1)(track)),
-                                                                                          itemgetter(1)(itemgetter(1)(track)),
-                                                                                          itemgetter(2)(itemgetter(1)(track)),
-                                                                                          itemgetter(3)(itemgetter(1)(track)))
-                                                    )
-                                                   for track in sorted(sorted(tracks, key=self.sortedbytracks), key=self.sortedbyalbums)
-                                                   if itemgetter(0)(itemgetter(0)(track)) == itemgetter(0)(item)])
-                        for item in sorted(set(albums), key=itemgetter(0))}
-        self._albums = dict(albums)
-
-        #  7. Yield output.
-        for item in sorted(self._tracks):
-            yield item, self._albums[item], self._tracks[item]
-
-    @property
-    def coll(self):
-        return self._coll
-
-    @coll.setter
-    def coll(self, arg):
-        if not isinstance(arg, Iterable):
-            raise ValueError
-        self._coll = sorted(arg)
-
-    @property
-    def albums(self):
-        for album in sorted(self._albums):
-            yield self._albums[album]
-
-    @classmethod
-    def fromfolder(cls, *args, folder):
-        return cls(list(filesinfolder(*args, folder=folder)))
-
-    @staticmethod
-    def sortedbytracks(*args):
-        return itemgetter(1)(itemgetter(0)(args))
-
-    @staticmethod
-    def sortedbyalbums(*args):
-        return itemgetter(0)(itemgetter(0)(args))
 
 
 # ==========
