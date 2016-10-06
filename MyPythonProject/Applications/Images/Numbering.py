@@ -21,20 +21,20 @@ __author__ = 'Xavier ROSSET'
 # ========
 class ImagesCollection(object):
 
-    def __init__(self, year):
+    def __init__(self, ccyy):
         self._year = ""
         self._index = 0
-        self.year = year
+        self.year = ccyy
 
     @property
     def year(self):
         return self._year
 
     @year.setter
-    def year(self, arg):
-        value = str(arg)
+    def year(self, psarg):
+        value = str(psarg)
         if not re.match(r"^(?=\d{4})20[0-2]\d$", value):
-            raise ValueError('"{0}" is not a valid year'.format(arg))
+            raise ValueError('"{0}" is not a valid year'.format(psarg))
         self._year = value
 
     @property
@@ -46,36 +46,36 @@ class ImagesCollection(object):
         return list(accumulate(self.func1(self.func2(dict(self.func3(self.year))))))
 
     @staticmethod
-    def func3(arg):
+    def func3(m):
         """
         Return [("201001", ["file", "file2", "file3"]), ("201002", ["file", "file2", "file3"])]
-        :param arg: month.
+        :param m: month.
         :return: files grouped by month.
         """
         collection = list()
         for i in range(1, 13):
-            month = "{0}{1:0>2}".format(arg, i)
+            month = "{0}{1:0>2}".format(m, i)
             if os.path.exists(os.path.normpath(os.path.join(r"H:\\", month))):
                 collection.append((month, list(glob.iglob(os.path.normpath(os.path.join(r"h:\\", month, r"*.jpg"))))))
         return collection
 
     @staticmethod
-    def func2(arg):
+    def func2(d):
         """
         Return {"201001": 100, "201002": 200}.
-        :param arg: dictionnary of files grouped by month.
+        :param d: dictionnary of files grouped by month.
         :return: counts by month.
         """
-        return {key: len(arg[key]) for key in arg.keys()}
+        return {k: len(d[k]) for k in list(d)}
 
     @staticmethod
-    def func1(arg):
+    def func1(d):
         """
         Return [100, 200].
-        :param arg: dictionnary of files grouped by month.
+        :param d: dictionnary of files grouped by month.
         :return: counts list.
         """
-        return [arg[key] for key in sorted(arg.keys(), key=int)]
+        return [d[k] for k in sorted(d, key=int)]
 
     def __iter__(self):
         return self
@@ -100,8 +100,8 @@ class Log(object):
         return self._index
 
     @index.setter
-    def index(self, arg):
-        self._index = arg
+    def index(self, psarg):
+        self._index = psarg
 
     def __call__(self, src, dst):
         self.index += 1
@@ -217,7 +217,7 @@ for year in arguments.year:
                             if not arguments.test:
                                 result = rename(src=itemgetter(0)(arg), dst=itemgetter(1)(arg))
                                 results.append(result)
-                                msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
+                                msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
                             logger.info(msg)
 
                         log.index = 0
@@ -226,7 +226,7 @@ for year in arguments.year:
                             if not arguments.test:
                                 result = rename(src=itemgetter(1)(arg), dst=itemgetter(2)(arg))
                                 results.append(result)
-                                msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
+                                msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
                             logger.info(msg)
 
                     continue
@@ -250,7 +250,7 @@ for year in arguments.year:
                         if not arguments.test:
                             result = rename(src=itemgetter(0)(arg), dst=itemgetter(2)(arg))
                             results.append(result)
-                            msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
+                            msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
                         logger.info(msg)
                 continue
 
@@ -268,7 +268,7 @@ for year in arguments.year:
                     if not arguments.test:
                         result = rename(src=itemgetter(0)(arg), dst=itemgetter(1)(arg))
                         results.append(result)
-                        msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
+                        msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
                     logger.info(msg)
 
                 log.index = 0
@@ -277,7 +277,7 @@ for year in arguments.year:
                     if not arguments.test:
                         result = rename(src=itemgetter(1)(arg), dst=itemgetter(2)(arg))
                         results.append(result)
-                        msg = "{msg} {result}.".format(log=msg, result=RESULTS[result])
+                        msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
                     logger.info(msg)
 
             continue
