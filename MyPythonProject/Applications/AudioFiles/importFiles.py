@@ -17,6 +17,8 @@ import sys
 import os
 import re
 from .. import shared
+# -----
+from mutagen.flac import FLAC
 
 __author__ = 'Xavier ROSSET'
 
@@ -556,30 +558,39 @@ while True:
 
             # --> 2.b. Copy mode.
             elif not arguments.test:
+                logger.debug("Start copying files.")
 
                 for item in args:
                     dst = "{0}{1}".format(os.path.join(item.dirname, item.basename), item.extension)
-                    try:
-                        copy2(src=item.file, dst=dst)
-                    except FileExistsError:
-                        statuss.append(100)
-                        fails.append(dst)
-                    else:
-                        statuss.append(0)
-                        successes.append(dst)
+                    while True:
+                        try:
+                            copy2(src="{0}".format(item.file), dst=dst)
+                        except FileNotFoundError:
+                            logger.debug('"FileNotFound" Error raised. Create "{0}"'.format(os.path.dirname(dst)))
+                            os.makedirs(os.path.dirname(dst))
+                        except FileExistsError:
+                            logger.debug('"FileExists" Error raised.')
+                            statuss.append(100)
+                            fails.append(dst)
+                            break
+                        else:
+                            statuss.append(0)
+                            successes.append(dst)
+                            break
 
+                logger.debug("End copying files.")
                 if successes:
                     logger.debug("----------")
                     logger.debug("Successes.")
                     logger.debug("----------")
                     for num, file in enumerate(successes, 1):
-                        logger.debug(num, file)
+                        logger.debug("{0:>3d}. {1}".format(num, file))
                 if fails:
                     logger.debug("------")
                     logger.debug("Fails.")
                     logger.debug("------")
                     for num, file in enumerate(fails, 1):
-                        logger.debug(num, file)
+                        logger.debug("{0:>3d}. {1}".format(num, file))
 
             # -> 2.c. All commands failed.
             if all(map(ne, statuss, repeat(0))):
@@ -604,13 +615,20 @@ while True:
         code = 99
         tmpl = template1.render(header=nt1(*head))
         if choice.upper() == "Y":
-            # for file in successes:
-            #     try:
-            #         track = ExtendedTrack(file, codecs[index - 1][1])
+            for file in successes:
+                try:
+                    track = FLAC(file)
+                    # track = ExtendedTrack(file, codecs[index - 1][1])
             #     except MutagenError:
             #         pass
             #     else:
             #         track.update(**{"artistsort": mapartist(artists[index - 1][1]), "albumartistsort": mapartist(artists[index - 1][1])})
+                except MutagenError:
+                    pass
+                else:
+                    track["artistsort"] = "Springsteen, Bruce"
+                    track["albumartistsort"] = "Springsteen, Bruce"
+                    track.save()
             code = 99
             tmpl = template1.render(header=nt1(*head))
 
