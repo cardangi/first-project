@@ -555,10 +555,10 @@ while True:
                         try:
                             copy2(src="{0}".format(item.file), dst=dst)
                         except FileNotFoundError:
-                            logger.debug('"FileNotFound" Error raised. Create "{0}"'.format(os.path.dirname(dst)))
-                            os.makedirs(os.path.dirname(dst))
+                            logger.debug('"FileNotFound" error raised. Create "{0}"'.format(item.dirname))
+                            os.makedirs(item.dirname)
                         except FileExistsError:
-                            logger.debug('"FileExists" Error raised.')
+                            logger.debug('"FileExists" error raised.')
                             statuss.append(100)
                             fails.append(dst)
                             break
