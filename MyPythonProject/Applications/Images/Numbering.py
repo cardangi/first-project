@@ -1,5 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
-from itertools import accumulate, repeat
+from itertools import accumulate, repeat, groupby
 from contextlib import contextmanager
 from collections import namedtuple
 from operator import itemgetter
@@ -55,7 +55,7 @@ class ImagesCollection(object):
         collection = list()
         for i in range(1, 13):
             month = "{0}{1:0>2}".format(m, i)
-            if os.path.exists(os.path.normpath(os.path.join(r"H:\\", month))):
+            if os.path.exists(os.path.normpath(os.path.join(r"h:\\", month))):
                 collection.append((month, list(glob.iglob(os.path.normpath(os.path.join(r"h:\\", month, r"*.jpg"))))))
         return collection
 
