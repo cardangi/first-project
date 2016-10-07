@@ -61,8 +61,8 @@ class AudioFiles(MutableSequence):
     def __len__(self):
         return len(self.collection)
 
-    def insert(self, index, value):
-        self.collection.insert(index, value)
+    def insert(self, idx, value):
+        self.collection.insert(idx, value)
 
     @property
     def collection(self):
@@ -73,12 +73,12 @@ class AudioFiles(MutableSequence):
         nt = namedtuple("nt", "artist album codec discnumber tracknumber title file object")
         for arg in psargs:
             try:
-                file = File(arg)
+                fil = File(arg)
             except MutagenError:
                 continue
-            if file:
-                if "audio/flac" in file.mime:
-                    tags = {key.lower(): file[key][0] for key in file}
+            if fil:
+                if "audio/flac" in fil.mime:
+                    tags = {key.lower(): fil[key][0] for key in fil}
                     if "artist" not in tags:
                         continue
                     if "album" not in tags:
@@ -89,7 +89,7 @@ class AudioFiles(MutableSequence):
                         continue
                     if "title" not in tags:
                         continue
-                    self._collection.append(nt(tags["artist"], tags["album"], "FLAC", tags["discnumber"], tags["tracknumber"], tags["title"], os.path.normpath(arg), file))
+                    self._collection.append(nt(tags["artist"], tags["album"], "FLAC", tags["discnumber"], tags["tracknumber"], tags["title"], os.path.normpath(arg), fil))
         self._collection = sorted(sorted(sorted(sorted(sorted(sorted(self._collection, key=self.sortedbytrack), key=self.sortedbydisc), key=self.sortedbycodec), key=self.sortedbyalbum), key=self.sortedbyartist))
 
     @classmethod
@@ -150,6 +150,9 @@ class Track(MutableMapping):
 
     @metadata.setter
     def metadata(self, psarg):
+        year, month, day, location, albumsort, titlesort = 0, 0, 0, "", "", ""
+
+        # Check input tags.
         if "artist" not in psarg:
             raise TagError("artist", "isn\'t available.")
         if "album" not in psarg:
@@ -160,43 +163,26 @@ class Track(MutableMapping):
             raise TagError("discnumber", "isn\'t available.")
         if "tracknumber" not in psarg:
             raise TagError("tracknumber", "isn\'t available.")
+
+        # Initialize dictionnary with input tags.
         self._metadata = {key: psarg[key][0] for key in psarg}
 
-    @property
-    def albumsort(self):
-        return "2.{year}{month:0>2d}{day:0>2d}.1.13".format(year=self.year, month=self.month, day=self.day)
-
-    @property
-    def discnumber(self):
-        return self.metadata["discnumber"]
-
-    @property
-    def titlesort(self):
-        return "D{discnumber}.T{tracknumber:0>2d}.NYY".format(discnumber=self.metadata["discnumber"], tracknumber=int(self.metadata["tracknumber"]))
-
-    @property
-    def year(self):
+        # Update dictionnary with dynamic tags.
         match = self.regex.match(self.metadata["album"])
         if match:
-            return int(match.group(2))
-
-    @property
-    def month(self):
+            year = int(match.group(2))
         match = self.regex.match(self.metadata["album"])
         if match:
-            return int(match.group(3))
-
-    @property
-    def day(self):
+            month = int(match.group(3))
         match = self.regex.match(self.metadata["album"])
         if match:
-            return int(match.group(4))
-
-    @property
-    def location(self):
+            day = int(match.group(4))
         match = self.regex.match(self.metadata["album"])
         if match:
-            return match.group(5)
+            location = match.group(5)
+        albumsort = "2.{year}{month:0>2d}{day:0>2d}.1.13".format(year=year, month=month, day=day)
+        titlesort = "D{discnumber}.T{tracknumber:0>2d}.NYY".format(discnumber=self.metadata["discnumber"], tracknumber=int(self.metadata["tracknumber"]))
+        self._metadata.update(list(zip(("year", "month", "day", "location", "albumsort", "titlesort"), (year, month, day, location, albumsort, titlesort))))
 
 
 # ==========
@@ -303,7 +289,7 @@ template2 = Template(r"F:\S\Springsteen, Bruce\2\$year\$month.$day - $location\C
 # ==========
 # Constants.
 # ==========
-CURWDIR, TABSIZE1, TABSIZE2 = os.path.join(os.path.expandvars("%_MYMUSIC%"), r"Bruce Springsteen & The E Street Band"), 10, 4
+CURWDIR, TABSIZE1, TABSIZE2 = os.path.expandvars("%_MYMUSIC%"), 10, 4
 
 
 # ==================
@@ -457,17 +443,17 @@ while True:
             tmpl = template1.render(header=nt1(*head), list1=kcodecs)
         sources, extensions = [itemgetter(6)(item) for item in codecs[index - 1][1]], [os.path.splitext(itemgetter(6)(item))[1] for item in codecs[index - 1][1]]
         files = [nt2(a, b, c, d) for a, (b, c), d in list(zip(sources,
-                                                              [(template2.substitute(year=track.year,
-                                                                                     month="{0:0>2d}".format(track.month),
-                                                                                     day="{0:0>2d}".format(track.day),
-                                                                                     location=track.location,
-                                                                                     disc=track.discnumber),
-                                                                "{0}.{1}".format(track.albumsort, track.titlesort)) for track in map(getattributes, [itemgetter(7)(item) for item in codecs[index - 1][1]])
+                                                              [(template2.substitute(year=track["year"],
+                                                                                     month="{0:0>2d}".format(track["month"]),
+                                                                                     day="{0:0>2d}".format(track["day"]),
+                                                                                     location=track["location"],
+                                                                                     disc=track["discnumber"]),
+                                                                "{0}.{1}".format(track["albumsort"], track["titlesort"])) for track in map(getattributes, [itemgetter(7)(item) for item in codecs[index - 1][1]])
                                                                if track],
                                                               extensions
                                                               )
                                                           )
-                    ]
+                 ]
         logger.debug("------")
         logger.debug("Files.")
         logger.debug("------")
