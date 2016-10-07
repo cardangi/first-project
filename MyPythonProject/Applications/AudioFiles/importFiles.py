@@ -4,6 +4,7 @@ from jinja2 import Environment, FileSystemLoader
 from mutagen import File, MutagenError
 from itertools import groupby, repeat
 from operator import itemgetter, ne
+from mutagen.flac import FLAC
 from datetime import datetime
 from string import Template
 from functools import wraps
@@ -150,7 +151,7 @@ class Track(MutableMapping):
 
     @metadata.setter
     def metadata(self, psarg):
-        year, month, day, location, albumsort, titlesort = 0, 0, 0, "", "", ""
+        year, month, day, location, albumsort, titlesort, code = 0, 0, 0, "", "", "", 0
 
         # Check input tags.
         if "artist" not in psarg:
@@ -168,6 +169,8 @@ class Track(MutableMapping):
         self._metadata = {key: psarg[key][0] for key in psarg}
 
         # Update dictionnary with dynamic tags.
+        if isinstance(psarg, FLAC):
+            code = 13
         match = self.regex.match(self.metadata["album"])
         if match:
             year = int(match.group(2))
@@ -180,7 +183,7 @@ class Track(MutableMapping):
         match = self.regex.match(self.metadata["album"])
         if match:
             location = match.group(5)
-        albumsort = "2.{year}{month:0>2d}{day:0>2d}.1.13".format(year=year, month=month, day=day)
+        albumsort = "2.{year}{month:0>2d}{day:0>2d}.1.{code:0>2d}".format(year=year, month=month, day=day, code=code)
         titlesort = "D{discnumber}.T{tracknumber:0>2d}.NYY".format(discnumber=self.metadata["discnumber"], tracknumber=int(self.metadata["tracknumber"]))
         self._metadata.update(list(zip(("year", "month", "day", "location", "albumsort", "titlesort"), (year, month, day, location, albumsort, titlesort))))
 
