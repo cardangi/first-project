@@ -1,7 +1,7 @@
 # -*- coding: ISO-8859-1 -*-
-from itertools import accumulate, repeat, groupby
+from collections import namedtuple, MutableSequence
+from itertools import accumulate, repeat
 from contextlib import contextmanager
-from collections import namedtuple
 from operator import itemgetter
 from datetime import datetime
 from pytz import timezone
@@ -19,31 +19,40 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Classes.
 # ========
-class ImagesCollection(object):
+class ImagesCollection(MutableSequence):
 
     def __init__(self, ccyy):
-        self._year = ""
-        self._index = 0
-        self.year = ccyy
+        self._collection = list()
+        self.collection = ccyy
+
+    def __getitem__(self, item):
+        return self.collection[item]
+
+    def __setitem__(self, key, value):
+        self.collection[key] = value
+
+    def __delitem__(self, key):
+        del self.collection[key]
+
+    def __len__(self):
+        return len(self.collection)
+
+    def insert(self, index, value):
+        self.collection.insert(index, value)
 
     @property
-    def year(self):
-        return self._year
+    def collection(self):
+        return self._collection
 
-    @year.setter
-    def year(self, psarg):
+    @collection.setter
+    def collection(self, psarg):
         value = str(psarg)
         if not re.match(r"^(?=\d{4})20[0-2]\d$", value):
             raise ValueError('"{0}" is not a valid year'.format(psarg))
-        self._year = value
-
-    @property
-    def keys(self):
-        return sorted(dict(self.func3(self.year)).keys(), key=int)
-
-    @property
-    def values(self):
-        return list(accumulate(self.func1(self.func2(dict(self.func3(self.year))))))
+        months = sorted(dict(self.func3(psarg)).keys(), key=int)
+        totals = sorted(accumulate(self.func1(self.func2(dict(self.func3(psarg))))))
+        totals.insert(0, 1)
+        self._collection = list(zip(months, map(list, self.func0(totals))))
 
     @staticmethod
     def func3(m):
@@ -71,22 +80,22 @@ class ImagesCollection(object):
     @staticmethod
     def func1(d):
         """
-        Return [100, 200].
+        Return [1, 100, 200].
         :param d: dictionnary of files grouped by month.
         :return: counts list.
         """
         return [d[k] for k in sorted(d, key=int)]
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        self._index += 1
-        if self._index > len(self.values):
-            raise StopIteration
-        if self._index == 1:
-            return self.keys[self._index - 1], list(range(1, self.values[self._index - 1] + 1))
-        return self.keys[self._index - 1], list(range(self.values[self._index - 2] + 1, self.values[self._index - 1] + 1))
+    @staticmethod
+    def func0(l):
+        y = (item for item in l)
+        i = next(y, False)
+        while i:
+            j = next(y, False)
+            if not j:
+                break
+            yield range(i, j + 1)
+            i = j + 1
 
 
 class Log(object):
@@ -190,21 +199,21 @@ logger.info(MODES[arguments.test].upper())
 # ===============
 for year in arguments.year:
     try:
-        obj = ImagesCollection(year)
+        collection = ImagesCollection(year)
     except ValueError as exception:
         logger.info("Value error: {0}.".format(exception))
     else:
-        for key, ranges in obj:
-            curdir = os.path.normpath(os.path.join(r"h:\\", key))
-            files = sorted(glob.glob(os.path.normpath(os.path.join(r"h:\\", key, r"*.jpg"))))
-            args = list(zip(map(os.path.basename, files), map(func2, files), map(func3, repeat(key), ranges)))
+        for keys, values in collection:
+            curdir = os.path.normpath(os.path.join(r"h:\\", keys))
+            files = sorted(glob.glob(os.path.normpath(os.path.join(r"h:\\", keys, r"*.jpg"))))
+            args = list(zip(map(os.path.basename, files), map(func2, files), map(func3, repeat(keys), values)))
 
             #    -------------------------------------------------------------------
             # 1. Tous les fichiers du répertoire répondent au masque "CCYYMM_xxxxx".
             #    -------------------------------------------------------------------
             if all([i.match for i in map(func1, map(os.path.basename, files))]):
                 try:
-                    assert [int(i.sequence) for i in map(func1, map(os.path.basename, files))] == ranges
+                    assert [int(i.sequence) for i in map(func1, map(os.path.basename, files))] == values
                 except AssertionError:
                     msg = '"{0}": renaming needed.'.format(curdir)
                     with logdecorator(msg):
