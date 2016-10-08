@@ -91,31 +91,20 @@ class AudioFiles(MutableSequence):
                     if "title" not in tags:
                         continue
                     self._collection.append(nt(tags["artist"], tags["album"], "FLAC", tags["discnumber"], tags["tracknumber"], tags["title"], os.path.normpath(arg), fil))
-        self._collection = sorted(sorted(sorted(sorted(sorted(sorted(self._collection, key=self.sortedbytrack), key=self.sortedbydisc), key=self.sortedbycodec), key=self.sortedbyalbum), key=self.sortedbyartist))
+        self._collection = \
+            sorted(
+                sorted(
+                    sorted(
+                        sorted(
+                            sorted(self._collection, key=lambda t: t.tracknumber.zfill(2)),
+                            key=lambda t: t.discnumber),
+                        key=lambda t: t.codec),
+                    key=lambda t: t.album),
+                key=lambda t: t.artist)
 
     @classmethod
     def fromfolder(cls, *psargs, folder):
         return cls(*list(shared.filesinfolder(*psargs, folder=folder)))
-
-    @staticmethod
-    def sortedbytrack(t):
-        return t.tracknumber.zfill(2)
-
-    @staticmethod
-    def sortedbydisc(t):
-        return t.discnumber
-
-    @staticmethod
-    def sortedbycodec(t):
-        return t.codec
-
-    @staticmethod
-    def sortedbyalbum(t):
-        return t.album
-
-    @staticmethod
-    def sortedbyartist(t):
-        return t.artist
 
 
 class Track(MutableMapping):
