@@ -211,8 +211,12 @@ def getattributes(obj):
     return tags
 
 
+def mapartistsort(art):
+    return ARTISTSORT.get(art.lower(), art)
+
+
 def mapartist(art):
-    return ARTISTS.get(art.lower(), art)
+    return ARTIST.get(art.lower(), art)
 
 
 # ==========
@@ -274,7 +278,9 @@ template2 = Template(r"F:\S\Springsteen, Bruce\2\$year\$month.$day - $location\C
 # ==========
 # Constants.
 # ==========
-CURWDIR, TABSIZE1, TABSIZE2, ARTISTS = os.path.expandvars("%_MYMUSIC%"), 10, 4, {"bruce springsteen & the e street band": "Springsteen, Bruce"}
+CURWDIR, TABSIZE1, TABSIZE2, ARTIST, ARTISTSORT = os.path.expandvars("%_MYMUSIC%"), 10, 4, \
+                                                  {"bruce springsteen & the e street band": "Bruce Springsteen"}, \
+                                                  {"bruce springsteen & the e street band": "Springsteen, Bruce"}
 
 
 # ==================
@@ -289,7 +295,7 @@ header, artists, albums, codecs, discs, files, successes, args, index, code, sta
 # ==================
 justify, nt1, nt2, = "".join(list(repeat("\n", 3))), \
                      namedtuple("nt1", "maintitle step title"), \
-                     namedtuple("nt2", "artistsort albumsort titlesort discnumber totaldiscs tracknumber totaltracks destination type")
+                     namedtuple("nt2", "artistsort albumsort titlesort discnumber totaldiscs tracknumber totaltracks destination type artist albumartist albumartistsort title")
 
 
 # ===============
@@ -301,7 +307,7 @@ while True:
     #  1. Grab available artists from current directory.
     #     ----------------------------------------------
     if code == 1:
-        header = shared.Header("import  audio  files", ["Set current directory.", "Set artist.", "Set album", "Set codec", "Import files.", "Run import.", "Tag files", "Exit program."])
+        header = shared.Header("import  audio  files", ["Set current directory.", "Set artist.", "Set album.", "Set codec.", "Import files.", "Run import.", "Tag files.", "Exit program."])
         head = header()
         tmpl = template1.render(header=nt1(*head), message=['Current directory is: "{0}"'.format(CURWDIR)])
         successes = list()
@@ -439,7 +445,7 @@ while True:
             track = getattributes(item.object)
             if track:
                 files.append((item.file,
-                              nt2(mapartist(kartists[index - 1]),
+                              nt2(mapartistsort(kartists[index - 1]),
                                   track["albumsort"],
                                   track["titlesort"],
                                   track["discnumber"],
@@ -452,12 +458,16 @@ while True:
                                                                     location=track["location"],
                                                                     disc=track["discnumber"]),
                                                "{0}.{1}{2}".format(track["albumsort"], track["titlesort"], os.path.splitext(item.file)[1])),
-                                  item.type
+                                  item.type,
+                                  mapartist(kartists[index - 1]),
+                                  mapartist(kartists[index - 1]),
+                                  mapartistsort(kartists[index - 1]),
+                                  track["title"]
                                   )
                               ))
         files = dict(files)
 
-        # 4.c. Log variables.
+        # 4.c. Log data structures.
         logger.debug("------------")
         logger.debug("Found discs.")
         logger.debug("------------")
@@ -470,13 +480,16 @@ while True:
         logger.debug("------------")
         for num, item in enumerate(sorted(files), 1):
             logger.debug("{0:>3d}. {1}".format(num, item))
-            logger.debug("\t{0}".format(files[item].artistsort).expandtabs(5))
-            logger.debug("\t{0}".format(files[item].albumsort).expandtabs(5))
-            logger.debug("\t{0}".format(files[item].titlesort).expandtabs(5))
-            logger.debug("\t{0}".format(files[item].discnumber).expandtabs(5))
-            logger.debug("\t{0}".format(files[item].totaldiscs).expandtabs(5))
-            logger.debug("\t{0}".format(files[item].tracknumber).expandtabs(5))
-            logger.debug("\t{0}".format(files[item].totaltracks).expandtabs(5))
+            logger.debug("\tartistsort\t: {0}".format(files[item].artistsort).expandtabs(5))
+            logger.debug("\talbumartistsort: {0}".format(files[item].albumartistsort).expandtabs(5))
+            logger.debug("\tartist\t\t: {0}".format(files[item].artist).expandtabs(5))
+            logger.debug("\talbumartist\t: {0}".format(files[item].albumartist).expandtabs(5))
+            logger.debug("\ttitlesort\t\t: {0}".format(files[item].titlesort).expandtabs(5))
+            logger.debug("\tdiscnumber\t: {0}".format(files[item].discnumber).expandtabs(5))
+            logger.debug("\ttotaldiscs\t: {0}".format(files[item].totaldiscs).expandtabs(5))
+            logger.debug("\ttracknumber\t: {0}".format(files[item].tracknumber).expandtabs(5))
+            logger.debug("\ttotaltracks\t: {0}".format(files[item].totaltracks).expandtabs(5))
+            logger.debug("\ttitle\t\t: {0}".format(files[item].title).expandtabs(5))
         logger.debug("---------------")
         logger.debug("Copy arguments.")
         logger.debug("---------------")
@@ -486,7 +499,8 @@ while True:
 
         # 4.d. Initialize next screen.
         head = header()
-        code = 5
+        # code = 5
+        code = 99
         tmpl = template1.render(header=nt1(*head),
                                 list2=[
                                     (
@@ -538,6 +552,7 @@ while True:
         # --> 2. Run import.
         elif choice.upper() == "Y":
 
+            # --> 2.a. Log data structures.
             logger.debug("---------------------------")
             logger.debug("Accumulated copy arguments.")
             logger.debug("---------------------------")
@@ -545,34 +560,37 @@ while True:
                 logger.debug("{0:>3d}. Source     : {1}".format(num, item))
                 logger.debug("\tDestination: {0}".format(args[item].destination).expandtabs(5))
 
-            # --> 2.a. Test mode.
+            # --> 2.b. Test mode.
             head = shared.Header("import  audio  files", ["Exit program."], 7)()
             code = 99
             tmpl = template1.render(header=nt1(*head))
 
-            # --> 2.b. Copy mode.
+            # --> 2.c. Copy mode.
             if not arguments.test:
-                logger.debug("Start copying files.")
 
+                # --> 2.c.1. Copy files.
+                logger.debug("Start copying files.")
                 for item in sorted(args):
                     while True:
                         try:
                             copy2(src=item, dst=args[item].destination)
                         except FileNotFoundError:
-                            logger.debug('"FileNotFound" error raised. Create "{0}"'.format(os.path.dirname(args[item].destination)))
                             os.makedirs(os.path.dirname(args[item].destination))
+                            logger.debug('"FileNotFound" error raised. Create "{0}"'.format(os.path.dirname(args[item].destination)))
                         except FileExistsError:
-                            logger.debug('"FileExists" error raised.')
                             statuss.append(100)
                             fails.append(item)
+                            logger.debug('"FileExists" error raised when tried to copy "{0}".'.format(args[item].destination))
                             break
                         else:
                             statuss.append(0)
                             successes.append((args[item].destination, item))
+                            logger.debug('"{0}" copied.'.format(args[item].destination))
                             break
                 successes = dict(successes)
-
                 logger.debug("End copying files.")
+
+                # --> 2.c.2. Log results.
                 if successes:
                     logger.debug("----------")
                     logger.debug("Successes.")
@@ -586,13 +604,13 @@ while True:
                     for num, item in enumerate(fails, 1):
                         logger.debug("{0:>3d}. {1}".format(num, item))
 
-                # --> 2.b.1 At least one command succeeded.
+                # --> 2.c.3. Tag copied files if at least one copy command succeeded.
                 head = header()
                 code = 99
                 # code = 7
                 tmpl = template1.render(header=nt1(*head))
 
-                # -> 2.b.2. All commands failed.
+                # --> 2.c.4. Exit program if all copy commands failed.
                 if all(map(ne, statuss, repeat(0))):
                     head = shared.Header("import  audio  files", ["Exit program."], 7)()
                     code = 99
@@ -607,7 +625,8 @@ while True:
             choice = input("{0}\tWould you like to tag copied files [Y/N]? ".format(justify).expandtabs(TABSIZE1))
             if choice.upper() in shared.ACCEPTEDANSWERS:
                 break
-        head = shared.Header("import  audio  files", ["Exit program."], 8)()
+        # head = shared.Header("import  audio  files", ["Exit program."], 8)()
+        head = header()
         code = 99
         tmpl = template1.render(header=nt1(*head))
         if choice.upper() == "Y":
@@ -619,17 +638,19 @@ while True:
                 else:
                     track.update([
                         ("artistsort", files[successes[file]].artistsort),
-                        ("albumartistsort", files[successes[file]].artistsort),
+                        ("albumartistsort", files[successes[file]].albumartistsort),
                         ("albumsort", files[successes[file]].albumsort),
                         ("titlesort", files[successes[file]].titlesort),
                         ("taggingtime", shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3)),
                         ("source", "CD (Lossless)"),
                         ("disctotal", files[successes[file]].totaldiscs),
-                        ("tracktotal", files[successes[file]].totaltracks)
+                        ("tracktotal", files[successes[file]].totaltracks),
+                        ("artist", files[successes[file]].artist),
+                        ("albumartist", files[successes[file]].albumartist)
                     ])
                     track.save()
-            code = 99
-            tmpl = template1.render(header=nt1(*head))
+            # code = 99
+            # tmpl = template1.render(header=nt1(*head))
 
     #     -------------
     #  8. Exit program.
