@@ -88,10 +88,10 @@ class ImagesCollection(MutableSequence):
 
     @staticmethod
     def func0(l):
-        y = (item for item in l)
-        i = next(y, False)
+        it = iter(l)
+        i = next(it, False)
         while i:
-            j = next(y, False)
+            j = next(it, False)
             if not j:
                 break
             yield range(i, j + 1)
@@ -209,7 +209,7 @@ for year in arguments.year:
             args = list(zip(map(os.path.basename, files), map(func2, files), map(func3, repeat(keys), values)))
 
             #    -------------------------------------------------------------------
-            # 1. Tous les fichiers du répertoire répondent au masque "CCYYMM_xxxxx".
+            # 1. Tous les fichiers du rÃ©pertoire rÃ©pondent au masque "CCYYMM_xxxxx".
             #    -------------------------------------------------------------------
             if all([i.match for i in map(func1, map(os.path.basename, files))]):
                 try:
@@ -246,7 +246,7 @@ for year in arguments.year:
                 continue
 
             #    ---------------------------------------------------------------
-            # 2. Aucun fichier du répertoire ne répond au masque "CCYYMM_xxxxx".
+            # 2. Aucun fichier du rÃ©pertoire ne rÃ©pond au masque "CCYYMM_xxxxx".
             #    ---------------------------------------------------------------
             if all([not i.match for i in map(func1, map(os.path.basename, files))]):
                 msg = '"{0}": renaming needed.'.format(curdir)
@@ -264,7 +264,7 @@ for year in arguments.year:
                 continue
 
             #    ------------------------------------------------------------------
-            # 3. Au moins un fichier du répertoire répond au masque "CCYYMM_xxxxx".
+            # 3. Au moins un fichier du rÃ©pertoire rÃ©pond au masque "CCYYMM_xxxxx".
             #    ------------------------------------------------------------------
             msg = '"{0}": renaming needed.'.format(curdir)
             with logdecorator(msg):
