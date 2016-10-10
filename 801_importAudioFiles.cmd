@@ -25,14 +25,9 @@ REM ===============
 :START
 IF EXIST %_xxcopy% DEL %_xxcopy%
 PUSHD %_PYTHONPROJECT%
-python -m Applications.AudioFiles.importFiles "flac"
+python -m Applications.AudioFiles.importFiles --test
 IF ERRORLEVEL 1 (
     GOTO EXIT
-)
-IF EXIST "%_xxcopy%" (
-    FOR /F usebackq^ delims^= %%i IN ("%_xxcopy%") DO (
-        %%i
-    )
 )
 
 :EXIT
