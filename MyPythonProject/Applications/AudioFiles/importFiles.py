@@ -219,6 +219,21 @@ def mapartist(art):
     return ARTIST.get(art.lower(), art)
 
 
+def maplanguage(art):
+    return LANGUAGES.get(art.lower(), "English")
+
+
+def log1(s, char="-"):
+    logger.debug(char*len(s))
+    yield s
+    logger.debug(char*len(s))
+
+
+def log2(iterable):
+    for numb, item in enumerate(iterable, 1):
+        yield "{0:>3d}. {1}".format(numb, item)
+
+
 # ==========
 # Arguments.
 # ==========
@@ -278,9 +293,10 @@ template2 = Template(r"F:\S\Springsteen, Bruce\2\$year\$month.$day - $location\C
 # ==========
 # Constants.
 # ==========
-CURWDIR, TABSIZE1, TABSIZE2, ARTIST, ARTISTSORT = os.path.expandvars("%_MYMUSIC%"), 10, 4, \
-                                                  {"bruce springsteen & the e street band": "Bruce Springsteen"}, \
-                                                  {"bruce springsteen & the e street band": "Springsteen, Bruce"}
+CURWDIR, TABSIZE1, TABSIZE2, ARTIST, ARTISTSORT, LANGUAGES = os.path.expandvars("%_MYMUSIC%"), 10, 4, \
+                                                             {"bruce springsteen & the e street band": "Bruce Springsteen"}, \
+                                                             {"bruce springsteen & the e street band": "Springsteen, Bruce"}, \
+                                                             {"bruce springsteen & the e street band": "English"}
 
 
 # ==================
@@ -295,7 +311,7 @@ header, artists, albums, codecs, discs, files, successes, args, index, code, sta
 # ==================
 justify, nt1, nt2, = "".join(list(repeat("\n", 3))), \
                      namedtuple("nt1", "maintitle step title"), \
-                     namedtuple("nt2", "artistsort albumsort titlesort discnumber totaldiscs tracknumber totaltracks destination type artist albumartist albumartistsort title")
+                     namedtuple("nt2", "artistsort albumsort titlesort discnumber totaldiscs tracknumber totaltracks destination type artist albumartist albumartistsort title titlelanguage object")
 
 
 # ===============
@@ -343,11 +359,10 @@ while True:
             head = shared.Header("import  audio  files", ["Exit program."], 2)()
             code = 99
             tmpl = template1.render(header=nt1(*head), message=["No artists found."])
-        logger.debug("--------------")
-        logger.debug("Found artists.")
-        logger.debug("--------------")
-        for num, artist in enumerate(kartists, 1):
-            logger.debug("{0:>3d}. {1}".format(num, artist))
+        with log1("Found artists.") as title:
+            logger.debug(title)
+        for artist in log2(kartists):
+            logger.debug(artist)
 
     #     ----------------------------------
     #  2. Grab available albums from artist.
@@ -377,11 +392,10 @@ while True:
             head = shared.Header("import  audio  files", ["Exit program."], 3)()
             code = 99
             tmpl = template1.render(header=nt1(*head), message=['No albums found.'])
-        logger.debug("-------------")
-        logger.debug("Found albums.")
-        logger.debug("-------------")
-        for num, album in enumerate(kalbums, 1):
-            logger.debug("{0:>3d}. {1}".format(num, album))
+        with log1("Found albums.") as title:
+            logger.debug(title)
+        for album in log2(kalbums):
+            logger.debug(album)
 
     #     ---------------------------------
     #  3. Grab available codecs from album.
@@ -411,11 +425,10 @@ while True:
             head = shared.Header("import  audio  files", ["Exit program."], 4)()
             code = 99
             tmpl = template1.render(header=nt1(*head), message=['No codecs found.'])
-        logger.debug("-------------")
-        logger.debug("Found codecs.")
-        logger.debug("-------------")
-        for num, codec in enumerate(kcodecs, 1):
-            logger.debug("{0:>3d}. {1}".format(num, codec))
+        with log1("Found codecs.") as title:
+            logger.debug(title)
+        for codec in log2(codecs):
+            logger.debug(codec)
 
     #     --------------------------------
     #  4. Grab available files from codec.
@@ -462,24 +475,39 @@ while True:
                                   mapartist(kartists[index - 1]),
                                   mapartist(kartists[index - 1]),
                                   mapartistsort(kartists[index - 1]),
-                                  track["title"]
+                                  track["title"],
+                                  maplanguage(kartists[index - 1]),
+                                  item.object
                                   )
                               ))
         files = dict(files)
 
         # 4.c. Log data structures.
-        logger.debug("------------")
-        logger.debug("Found discs.")
-        logger.debug("------------")
+
+        # -----
+        with log1("Found discs.") as title:
+            logger.debug(title)
         for num1, item1 in enumerate(sorted(discs), 1):
             logger.debug("{0:>3d}. CD {1}.".format(num1, item1))
             for num2, item2 in enumerate(sorted(discs[item1]), 1):
                 logger.debug("\t{0:>3d}.{1:0>2d}. {2}".format(num1, num2, item2.file).expandtabs(3))
-        logger.debug("------------")
-        logger.debug("Found files.")
-        logger.debug("------------")
-        for num, item in enumerate(sorted(files), 1):
-            logger.debug("{0:>3d}. {1}".format(num, item))
+
+        # -----
+        with log1("Found files.") as title:
+            logger.debug(title)
+        for file in log2(sorted(files)):
+            logger.debug(file)
+
+            # -----
+        with log1("Found tags.") as title:
+            logger.debug(title)
+        for file in log2(sorted(files)):
+            logger.debug(file)
+            for tag in "".join(list(files[item].object.pprint())).splitlines():
+                logger.debug("\t{0}".format(tag).expandtabs(5))
+
+            logger.debug("")
+            logger.debug("\tActual tags.".expandtabs(5))
             logger.debug("\tartistsort\t: {0}".format(files[item].artistsort).expandtabs(5))
             logger.debug("\talbumartistsort: {0}".format(files[item].albumartistsort).expandtabs(5))
             logger.debug("\tartist\t\t: {0}".format(files[item].artist).expandtabs(5))
@@ -490,6 +518,12 @@ while True:
             logger.debug("\ttracknumber\t: {0}".format(files[item].tracknumber).expandtabs(5))
             logger.debug("\ttotaltracks\t: {0}".format(files[item].totaltracks).expandtabs(5))
             logger.debug("\ttitle\t\t: {0}".format(files[item].title).expandtabs(5))
+        logger.debug("---------------")
+        logger.debug("Available tags.")
+        logger.debug("---------------")
+        for num, item in enumerate(sorted(files), 1):
+            logger.debug("{0:>3d}. {1}".format(num, item))
+
         logger.debug("---------------")
         logger.debug("Copy arguments.")
         logger.debug("---------------")
@@ -646,7 +680,8 @@ while True:
                         ("disctotal", files[successes[file]].totaldiscs),
                         ("tracktotal", files[successes[file]].totaltracks),
                         ("artist", files[successes[file]].artist),
-                        ("albumartist", files[successes[file]].albumartist)
+                        ("albumartist", files[successes[file]].albumartist),
+                        ("titlelanguage", files[successes[file]].titlelanguage)
                     ])
                     track.save()
             # code = 99
