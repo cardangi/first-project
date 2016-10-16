@@ -524,7 +524,7 @@ def canfilebeprocessed(fe, *tu):
     fe: file extension.
     tu: filtered extensions tuple.
     """
-    if fe.lower() not in ["flac", "m4a", "mp3", "ogg"]:
+    if fe.lower() not in ["ape", "flac", "m4a", "mp3", "ogg"]:
         return False
     if not tu:
         return True

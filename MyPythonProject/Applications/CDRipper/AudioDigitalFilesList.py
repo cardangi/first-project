@@ -164,6 +164,8 @@ if artists:
 #  7. XML Output.
 #     -----------
 root = ElementTree.Element("Data", attrib=dict(css="firstcss.css"))
+se = ElementTree.SubElement(root, "Updated")
+se.text = s1.now()
 if lista:
     se = ElementTree.SubElement(root, "Files")
     for item1, item2, item3 in lista:
