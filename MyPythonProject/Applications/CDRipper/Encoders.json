@@ -22,5 +22,11 @@
         "folder": "1.Monkey's Audio",
         "name": "Monkeys Audio v4.12",
         "extension": "ape"
+    },
+    {
+        "code": "01",
+        "folder": "0.MPEG 1 Layer III",
+        "name": "Lame 3.99.5",
+        "extension": "mp3"
     }
 ]
