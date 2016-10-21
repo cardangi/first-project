@@ -56,13 +56,13 @@ exists, join, expandvars, missingattribute = os.path.exists, os.path.join, os.pa
 # ==========
 # Constants.
 # ==========
-JSON = join(expandvars("%TEMP%"), "tags.json")
+JSON, DABJSON = join(expandvars("%TEMP%"), "tags.json"), join(expandvars("%TEMP%"), "digitalaudiodatabase.json")
 
 
 # ==========
 # Variables.
 # ==========
-NewRippedCD, fo, encoding, obj, regex, arguments = None, None, None, [], re.compile(s2.DFTPATTERN), parser.parse_args()
+NewRippedCD, fo, encoding, obj, dab, regex, arguments = None, None, None, [], [], re.compile(s2.DFTPATTERN), parser.parse_args()
 
 
 # ===================
@@ -115,15 +115,20 @@ if exists(arguments.tagsfile) and arguments.rippingprofile.lower() in s2.PROFILE
     if arguments.rippingprofile.lower() == s2.PROFILES[0]:
         NewRippedCD = s2.DefaultCD.fromfile(arguments.tagsfile, s1.UTF16)
 
-        #          같같같같같같같같같같같�
+        #          째째째째째째째째째째째째째째째째째째째째째째째
         # ----- 1. Digital audio database.
-        #          같같같같같같같같같같같�
-        with open(join(expandvars("%TEMP%"), "digitalaudiodatabase"), mode=s1.APPEND, encoding=s1.DFTENCODING) as fw:
-            fw.write("{0}\n".format(audiodatabase.render(headers=[], rippedcd=NewRippedCD)))
+        #          째째째째째째째째째째째째째째째째째째째째째째째
+        if exists(DABJSON):
+            with open(DABJSON) as fp:
+                dab = json.load(fp)
+            dab = [tuple(item) for item in dab]
+        dab.append(tuple(NewRippedCD.digitalaudiobase()))
+        with open(JSON, s1.WRITE) as fp:
+            json.dump(sorted(dab, key=itemgetter(0)), fp, indent=4, sort_keys=True)
 
-        #          같같같같같같같같같같같같같
+        #          째째째째째째째째째째째째째째째째째째째째째째째째째째
         # ----- 2. Audio CD ripping database.
-        #          같같같같같같같같같같같같같
+        #          째째째째째째째째째째째째째째째째째째째째째째째째째째
         with open(join(expandvars("%TEMP%"), "rippingdatabase"), mode=s1.APPEND, encoding=s1.DFTENCODING) as fw:
             fw.write("{0}\n".format(rippinglog.render(detail=list((NewRippedCD.artist, NewRippedCD.year, NewRippedCD.album, NewRippedCD.genre, NewRippedCD.upc, NewRippedCD.albumsort[:-3], NewRippedCD.tracknumber,
                                                                    NewRippedCD.encoder, NewRippedCD.artistsort)))))
@@ -150,7 +155,7 @@ if exists(arguments.tagsfile) and arguments.rippingprofile.lower() in s2.PROFILE
     # --> Log output tags.
     #     ----------------
     logger.debug("Output tags.")
-    for k, v in NewRippedCD:
+    for k, v in NewRippedCD.items():
         logger.debug("\t{0}={1}".format(k, v).expandtabs(4))
 
     #     -----------------
@@ -171,7 +176,7 @@ if exists(arguments.tagsfile) and arguments.rippingprofile.lower() in s2.PROFILE
     if exists(JSON):
         with open(JSON) as fp:
             obj = json.load(fp)
-    obj.append({key: NewRippedCD[key] for key in NewRippedCD.keys()})
+    obj.append({key: NewRippedCD[key] for key in NewRippedCD})
     with open(JSON, s1.WRITE) as fp:
         json.dump(obj, fp, indent=4, sort_keys=True)
 
