@@ -42,105 +42,106 @@ logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 # ========
 # Classes.
 # ========
-class AudioCD:
-    itags = ["artist", "title", "track", "disc", "upc", "profile", "source", "incollection", "titlelanguage", "genre", "artistsort", "albumartist", "albumartistsort", "_albumart_1_front album cover", "style",
-             "encoder"]
-    otags = ["artist", "title", "track", "disc", "upc", "profile", "source", "incollection", "titlelanguage", "genre", "artistsort", "albumartist", "albumartistsort", "_albumart_1_front album cover", "style",
-             "encodedby", "taggingtime", "encodingtime"]
+# http://stackoverflow.com/questions/31909094/overriding-an-inherited-property-setter
+class AudioCD(MutableMappings):
+    itags = ["artist", "title", "track", "disc", "upc", "profile", "source", "incollection", "titlelanguage", "genre", "artistsort", "albumartist", "albumartistsort", "_albumart_1_front album cover", "style"]
+             # "encoder"]
+    # otags = ["artist", "title", "track", "disc", "upc", "profile", "source", "incollection", "titlelanguage", "genre", "artistsort", "albumartist", "albumartistsort", "_albumart_1_front album cover", "style",
+             # "encodedby", "taggingtime", "encodingtime", "encodingyear"]
 
     def __getitem__(self, itm):
-        return self.tags[itm]
+        return self.otags[itm]
 
-    def __init__(self, **kwargs):
+    def __setitem__(self, key, value):
+        return self.otags[key] = value
 
-        self.tags = {}
-
-        # ----- Attributes taken from the input file.
-        for i in AudioCD.itags:
-            if i in kwargs:
-                setattr(self, i, kwargs[i])
-
-        # ----- Attributes initialized with "N".
-        for i in ["bonus"]:
-            setattr(self, i, "N")
-
-        # ----- Encodedby.
-        self.encodedby = "dBpoweramp 15.1 on {0}".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3))
-
-        # ----- Taggingtime.
-        self.taggingtime = shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3)
-
-        # ----- Encodingtime.
-        self.encodingtime = int(datetime.now(tz=timezone(shared.DFTTIMEZONE)).timestamp())
-        self.encodingyear = datetime.now(tz=timezone(shared.DFTTIMEZONE)).strftime("%Y")
-
-        # ----- Encoder attributes.
-        if not missingattribute(self, "encoder"):
-            for encoder in self.deserialize(ENCODERS):  # "encoder" est un dictionnaire.
-                if sorted(list(encoder.keys())) == sorted(ENC_KEYS):
-                    if self.encoder == encoder["name"]:
-                        self.encodercode = encoder["code"]
-                        self.encoderfold = encoder["folder"]
-                        self.encoderexte = encoder["extension"]
-                        break
-        logger.debug("Used encoder.")
-        if not missingattribute(self, "encoder"):
-            logger.debug("\t%s".expandtabs(4) % ("Name\t: %s".expandtabs(9) % (self.encoder,)),)
-        if not missingattribute(self, "encodercode"):
-            logger.debug("\t%s".expandtabs(4) % ("Code\t: %s".expandtabs(9) % (self.encodercode,)),)
-        if not missingattribute(self, "encoderfold"):
-            logger.debug("\t%s".expandtabs(4) % ("Folder\t: %s".expandtabs(9) % (self.encoderfold,)),)
-        if not missingattribute(self, "encoderexte"):
-            logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (self.encoderexte,)),)
-
-        # ----- Tracknumber / Totaltracks.
-        if not missingattribute(self, "track"):
-            self.tracknumber, self.totaltracks = self.splitfield(self.track, r"^(\d{1,2})/(\d{1,2})")
-
-        # ----- Discnumber / Totaldiscs.
-        if not missingattribute(self, "disc"):
-            self.discnumber, self.totaldiscs = self.splitfield(self.disc, r"^(\d{1,2})/(\d{1,2})")
-
-        # ----- Genre.
-        if not missingattribute(self, "artist"):
-            for artist, genre in self.deserialize(GENRES):
-                if self.artist.lower() == artist.lower():
-                    self.genre = genre
-                    break
-
-        # ----- Titlelanguage.
-        if not missingattribute(self, "artist"):
-            for artist, language in self.deserialize(LANGUAGES):
-                if self.artist.lower() == artist.lower():
-                    self.language = language
-                    break
-
-        # ----- Title.
-        if not missingattribute(self, "tracknumber"):
-            for track in self.deserialize(TITLES):  # "track" est un dictionnaire.
-                if sorted(list(track.keys())) == sorted(TIT_KEYS):
-                    if self.tracknumber == track["number"]:
-                        if track["overwrite"]:
-                            self.title = track["title"]
-                            break
-
-    def __iter__(self):
-        for k, v in self.tags.items():
-            yield k, v
+    def __delitem__(self, itm):
+        del self.otags[itm]
 
     def __len__(self):
-        return len(self.tags)
+        return len(self.otags)
 
-    def __repr__(self):
-        return repr(self.tags)
+    def __iter__(self):
+        return iter(self.otags)
 
-    def keys(self):
-        return list(self.tags.keys())
+    def __init__(self, **kwargs):
+        self._otags = dict()
+        self.otags = kwargs
 
-    def outputtags(self):
-        for i in AudioCD.otags:
-            if hasattr(self, i):
-                self.tags[i] = getattr(self, i)
+    def digitalaudiobase(self):
+        l = list()
+        l.append("{artistsort[:1]}.{artistsort}.{albumsort[:-3]}.{titlesort}".format(**self.otags))
+        l.append(self.otags["albumsort"][:-3])
+        l.extends([self.otags[key] for key in ["titlesort", "artist", "year", "album", "genre", "discnumber", "totaldiscs", "label", "tracknumber", "totaltracks", "title", "live", "bootleg", "incollection", "upc", "encodingyear", "titlelanguage", "origyear"]])
+        for item in l:
+            yield l
+
+    @property
+    def otags(self):
+        return self._otags
+
+    @otags.setter
+    def otags(self, **kwargs):
+
+        if "artist" not in kwargs:
+            raise TagError
+        if "track" not in kwargs:
+            raise TagError
+        if "disc" not in kwargs:
+            raise TagError
+        if "encoder" not in kwargs:
+            raise TagError
+
+        # ----- Attributes taken from the input file.
+        self._otags = {key: kwargs[key] for key in kwargs if key in AudioCD.itags}
+
+        # ----- Encodedby.
+        self._otags["encodedby"] = "dBpoweramp 15.1 on {0}".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3))
+
+        # ----- Taggingtime.
+        self._otags["taggingtime"] = shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3)
+
+        # ----- Encodingtime.
+        self._otags["encodingtime"] = int(datetime.now(tz=timezone(shared.DFTTIMEZONE)).timestamp())
+        self._otags["encodingyear"] = datetime.now(tz=timezone(shared.DFTTIMEZONE)).strftime("%Y")
+
+        # ----- Encoder attributes.
+        for encoder in self.deserialize(ENCODERS):  # "encoder" est un dictionnaire.
+            if sorted(list(encoder.keys())) == sorted(ENC_KEYS):
+                if kwargs["encoder"] == encoder["name"]:
+                    self._otags["encoder"] = nt(encoder["name"], encoder["code"], encoder["folder"], encoder["extension"])
+                    logger.debug("Used encoder.")
+                    logger.debug("\t%s".expandtabs(4) % ("Name\t: %s".expandtabs(9) % (encoder["name"],)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Code\t: %s".expandtabs(9) % (encoder["code"],)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Folder\t: %s".expandtabs(9) % (encoder["folder"],)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (encoder["extension"],)),)
+                    break
+
+        # ----- Tracknumber / Totaltracks.
+        self._otags["tracknumber"], self._otags["totaltracks"] = self.splitfield(kwargs["track"], r"^(\d{1,2})/(\d{1,2})")
+
+        # ----- Discnumber / Totaldiscs.
+        self._otags["discnumber"], self._otags["totaldiscs"] = self.splitfield(kwargs["disc"], r"^(\d{1,2})/(\d{1,2})")
+
+        # ----- Genre.
+        for artist, genre in self.deserialize(GENRES):
+            if kwargs["artist"].lower() == artist.lower():
+                self._otags["genre"] = genre
+                break
+
+        # ----- Titlelanguage.
+        for artist, language in self.deserialize(LANGUAGES):
+            if kwargs["artist"].lower() == artist.lower():
+                self._otags["language"] = language
+                break
+
+        # ----- Title.
+        for track in self.deserialize(TITLES):  # "track" est un dictionnaire.
+            if sorted(list(track.keys())) == sorted(TIT_KEYS):
+                if self._otags["tracknumber"] == track["number"]:
+                    if track["overwrite"]:
+                        self._otags["title"] = track["title"]
+                        break
 
     @classmethod
     def fromfile(cls, fil, enc=shared.UTF8):
@@ -162,17 +163,17 @@ class AudioCD:
                  "5": r"[\.\-]+"}
 
         # ---------------------------------------------
-        # Chaque mot est formaté en lettres minuscules.
+        # Chaque mot est formatÃ© en lettres minuscules.
         # ---------------------------------------------
         s = re.compile(r"(?i)^(.+)$").sub(cls.low, s)
 
         # --------------------------
-        # Chaque mot est capitalisé.
+        # Chaque mot est capitalisÃ©.
         # --------------------------
         s = re.compile(r"(?i)\b([a-z]+)\b").sub(cls.cap1, s)
 
         # -------------------------------------------------------------
-        # Les conjonctions demeurent entièrement en lettres minsucules.
+        # Les conjonctions demeurent entiÃ¨rement en lettres minsucules.
         # -------------------------------------------------------------
         s = re.compile(r"(?i)\b{0}\b".format(regex["1"])).sub(cls.low, s)
         s = re.compile(r"(?i)\b{0}\b".format(regex["2"])).sub(cls.low, s)
@@ -180,7 +181,7 @@ class AudioCD:
         s = re.compile(r"(?i)\b{0}\b".format(regex["4"])).sub(cls.low, s)
 
         # -------------------------------------
-        # Le début du titre demeure capitalisé.
+        # Le dÃ©but du titre demeure capitalisÃ©.
         # -------------------------------------
         s = re.compile(r"(?i)^{0}\b".format(regex["1"])).sub(cls.cap1, s)
         s = re.compile(r"(?i)^{0}\b".format(regex["2"])).sub(cls.cap1, s)
@@ -192,19 +193,19 @@ class AudioCD:
         s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex["4"])).sub(cls.cap2, s)
 
         # ------------------------------------
-        # Les acronymes demeurent capitalisés.
+        # Les acronymes demeurent capitalisÃ©s.
         # ------------------------------------
         s = re.compile(r"(?i)\b(u\.?s\.?a\.?)").sub(cls.upp, s)
         s = re.compile(r"(?i)\b(u\.?k\.?)").sub(cls.upp, s)
         s = re.compile(r"(?i)\b(dj)\b").sub(cls.upp, s)
 
         # ----------------------------------
-        # Autres mots demeurant capitalisés.
+        # Autres mots demeurant capitalisÃ©s.
         # ----------------------------------
         s = re.compile(r"(?i)\b({0})({1})\b".format(regex["5"], regex["3"])).sub(cls.cap2, s)
 
         # -----------------------------------------------------------------
-        # Les mots précédés d'une apostrophe demeurent en lettre minuscule.
+        # Les mots prÃ©cÃ©dÃ©s d'une apostrophe demeurent en lettre minuscule.
         #  ----------------------------------------------------------------
         s = re.compile(r"(?i)\b('[a-z])\b").sub(cls.low, s)
 
@@ -289,18 +290,19 @@ class AudioCD:
 
 class DefaultCD(AudioCD):
     itags = ["label", "year", "album", "origyear", "albumsortcount", "bootleg", "live"]
-    otags = ["label", "year", "album", "origyear", "albumsort", "titlesort"]
+    # otags = ["label", "year", "album", "origyear", "albumsort", "titlesort"]
 
     def __init__(self, **kwargs):
-
         super(DefaultCD, self).__init__(**kwargs)
-        for i in DefaultCD.itags:
-            if i in kwargs:
-                setattr(self, i, kwargs[i])
+        DefaultCD.otags.fset(self, kwargs)
+
+    @AudioCD.otags.setter
+    def otags(self, kwargs):
+
+        self._otags = {key: kwargs[key] for key in kwargs if key in DefaultCD.itags}
 
         # ----- Album.
-        if not missingattribute(self, *("album",)):
-            self.album = self.case(self.album)
+        self._otags["album"] = self.case(self.album)
 
         # ----- Albumsort.
         if not missingattribute(self, *("year",)):
@@ -315,192 +317,6 @@ class DefaultCD(AudioCD):
         # ----- Titlesort.
         if not missingattribute(self, *("discnumber", "tracknumber", "bonus", "live", "bootleg")):
             self.titlesort = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self.discnumber, track=self.tracknumber.zfill(2), bonus=self.bonus, live=self.live, bootleg=self.bootleg)
-
-        # ----- Append tags to dictionary.
-        self.outputtags()
-
-    def outputtags(self):
-        super(DefaultCD, self).outputtags()
-        for i in DefaultCD.otags:
-            if hasattr(self, i):
-                self.tags[i] = getattr(self, i)
-
-
-class SelfTitledCD(DefaultCD):
-    itags = []
-    otags = []
-
-    def __init__(self, **kwargs):
-        super(SelfTitledCD, self).__init__(**kwargs)
-        for i in SelfTitledCD.itags:
-            if i in kwargs:
-                setattr(self, i, kwargs[i])
-        if not missingattribute(self, *("year",)):
-            self.album = "{0} (Self Titled)".format(self.year)
-        self.outputtags()
-
-    def outputtags(self):
-        super(SelfTitledCD, self).outputtags()
-        for i in SelfTitledCD.otags:
-            if hasattr(self, i):
-                self.tags[i] = getattr(self, i)
-
-
-class LiveCD(AudioCD):
-    itags = []
-    otags = []
-
-    def __init__(self, **kwargs):
-        super(LiveCD, self).__init__(**kwargs)
-        for i in LiveCD.itags:
-            if i in kwargs:
-                setattr(self, i, kwargs[i])
-        self.outputtags()
-
-    def outputtags(self):
-        super(LiveCD, self).outputtags()
-        for i in LiveCD.otags:
-            if hasattr(self, i):
-                self.tags[i] = getattr(self, i)
-
-
-class Bootlegs(LiveCD):
-    itags = ["bootlegtrackcity", "bootlegtracktour", "bootlegtrackdate"]
-    otags = ["bootlegtrackcity", "bootlegtracktour", "bootlegtrackyear", "bootlegtrackcountry"]
-    regex1 = re.compile(r"^[^,]+, [A-Z]{2}$")
-    regex2 = re.compile(r"^([^,]+), ([a-z]{3,})$", re.IGNORECASE)
-    regex3 = re.compile(r"^\b(?:20[012]|19[7-9]\d) \b(?:{0})\b \b(?:{1})\b$".format(shared.DFTMONTHREGEX, shared.DFTDAYREGEX))
-
-    def __init__(self, **kwargs):
-
-        # ----- Attributes taken from the input file.
-        super(Bootlegs, self).__init__(**kwargs)
-        for i in Bootlegs.itags:
-            if i in kwargs:
-                setattr(self, i, kwargs[i])
-
-        # Backup bootlegtrackcity.
-        self.city = self.bootlegtrackcity
-
-        # ----- Bootlegtrackyear.
-        if not missingattribute(self, *("bootlegtrackdate",)):
-            if Bootlegs.regex3.match(self.bootlegtrackdate):
-                self.bootlegtrackyear = self.bootlegtrackdate.replace(" ", "-")
-
-        # ----- Bootlegtrackcountry.
-        if not missingattribute(self, *("bootlegtrackcity",)):
-            self.bootlegtrackcountry = "United States"
-            if not Bootlegs.regex1.match(self.bootlegtrackcity):
-                match = Bootlegs.regex2.match(self.bootlegtrackcity)
-                if match:
-                    self.bootlegtrackcountry = match.group(2)
-
-        # ----- Bootlegtrackcity.
-        if not missingattribute(self, *("bootlegtrackcity",)):
-            if not Bootlegs.regex1.match(self.bootlegtrackcity):
-                match = Bootlegs.regex2.match(self.bootlegtrackcity)
-                if match:
-                    self.bootlegtrackcity = match.group(1)
-
-        # ----- Append tags to dictionary.
-        self.outputtags()
-
-    def outputtags(self):
-        super(Bootlegs, self).outputtags()
-        for i in Bootlegs.otags:
-            if hasattr(self, i):
-                self.tags[i] = getattr(self, i)
-
-
-class DefaultBootlegs(Bootlegs):
-    itags = ["album", "label", "origalbum", "reference", "bootleg", "live"]
-    otags = ["album", "label", "origalbum", "publisherreference", "albumsort", "titlesort", "year"]
-    regex1 = re.compile(r"^[^\-]+\- \b(20[012]|19[7-9]\d)\.\b({0})\b\.\b({1})\b \- \B.+$".format(shared.DFTMONTHREGEX, shared.DFTDAYREGEX))
-    regex2 = re.compile(r"^\b(?:20[012]|19[7-9]\d) \b(?:{0})\b \b(?:{1})\b$".format(shared.DFTMONTHREGEX, shared.DFTDAYREGEX))
-
-    def __init__(self, **kwargs):
-
-        # ----- Attributes taken from the input file.
-        super(DefaultBootlegs, self).__init__(**kwargs)
-        for i in DefaultBootlegs.itags:
-            if i in kwargs:
-                setattr(self, i, kwargs[i])
-
-        # ----- Year, Month, Day.
-        if not missingattribute(self, *("album",)):
-            match = DefaultBootlegs.regex1.match(self.album)
-            if match:
-                self.year = match.group(1)
-                self.month = match.group(2)
-                self.day = match.group(3)
-
-        # ----- Albumsort.
-        if not missingattribute(self, *("encodercode", "year", "month", "day")):
-            self.albumsort = "2.{ccyy}{mm}{dd}.1.{enc}".format(ccyy=self.year, mm=self.month, dd=self.day, enc=self.encodercode)
-
-        # ----- Titlesort.
-        self.bonus = "N"
-        if not missingattribute(self, *("album", "bootlegtracktour", "bootlegtrackdate", "city")):
-            if DefaultBootlegs.regex2.match(self.bootlegtrackdate):
-                if self.album != "{0} - {1}.{2}.{3} - [{4}]".format(self.bootlegtracktour, self.bootlegtrackdate[:4], self.bootlegtrackdate[5:7], self.bootlegtrackdate[8:10], self.city):
-                    self.bonus = "Y"
-        if not missingattribute(self, *("discnumber", "tracknumber", "bonus", "live", "bootleg")):
-            self.titlesort = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self.discnumber, track=self.tracknumber.zfill(2), bonus=self.bonus, live=self.live, bootleg=self.bootleg)
-
-        # ----- Publisherreference.
-        if not missingattribute(self, *("reference",)):
-            self.publisherreference = self.reference
-
-        # ----- Append tags to dictionary.
-        self.outputtags()
-
-    def outputtags(self):
-        super(DefaultBootlegs, self).outputtags()
-        for i in DefaultBootlegs.otags:
-            if hasattr(self, i):
-                self.tags[i] = getattr(self, i)
-
-
-class PJBootlegs(Bootlegs):
-    itags = ["bootleg", "live"]
-    otags = ["album", "albumsort", "titlesort", "year"]
-    regex = re.compile(r"^\b(?:20[012]|19[7-9]\d) \b(?:{0})\b \b(?:{1})\b$".format(shared.DFTMONTHREGEX, shared.DFTDAYREGEX))
-
-    def __init__(self, **kwargs):
-
-        # ----- Attributes taken from the input file.
-        super(PJBootlegs, self).__init__(**kwargs)
-        for i in PJBootlegs.itags:
-            if i in kwargs:
-                setattr(self, i, kwargs[i])
-
-        # ----- Album.
-        if not missingattribute(self, "city", "bootlegtrackdate"):
-            if PJBootlegs.regex.match(self.bootlegtrackdate):
-                self.album = "Live: {0}-{1}-{2} - {3}".format(self.bootlegtrackdate[:4], self.bootlegtrackdate[5:7], self.bootlegtrackdate[8:10], self.city)
-
-        # ----- Albumsort.
-        if not missingattribute(self, "encodercode", "bootlegtrackdate"):
-            if PJBootlegs.regex.match(self.bootlegtrackdate):
-                self.albumsort = "2.{0}{1}{2}.1.{3}".format(self.bootlegtrackdate[:4], self.bootlegtrackdate[5:7], self.bootlegtrackdate[8:10], self.encodercode)
-
-        # ----- Titlesort.
-        if not missingattribute(self, "discnumber", "tracknumber", "live", "bootleg"):
-            self.titlesort = "D{disc}.T{track}.N{live}{bootleg}".format(disc=self.discnumber, track=self.tracknumber.zfill(2), live=self.live, bootleg=self.bootleg)
-
-        # ----- Year.
-        if not missingattribute(self, "bootlegtrackdate"):
-            if PJBootlegs.regex.match(self.bootlegtrackdate):
-                self.year = self.bootlegtrackdate[:4]
-
-        # ----- Append tags to dictionary.
-        self.outputtags()
-
-    def outputtags(self):
-        super(PJBootlegs, self).outputtags()
-        for i in PJBootlegs.otags:
-            if hasattr(self, i):
-                self.tags[i] = getattr(self, i)
 
 
 # ==========
