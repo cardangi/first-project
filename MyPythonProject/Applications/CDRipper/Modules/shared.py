@@ -49,14 +49,14 @@ class AudioCD(MutableMappings):
     # otags = ["artist", "title", "track", "disc", "upc", "profile", "source", "incollection", "titlelanguage", "genre", "artistsort", "albumartist", "albumartistsort", "_albumart_1_front album cover", "style",
              # "encodedby", "taggingtime", "encodingtime", "encodingyear"]
 
-    def __getitem__(self, itm):
-        return self.otags[itm]
+    def __getitem__(self, item):
+        return self.otags[item]
 
-    def __setitem__(self, key, value):
-        return self.otags[key] = value
+    def __setitem__(self, item, value):
+        return self.otags[item] = value
 
-    def __delitem__(self, itm):
-        del self.otags[itm]
+    def __delitem__(self, item):
+        del self.otags[item]
 
     def __len__(self):
         return len(self.otags)
@@ -79,6 +79,10 @@ class AudioCD(MutableMappings):
     @property
     def otags(self):
         return self._otags
+
+    @property
+    def tracknumber(self):
+        return self._otags["tracknumber"]
 
     @otags.setter
     def otags(self, **kwargs):
