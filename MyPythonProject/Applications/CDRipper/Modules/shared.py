@@ -1,10 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
+from collections import MutableMapping, namedtuple
 from sortedcontainers import SortedDict
 from datetime import datetime
 from pytz import timezone
@@ -12,12 +7,9 @@ import logging
 import json
 import os
 import re
-
-
-# =================
-# Relative imports.
-# =================
 from ... import shared
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========
@@ -39,24 +31,32 @@ TIT_KEYS = ["number", "title", "overwrite"]
 logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 
 
+# =====
+# Help.
+# =====
+# http://stackoverflow.com/questions/31909094/overriding-an-inherited-property-setter
+
+
 # ========
 # Classes.
 # ========
-# http://stackoverflow.com/questions/31909094/overriding-an-inherited-property-setter
-class AudioCD(MutableMappings):
-    itags = ["artist", "title", "track", "disc", "upc", "profile", "source", "incollection", "titlelanguage", "genre", "artistsort", "albumartist", "albumartistsort", "_albumart_1_front album cover", "style"]
-             # "encoder"]
-    # otags = ["artist", "title", "track", "disc", "upc", "profile", "source", "incollection", "titlelanguage", "genre", "artistsort", "albumartist", "albumartistsort", "_albumart_1_front album cover", "style",
-             # "encodedby", "taggingtime", "encodingtime", "encodingyear"]
+class TagError(ValueError):
+    def __init__(self, err):
+        self.err = err
+
+
+class AudioCD(MutableMapping):
+    itags = ["artistsort", "albumartistsort", "artist", "albumartist", "disc", "track", "title", "profile", "source", "bootleg", "live", "incollection", "titlelanguage", "genre", "style",
+             "_albumart_1_front album cover"]
 
     def __getitem__(self, item):
         return self.otags[item]
 
-    def __setitem__(self, item, value):
-        return self.otags[item] = value
+    def __setitem__(self, key, value):
+        self.otags[key] = value
 
-    def __delitem__(self, item):
-        del self.otags[item]
+    def __delitem__(self, key):
+        del self.otags[key]
 
     def __len__(self):
         return len(self.otags)
@@ -68,36 +68,38 @@ class AudioCD(MutableMappings):
         self._otags = dict()
         self.otags = kwargs
 
-    def digitalaudiobase(self):
-        l = list()
-        l.append("{artistsort[:1]}.{artistsort}.{albumsort[:-3]}.{titlesort}".format(**self.otags))
-        l.append(self.otags["albumsort"][:-3])
-        l.extends([self.otags[key] for key in ["titlesort", "artist", "year", "album", "genre", "discnumber", "totaldiscs", "label", "tracknumber", "totaltracks", "title", "live", "bootleg", "incollection", "upc", "encodingyear", "titlelanguage", "origyear"]])
-        for item in l:
-            yield l
+    @property
+    def tracknumber(self):
+        return self._otags["tracknumber"]
 
     @property
     def otags(self):
         return self._otags
 
-    @property
-    def tracknumber(self):
-        return self._otags["tracknumber"]
-
     @otags.setter
     def otags(self, **kwargs):
+        nt = namedtuple("nt", "name code folde extension")
 
+        # ----- Check input tags.
+        if "artistsort" not in kwargs:
+            raise TagError("artistsort isn\'t available!")
         if "artist" not in kwargs:
-            raise TagError
+            raise TagError("artist isn\'t available!")
         if "track" not in kwargs:
-            raise TagError
+            raise TagError("track isn\'t available!")
         if "disc" not in kwargs:
-            raise TagError
+            raise TagError("disc isn\'t available!")
         if "encoder" not in kwargs:
-            raise TagError
+            raise TagError("encoder isn\'t available!")
+        if "live" not in kwargs:
+            raise TagError("live isn\'t available!")
+        if "bootleg" not in kwargs:
+            raise TagError("bootleg isn\'t available!")
+        if "incollection" not in kwargs:
+            raise TagError("incollection isn\'t available!")
 
-        # ----- Attributes taken from the input file.
-        self._otags = {key: kwargs[key] for key in kwargs if key in AudioCD.itags}
+        # ----- Attributes taken from the input tags.
+        self._otags.update({key: kwargs[key] for key in kwargs if key in AudioCD.itags})
 
         # ----- Encodedby.
         self._otags["encodedby"] = "dBpoweramp 15.1 on {0}".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3))
@@ -146,6 +148,28 @@ class AudioCD(MutableMappings):
                     if track["overwrite"]:
                         self._otags["title"] = track["title"]
                         break
+
+        # ----- Albumsort.
+        albumsortyear = self._otags.get("origyear", self._otags["year"])
+        self._otags["albumsort"] = "1.{year}0000.{count}.{enc}".format(year=albumsortyear, count=self._otags["albumsortcount"], enc=self._otags["encoder"].code)
+        logger.debug("Build tags.")
+        logger.debug("\talbumsort: %s".expandtabs(4) % (self._otags["albumsort"],))
+
+        # ----- Titlesort.
+        self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["discnumber"],
+                                                                                    track=self._otags["tracknumber"].zfill(2),
+                                                                                    bonus="N",
+                                                                                    live=self._otags["live"],
+                                                                                    bootleg=self._otags["bootleg"])
+
+    def digitalaudiobase(self):
+        tags, l = ["titlesort", "artist", "year", "album", "genre", "discnumber", "totaldiscs", "label", "tracknumber", "totaltracks", "title", "live", "bootleg", "incollection", "upc", "encodingyear",
+                   "titlelanguage", "origyear"], list()
+        l.append("{artistsort}.{artistsort}.{albumsort}.{titlesort}".format(**self.otags))
+        l.append(self.otags["albumsort"][:-3])
+        l.extend([self.otags[key] for key in tags])
+        for item in l:
+            yield item
 
     @classmethod
     def fromfile(cls, fil, enc=shared.UTF8):
@@ -293,50 +317,74 @@ class AudioCD(MutableMappings):
 
 
 class DefaultCD(AudioCD):
-    itags = ["label", "year", "album", "origyear", "albumsortcount", "bootleg", "live"]
-    # otags = ["label", "year", "album", "origyear", "albumsort", "titlesort"]
+    itags = ["upc", "label", "origyear", "year", "albumsortcount", "album"]
 
     def __init__(self, **kwargs):
         super(DefaultCD, self).__init__(**kwargs)
-        DefaultCD.otags.fset(self, kwargs)
+        for item in DefaultCD.itags:
+            if item in kwargs:
+                del kwargs[item]
+        AudioCD.otags.fset(self, **kwargs)
 
     @AudioCD.otags.setter
     def otags(self, kwargs):
 
+        # ----- Check mandatory input tags.
+        if "year" not in kwargs:
+            raise TagError("year isn\'t available!")
+        if "albumsortcount" not in kwargs:
+            raise TagError("albumsortcount isn\'t available!")
+        if "album" not in kwargs:
+            raise TagError("album isn\'t available!")
+        if "label" not in kwargs:
+            raise TagError("label isn\'t available!")
+        if "upc" not in kwargs:
+            raise TagError("upc isn\'t available!")
+
+        # ----- Attributes taken from the input tags.
         self._otags = {key: kwargs[key] for key in kwargs if key in DefaultCD.itags}
 
         # ----- Album.
-        self._otags["album"] = self.case(self.album)
+        self._otags["album"] = self.case(kwargs["album"])
 
-        # ----- Albumsort.
-        if not missingattribute(self, *("year",)):
-            self.albumsortyear = self.year
-        if not missingattribute(self, *("origyear",)):
-            self.albumsortyear = self.origyear
-        if not missingattribute(self, *("albumsortyear", "albumsortcount", "encodercode")):
-            self.albumsort = "1.{year}0000.{count}.{enc}".format(year=self.albumsortyear, count=self.albumsortcount, enc=self.encodercode)
-        logger.debug("Build tags.")
-        logger.debug("\talbumsort: %s".expandtabs(4) % (self.albumsort,))
+        # ----- Origyear.
+        self._otags["origyear"] = kwargs.get("origyear", "0")
 
-        # ----- Titlesort.
-        if not missingattribute(self, *("discnumber", "tracknumber", "bonus", "live", "bootleg")):
-            self.titlesort = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self.discnumber, track=self.tracknumber.zfill(2), bonus=self.bonus, live=self.live, bootleg=self.bootleg)
+
+class SelfTitledCD(DefaultCD):
+    itags = ["upc", "label", "origyear", "year", "albumsortcount", "album"]
+
+    def __init__(self, **kwargs):
+        super(SelfTitledCD, self).__init__(**kwargs)
+        for item in SelfTitledCD.itags:
+            if item in kwargs:
+                del kwargs[item]
+        DefaultCD.otags.fset(self, **kwargs)
+
+    @DefaultCD.otags.setter
+    def otags(self, kwargs):
+
+        # ----- Attributes taken from the input tags.
+        self._otags = {key: kwargs[key] for key in kwargs if key in SelfTitledCD.itags}
+
+        # ----- Album.
+        self._otags["album"] = "{0} (Self Titled)".format(kwargs["year"])
 
 
 # ==========
 # Functions.
 # ==========
-def missingattribute(obj, *attrs):
-    """
-    Check if an object has got attribute(s).
-    :param obj: object created from AudioCD class.
-    :param attrs: attribute(s) looked for.
-    :return: True: at lease one attribute is missing.
-             False: all attributes looked for are present.
-    """
-    if all(hasattr(obj, name) for name in attrs):
-        return False
-    return True
+# def missingattribute(obj, *attrs):
+#     """
+    # Check if an object has got attribute(s).
+    # :param obj: object created from AudioCD class.
+    # :param attrs: attribute(s) looked for.
+    # :return: True: at lease one attribute is missing.
+    #          False: all attributes looked for are present.
+    # """
+    # if all(hasattr(obj, name) for name in attrs):
+    #     return False
+    # return True
 
 
 def canfilebeprocessed(fe, *tu):
