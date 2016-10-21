@@ -1,0 +1,4 @@
+            artist    title    track    disc    upc    profile    source    incollection    titlelanguage    genre    artistsort    albumartist    albumartistsort    _albumart_1_front album cover    style    label    year    album    origyear    albumsortcount    bootleg    live
+
+AudioCD        X        X        X        X      X        X         X            X                X            X          X              X                X                           X                  X
+DefaultCD                                                                                                                                                                                                         X        X       X          X            X               X         X
