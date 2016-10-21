@@ -77,20 +77,20 @@ class AudioCD(MutableMapping):
         return self._otags
 
     @otags.setter
-    def otags(self, **kwargs):
+    def otags(self, kwargs):
         nt = namedtuple("nt", "name code folde extension")
 
-        # ----- Check input tags.
+        # ----- Check mandatory input tags.
         if "artistsort" not in kwargs:
             raise TagError("artistsort isn\'t available!")
         if "artist" not in kwargs:
             raise TagError("artist isn\'t available!")
-        if "track" not in kwargs:
-            raise TagError("track isn\'t available!")
-        if "disc" not in kwargs:
-            raise TagError("disc isn\'t available!")
         if "encoder" not in kwargs:
             raise TagError("encoder isn\'t available!")
+        if "disc" not in kwargs:
+            raise TagError("disc isn\'t available!")
+        if "track" not in kwargs:
+            raise TagError("track isn\'t available!")
         if "live" not in kwargs:
             raise TagError("live isn\'t available!")
         if "bootleg" not in kwargs:
@@ -99,19 +99,19 @@ class AudioCD(MutableMapping):
             raise TagError("incollection isn\'t available!")
 
         # ----- Attributes taken from the input tags.
-        self._otags.update({key: kwargs[key] for key in kwargs if key in AudioCD.itags})
+        self._otags = {key: kwargs[key] for key in kwargs if key in AudioCD.itags}
 
-        # ----- Encodedby.
+        # ----- Set encodedby.
         self._otags["encodedby"] = "dBpoweramp 15.1 on {0}".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3))
 
-        # ----- Taggingtime.
+        # ----- Set taggingtime.
         self._otags["taggingtime"] = shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3)
 
-        # ----- Encodingtime.
+        # ----- Set encodingtime.
         self._otags["encodingtime"] = int(datetime.now(tz=timezone(shared.DFTTIMEZONE)).timestamp())
         self._otags["encodingyear"] = datetime.now(tz=timezone(shared.DFTTIMEZONE)).strftime("%Y")
 
-        # ----- Encoder attributes.
+        # ----- Set encoder attributes.
         for encoder in self.deserialize(ENCODERS):  # "encoder" est un dictionnaire.
             if sorted(list(encoder.keys())) == sorted(ENC_KEYS):
                 if kwargs["encoder"] == encoder["name"]:
@@ -123,53 +123,31 @@ class AudioCD(MutableMapping):
                     logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (encoder["extension"],)),)
                     break
 
-        # ----- Tracknumber / Totaltracks.
+        # ----- Set tracknumber / totaltracks.
         self._otags["tracknumber"], self._otags["totaltracks"] = self.splitfield(kwargs["track"], r"^(\d{1,2})/(\d{1,2})")
 
-        # ----- Discnumber / Totaldiscs.
+        # ----- Set discnumber / totaldiscs.
         self._otags["discnumber"], self._otags["totaldiscs"] = self.splitfield(kwargs["disc"], r"^(\d{1,2})/(\d{1,2})")
 
-        # ----- Genre.
+        # ----- Update genre.
         for artist, genre in self.deserialize(GENRES):
             if kwargs["artist"].lower() == artist.lower():
                 self._otags["genre"] = genre
                 break
 
-        # ----- Titlelanguage.
+        # ----- Update titlelanguage.
         for artist, language in self.deserialize(LANGUAGES):
             if kwargs["artist"].lower() == artist.lower():
                 self._otags["language"] = language
                 break
 
-        # ----- Title.
+        # ----- Update title.
         for track in self.deserialize(TITLES):  # "track" est un dictionnaire.
             if sorted(list(track.keys())) == sorted(TIT_KEYS):
                 if self._otags["tracknumber"] == track["number"]:
                     if track["overwrite"]:
                         self._otags["title"] = track["title"]
                         break
-
-        # ----- Albumsort.
-        albumsortyear = self._otags.get("origyear", self._otags["year"])
-        self._otags["albumsort"] = "1.{year}0000.{count}.{enc}".format(year=albumsortyear, count=self._otags["albumsortcount"], enc=self._otags["encoder"].code)
-        logger.debug("Build tags.")
-        logger.debug("\talbumsort: %s".expandtabs(4) % (self._otags["albumsort"],))
-
-        # ----- Titlesort.
-        self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["discnumber"],
-                                                                                    track=self._otags["tracknumber"].zfill(2),
-                                                                                    bonus="N",
-                                                                                    live=self._otags["live"],
-                                                                                    bootleg=self._otags["bootleg"])
-
-    def digitalaudiobase(self):
-        tags, l = ["titlesort", "artist", "year", "album", "genre", "discnumber", "totaldiscs", "label", "tracknumber", "totaltracks", "title", "live", "bootleg", "incollection", "upc", "encodingyear",
-                   "titlelanguage", "origyear"], list()
-        l.append("{artistsort}.{artistsort}.{albumsort}.{titlesort}".format(**self.otags))
-        l.append(self.otags["albumsort"][:-3])
-        l.extend([self.otags[key] for key in tags])
-        for item in l:
-            yield item
 
     @classmethod
     def fromfile(cls, fil, enc=shared.UTF8):
@@ -317,14 +295,10 @@ class AudioCD(MutableMapping):
 
 
 class DefaultCD(AudioCD):
-    itags = ["upc", "label", "origyear", "year", "albumsortcount", "album"]
+    itags = ["origyear", "year", "albumsortcount", "album", "upc", "label"]
 
     def __init__(self, **kwargs):
         super(DefaultCD, self).__init__(**kwargs)
-        for item in DefaultCD.itags:
-            if item in kwargs:
-                del kwargs[item]
-        AudioCD.otags.fset(self, **kwargs)
 
     @AudioCD.otags.setter
     def otags(self, kwargs):
@@ -336,57 +310,68 @@ class DefaultCD(AudioCD):
             raise TagError("albumsortcount isn\'t available!")
         if "album" not in kwargs:
             raise TagError("album isn\'t available!")
-        if "label" not in kwargs:
-            raise TagError("label isn\'t available!")
         if "upc" not in kwargs:
             raise TagError("upc isn\'t available!")
+        if "label" not in kwargs:
+            raise TagError("label isn\'t available!")
 
-        # ----- Attributes taken from the input tags.
-        self._otags = {key: kwargs[key] for key in kwargs if key in DefaultCD.itags}
+        # ----- Set tags.
+        AudioCD.otags.fset(self, kwargs)
 
-        # ----- Album.
+        # ----- Update tags.
+        self._otags.update({key: kwargs[key] for key in kwargs if key in DefaultCD.itags})
+
+        # ----- Update album.
         self._otags["album"] = self.case(kwargs["album"])
 
-        # ----- Origyear.
+        # ----- Set albumsort.
+        albumsortyear = kwargs.get("origyear", kwargs["year"])
+        self._otags["albumsort"] = "1.{year}0000.{count}.{enc}".format(year=albumsortyear, count=kwargs["albumsortcount"], enc=self._otags["encoder"].code)
+        logger.debug("Build tags.")
+        logger.debug("\talbumsort: %s".expandtabs(4) % (self._otags["albumsort"],))
+
+        # ----- Set titlesort.
+        self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["discnumber"],
+                                                                                    track=self._otags["tracknumber"].zfill(2),
+                                                                                    bonus="N",
+                                                                                    live=self._otags["live"],
+                                                                                    bootleg=self._otags["bootleg"])
+
+        # ----- Update origyear.
         self._otags["origyear"] = kwargs.get("origyear", "0")
+
+    def digitalaudiobase(self):
+        tags, l = ["titlesort", "artist", "year", "album", "genre", "discnumber", "totaldiscs", "label", "tracknumber", "totaltracks", "title", "live", "bootleg", "incollection", "upc", "encodingyear",
+                   "titlelanguage", "origyear"], list()
+        l.append("{artistsort}.{artistsort}.{albumsort}.{titlesort}".format(**self._otags))
+        l.append(self._otags["albumsort"][:-3])
+        l.extend([self._otags[key] for key in tags])
+        for item in l:
+            yield item
 
 
 class SelfTitledCD(DefaultCD):
-    itags = ["upc", "label", "origyear", "year", "albumsortcount", "album"]
+    itags = []
 
     def __init__(self, **kwargs):
         super(SelfTitledCD, self).__init__(**kwargs)
-        for item in SelfTitledCD.itags:
-            if item in kwargs:
-                del kwargs[item]
-        DefaultCD.otags.fset(self, **kwargs)
 
     @DefaultCD.otags.setter
     def otags(self, kwargs):
 
-        # ----- Attributes taken from the input tags.
-        self._otags = {key: kwargs[key] for key in kwargs if key in SelfTitledCD.itags}
+        # ----- Set tags.
+        DefaultCD.otags.fset(self, kwargs)
 
-        # ----- Album.
+        # ----- Update tags.
+        self._otags.update({key: kwargs[key] for key in kwargs if key in SelfTitledCD.itags})
+
+        # ----- Update album.
         self._otags["album"] = "{0} (Self Titled)".format(kwargs["year"])
 
 
 # ==========
 # Functions.
 # ==========
-# def missingattribute(obj, *attrs):
-#     """
-    # Check if an object has got attribute(s).
-    # :param obj: object created from AudioCD class.
-    # :param attrs: attribute(s) looked for.
-    # :return: True: at lease one attribute is missing.
-    #          False: all attributes looked for are present.
-    # """
-    # if all(hasattr(obj, name) for name in attrs):
-    #     return False
-    # return True
-
-
 def canfilebeprocessed(fe, *tu):
     """
     fe: file extension.
