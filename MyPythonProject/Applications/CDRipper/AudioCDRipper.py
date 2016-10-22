@@ -7,7 +7,7 @@ import logging.handlers
 from pytz import timezone
 from datetime import datetime
 from operator import itemgetter
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, FileSystemLoader
 from .. import shared as s1
 from .Modules import shared as s2
 
@@ -59,21 +59,13 @@ NewRippedCD, fo, encoding, obj, dab, regex, arguments = None, None, None, [], []
 # ===================
 # Jinja2 environment.
 # ===================
-environment = Environment(loader=PackageLoader("Applications.CDRipper", "Templates"), trim_blocks=True, lstrip_blocks=True)
-
-
-# ======================
-# Jinja2 custom filters.
-# ======================
-environment.filters["hasattribute"] = hasattribute
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Templates")), trim_blocks=True, lstrip_blocks=True)
 
 
 # =================
 # Jinja2 templates.
 # =================
 outputtags = environment.get_template("AudioCDOutputTags")
-rippinglog = environment.get_template("AudioCDRippingLog")
-audiodatabase = environment.get_template("DigitalAudioBase")
 
 
 # ==============
