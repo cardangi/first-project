@@ -1,26 +1,17 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# =================
-# Absolute imports.
-# =================
 import os
 import re
 import json
-import logging
 import argparse
 import logging.handlers
 from pytz import timezone
 from datetime import datetime
+from operator import itemgetter
 from jinja2 import Environment, PackageLoader
-
-
-# =================
-# Relative imports.
-# =================
 from .. import shared as s1
 from .Modules import shared as s2
+
+__author__ = 'Xavier ROSSET'
 
 
 # =================
@@ -50,13 +41,13 @@ logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 # ============
 # Local names.
 # ============
-exists, join, expandvars, missingattribute = os.path.exists, os.path.join, os.path.expandvars, s2.missingattribute
+exists, join, expandvars = os.path.exists, os.path.join, os.path.expandvars
 
 
 # ==========
 # Constants.
 # ==========
-JSON, DABJSON = join(expandvars("%TEMP%"), "tags.json"), join(expandvars("%TEMP%"), "digitalaudiodatabase.json")
+JSON, DABJSON, RIPJSON = join(expandvars("%TEMP%"), "tags.json"), join(expandvars("%TEMP%"), "digitalaudiodatabase.json"), join(expandvars("%TEMP%"), "rippinglog.json")
 
 
 # ==========
@@ -115,23 +106,25 @@ if exists(arguments.tagsfile) and arguments.rippingprofile.lower() in s2.PROFILE
     if arguments.rippingprofile.lower() == s2.PROFILES[0]:
         NewRippedCD = s2.DefaultCD.fromfile(arguments.tagsfile, s1.UTF16)
 
-        #          °°°°°°°°°°°°°°°°°°°°°°°
-        # ----- 1. Digital audio database.
-        #          °°°°°°°°°°°°°°°°°°°°°°°
+        # --> 1. Digital audio database.
         if exists(DABJSON):
             with open(DABJSON) as fp:
                 dab = json.load(fp)
             dab = [tuple(item) for item in dab]
         dab.append(tuple(NewRippedCD.digitalaudiobase()))
-        with open(JSON, s1.WRITE) as fp:
+        with open(DABJSON, s1.WRITE) as fp:
             json.dump(sorted(dab, key=itemgetter(0)), fp, indent=4, sort_keys=True)
+        dab.clear()
 
-        #          °°°°°°°°°°°°°°°°°°°°°°°°°°
-        # ----- 2. Audio CD ripping database.
-        #          °°°°°°°°°°°°°°°°°°°°°°°°°°
-        with open(join(expandvars("%TEMP%"), "rippingdatabase"), mode=s1.APPEND, encoding=s1.DFTENCODING) as fw:
-            fw.write("{0}\n".format(rippinglog.render(detail=list((NewRippedCD.artist, NewRippedCD.year, NewRippedCD.album, NewRippedCD.genre, NewRippedCD.upc, NewRippedCD.albumsort[:-3], NewRippedCD.tracknumber,
-                                                                   NewRippedCD.encoder, NewRippedCD.artistsort)))))
+        #  --> 2. Audio CD ripping database.
+        if exists(RIPJSON):
+            with open(RIPJSON) as fp:
+                dab = json.load(fp)
+            dab = [tuple(item) for item in dab]
+        dab.append(tuple(NewRippedCD.rippinglog()))
+        with open(RIPJSON, s1.WRITE) as fp:
+            json.dump(sorted(dab, key=itemgetter(0)), fp, indent=4, sort_keys=True)
+        dab.clear()
 
     #     ---------------
     # --> Self titled CD.
@@ -168,6 +161,7 @@ if exists(arguments.tagsfile) and arguments.rippingprofile.lower() in s2.PROFILE
     if arguments.test:
         fo, encoding = join(expandvars("%TEMP%"), "T{0}.txt".format(NewRippedCD.tracknumber.zfill(2))), s1.UTF8
     with open(fo, s1.WRITE, encoding=encoding) as fw:
+        logger.debug(fo)
         fw.write(outputtags.render(tags=NewRippedCD))
 
     #     ----------------------------------
@@ -176,7 +170,7 @@ if exists(arguments.tagsfile) and arguments.rippingprofile.lower() in s2.PROFILE
     if exists(JSON):
         with open(JSON) as fp:
             obj = json.load(fp)
-    obj.append({key: NewRippedCD[key] for key in NewRippedCD})
+    obj.append(dict(NewRippedCD))
     with open(JSON, s1.WRITE) as fp:
         json.dump(obj, fp, indent=4, sort_keys=True)
 

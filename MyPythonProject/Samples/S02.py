@@ -1,66 +1,73 @@
 # -*- coding: ISO-8859-1 -*-
+from collections import MutableSequence
 from operator import itemgetter
 import re
 
 __author__ = 'Xavier ROSSET'
 
 
-class MyClass1(object):
+class MyClass1(MutableSequence):
 
     def __init__(self, seq):
+        self._index = 0
+        self._seq = sorted(sorted(seq, key=self.f1), key=self.f2)
 
-        def f1(s):
-            return int(s.split(".")[0])
+    def __getitem__(self, item):
+        return self._seq[item]
 
-        def f2(s):
-            return int(s.split(".")[1])
+    def __setitem__(self, key, value):
+        self._seq[key] = value
 
-        self._index1 = 0
-        self._index2 = 0
-        self._seq = sorted(sorted(seq, key=f1), key=f2)
+    def __delitem__(self, key):
+        del self._seq[key]
+
+    def __len__(self):
+        return len(self._seq)
+
+    def __iter__(self):
+        for item in self._seq:
+            yield item[2:6]
 
     def __call__(self):
-        self._index1 += 1
-        return self._seq[self._index1 - 1][2:6]
-    
-    def __iter__(self):
-        return self
+        self._index += 1
+        return self._seq[self._index - 1][2:6]
 
-    def __next__(self):
-        if self._index2 == len(self._seq):
-            raise StopIteration
-        self._index2 += 1
-        return self._seq[self._index2 - 1][2:6]
+    def insert(self, index, value):
+        self._seq.insert(index, value)
+
+    @staticmethod
+    def f1(s):
+        return int(s.split(".")[0])
+
+    @staticmethod
+    def f2(s):
+        return int(s.split(".")[1])
 
 
-class MyClass2(object):
+class MyClass2(MutableSequence):
 
     def __init__(self, seq):
-        self._index1 = 0
-        self._index2 = 0
-        self._seq = list()
-        self.seq = seq
+        self._index = 0
+        self._seq = seq
 
-    @property
-    def seq(self):
-        return self._seq
+    def __getitem__(self, item):
+        return self._seq[item]
 
-    @seq.setter
-    def seq(self, arg):
-        self._seq = arg
+    def __setitem__(self, key, value):
+        self._seq[key] = value
+
+    def __delitem__(self, key):
+        del self._seq[key]
+
+    def __len__(self):
+        return len(self._seq)
 
     def __call__(self):
-        self._index1 += 1
-        return int(re.split(r"\D+", self.seq[self._index1 - 1])[1])
+        self._index += 1
+        return int(re.split(r"\D+", self._seq[self._index - 1])[1])
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self._index2 == len(self.seq):
-            raise StopIteration
-        self._index2 += 1
-        return self.seq[self._index2 - 1]
+    def insert(self, index, value):
+        self._seq.insert(index, value)
 
 
 def func(d):
@@ -77,7 +84,7 @@ print(list(iter(x, "2016")))
 
 z1 = list(map(func, range(1, 101)))
 z2, z3 = MyClass2(z1), list()
-for i in iter(z2, 11):
+for i in iter(z2, 51):
     for j in z1:
         try:
             assert func2(j) == i

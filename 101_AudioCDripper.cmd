@@ -15,7 +15,7 @@ SET _myparent=%~dp0
 REM ==================
 REM Initializations 2.
 REM ==================
-SET _rippingbase=%TEMP%\rippingdatabase
+SET _rippinglog=%TEMP%\rippinglog.json
 SET _htmlrippinglog=%_COMPUTING%\RippingLog\rippinglog.html
 SET _txtdigitalaudiobase=%TEMP%\digitalaudiodatabase
 SET _xmldigitalaudiobase=%TEMP%\digitalaudiobase.xml
@@ -41,9 +41,9 @@ REM        -----------------
 REM  1 --> Ripping database.
 REM        -----------------
 :STEP1
-IF EXIST "%_rippingbase%" (
+IF EXIST "%_rippinglog%" (
     SET _first=Y
-    FOR /F "usebackq tokens=1-9 delims=;" %%a IN ("%_rippingbase%") DO (
+    FOR /F "usebackq tokens=1-9 delims=;" %%a IN ("%_rippinglog%") DO (
 
         IF "!_first!"=="Y" (
             SET _first=N
@@ -53,7 +53,7 @@ IF EXIST "%_rippingbase%" (
         )
 
     )
-    DEL "%_rippingbase%"
+    DEL "%_rippinglog%"
 )
 SHIFT
 GOTO MAIN
