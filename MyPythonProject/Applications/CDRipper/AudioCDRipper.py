@@ -79,7 +79,7 @@ audiodatabase = environment.get_template("DigitalAudioBase")
 # ==============
 # Start logging.
 # ==============
-logger.info("{0} {1} {0}".format("="*50, s1.dateformat(datetime.now(tz=timezone(s1.DFTTIMEZONE)), s1.TEMPLATE1)))
+logger.info("{0:^140}".format(" {0} ".format(s1.dateformat(datetime.now(tz=timezone(s1.DFTTIMEZONE)), s1.TEMPLATE1))))
 logger.info('START "%s".' % (os.path.basename(__file__),))
 logger.info('"{0}" used as ripping profile.'.format(arguments.rippingprofile))
 
