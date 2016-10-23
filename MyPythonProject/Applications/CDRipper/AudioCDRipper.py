@@ -23,15 +23,6 @@ parser.add_argument("rippingprofile", help="rip profile")
 parser.add_argument("-t", "--test", action="store_true")
 
 
-# ======================
-# Jinja2 custom filters.
-# ======================
-def hasattribute(obj, attr):
-    if hasattr(obj, attr):
-        return True
-    return False
-
-
 # ========
 # Logging.
 # ========
