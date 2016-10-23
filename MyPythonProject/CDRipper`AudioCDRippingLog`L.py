@@ -30,7 +30,7 @@ CURDIR, JSON = os.path.join(os.path.expandvars("%_COMPUTING%"), "MyPythonProject
 # ================
 # Initializations.
 # ================
-returncodes, dftcmd = [], [r"C:\Program Files (x86)\Python35-32\python.exe", "-m", "Applications.CDRipper.AudioCDRippingLog", "insert"]
+tags, returncodes, dftcmd = [], [], [r"C:\Program Files (x86)\Python35-32\python.exe", "-m", "Applications.CDRipper.AudioCDRippingLog", "insert"]
 
 
 # ===============
@@ -38,8 +38,7 @@ returncodes, dftcmd = [], [r"C:\Program Files (x86)\Python35-32\python.exe", "-m
 # ===============
 if os.path.exists(JSON):
     with open(JSON) as fp:
-        tags = list(set([tuple([itemgetter(0)(item), itemgetter(1)(item), itemgetter(2)(item), itemgetter(3)(item), itemgetter(4)(item), itemgetter(5)(item), itemgetter(8)(item)]) for item in json.load(fp)]))
-        for artist, year, album, genre, upc, albumsort, artistsort in tags:
+        for artist, year, album, genre, upc, albumsort, artistsort in json.load(fp):
             cmd = list(dftcmd)
             cmd.append(artist)
             cmd.append(year)

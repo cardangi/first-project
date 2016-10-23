@@ -124,19 +124,19 @@ class AudioCD(MutableMapping):
         return iter(self._otags)
 
     @property
-    def artistsort(self):
-        return self._otags["artistsort"][:1]
+    def enc_name(self):
+        return self._otags["encoder"].name
 
     @property
-    def fullartistsort(self):
+    def index(self):
+        return "{0}.{1}.{2}.{3}".format(self._otags["artistsort"][:1], self._otags["artistsort"], self._otags["albumsort"][:-3], self._otags["titlesort"])
+
+    @property
+    def artistsort(self):
         return self._otags["artistsort"]
 
     @property
     def albumsort(self):
-        return self._otags["albumsort"][:-3]
-
-    @property
-    def fullalbumsort(self):
         return self._otags["albumsort"]
 
     @property
@@ -148,8 +148,28 @@ class AudioCD(MutableMapping):
         return self._otags["discnumber"]
 
     @property
+    def totaldiscs(self):
+        return self._otags["totaldiscs"]
+
+    @property
     def tracknumber(self):
         return self._otags["tracknumber"]
+
+    @property
+    def totaltracks(self):
+        return self._otags["totaltracks"]
+
+    @property
+    def artist(self):
+        return self._otags["artist"]
+
+    @property
+    def origyear(self):
+        return self._otags["origyear"]
+
+    @property
+    def year(self):
+        return self._otags["year"]
 
     @property
     def album(self):
@@ -158,6 +178,38 @@ class AudioCD(MutableMapping):
     @property
     def title(self):
         return self._otags["title"]
+
+    @property
+    def genre(self):
+        return self._otags["genre"]
+
+    @property
+    def titlelanguage(self):
+        return self._otags["titlelanguage"]
+
+    @property
+    def label(self):
+        return self._otags["label"]
+
+    @property
+    def upc(self):
+        return self._otags["upc"]
+
+    @property
+    def live(self):
+        return self._otags["live"]
+
+    @property
+    def bootleg(self):
+        return self._otags["bootleg"]
+
+    @property
+    def incollection(self):
+        return self._otags["incollection"]
+
+    @property
+    def encodingyear(self):
+        return self._otags["encodingyear"]
 
     @classmethod
     def fromfile(cls, fil, enc=shared.UTF8):
@@ -179,17 +231,17 @@ class AudioCD(MutableMapping):
                  "5": r"[\.\-]+"}
 
         # ---------------------------------------------
-        # Chaque mot est formatÃ© en lettres minuscules.
+        # Chaque mot est formaté en lettres minuscules.
         # ---------------------------------------------
         s = re.compile(r"(?i)^(.+)$").sub(cls.low, s)
 
         # --------------------------
-        # Chaque mot est capitalisÃ©.
+        # Chaque mot est capitalisé.
         # --------------------------
         s = re.compile(r"(?i)\b([a-z]+)\b").sub(cls.cap1, s)
 
         # -------------------------------------------------------------
-        # Les conjonctions demeurent entiÃ¨rement en lettres minsucules.
+        # Les conjonctions demeurent entièrement en lettres minsucules.
         # -------------------------------------------------------------
         s = re.compile(r"(?i)\b{0}\b".format(regex["1"])).sub(cls.low, s)
         s = re.compile(r"(?i)\b{0}\b".format(regex["2"])).sub(cls.low, s)
@@ -197,7 +249,7 @@ class AudioCD(MutableMapping):
         s = re.compile(r"(?i)\b{0}\b".format(regex["4"])).sub(cls.low, s)
 
         # -------------------------------------
-        # Le dÃ©but du titre demeure capitalisÃ©.
+        # Le début du titre demeure capitalisé.
         # -------------------------------------
         s = re.compile(r"(?i)^{0}\b".format(regex["1"])).sub(cls.cap1, s)
         s = re.compile(r"(?i)^{0}\b".format(regex["2"])).sub(cls.cap1, s)
@@ -209,19 +261,19 @@ class AudioCD(MutableMapping):
         s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex["4"])).sub(cls.cap2, s)
 
         # ------------------------------------
-        # Les acronymes demeurent capitalisÃ©s.
+        # Les acronymes demeurent capitalisés.
         # ------------------------------------
         s = re.compile(r"(?i)\b(u\.?s\.?a\.?)").sub(cls.upp, s)
         s = re.compile(r"(?i)\b(u\.?k\.?)").sub(cls.upp, s)
         s = re.compile(r"(?i)\b(dj)\b").sub(cls.upp, s)
 
         # ----------------------------------
-        # Autres mots demeurant capitalisÃ©s.
+        # Autres mots demeurant capitalisés.
         # ----------------------------------
         s = re.compile(r"(?i)\b({0})({1})\b".format(regex["5"], regex["3"])).sub(cls.cap2, s)
 
         # -----------------------------------------------------------------
-        # Les mots prÃ©cÃ©dÃ©s d'une apostrophe demeurent en lettre minuscule.
+        # Les mots précédés d'une apostrophe demeurent en lettre minuscule.
         #  ----------------------------------------------------------------
         s = re.compile(r"(?i)\b('[a-z])\b").sub(cls.low, s)
 
@@ -339,39 +391,6 @@ class DefaultCD(AudioCD):
         # ----- Update origyear.
         self._otags["origyear"] = kwargs.get("origyear", "0")
         logger.debug("\torigyear : %s".expandtabs(4) % (self._otags["origyear"],))
-
-    def digitalaudiobase(self):
-        yield "{0}.{1}.{2}.{3}".format(self.artistsort, self.fullartistsort, self.albumsort, self.titlesort)
-        yield self.albumsort
-        yield self.titlesort
-        yield self._otags["artist"]
-        yield self._otags["year"]
-        yield self.album
-        yield self._otags["genre"]
-        yield self._otags["discnumber"]
-        yield self._otags["totaldiscs"]
-        yield self._otags["label"]
-        yield self._otags["tracknumber"]
-        yield self._otags["totaltracks"]
-        yield self.title
-        yield self._otags["live"]
-        yield self._otags["bootleg"]
-        yield self._otags["incollection"]
-        yield self._otags["upc"]
-        yield self._otags["encodingyear"]
-        yield self._otags["titlelanguage"]
-        yield self._otags["origyear"]
-
-    def rippinglog(self):
-        yield self._otags["artist"]
-        yield self._otags["year"]
-        yield self.album
-        yield self._otags["genre"]
-        yield self._otags["upc"]
-        yield self.albumsort
-        yield self._otags["tracknumber"]
-        yield self._otags["encoder"].name
-        yield self.fullartistsort
 
 
 class SelfTitledCD(DefaultCD):

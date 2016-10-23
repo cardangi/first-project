@@ -3,7 +3,8 @@ from datetime import datetime
 import argparse
 import sqlite3
 import locale
-import csv
+import json
+import os
 from ... import shared as s1
 from ..Modules import shared as s2
 
@@ -14,13 +15,6 @@ __author__ = 'Xavier ROSSET'
 # Define French environment.
 # ==========================
 locale.setlocale(locale.LC_ALL, "")
-
-
-# =================
-# Arguments parser.
-# =================
-parser = argparse.ArgumentParser()
-parser.add_argument("fromfile", type=argparse.FileType(encoding=s1.DFTENCODING))
 
 
 # ==========
@@ -35,11 +29,17 @@ def convertyeartointeger(s):
     return 0
 
 
-# ==========
-# Constants.
-# ==========
-HEADERS = ["index", "albumsort", "titlesort", "artist", "year", "album", "genre", "discnumber", "totaldiscs", "publisher", "track", "totaltracks", "title", "live", "bootleg", "incollection", "upc", "encodingyear",
-           "language", "origyear"]
+def validfile(s):
+    if not os.path.exists(s):
+        raise argparse.ArgumentTypeError('"{0}" doesn\'t exist.'.format(s))
+    return s
+
+
+# =================
+# Arguments parser.
+# =================
+parser = argparse.ArgumentParser()
+parser.add_argument("fromjsonfile", type=validfile)
 
 
 # ================
@@ -59,28 +59,48 @@ sqlite3.register_adapter(s2.Boolean, s2.adapt_boolean)
 # ===============
 with s2.connectto(s1.DATABASE) as c:
 
-    reader = csv.DictReader(arguments.fromfile, delimiter=";", fieldnames=HEADERS)
-    for row in reader:
+    with open(arguments.fromjsonfile) as fp:
+        for index, \
+            albumsort, \
+            titlesort, \
+            artist, \
+            year, \
+            album, \
+            genre, \
+            discnumber, \
+            totaldiscs, \
+            label, \
+            tracknumber, \
+            totaltracks, \
+            title, \
+            live, \
+            bootleg, \
+            incollection, \
+            upc, \
+            encodingyear, \
+            titlelanguage, \
+            origyear \
+                in json.load(fp):
 
-        # ALBUMS table.
-        tupalbum = (row["index"][:-11], row["artist"], int(row["year"]), row["album"], int(row["totaldiscs"]), row["genre"], s2.Boolean(row["live"]), s2.Boolean(row["bootleg"]), s2.Boolean(row["incollection"]),
-                    row["language"], row["upc"], convertyeartointeger(row["encodingyear"]), datetime.now(), convertyeartointeger(row["origyear"]))
-        try:
-            c.execute("INSERT INTO albums (albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, created, origyear) "
-                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", tupalbum)
-        except sqlite3.IntegrityError:
-            pass
-
-        # DISCS table.
-        tupdisc = (row["index"][:-11], int(row["discnumber"]), int(row["totaltracks"]), datetime.now())
-        try:
-            c.execute("INSERT INTO discs (albumid, discid, tracks, created) VALUES (?, ?, ?, ?)", tupdisc)
-        except sqlite3.IntegrityError:
-            pass
-
-        # TRACKS table.
-        tuptrack = (row["index"][:-11], int(row["discnumber"]), int(row["track"]), row["title"], datetime.now())
-        try:
-            c.execute("INSERT INTO tracks (albumid, discid, trackid, title, created) VALUES (?, ?, ?, ?, ?)", tuptrack)
-        except sqlite3.IntegrityError:
-            pass
+            # ALBUMS table.
+            tupalbum = (index[:-11], artist, int(year), album, int(totaldiscs), genre, s2.Boolean(live), s2.Boolean(bootleg), s2.Boolean(incollection), titlelanguage, upc, convertyeartointeger(encodingyear),
+                        datetime.now(), convertyeartointeger(origyear))
+            try:
+                c.execute("INSERT INTO albums (albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, created, origyear) "
+                          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", tupalbum)
+            except sqlite3.IntegrityError:
+                pass
+    
+            # DISCS table.
+            tupdisc = (index[:-11], int(discnumber), int(totaltracks), datetime.now())
+            try:
+                c.execute("INSERT INTO discs (albumid, discid, tracks, created) VALUES (?, ?, ?, ?)", tupdisc)
+            except sqlite3.IntegrityError:
+                pass
+    
+            # TRACKS table.
+            tuptrack = (index[:-11], int(discnumber), int(tracknumber), title, datetime.now())
+            try:
+                c.execute("INSERT INTO tracks (albumid, discid, trackid, title, created) VALUES (?, ?, ?, ?, ?)", tuptrack)
+            except sqlite3.IntegrityError:
+                pass

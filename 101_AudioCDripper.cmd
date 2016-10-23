@@ -15,9 +15,9 @@ SET _myparent=%~dp0
 REM ==================
 REM Initializations 2.
 REM ==================
-SET _rippinglog=%TEMP%\rippinglog.json
-SET _htmlrippinglog=%_COMPUTING%\RippingLog\rippinglog.html
-SET _txtdigitalaudiobase=%TEMP%\digitalaudiodatabase
+SET _jsonrippinglog=%TEMP%\rippinglog.json
+SET _htmlrippinglog=%_COMPUTING%\rippingLog\rippinglog.html
+SET _jsondigitalaudiobase=%TEMP%\digitalaudiodatabase.json
 SET _xmldigitalaudiobase=%TEMP%\digitalaudiobase.xml
 SET _digitalaudiobase=%_COMPUTING%\digitalaudiobase\digitalaudiobase
 
@@ -37,23 +37,13 @@ SHIFT
 GOTO MAIN
 
 
-REM        -----------------
-REM  1 --> Ripping database.
-REM        -----------------
+REM        ------------
+REM  1 --> Ripping log.
+REM        ------------
 :STEP1
-IF EXIST "%_rippinglog%" (
-    SET _first=Y
-    FOR /F "usebackq tokens=1-9 delims=;" %%a IN ("%_rippinglog%") DO (
-
-        IF "!_first!"=="Y" (
-            SET _first=N
-            PUSHD "%_PYTHONPROJECT%"
-            python -m Applications.CDRipper.AudioCDRippingLog insert "%%~a" %%~b "%%~c" "%%~d" %%~e %%~f "%%~i"
-            POPD
-        )
-
-    )
-    DEL "%_rippinglog%"
+IF EXIST "%_jsonrippinglog%" (
+    python %_PYTHONPROJECT%\CDRipper`AudioCDRippingLog`L.py
+    DEL "%_jsonrippinglog%"
 )
 SHIFT
 GOTO MAIN
@@ -63,33 +53,33 @@ REM        -----------------------
 REM  2 --> Digital audio database.
 REM        -----------------------
 :STEP2
-IF EXIST "%_txtdigitalaudiobase%" (
+IF EXIST "%_jsondigitalaudiobase%" (
     PUSHD "%_PYTHONPROJECT%"
-    python -m Applications.Database.DigitalAudio.insert "%_txtdigitalaudiobase%"
+    python -m Applications.Database.DigitalAudio.insert "%_jsondigitalaudiobase%"
     POPD
-    DEL "%_txtdigitalaudiobase%"
+    DEL "%_jsondigitalaudiobase%"
 )
 SHIFT
 GOTO MAIN
 
 
-REM        ------------------------
-REM  3 --> Update RippingLog views.
-REM        ------------------------
+REM        -------------------------
+REM  3 --> Update Ripping log views.
+REM        -------------------------
 :STEP3
 python G:\Computing\MyPythonProject\Database`HTMLView`L.py RippingLog
 IF NOT ERRORLEVEL 1 (
-    PUSHD %_PYTHONPROJECT%
-    python -m Applications.Database.RippingLog.View2
-    POPD
+    REM PUSHD %_PYTHONPROJECT%
+    REM python -m Applications.Database.RippingLog.View2
+    REM POPD
 )
 SHIFT
 GOTO MAIN
 
 
-REM        ---------------------------
-REM  4 --> Update Digital Audio views.
-REM        ---------------------------
+REM        ------------------------------------
+REM  4 --> Update Digital Audio database views.
+REM        ------------------------------------
 :STEP4
 python G:\Computing\MyPythonProject\Database`HTMLView`L.py DigitalAudio
 IF NOT ERRORLEVEL 1 (

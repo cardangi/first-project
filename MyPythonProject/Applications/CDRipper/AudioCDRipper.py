@@ -47,7 +47,7 @@ exists, join, expandvars = os.path.exists, os.path.join, os.path.expandvars
 # ==========
 # Constants.
 # ==========
-JSON, DABJSON, RIPJSON = join(expandvars("%TEMP%"), "tags.json"), join(expandvars("%TEMP%"), "digitalaudiodatabase.json"), join(expandvars("%TEMP%"), "rippinglog.json")
+JSON, DABJSON, RIPDBJSON = join(expandvars("%TEMP%"), "tags.json"), join(expandvars("%TEMP%"), "digitalaudiodatabase.json"), join(expandvars("%TEMP%"), "rippinglog.json")
 
 
 # ==========
@@ -103,18 +103,57 @@ if exists(arguments.tagsfile) and arguments.rippingprofile.lower() in s2.PROFILE
             with open(DABJSON) as fp:
                 dab = json.load(fp)
             dab = [tuple(item) for item in dab]
-        dab.append(tuple(NewRippedCD.digitalaudiobase()))
+        dab.append(
+            tuple(
+                [
+                    NewRippedCD.index,
+                    NewRippedCD.albumsort[:-3],
+                    NewRippedCD.titlesort,
+                    NewRippedCD.artist,
+                    NewRippedCD.year,
+                    NewRippedCD.album,
+                    NewRippedCD.genre,
+                    NewRippedCD.discnumber,
+                    NewRippedCD.totaldiscs,
+                    NewRippedCD.label,
+                    NewRippedCD.tracknumber,
+                    NewRippedCD.totaltracks,
+                    NewRippedCD.title,
+                    NewRippedCD.live,
+                    NewRippedCD.bootleg,
+                    NewRippedCD.incollection,
+                    NewRippedCD.upc,
+                    NewRippedCD.encodingyear,
+                    NewRippedCD.titlelanguage,
+                    NewRippedCD.origyear
+                ]
+            )
+        )
+        dab = list(set(dab))
         with open(DABJSON, s1.WRITE) as fp:
             json.dump(sorted(dab, key=itemgetter(0)), fp, indent=4, sort_keys=True)
         dab.clear()
 
         #  --> 2.b. Audio CD ripping database.
-        if exists(RIPJSON):
-            with open(RIPJSON) as fp:
+        if exists(RIPDBJSON):
+            with open(RIPDBJSON) as fp:
                 dab = json.load(fp)
             dab = [tuple(item) for item in dab]
-        dab.append(tuple(NewRippedCD.rippinglog()))
-        with open(RIPJSON, s1.WRITE) as fp:
+        dab.append(
+            tuple(
+                [
+                    NewRippedCD.artist, 
+                    NewRippedCD.year, 
+                    NewRippedCD.album, 
+                    NewRippedCD.genre, 
+                    NewRippedCD.upc, 
+                    NewRippedCD.albumsort[:-3], 
+                    NewRippedCD.artistsort
+                ]
+            )
+        )
+        dab = list(set(dab))
+        with open(RIPDBJSON, s1.WRITE) as fp:
             json.dump(sorted(dab, key=itemgetter(0)), fp, indent=4, sort_keys=True)
         dab.clear()
 
