@@ -143,10 +143,14 @@ if exists(arguments.tagsfile) and arguments.rippingprofile.lower() in s2.PROFILE
                 ]
             )
         )
-        dab = list(set(dab))
-        with open(RIPDBJSON, s1.WRITE) as fp:
-            json.dump(sorted(dab, key=itemgetter(0)), fp, indent=4, sort_keys=True)
-        dab.clear()
+        try:
+            dab = list(set(dab))
+        except TypeError:
+            pass
+        else:
+            with open(RIPDBJSON, s1.WRITE) as fp:
+                json.dump(sorted(dab, key=itemgetter(0)), fp, indent=4, sort_keys=True)
+            dab.clear()
 
     #        ---------------
     # --> 3. Self titled CD.

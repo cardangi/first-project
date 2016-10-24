@@ -38,11 +38,12 @@ logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 # ========
 class AudioCD(MutableMapping):
 
-    tags = {"artistsort": True, "albumartistsort": False, "artist": True, "albumartist": False, "disc": True, "track": True, "title": False, "profile": False, "source": False, "bootleg": True, "live": True,
-            "incollection": True, "titlelanguage": False, "genre": False, "style": False, "_albumart_1_front album cover": False}
+    tags = {"artistsort": True, "albumartistsort": False, "artist": True, "albumartist": False, "encoder": True, "disc": True, "track": True, "title": False, "profile": False, "source": False, "bootleg": True,
+            "live": True, "incollection": True, "titlelanguage": False, "genre": False, "style": False, "_albumart_1_front album cover": False}
 
     def __init__(self, **kwargs):
-        nt = namedtuple("nt", "name code folde extension")
+
+        nt = namedtuple("nt", "name code folder extension")
         regex = re.compile(r"^(\d{1,2})/(\d{1,2})")
         self._otags = dict()
 
@@ -50,12 +51,12 @@ class AudioCD(MutableMapping):
         for item in [item for item in AudioCD.tags if AudioCD.tags[item]]:
             if item not in kwargs:
                 raise ValueError("{0} isn\'t available.".format(item))
-        if "encoder" not in kwargs:
-            raise ValueError("encoder isn\'t available.")
         if not regex.match(kwargs["track"]):
             raise ValueError("track doesn\'t respect the expected pattern.")
         if not regex.match(kwargs["disc"]):
             raise ValueError("disc doesn\'t respect the expected pattern.")
+        if kwargs["encoder"] not in [encoder.get("name") for encoder in self.deserialize(ENCODERS)]:
+            raise ValueError('"{0}" as encoder isn\'t recognized.'.format(kwargs["encoder"]))
 
         # ----- Attributes taken from the input tags.
         self._otags = {key: kwargs[key] for key in kwargs if key in AudioCD.tags}
@@ -74,12 +75,13 @@ class AudioCD(MutableMapping):
         for encoder in self.deserialize(ENCODERS):  # "encoder" est un dictionnaire.
             if sorted(list(encoder.keys())) == sorted(ENC_KEYS):
                 if kwargs["encoder"] == encoder["name"]:
-                    self._otags["encoder"] = nt(encoder["name"], encoder["code"], encoder["folder"], encoder["extension"])
+                    self._otags["encoder"] = kwargs["encoder"]
+                    encoder = nt(encoder["name"], encoder["code"], encoder["folder"], encoder["extension"])
                     logger.debug("Used encoder.")
-                    logger.debug("\t%s".expandtabs(4) % ("Name\t: %s".expandtabs(9) % (encoder["name"],)),)
-                    logger.debug("\t%s".expandtabs(4) % ("Code\t: %s".expandtabs(9) % (encoder["code"],)),)
-                    logger.debug("\t%s".expandtabs(4) % ("Folder\t: %s".expandtabs(9) % (encoder["folder"],)),)
-                    logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (encoder["extension"],)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Name\t: %s".expandtabs(9) % (encoder.name,)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Code\t: %s".expandtabs(9) % (encoder.code,)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Folder\t: %s".expandtabs(9) % (encoder.folder,)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (encoder.extension,)),)
                     break
 
         # ----- Set tracknumber / totaltracks.
@@ -124,8 +126,8 @@ class AudioCD(MutableMapping):
         return iter(self._otags)
 
     @property
-    def enc_name(self):
-        return self._otags["encoder"].name
+    def encoder(self):
+        return self._otags["encoder"]
 
     @property
     def index(self):
@@ -376,9 +378,6 @@ class DefaultCD(AudioCD):
 
         # ----- Set albumsort.
         self._otags["albumsort"] = "1.{year}0000.{count}.{enc}".format(year=kwargs.get("origyear", kwargs["year"]), count=kwargs["albumsortcount"], enc=self._otags["encoder"].code)
-        logger.debug("Build tags.")
-        logger.debug("\talbum    : %s".expandtabs(4) % (self._otags["album"],))
-        logger.debug("\talbumsort: %s".expandtabs(4) % (self._otags["albumsort"],))
 
         # ----- Set titlesort.
         self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["discnumber"],
@@ -386,10 +385,15 @@ class DefaultCD(AudioCD):
                                                                                     bonus="N",
                                                                                     live=self._otags["live"],
                                                                                     bootleg=self._otags["bootleg"])
-        logger.debug("\ttitlesort: %s".expandtabs(4) % (self._otags["titlesort"],))
 
         # ----- Update origyear.
         self._otags["origyear"] = kwargs.get("origyear", "0")
+
+        # ----- Log new tags.
+        logger.debug("Build tags.")
+        logger.debug("\talbum    : %s".expandtabs(4) % (self._otags["album"],))
+        logger.debug("\talbumsort: %s".expandtabs(4) % (self._otags["albumsort"],))
+        logger.debug("\ttitlesort: %s".expandtabs(4) % (self._otags["titlesort"],))
         logger.debug("\torigyear : %s".expandtabs(4) % (self._otags["origyear"],))
 
 
