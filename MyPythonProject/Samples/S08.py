@@ -9,10 +9,10 @@ class MyClass(ContextDecorator):
     def __enter__(self):
         print("Starting")
         try:
-            print("A")
-            raise ValueError("Exception!")
-        except ValueError as e:
+            15 / 0
+        except ZeroDivisionError as e:
             print(e)
+        return "AAAA"
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         print("Stopping")
@@ -23,5 +23,6 @@ class MyClass(ContextDecorator):
 # def myfunc(s):
 #     print(s)
 # myfunc("Running")
-with MyClass():
-    print("Running")
+with MyClass() as x:
+    if x:
+        print(x)

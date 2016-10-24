@@ -45,6 +45,7 @@ class AudioCD(MutableMapping):
 
         nt = namedtuple("nt", "name code folder extension")
         regex = re.compile(r"^(\d{1,2})/(\d{1,2})")
+        self._encoder = None
         self._otags = dict()
 
         # ----- Check mandatory input tags.
@@ -76,12 +77,12 @@ class AudioCD(MutableMapping):
             if sorted(list(encoder.keys())) == sorted(ENC_KEYS):
                 if kwargs["encoder"] == encoder["name"]:
                     self._otags["encoder"] = kwargs["encoder"]
-                    encoder = nt(encoder["name"], encoder["code"], encoder["folder"], encoder["extension"])
+                    self._encoder = nt(encoder["name"], encoder["code"], encoder["folder"], encoder["extension"])
                     logger.debug("Used encoder.")
-                    logger.debug("\t%s".expandtabs(4) % ("Name\t: %s".expandtabs(9) % (encoder.name,)),)
-                    logger.debug("\t%s".expandtabs(4) % ("Code\t: %s".expandtabs(9) % (encoder.code,)),)
-                    logger.debug("\t%s".expandtabs(4) % ("Folder\t: %s".expandtabs(9) % (encoder.folder,)),)
-                    logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (encoder.extension,)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Name\t: %s".expandtabs(9) % (self._encoder.name,)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Code\t: %s".expandtabs(9) % (self._encoder.code,)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Folder\t: %s".expandtabs(9) % (self._encoder.folder,)),)
+                    logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (self._encoder.extension,)),)
                     break
 
         # ----- Set tracknumber / totaltracks.
@@ -377,7 +378,7 @@ class DefaultCD(AudioCD):
         self._otags["album"] = self.case(kwargs["album"])
 
         # ----- Set albumsort.
-        self._otags["albumsort"] = "1.{year}0000.{count}.{enc}".format(year=kwargs.get("origyear", kwargs["year"]), count=kwargs["albumsortcount"], enc=self._otags["encoder"].code)
+        self._otags["albumsort"] = "1.{year}0000.{count}.{enc}".format(year=kwargs.get("origyear", kwargs["year"]), count=kwargs["albumsortcount"], enc=self._encoder.code)
 
         # ----- Set titlesort.
         self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["discnumber"],
