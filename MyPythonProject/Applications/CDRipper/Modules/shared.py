@@ -1,10 +1,10 @@
 # -*- coding: ISO-8859-1 -*-
 from collections import MutableMapping, namedtuple
+from jinja2 import Environment, FileSystemLoader
 from sortedcontainers import SortedDict
-from itertools import repeat
+from contextlib import ContextDecorator
 from datetime import datetime
 from pytz import timezone
-from operator import is_
 import logging
 import json
 import os
@@ -415,6 +415,104 @@ class SelfTitledCD(DefaultCD):
 
         # ----- Update album.
         self._otags["album"] = "{0} (Self Titled)".format(kwargs["year"])
+
+
+class RippedCD(ContextDecorator):
+
+    environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Templates")), trim_blocks=True, lstrip_blocks=True)
+    outputtags = environment.get_template("AudioCDOutputTags")
+    profiles = {"default": DefaultCD.fromfile, "selftitled": SelfTitledCD.fromfile}
+
+    def __init__(self, ripprofile, tagsfile, test=True):
+        self._rippedcd = None
+        self._profile = None
+        self._tags = None
+        self._test = None
+        self.profile = ripprofile
+        self.tags = tagsfile
+        self.test = test
+
+    @property
+    def profile(self):
+        return self._profile
+
+    @profile.setter
+    def profile(self, arg):
+        if arg.lower() not in self.profiles:
+            raise ValueError('"{0}" isn\'t allowed.'.format(arg))
+        self._profile = arg
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @tags.setter
+    def tags(self, arg):
+        if not os.path.exists(arg):
+            raise ValueError('"{0}" doesn\'t exist.'.format(arg))
+        self._tags = arg
+
+    @property
+    def test(self):
+        return self._test
+
+    @test.setter
+    def test(self, arg):
+        self._test = arg
+
+    @property
+    def new(self):
+        return self._rippedcd
+
+    def __enter__(self):
+
+        # --> 1. Start logging.
+        logger.info("{0:=^140}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
+        logger.info('START "%s".' % (os.path.basename(__file__),))
+        logger.info('"{0}" used as ripping profile.'.format(self.profile))
+
+        # --> 2. Log input tags.
+        logger.debug("Input file.")
+        logger.debug('\t"{0}"'.format(self.tags).expandtabs(4))
+        logger.debug("Input tags.")
+        if os.path.exists(self.tags):
+            with open(self.tags, encoding=shared.UTF16) as fr:
+                for line in fr:
+                    logger.debug("\t{0}".format(line.splitlines()[0]).expandtabs(4))
+
+        # --> 3. Create AudioCD instance.
+        self._rippedcd = self.profiles[self.profile](self.tags, shared.UTF16)  # l'attribut "_rippedcd" est une instance de type "AudioCD".
+
+        # --> 4. Return instance.
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+
+        # --> 1. Log output tags.
+        logger.debug("Output tags.")
+        for k, v in self.new.items():
+            logger.debug("\t{0}={1}".format(k, v).expandtabs(4))
+
+        # --> 2. Store tags.
+        fo, encoding = self.tags, shared.UTF16
+        if self.test:
+            fo, encoding = os.path.join(os.path.expandvars("%TEMP%"), "T{0}.txt".format(self.new.tracknumber.zfill(2))), shared.UTF8
+        with open(fo, shared.WRITE, encoding=encoding) as fw:
+            logger.debug("Tags file.")
+            logger.debug("\t{0}".format(fo).expandtabs(4))
+            fw.write(self.outputtags.render(tags=self.new))
+
+        # --> 3. Store tags in JSON.
+        JSON, obj = os.path.join(os.path.expandvars("%TEMP%"), "tags.json"), []
+        if os.path.exists(JSON):
+            with open(JSON) as fp:
+                obj = json.load(fp)
+        obj.append(dict(self.new))
+        with open(JSON, shared.WRITE) as fp:
+            json.dump(obj, fp, indent=4, sort_keys=True)
+
+        # --> 4. Stop logging.
+        logger.info('END "%s".' % (os.path.basename(__file__),))
 
 
 # ==========
