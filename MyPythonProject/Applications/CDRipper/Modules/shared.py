@@ -467,9 +467,9 @@ class RippedCD(ContextDecorator):
     def __enter__(self):
 
         # --> 1. Start logging.
-        logger.info("{0:=^140}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
-        logger.info('START "%s".' % (os.path.basename(__file__),))
-        logger.info('"{0}" used as ripping profile.'.format(self.profile))
+        logger.debug("{0:=^140}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
+        logger.debug('START "%s".' % (os.path.basename(__file__),))
+        logger.debug('"{0}" used as ripping profile.'.format(self.profile))
 
         # --> 2. Log input tags.
         logger.debug("Input file.")
@@ -512,7 +512,7 @@ class RippedCD(ContextDecorator):
             json.dump(obj, fp, indent=4, sort_keys=True)
 
         # --> 4. Stop logging.
-        logger.info('END "%s".' % (os.path.basename(__file__),))
+        logger.debug('END "%s".' % (os.path.basename(__file__),))
 
 
 # ==========

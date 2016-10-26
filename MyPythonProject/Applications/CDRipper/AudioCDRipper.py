@@ -52,11 +52,12 @@ try:
     rippedcd = stack.enter_context(s2.RippedCD(arguments.rippingprofile, arguments.tagsfile, arguments.test))
 except ValueError as e:
     logger.debug(e)
-    logger.info('END "%s".' % (os.path.basename(__file__),))
+    logger.debug('END "%s".' % (os.path.basename(__file__),))
 else:
     with stack:
         if rippedcd.profile in ["default", "selftitled"]:
 
+            #  --> 1. Digital audio database.
             if exists(DABJSON):
                 with open(DABJSON) as fp:
                     obj = json.load(fp)
@@ -92,7 +93,7 @@ else:
                 json.dump(sorted(obj, key=itemgetter(0)), fp, indent=4, sort_keys=True)
             obj.clear()
 
-            #  --> 2.b. Audio CD ripping database.
+            #  --> 2. Audio CD ripping database.
             if exists(RIPDBJSON):
                 with open(RIPDBJSON) as fp:
                     obj = json.load(fp)
