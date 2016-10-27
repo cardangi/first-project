@@ -14,19 +14,6 @@ from ... import shared
 __author__ = 'Xavier ROSSET'
 
 
-# ==========
-# Constants.
-# ==========
-DFTPATTERN = r"^(?:\ufeff)?(?!#)(?:z_)?([^=]+)=(.+)$"
-PROFILES = ["default", "defaultbootlegs", "pjbootlegs", "selftitled"]
-GENRES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Genres.json")
-LANGUAGES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Languages.json")
-ENCODERS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Encoders.json")
-TITLES = os.path.join(os.path.expandvars("%_COMPUTING%"), "Titles.json")
-ENC_KEYS = ["name", "code", "folder", "extension"]
-TIT_KEYS = ["number", "title", "overwrite"]
-
-
 # ========
 # Logging.
 # ========
@@ -421,7 +408,6 @@ class RippedCD(ContextDecorator):
 
     environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Templates")), trim_blocks=True, lstrip_blocks=True)
     outputtags = environment.get_template("AudioCDOutputTags")
-    profiles = {"default": DefaultCD.fromfile, "selftitled": SelfTitledCD.fromfile}
 
     def __init__(self, ripprofile, tagsfile, test=True):
         self._rippedcd = None
@@ -438,8 +424,8 @@ class RippedCD(ContextDecorator):
 
     @profile.setter
     def profile(self, arg):
-        if arg.lower() not in self.profiles:
-            raise ValueError('"{0}" isn\'t allowed.'.format(arg))
+        if arg.lower() not in PROFILES:
+            raise ValueError('"{0}" isn\'t allowed.'.format(arg.lower()))
         self._profile = arg
 
     @property
@@ -481,7 +467,7 @@ class RippedCD(ContextDecorator):
                     logger.debug("\t{0}".format(line.splitlines()[0]).expandtabs(4))
 
         # --> 3. Create AudioCD instance.
-        self._rippedcd = self.profiles[self.profile](self.tags, shared.UTF16)  # l'attribut "_rippedcd" est une instance de type "AudioCD".
+        self._rippedcd = PROFILES[self.profile].isinstancedfrom(self.tags, shared.UTF16)  # l'attribut "_rippedcd" est une instance de type "AudioCD".
 
         # --> 4. Return instance.
         return self
@@ -500,7 +486,7 @@ class RippedCD(ContextDecorator):
         with open(fo, shared.WRITE, encoding=encoding) as fw:
             logger.debug("Tags file.")
             logger.debug("\t{0}".format(fo).expandtabs(4))
-            fw.write(self.outputtags.render(tags=self.new))
+            fw.write(self.outputtags.render(tags={key: self.new[key] for key in self.new if key not in PROFILES[self.profile].exclusions}))
 
         # --> 3. Store tags in JSON.
         JSON, obj = os.path.join(os.path.expandvars("%TEMP%"), "tags.json"), []
@@ -530,3 +516,23 @@ def canfilebeprocessed(fe, *tu):
     if fe.lower() in [item.lower() for item in tu]:
         return True
     return False
+
+
+# ================
+# Initializations.
+# ================
+profile = namedtuple("profile", "exclusions isinstancedfrom")
+
+
+# ==========
+# Constants.
+# ==========
+DFTPATTERN = r"^(?:\ufeff)?(?!#)(?:z_)?([^=]+)=(.+)$"
+GENRES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Genres.json")
+LANGUAGES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Languages.json")
+ENCODERS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Encoders.json")
+TITLES = os.path.join(os.path.expandvars("%_COMPUTING%"), "Titles.json")
+ENC_KEYS = ["name", "code", "folder", "extension"]
+TIT_KEYS = ["number", "title", "overwrite"]
+PROFILES = {"default": profile(["albumsortcount", "bootleg", "disc", "live", "origyear", "track"], DefaultCD.fromfile),
+            "selftitled": profile(["albumsortcount", "bootleg", "disc", "live", "origyear", "track"], SelfTitledCD.fromfile)}
