@@ -1,0 +1,18 @@
+{
+    "(FLAC 1.3.0)": {
+        "totaldiscs": "disctotal",
+        "totaltracks": "tracktotal"
+    },
+    "FDK v0.1.3": {
+        "totaldiscs": "totaldiscs",
+        "totaltracks": "totaltracks"
+    },
+    "default": {
+        "totaldiscs": "totaldiscs",
+        "totaltracks": "totaltracks"
+    },
+    "ogg vorbis (aoTuV SSE3)": {
+        "totaldiscs": "disctotal",
+        "totaltracks": "tracktotal"
+    }
+}

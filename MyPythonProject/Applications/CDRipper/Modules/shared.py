@@ -72,11 +72,11 @@ class AudioCD(MutableMapping):
                     logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (self._encoder.extension,)),)
                     break
 
-        # ----- Set tracknumber / totaltracks.
-        self._otags["tracknumber"], self._otags["totaltracks"] = self.splitfield(kwargs["track"], regex)
+        # ----- Both update track and set total tracks.
+        self._otags["track"], self._otags[MAPPING.get(kwargs["encoder"], MAPPING["default"])["totaltracks"]] = self.splitfield(kwargs["track"], regex)
 
-        # ----- Set discnumber / totaldiscs.
-        self._otags["discnumber"], self._otags["totaldiscs"] = self.splitfield(kwargs["disc"], regex)
+        # ----- Both update disc and set total discs.
+        self._otags["disc"], self._otags[MAPPING.get(kwargs["encoder"], MAPPING["default"])["totaldiscs"]] = self.splitfield(kwargs["disc"], regex)
 
         # ----- Update genre.
         for artist, genre in self.deserialize(GENRES):
@@ -93,7 +93,7 @@ class AudioCD(MutableMapping):
         # ----- Update title.
         for track in self.deserialize(TITLES):  # "track" est un dictionnaire.
             if sorted(list(track.keys())) == sorted(TIT_KEYS):
-                if self._otags["tracknumber"] == track["number"]:
+                if self._otags["track"] == track["number"]:
                     if track["overwrite"]:
                         self._otags["title"] = track["title"]
                         break
@@ -135,19 +135,19 @@ class AudioCD(MutableMapping):
 
     @property
     def discnumber(self):
-        return self._otags["discnumber"]
+        return self._otags["disc"]
 
     @property
     def totaldiscs(self):
-        return self._otags["totaldiscs"]
+        return self._otags[MAPPING.get(self.encoder, MAPPING["default"])["totaldiscs"]]
 
     @property
     def tracknumber(self):
-        return self._otags["tracknumber"]
+        return self._otags["track"]
 
     @property
     def totaltracks(self):
-        return self._otags["totaltracks"]
+        return self._otags[MAPPING.get(self.encoder, MAPPING["default"])["totaltracks"]]
 
     @property
     def artist(self):
@@ -368,14 +368,14 @@ class DefaultCD(AudioCD):
         self._otags["albumsort"] = "1.{year}0000.{count}.{enc}".format(year=kwargs.get("origyear", kwargs["year"]), count=kwargs["albumsortcount"], enc=self._encoder.code)
 
         # ----- Set titlesort.
-        self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["discnumber"],
-                                                                                    track=self._otags["tracknumber"].zfill(2),
+        self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["disc"],
+                                                                                    track=self._otags["track"].zfill(2),
                                                                                     bonus="N",
                                                                                     live=self._otags["live"],
                                                                                     bootleg=self._otags["bootleg"])
 
         # ----- Update origyear.
-        self._otags["origyear"] = kwargs.get("origyear", "0")
+        self._otags["origyear"] = kwargs.get("origyear", kwargs["year"])
 
         # ----- Log new tags.
         logger.debug("Build tags.")
@@ -534,5 +534,7 @@ ENCODERS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", 
 TITLES = os.path.join(os.path.expandvars("%_COMPUTING%"), "Titles.json")
 ENC_KEYS = ["name", "code", "folder", "extension"]
 TIT_KEYS = ["number", "title", "overwrite"]
-PROFILES = {"default": profile(["albumsortcount", "bootleg", "disc", "live", "origyear", "track"], DefaultCD.fromfile),
-            "selftitled": profile(["albumsortcount", "bootleg", "disc", "live", "origyear", "track"], SelfTitledCD.fromfile)}
+PROFILES = {"default": profile(["albumsortcount", "bootleg", "live"], DefaultCD.fromfile),
+            "selftitled": profile(["albumsortcount", "bootleg", "live"], SelfTitledCD.fromfile)}
+with open(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), r"Applications/CDRipper/Mapping.json")) as fp:
+    MAPPING = json.load(fp)
