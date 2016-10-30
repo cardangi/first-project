@@ -26,7 +26,7 @@ logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 class AudioCD(MutableMapping):
 
     tags = {"artistsort": True, "albumartistsort": False, "artist": True, "albumartist": False, "encoder": True, "disc": True, "track": True, "title": False, "profile": False, "source": False, "bootleg": True,
-            "live": True, "incollection": True, "titlelanguage": False, "genre": False, "style": False, "_albumart_1_front album cover": False}
+            "live": True, "incollection": True, "titlelanguage": False, "genre": False, "style": False, "rating": False, "_albumart_1_front album cover": False}
 
     def __init__(self, **kwargs):
 
