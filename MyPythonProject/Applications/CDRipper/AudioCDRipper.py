@@ -1,8 +1,8 @@
 # -*- coding: ISO-8859-1 -*-
 import os
 import json
+import logging
 import argparse
-import logging.handlers
 from operator import itemgetter
 from contextlib import ExitStack
 from .. import shared as s1
