@@ -39,6 +39,7 @@ def log(arg1, arg2):
 # =================
 parser = argparse.ArgumentParser()
 # parser.add_argument("odirectory", type=validdirectory)
+parser.add_argument("delay", type=int)
 parser.add_argument("-t", "--test", action="store_true")
 
 
@@ -115,5 +116,5 @@ class FilesFrom(MutableSequence):
 # Main algorithm.
 # ===============
 s = sched.scheduler()
-s.enter(10, 1, FilesFrom(IDIRECTORY), kwargs={"odirectory": r"m:", "test": arguments.test})
+s.enter(arguments.delay, 1, FilesFrom(IDIRECTORY), kwargs={"odirectory": r"m:", "test": arguments.test})
 s.run()
