@@ -66,8 +66,8 @@ logger = logging.getLogger("%s.%s" % (__package__, basename(__file__)))
 class FilesFrom(MutableSequence):
 
     def __init__(self, folder):
-        self._regex = re.compile(r"^{0}".format(folder), re.IGNORECASE)
         self._folder = folder
+        self._regex = re.compile(r"^{0}".format(folder), re.IGNORECASE)
         self._seq = []
         for fil in shared.filesinfolder(folder=folder):
             try:
