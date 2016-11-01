@@ -1,11 +1,11 @@
 {
-    "(FLAC 1.3.0)": {
-        "totaldiscs": "disctotal",
-        "totaltracks": "tracktotal"
-    },
     "default": {
         "totaldiscs": "totaldiscs",
         "totaltracks": "totaltracks"
+    },
+    "(FLAC 1.3.0)": {
+        "totaldiscs": "disctotal",
+        "totaltracks": "tracktotal"
     },
     "ogg vorbis (aoTuV SSE3)": {
         "totaldiscs": "disctotal",
