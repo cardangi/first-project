@@ -103,7 +103,7 @@ REM        ----------------
 REM IF EXIST "M:\" (
     IF EXIST "F:\`X5" (
         PUSHD "%_PYTHONPROJECT%"
-        python -m Applications.CDRipper.AudioDigitalFilesCopy 10 --test
+        python -m Applications.CDRipper.AudioDigitalFilesCopy 120 --test
         POPD
     )
 REM )
