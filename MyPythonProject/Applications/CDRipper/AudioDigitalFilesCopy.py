@@ -22,12 +22,6 @@ dirname, basename, exists, normpath = os.path.dirname, os.path.basename, os.path
 # ==========
 # Functions.
 # ==========
-def log(arg1, arg2):
-    logger.debug("Copy file.")
-    logger.debug("\tSource\t\t: {0}".format(arg1).expandtabs(3))
-    logger.debug("\tDestination : {0}".format(arg2).expandtabs(3))
-
-
 # def validdirectory(d):
 #     if not exists(d):
 #         raise argparse.ArgumentTypeError('"{0}" isn\'t a valid output directory.'.format(d))
@@ -97,7 +91,7 @@ class FilesFrom(MutableSequence):
             for fil in self:
                 dst = normpath(dirname(self._regex.sub(kwargs["odirectory"], fil)))
                 if kwargs["test"]:
-                    log(fil, dst)
+                    self.log(fil, dst)
                     continue
                 while True:
                     try:
@@ -105,11 +99,17 @@ class FilesFrom(MutableSequence):
                     except FileNotFoundError:
                         os.makedirs(dst)
                     else:
-                        log(fil, dst)
+                        self.log(fil, dst)
                         break
 
     def insert(self, index, value):
         self._seq.insert(index, value)
+
+    @staticmethod
+    def log(arg1, arg2):
+        logger.debug("Copy file.")
+        logger.debug("\tSource\t\t: {0}".format(arg1).expandtabs(3))
+        logger.debug("\tDestination : {0}".format(arg2).expandtabs(3))
 
 
 # ===============
