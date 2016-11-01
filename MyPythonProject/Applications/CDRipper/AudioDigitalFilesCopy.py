@@ -58,7 +58,7 @@ logger = logging.getLogger("%s.%s" % (__package__, basename(__file__)))
 # ========
 # Classes.
 # ========
-class FilesFrom(MutableSequence):
+class FLACFilesFrom(MutableSequence):
 
     def __init__(self, folder):
         self._folder = folder
@@ -116,5 +116,5 @@ class FilesFrom(MutableSequence):
 # Main algorithm.
 # ===============
 s = sched.scheduler()
-s.enter(arguments.delay, 1, FilesFrom(IDIRECTORY), kwargs={"odirectory": r"m:", "test": arguments.test})
+s.enter(arguments.delay, 1, FLACFilesFrom(IDIRECTORY), kwargs={"odirectory": r"m:", "test": arguments.test})
 s.run()
