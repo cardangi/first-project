@@ -100,10 +100,10 @@ REM        ----------------
 REM  5 --> Copy to SD card.
 REM        ----------------
 :STEP5
-IF EXIST "M:\" (
+REM IF EXIST "M:\" (
     IF EXIST "F:\`X5" (
         PUSHD "%_PYTHONPROJECT%"
-        python -m Applications.CDRipper.AudioDigitalFilesCopy "M:"
+        python -m Applications.CDRipper.AudioDigitalFilesCopy --test
         POPD
     )
-)
+REM )
