@@ -1,13 +1,14 @@
 # -*- coding: ISO-8859-1 -*-
 from mutagen import File, MutagenError
 from contextlib import ExitStack
-from Applications import shared
 import argparse
 import logging
 import shutil
 import sys
 import os
 import re
+from .. import shared
+
 
 __author__ = 'Xavier ROSSET'
 
