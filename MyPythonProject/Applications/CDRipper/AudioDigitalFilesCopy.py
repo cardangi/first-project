@@ -1,14 +1,14 @@
 # -*- coding: ISO-8859-1 -*-
+from collections import MutableSequence
 from mutagen import File, MutagenError
 from contextlib import ExitStack
 import argparse
 import logging
 import shutil
-import sys
+import sched
 import os
 import re
 from .. import shared
-
 
 __author__ = 'Xavier ROSSET'
 
@@ -16,7 +16,7 @@ __author__ = 'Xavier ROSSET'
 # ============
 # Local names.
 # ============
-dirname, basename, exists = os.path.dirname, os.path.basename, os.path.exists
+dirname, basename, exists, normpath = os.path.dirname, os.path.basename, os.path.exists, os.path.normpath
 
 
 # ==========
@@ -28,17 +28,17 @@ def log(arg1, arg2):
     logger.debug("\tDestination : {0}".format(arg2).expandtabs(3))
 
 
-def validdirectory(d):
-    if not exists(d):
-        raise argparse.ArgumentTypeError('"{0}" isn\'t a valid output directory.'.format(d))
-    return d
+# def validdirectory(d):
+#     if not exists(d):
+#         raise argparse.ArgumentTypeError('"{0}" isn\'t a valid output directory.'.format(d))
+#     return d
 
 
 # =================
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("odirectory", type=validdirectory)
+# parser.add_argument("odirectory", type=validdirectory)
 parser.add_argument("-t", "--test", action="store_true")
 
 
@@ -54,47 +54,66 @@ IDIRECTORY = r"F:\\`X5"
 arguments = parser.parse_args()
 
 
-# ===================
-# Regular expression.
-# ===================
-regex = re.compile(r"^{0}".format(IDIRECTORY), re.IGNORECASE)
-
-
 # ========
 # Logging.
 # ========
 logger = logging.getLogger("%s.%s" % (__package__, basename(__file__)))
 
 
+# ========
+# Classes.
+# ========
+class FilesFrom(MutableSequence):
+
+    def __init__(self, folder):
+        self._regex = re.compile(r"^{0}".format(folder), re.IGNORECASE)
+        self._folder = folder
+        self._seq = []
+        for fil in shared.filesinfolder(folder=folder):
+            try:
+                audio = File(fil)
+            except MutagenError:
+                continue
+            if "audio/flac" in audio.mime:
+                self._seq.append(normpath(fil))
+
+    def __getitem__(self, item):
+        return self._seq[item]
+
+    def __setitem__(self, key, value):
+        self._seq[key] = value
+
+    def __delitem__(self, key):
+        del self._seq[key]
+
+    def __len__(self):
+        return len(self._seq)
+
+    def __call__(self, *args, **kwargs):
+        stack = ExitStack()
+        stack.callback(shutil.rmtree, normpath(self._folder))
+        with stack:
+            for fil in self:
+                dst = normpath(dirname(self._regex.sub(kwargs["odirectory"], fil)))
+                if kwargs["test"]:
+                    log(fil, dst)
+                    continue
+                while True:
+                    try:
+                        shutil.copy2(src=fil, dst=dst)
+                    except FileNotFoundError:
+                        os.makedirs(dst)
+                    else:
+                        log(fil, dst)
+                        break
+
+    def insert(self, index, value):
+        self._seq.insert(index, value)
+
+
 # ===============
 # Main algorithm.
 # ===============
-
-# 1. Is IDIRECTORY a valid input directory?
-if not exists(IDIRECTORY):
-    logger.debug('"{0}" doesn\'t exist. Can\'t run script.'.format(IDIRECTORY))
-    sys.exit(100)
-
-# 2. Copy found FLAC files from input directory to output directory.
-stack = ExitStack()
-stack.callback(shutil.rmtree, IDIRECTORY)
-with stack:
-    for fil in shared.filesinfolder(folder=IDIRECTORY):
-        try:
-            audio = File(fil)
-        except MutagenError:
-            continue
-        if "audio/flac" in audio.mime:
-            fil = os.path.normpath(fil)
-            dst = dirname(regex.sub(arguments.odirectory, fil))
-            if arguments.test:
-                log(fil, dst)
-                continue
-            while True:
-                try:
-                    shutil.copy2(src=fil, dst=dst)
-                except FileNotFoundError:
-                    os.makedirs(dst)
-                else:
-                    log(fil, dst)
-                    break
+s = sched.scheduler()
+s.enter(10, 1, FilesFrom(IDIRECTORY), kwargs={"odirectory": r"m:", "test": arguments.test})
+s.run()
