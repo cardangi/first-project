@@ -33,6 +33,7 @@ IF "%~1" EQU "1" GOTO STEP1
 IF "%~1" EQU "2" GOTO STEP2
 IF "%~1" EQU "3" GOTO STEP3
 IF "%~1" EQU "4" GOTO STEP4
+IF "%~1" EQU "5" GOTO STEP5
 SHIFT
 GOTO MAIN
 
@@ -93,3 +94,16 @@ IF NOT ERRORLEVEL 1 (
 )
 SHIFT
 GOTO MAIN
+
+
+REM        ----------------
+REM  5 --> Copy to SD card.
+REM        ----------------
+:STEP5
+IF EXIST "M:\" (
+    IF EXIST "F:\`X5" (
+        PUSHD "%_PYTHONPROJECT%"
+        python -m Applications.CDRipper.AudioDigitalFilesCopy "M:"
+        POPD
+    )
+)
