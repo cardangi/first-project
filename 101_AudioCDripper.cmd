@@ -1,7 +1,6 @@
 @ECHO off
 
 
-REM
 SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
 
 
@@ -100,10 +99,6 @@ REM        ----------------
 REM  5 --> Copy to SD card.
 REM        ----------------
 :STEP5
-REM IF EXIST "M:\" (
-    IF EXIST "F:\`X5" (
-        PUSHD "%_PYTHONPROJECT%"
-        python -m Applications.CDRipper.AudioDigitalFilesCopy 120 --test
-        POPD
-    )
-REM )
+START "" /B "G:\Computing\102_AudioCDripper.cmd"
+SHIFT
+GOTO MAIN

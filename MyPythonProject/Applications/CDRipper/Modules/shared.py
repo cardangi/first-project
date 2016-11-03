@@ -535,6 +535,7 @@ TITLES = os.path.join(os.path.expandvars("%_COMPUTING%"), "Titles.json")
 ENC_KEYS = ["name", "code", "folder", "extension"]
 TIT_KEYS = ["number", "title", "overwrite"]
 PROFILES = {"default": profile(["albumsortcount", "bootleg", "live"], DefaultCD.fromfile),
+            "default1": profile(["albumsortcount", "bootleg", "live"], DefaultCD.fromfile),
             "selftitled": profile(["albumsortcount", "bootleg", "live"], SelfTitledCD.fromfile)}
 with open(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), r"Applications/CDRipper/Mapping.json")) as fp:
     MAPPING = json.load(fp)

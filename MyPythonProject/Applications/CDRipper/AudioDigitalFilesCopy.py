@@ -22,17 +22,17 @@ dirname, basename, exists, normpath = os.path.dirname, os.path.basename, os.path
 # ==========
 # Functions.
 # ==========
-# def validdirectory(d):
-#     if not exists(d):
-#         raise argparse.ArgumentTypeError('"{0}" isn\'t a valid output directory.'.format(d))
-#     return d
+def validdirectory(d):
+    if not exists(d):
+        raise argparse.ArgumentTypeError('"{0}" isn\'t a valid output directory.'.format(d))
+    return d
 
 
 # =================
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-# parser.add_argument("odirectory", type=validdirectory)
+parser.add_argument("directory", type=validdirectory)
 parser.add_argument("delay", type=int)
 parser.add_argument("-t", "--test", action="store_true")
 
@@ -40,7 +40,7 @@ parser.add_argument("-t", "--test", action="store_true")
 # ==========
 # Constants.
 # ==========
-IDIRECTORY = r"F:\\`X5"
+SOURCE = r"F:\\`X5"
 
 
 # ================
@@ -61,10 +61,10 @@ logger = logging.getLogger("%s.%s" % (__package__, basename(__file__)))
 class FLACFilesFrom(MutableSequence):
 
     def __init__(self, folder):
-        self._folder = folder
+        self._folder = normpath(folder)
         self._regex = re.compile(r"^{0}".format(folder), re.IGNORECASE)
         self._seq = []
-        for fil in shared.filesinfolder(folder=folder):
+        for fil in shared.filesinfolder(folder=normpath(folder)):
             try:
                 audio = File(fil)
             except MutagenError:
@@ -86,21 +86,18 @@ class FLACFilesFrom(MutableSequence):
 
     def __call__(self, *args, **kwargs):
         stack = ExitStack()
-        stack.callback(shutil.rmtree, normpath(self._folder))
+        stack.callback(shutil.rmtree, self._folder)
         with stack:
             for fil in self:
-                dst = normpath(dirname(self._regex.sub(kwargs["odirectory"], fil)))
+                dst = normpath(dirname(self._regex.sub(kwargs["directory"], fil)))
                 if kwargs["test"]:
                     self.log(fil, dst)
                     continue
-                while True:
-                    try:
-                        shutil.copy2(src=fil, dst=dst)
-                    except FileNotFoundError:
-                        os.makedirs(dst)
-                    else:
-                        self.log(fil, dst)
-                        break
+                if not exists(dst):
+                    os.makedirs(dst)
+                    logger.debug('"{0}" created'.format(dst))
+                shutil.copy2(src=fil, dst=dst)
+                self.log(fil, dst)
 
     def insert(self, index, value):
         self._seq.insert(index, value)
@@ -116,5 +113,5 @@ class FLACFilesFrom(MutableSequence):
 # Main algorithm.
 # ===============
 s = sched.scheduler()
-s.enter(arguments.delay, 1, FLACFilesFrom(IDIRECTORY), kwargs={"odirectory": r"m:", "test": arguments.test})
+s.enter(arguments.delay, 1, FLACFilesFrom(SOURCE), kwargs={"directory": arguments.directory, "test": arguments.test})
 s.run()
