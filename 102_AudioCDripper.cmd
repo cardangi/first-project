@@ -22,7 +22,7 @@ SET /A _i=0
 REM ==================================
 REM Enumérer les lecteurs disponibles.
 REM ==================================
-REM wscript "G:\Computing\Serial.vbs"
+wscript "G:\Computing\Serial.vbs"
 
 
 REM =====================================================================
