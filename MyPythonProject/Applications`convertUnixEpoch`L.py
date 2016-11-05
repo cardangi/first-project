@@ -20,6 +20,13 @@ PYTHON, INFILE = r"C:\Program Files (x86)\Python35-32\python.exe", os.path.join(
 returncode = 999
 
 
+# =========
+# Commands.
+# =========
+cmd1 = [PYTHON, "-m", "Applications.convertUnixEpoch1"]
+cmd2 = [PYTHON, "-m", "Applications.convertUnixEpoch2"]
+
+
 # ==========
 # Functions.
 # ==========
@@ -36,23 +43,17 @@ def chgcurdir(d):
 # ===============
 with chgcurdir(os.path.expandvars("%_PYTHONPROJECT%")):
     while True:
-        process1 = subprocess.run([PYTHON, "-m", "Applications.convertUnixEpoch1"])
-        if process1.returncode:
-            returncode = process1.returncode
+        task1 = subprocess.run(cmd1)
+        if task1.returncode:
+            returncode = task1.returncode
             break
         if os.path.exists(INFILE):
             with open(INFILE, encoding="ISO-8859-1") as fp:
-                for arguments in json.load(fp):
-                    if len(arguments) >= 3:
-                        command = [arguments[i] for i in range(0, 3)]
-                        command.insert(0, "Applications.convertUnixEpoch2")
-                        command.insert(0, "-m")
-                        command.insert(0, PYTHON)
-                        process2 = subprocess.run(command)
-                        if process2.returncode in [11, 99]:
-                            returncode = process2.returncode
-                            break
-                if returncode in [11, 99]:
+                cmd = list(cmd2)
+                cmd.extend(json.load(fp))
+                task2 = subprocess.run(cmd)
+                if task2.returncode in [11, 99]:
+                    returncode = task2.returncode
                     break
 
 
