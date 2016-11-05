@@ -13,6 +13,11 @@ __author__ = 'Xavier ROSSET'
 parser = argparse.ArgumentParser()
 parser.add_argument("ifile")
 parser.add_argument("ofile")
+
+
+# ================
+# Initializations.
+# ================
 arguments = parser.parse_args()
 
 
@@ -31,5 +36,5 @@ def chgcurdir(d):
 # Main algorithm.
 # ===============
 cmd = [r"C:\Program Files (x86)\Python35-32\python.exe", "-m", "Applications.CDRipper.AudioCDFiles", arguments.ifile, arguments.ofile]
-with chgcurdir(r"G:\Computing\MyPythonProject"):
+with chgcurdir(os.path.expandvars("%_PYTHONPROJECT%")):
     subprocess.run(cmd)

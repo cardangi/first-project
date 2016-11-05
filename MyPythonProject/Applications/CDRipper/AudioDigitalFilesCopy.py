@@ -28,12 +28,22 @@ def validdirectory(d):
     return d
 
 
+def validdelay(d):
+    try:
+        delay = int(d)
+    except ValueError:
+        raise argparse.ArgumentTypeError('"{0}" isn\'t a valid delay.'.format(d))
+    if delay > 60:
+        return 60
+    return delay
+
+
 # =================
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
 parser.add_argument("directory", type=validdirectory)
-parser.add_argument("delay", type=int)
+parser.add_argument("delay", type=validdelay)
 parser.add_argument("-t", "--test", action="store_true")
 
 
