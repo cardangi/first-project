@@ -168,7 +168,7 @@ REM ----------------------------------
 REM Copy audio files from audio drive.
 REM ----------------------------------
 IF ERRORLEVEL 20 (
-    CALL "G:\Computing\802_copyAudioFiles.cmd"
+    REM CALL "G:\Computing\802_copyAudioFiles.cmd"
     GOTO MENU
 )
 
