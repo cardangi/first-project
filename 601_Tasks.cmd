@@ -43,8 +43,8 @@ REM Test function "Applications\AudioFiles\Testing\test_grabdiscnumber.py".
 REM -----------------------------------------------------------------------
 IF ERRORLEVEL 33 (
     CLS
-    python -m Applications.AudioFiles.Testing.test_grabdiscnumber
-    PAUSE
+    REM python -m Applications.AudioFiles.Testing.test_grabdiscnumber
+    REM PAUSE
     GOTO MENU
 )
 
@@ -54,8 +54,8 @@ REM Test function "Applications\AudioFiles\Testing\test_getfilefromindex.py".
 REM ------------------------------------------------------------------------
 IF ERRORLEVEL 32 (
     CLS
-    python -m Applications.AudioFiles.Testing.test_getfilefromindex
-    PAUSE
+    REM python -m Applications.AudioFiles.Testing.test_getfilefromindex
+    REM PAUSE
     GOTO MENU
 )
 
