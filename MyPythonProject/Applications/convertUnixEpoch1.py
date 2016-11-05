@@ -163,7 +163,7 @@ while True:
             break
     if answer.upper() == "Y":
         with open(OUTFILE, mode=shared.WRITE, encoding=shared.DFTENCODING) as fp:
-            json.dump([(str(start), str(end), zone)], fp, indent=4)
+            json.dump([str(start), str(end), zone], fp, indent=4)
         status = 0
         break
     if answer.upper() == "N":
