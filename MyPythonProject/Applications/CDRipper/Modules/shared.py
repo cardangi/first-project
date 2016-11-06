@@ -50,16 +50,23 @@ class AudioCDTrack(MutableMapping):
         self._otags = {key: kwargs[key] for key in kwargs if key in AudioCDTrack.tags}
 
         # ----- Set encodedby.
+        logger.debug("Set encodedby.")
         self._otags["encodedby"] = "dBpoweramp 15.1 on {0}".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3))
 
         # ----- Set taggingtime.
+        logger.debug("Set taggingtime.")
         self._otags["taggingtime"] = shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3)
 
         # ----- Set encodingtime.
+        logger.debug("Set encodingtime.")
         self._otags["encodingtime"] = int(datetime.now(tz=timezone(shared.DFTTIMEZONE)).timestamp())
+
+        # ----- Set encodingyear.
+        logger.debug("Set encodingyear.")
         self._otags["encodingyear"] = datetime.now(tz=timezone(shared.DFTTIMEZONE)).strftime("%Y")
 
         # ----- Set encoder attributes.
+        logger.debug("Set encoder attributes.")
         for encoder in self.deserialize(ENCODERS):  # "encoder" est un dictionnaire.
             if sorted(list(encoder.keys())) == sorted(ENC_KEYS):
                 if kwargs["encoder"] == encoder["name"]:
@@ -371,13 +378,16 @@ class DefaultCDTrack(AudioCDTrack):
         # ----- Update tags.
         self._otags.update({key: kwargs[key] for key in kwargs if key in DefaultCDTrack.tags})
 
-        # ----- Update origyear.
+        # ----- Set origyear.
+        logger.debug("Set origyear.")
         self._otags["origyear"] = self._otags.get("origyear", self._otags["year"])
 
         # ----- Set albumsort.
+        logger.debug("Set albumsort.")
         self._otags["albumsort"] = "1.{year}0000.{uid}.{enc}".format(year=self._otags["origyear"], uid=self._otags["albumsortcount"], enc=self._encoder.code)
 
         # ----- Set titlesort.
+        logger.debug("Set titlesort.")
         self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["disc"],
                                                                                     track=self._otags["track"].zfill(2),
                                                                                     bonus=self._otags.get("bonus", "N"),
@@ -385,6 +395,7 @@ class DefaultCDTrack(AudioCDTrack):
                                                                                     bootleg=self._otags["bootleg"])
 
         # ----- Update album.
+        logger.debug("Update album.")
         self._otags["album"] = self.case(self._otags["album"])
 
         # ----- Log new tags.
@@ -411,6 +422,7 @@ class SelfTitledCDTrack(DefaultCDTrack):
         self._otags.update({key: kwargs[key] for key in kwargs if key in SelfTitledCDTrack.tags})
 
         # ----- Update album.
+        logger.debug("Update album.")
         self._otags["album"] = "{year} (Self Titled)".format(year=self._otags["origyear"])
 
 
@@ -430,6 +442,7 @@ class FiioX5Track(DefaultCDTrack):
         self._otags.update({key: kwargs[key] for key in kwargs if key in FiioX5Track.tags})
 
         # ----- Update album.
+        logger.debug("Update album.")
         self._otags["album"] = "{year}.{uid} - {album}".format(year=self._otags["origyear"], uid=self._otags["albumsortcount"], album=self._otags["album"])
 
 
