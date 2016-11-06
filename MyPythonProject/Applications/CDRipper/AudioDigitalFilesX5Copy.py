@@ -66,11 +66,9 @@ else:
     logger.debug("\tDisc     : {0}".format(audio.get("disc", audio["discnumber"])[0]).expandtabs(TABSIZE))
     logger.debug("\tTrack    : {0}".format(audio.get("track", audio["tracknumber"])[0]).expandtabs(TABSIZE))
     logger.debug("\tTitle    : {0}".format(audio["title"][0]).expandtabs(TABSIZE))
-    try:
+    if os.path.exists(JSON):
         with open(JSON) as fp:
             x = json.load(fp)
-    except FileNotFoundError:
-        pass
     match = rex1.match(arguments.file.name)
     if match:
         dst = os.path.normpath(os.path.join(rex2.sub(arguments.drive, match.group(1)), audio["albumsort"][0][:-3], "{0}.{1}.{2}{3}".format(audio.get("disc", audio["discnumber"])[0],
@@ -83,5 +81,6 @@ else:
         y = [(arguments.file.name, dst)]
     if y:
         x.extend(y)
+    if x:
         with open(JSON, mode="w") as fp:
             json.dump(x, fp, indent=4)
