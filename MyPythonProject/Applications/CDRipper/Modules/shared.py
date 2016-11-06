@@ -23,7 +23,7 @@ logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 # ========
 # Classes.
 # ========
-class AudioCD(MutableMapping):
+class AudioCDTrack(MutableMapping):
 
     tags = {"artistsort": True, "albumartistsort": False, "artist": True, "albumartist": False, "encoder": True, "disc": True, "track": True, "title": False, "profile": False, "source": False, "bootleg": True,
             "live": True, "incollection": True, "titlelanguage": False, "genre": False, "style": False, "rating": False, "_albumart_1_front album cover": False}
@@ -36,7 +36,7 @@ class AudioCD(MutableMapping):
         self._otags = dict()
 
         # ----- Check mandatory input tags.
-        for item in [item for item in AudioCD.tags if AudioCD.tags[item]]:
+        for item in [item for item in AudioCDTrack.tags if AudioCDTrack.tags[item]]:
             if item not in kwargs:
                 raise ValueError("{0} isn\'t available.".format(item))
         if not regex.match(kwargs["track"]):
@@ -47,7 +47,7 @@ class AudioCD(MutableMapping):
             raise ValueError('"{0}" as encoder isn\'t recognized.'.format(kwargs["encoder"]))
 
         # ----- Attributes taken from the input tags.
-        self._otags = {key: kwargs[key] for key in kwargs if key in AudioCD.tags}
+        self._otags = {key: kwargs[key] for key in kwargs if key in AudioCDTrack.tags}
 
         # ----- Set encodedby.
         self._otags["encodedby"] = "dBpoweramp 15.1 on {0}".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3))
@@ -73,30 +73,36 @@ class AudioCD(MutableMapping):
                     break
 
         # ----- Both update track and set total tracks.
+        logger.debug("Set track.")
         self._otags["track"], self._otags[MAPPING.get(kwargs["encoder"], MAPPING["default"])["totaltracks"]] = self.splitfield(kwargs["track"], regex)
 
         # ----- Both update disc and set total discs.
+        logger.debug("Set disc.")
         self._otags["disc"], self._otags[MAPPING.get(kwargs["encoder"], MAPPING["default"])["totaldiscs"]] = self.splitfield(kwargs["disc"], regex)
 
         # ----- Update genre.
+        logger.debug("Update genre.")
         for artist, genre in self.deserialize(GENRES):
             if kwargs["artist"].lower() == artist.lower():
                 self._otags["genre"] = genre
                 break
 
         # ----- Update titlelanguage.
+        logger.debug("Update titlelanguage.")
         for artist, language in self.deserialize(LANGUAGES):
             if kwargs["artist"].lower() == artist.lower():
                 self._otags["titlelanguage"] = language
                 break
 
         # ----- Update title.
+        logger.debug("Update title.")
         for track in self.deserialize(TITLES):  # "track" est un dictionnaire.
             if sorted(list(track.keys())) == sorted(TIT_KEYS):
                 if self._otags["track"] == track["number"]:
                     if track["overwrite"]:
                         self._otags["title"] = track["title"]
                         break
+        self._otags["title"] = self.case(self._otags["title"])
 
     def __getitem__(self, item):
         return self._otags[item]
@@ -192,6 +198,10 @@ class AudioCD(MutableMapping):
     @property
     def bootleg(self):
         return self._otags["bootleg"]
+
+    @property
+    def bonus(self):
+        return self._otags.get("bonus", "N")
 
     @property
     def incollection(self):
@@ -346,36 +356,36 @@ class AudioCD(MutableMapping):
                 yield structure
 
 
-class DefaultCD(AudioCD):
+class DefaultCDTrack(AudioCDTrack):
 
-    tags = {"origyear": False, "year": True, "albumsortcount": True, "album": True, "upc": True, "label": True}
+    tags = {"origyear": False, "year": True, "albumsortcount": True, "album": True, "upc": True, "label": True, "bonus": False}
 
     def __init__(self, **kwargs):
-        super(DefaultCD, self).__init__(**kwargs)
+        super(DefaultCDTrack, self).__init__(**kwargs)
 
         # ----- Check mandatory input tags.
-        for item in [item for item in DefaultCD.tags if DefaultCD.tags[item]]:
+        for item in [item for item in DefaultCDTrack.tags if DefaultCDTrack.tags[item]]:
             if item not in kwargs:
                 raise ValueError("{0} isn\'t available.".format(item))
 
         # ----- Update tags.
-        self._otags.update({key: kwargs[key] for key in kwargs if key in DefaultCD.tags})
+        self._otags.update({key: kwargs[key] for key in kwargs if key in DefaultCDTrack.tags})
 
-        # ----- Update album.
-        self._otags["album"] = self.case(kwargs["album"])
+        # ----- Update origyear.
+        self._otags["origyear"] = self._otags.get("origyear", self._otags["year"])
 
         # ----- Set albumsort.
-        self._otags["albumsort"] = "1.{year}0000.{count}.{enc}".format(year=kwargs.get("origyear", kwargs["year"]), count=kwargs["albumsortcount"], enc=self._encoder.code)
+        self._otags["albumsort"] = "1.{year}0000.{uid}.{enc}".format(year=self._otags["origyear"], uid=self._otags["albumsortcount"], enc=self._encoder.code)
 
         # ----- Set titlesort.
         self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["disc"],
                                                                                     track=self._otags["track"].zfill(2),
-                                                                                    bonus="N",
+                                                                                    bonus=self._otags.get("bonus", "N"),
                                                                                     live=self._otags["live"],
                                                                                     bootleg=self._otags["bootleg"])
 
-        # ----- Update origyear.
-        self._otags["origyear"] = kwargs.get("origyear", kwargs["year"])
+        # ----- Update album.
+        self._otags["album"] = self.case(self._otags["album"])
 
         # ----- Log new tags.
         logger.debug("Build tags.")
@@ -385,23 +395,117 @@ class DefaultCD(AudioCD):
         logger.debug("\torigyear : %s".expandtabs(4) % (self._otags["origyear"],))
 
 
-class SelfTitledCD(DefaultCD):
+class SelfTitledCDTrack(DefaultCDTrack):
 
-    itags = []
+    tags = {}
 
     def __init__(self, **kwargs):
-        super(SelfTitledCD, self).__init__(**kwargs)
+        super(SelfTitledCDTrack, self).__init__(**kwargs)
 
         # ----- Check mandatory input tags.
-        for item in [item for item in SelfTitledCD.tags if SelfTitledCD.tags[item]]:
+        for item in [item for item in SelfTitledCDTrack.tags if SelfTitledCDTrack.tags[item]]:
             if item not in kwargs:
                 raise ValueError("{0} isn\'t available.".format(item))
 
         # ----- Update tags.
-        self._otags.update({key: kwargs[key] for key in kwargs if key in SelfTitledCD.itags})
+        self._otags.update({key: kwargs[key] for key in kwargs if key in SelfTitledCDTrack.tags})
 
         # ----- Update album.
-        self._otags["album"] = "{0} (Self Titled)".format(kwargs["year"])
+        self._otags["album"] = "{year} (Self Titled)".format(year=self._otags["origyear"])
+
+
+class FiioX5Track(DefaultCDTrack):
+
+    tags = {}
+
+    def __init__(self, **kwargs):
+        super(FiioX5Track, self).__init__(**kwargs)
+
+        # ----- Check mandatory input tags.
+        for item in [item for item in FiioX5Track.tags if FiioX5Track.tags[item]]:
+            if item not in kwargs:
+                raise ValueError("{0} isn\'t available.".format(item))
+
+        # ----- Update tags.
+        self._otags.update({key: kwargs[key] for key in kwargs if key in FiioX5Track.tags})
+
+        # ----- Update album.
+        self._otags["album"] = "{year}.{uid} - {album}".format(year=self._otags["origyear"], uid=self._otags["albumsortcount"], album=self._otags["album"])
+
+
+class BootlegCDTrack(AudioCDTrack):
+
+    tags = {"bootlegtracktour": True, "bootlegtrackyear": True, "bootlegtrackcity": True, "albumsortcount": True, "provider": False, "providerreference": False, "origalbum": False, "groupby": False, "bonus": True}
+    rex1 = re.compile(r"\W+")
+    rex2 = re.compile(r", ([A-Z][a-z]+)$")
+    DFTCOUNTRY = "United States"
+
+    def __init__(self, **kwargs):
+        super(BootlegCDTrack, self).__init__(**kwargs)
+
+        # ----- Check mandatory input tags.
+        for item in [item for item in BootlegCDTrack.tags if BootlegCDTrack.tags[item]]:
+            if item not in kwargs:
+                raise ValueError("{0} isn\'t available.".format(item))
+
+        # ----- Update tags.
+        self._otags.update({key: kwargs[key] for key in kwargs if key in BootlegCDTrack.tags})
+
+        # ----- Update bootlegtrackyear.
+        logger.debug("Update bootlegtrackyear.")
+        self._otags["bootlegtrackyear"] = self.rex1.sub("-", self._otags["bootlegtrackyear"])
+        
+        # ----- Set bootlegtrackcountry.
+        logger.debug("Set bootlegtrackcountry.")
+        self._otags["bootlegtrackcountry"] = BootlegCDTrack.DFTCOUNTRY
+        match = self.rex2.search(self._otags["bootlegtrackcity"])
+        if match:
+            self._otags["bootlegtrackcountry"] = match.group(1)
+
+        # ----- Set year.
+        logger.debug("Set year.")
+        self._otags["year"] = self._otags["bootlegtrackyear"][:4]
+
+        # ----- Set albumsort.
+        logger.debug("Set albumsort.")
+        self._otags["albumsort"] = "2.{date}.{uid}.{enc}".format(date=self.rex1.sub("", self._otags.get("groupby", self._otags["bootlegtrackyear"])),
+                                                                 uid=self._otags["albumsortcount"],
+                                                                 enc=self._encoder.code)
+
+        # ----- Set titlesort.
+        logger.debug("Set titlesort.")
+        self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["disc"],
+                                                                                    track=self._otags["track"].zfill(2),
+                                                                                    bonus=self._otags["bonus"],
+                                                                                    live=self._otags["live"],
+                                                                                    bootleg=self._otags["bootleg"])
+
+
+class SpringsteenBootlegCDTrack(BootlegCDTrack):
+
+    tags = {}
+
+    def __init__(self, **kwargs):
+        super(SpringsteenBootlegCDTrack, self).__init__(**kwargs)
+
+        # ----- Check mandatory input tags.
+        for item in [item for item in SpringsteenBootlegCDTrack.tags if SpringsteenBootlegCDTrack.tags[item]]:
+            if item not in kwargs:
+                raise ValueError("{0} isn\'t available.".format(item))
+
+        # ----- Update tags.
+        self._otags.update({key: kwargs[key] for key in kwargs if key in SpringsteenBootlegCDTrack.tags})
+
+        # ----- Set album.
+        logger.debug("Set album.")
+        self._otags["album"] = "{tour} - {date} - [{city}]".format(tour=self._otags["bootlegtracktour"], date=self.rex1.sub(".", self._otags["bootlegtrackyear"]), city=self._otags["bootlegtrackcity"])
+
+        # ----- Log new tags.
+        logger.debug("Build tags.")
+        logger.debug("\talbum    : %s".expandtabs(4) % (self._otags["album"],))
+        logger.debug("\talbumsort: %s".expandtabs(4) % (self._otags["albumsort"],))
+        logger.debug("\ttitlesort: %s".expandtabs(4) % (self._otags["titlesort"],))
+        logger.debug("\tyear     : %s".expandtabs(4) % (self._otags["year"],))
 
 
 class RippedCD(ContextDecorator):
@@ -466,8 +570,8 @@ class RippedCD(ContextDecorator):
                 for line in fr:
                     logger.debug("\t{0}".format(line.splitlines()[0]).expandtabs(4))
 
-        # --> 3. Create AudioCD instance.
-        self._rippedcd = PROFILES[self.profile].isinstancedfrom(self.tags, shared.UTF16)  # l'attribut "_rippedcd" est une instance de type "AudioCD".
+        # --> 3. Create AudioCDTrack instance.
+        self._rippedcd = PROFILES[self.profile].isinstancedfrom(self.tags, shared.UTF16)  # l'attribut "_rippedcd" est une instance de type "AudioCDTrack".
 
         # --> 4. Return instance.
         return self
@@ -534,8 +638,10 @@ ENCODERS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", 
 TITLES = os.path.join(os.path.expandvars("%_COMPUTING%"), "Titles.json")
 ENC_KEYS = ["name", "code", "folder", "extension"]
 TIT_KEYS = ["number", "title", "overwrite"]
-PROFILES = {"default": profile(["albumsortcount", "bootleg", "live"], DefaultCD.fromfile),
-            "default1": profile(["albumsortcount", "bootleg", "live"], DefaultCD.fromfile),
-            "selftitled": profile(["albumsortcount", "bootleg", "live"], SelfTitledCD.fromfile)}
+PROFILES = {"default": profile(["albumsortcount", "bootleg", "live", "bonus"], DefaultCDTrack.fromfile),
+            "default1": profile(["albumsortcount", "bootleg", "live", "bonus"], DefaultCDTrack.fromfile),
+            "selftitled": profile(["albumsortcount", "bootleg", "live", "bonus"], SelfTitledCDTrack.fromfile),
+            "fiiox5": profile(["albumsortcount", "bootleg", "live", "bonus"], FiioX5Track.fromfile),
+            "sbootlegs": profile(["albumsortcount", "bootleg", "live", "bonus", "groupby"], SpringsteenBootlegCDTrack.fromfile)}
 with open(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), r"Applications/CDRipper/Mapping.json")) as fp:
     MAPPING = json.load(fp)
