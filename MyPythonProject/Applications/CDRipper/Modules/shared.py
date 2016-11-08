@@ -426,24 +426,24 @@ class SelfTitledCDTrack(DefaultCDTrack):
         self._otags["album"] = "{year} (Self Titled)".format(year=self._otags["origyear"])
 
 
-class FiioX5Track(DefaultCDTrack):
-
-    tags = {}
-
-    def __init__(self, **kwargs):
-        super(FiioX5Track, self).__init__(**kwargs)
-
-        # ----- Check mandatory input tags.
-        for item in [item for item in FiioX5Track.tags if FiioX5Track.tags[item]]:
-            if item not in kwargs:
-                raise ValueError("{0} isn\'t available.".format(item))
-
-        # ----- Update tags.
-        self._otags.update({key: kwargs[key] for key in kwargs if key in FiioX5Track.tags})
-
-        # ----- Update album.
-        logger.debug("Update album.")
-        self._otags["album"] = "{year}.{uid} - {album}".format(year=self._otags["origyear"], uid=self._otags["albumsortcount"], album=self._otags["album"])
+# class FiioX5Track(DefaultCDTrack):
+#
+#     tags = {}
+#
+#     def __init__(self, **kwargs):
+#         super(FiioX5Track, self).__init__(**kwargs)
+#
+#         # ----- Check mandatory input tags.
+#         for item in [item for item in FiioX5Track.tags if FiioX5Track.tags[item]]:
+#             if item not in kwargs:
+#                 raise ValueError("{0} isn\'t available.".format(item))
+#
+#         # ----- Update tags.
+#         self._otags.update({key: kwargs[key] for key in kwargs if key in FiioX5Track.tags})
+#
+#         # ----- Update album.
+#         logger.debug("Update album.")
+#         self._otags["album"] = "{year}.{uid} - {album}".format(year=self._otags["origyear"], uid=self._otags["albumsortcount"], album=self._otags["album"])
 
 
 class BootlegCDTrack(AudioCDTrack):
@@ -654,7 +654,11 @@ TIT_KEYS = ["number", "title", "overwrite"]
 PROFILES = {"default": profile(["albumsortcount", "bootleg", "live", "bonus"], DefaultCDTrack.fromfile),
             "default1": profile(["albumsortcount", "bootleg", "live", "bonus"], DefaultCDTrack.fromfile),
             "selftitled": profile(["albumsortcount", "bootleg", "live", "bonus"], SelfTitledCDTrack.fromfile),
-            "fiiox5": profile(["albumsortcount", "bootleg", "live", "bonus"], FiioX5Track.fromfile),
             "sbootlegs": profile(["albumsortcount", "bootleg", "live", "bonus", "groupby"], SpringsteenBootlegCDTrack.fromfile)}
+
+
+# ================
+# Initializations.
+# ================
 with open(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), r"Applications/CDRipper/Mapping.json")) as fp:
     MAPPING = json.load(fp)
