@@ -102,6 +102,7 @@ class CopyFilesFrom(MutableSequence):
 # ===============
 # Main algorithm.
 # ===============
+logger.debug("Delay: {0} second(s).".format(arguments.delay))
 if not arguments.delay:
     CopyFilesFrom(arguments.file)(test=arguments.test)
     sys.exit(0)

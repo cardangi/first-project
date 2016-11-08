@@ -1,9 +1,9 @@
 @ECHO off
 REM Stocker dans un fichier JSON les arguments permettant de copier un fichier audio FLAC
-REM Le profil associé à la copie est transmis à un script python en qualité de premier paramètre.
-REM Le nom du fichier audio est transmis en qualité de deuxième paramètre.
-REM La lettre identifiant le lecteur reçevant le fichier copié est transmise en qualité de troisième paramètre.
-REM Le nom du fichier JSON est transmis en qualité de quatrième paramètre.
+REM Le nom du fichier audio est reçu en qualité de premier paramètre.
+REM Le nom du fichier audio est transmis en qualité de premier paramètre.
+REM La lettre identifiant le lecteur reçevant le fichier copié est transmise en qualité de deuxième paramètre.
+REM Le nom du fichier JSON est transmis en qualité de troisième paramètre.
 
 
 SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION

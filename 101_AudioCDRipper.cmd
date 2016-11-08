@@ -100,6 +100,6 @@ REM        -----------------
 REM  5 --> Copy audio files.
 REM        -----------------
 :STEP5
-START "" /D %_COMPUTING% 102_AudioCDRipper.cmd "%_json%" 30
+START "" /B /D %_COMPUTING% 102_AudioCDRipper.cmd "%_json%" 30
 SHIFT
 GOTO MAIN

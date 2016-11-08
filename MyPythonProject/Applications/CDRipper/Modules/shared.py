@@ -513,6 +513,10 @@ class SpringsteenBootlegCDTrack(BootlegCDTrack):
         logger.debug("Set album.")
         self._otags["album"] = "{tour} - {date} - [{city}]".format(tour=self._otags["bootlegtracktour"], date=self.rex1.sub(".", self._otags["bootlegtrackyear"]), city=self._otags["bootlegtrackcity"])
 
+        # ----- Update albumartist.
+        logger.debug("Update albumartist.")
+        self._otags["albumartist"] = "Bruce Springsteen And The E Street Band"
+
         # ----- Log new tags.
         logger.debug("Build tags.")
         logger.debug("\talbum    : %s".expandtabs(4) % (self._otags["album"],))
