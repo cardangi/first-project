@@ -14,6 +14,7 @@ SET _myparent=%~dp0
 REM ==================
 REM Initializations 2.
 REM ==================
+SET _json=%TEMP%\arguments.json
 SET _jsonrippinglog=%TEMP%\rippinglog.json
 SET _htmlrippinglog=%_COMPUTING%\rippingLog\rippinglog.html
 SET _jsondigitalaudiobase=%TEMP%\digitalaudiodatabase.json
@@ -95,10 +96,10 @@ SHIFT
 GOTO MAIN
 
 
-REM        ----------------
-REM  5 --> Copy to SD card.
-REM        ----------------
+REM        -----------------
+REM  5 --> Copy audio files.
+REM        -----------------
 :STEP5
-START "" /B "G:\Computing\102_AudioCDripper.cmd"
+START "" /B "G:\Computing\102_AudioCDripper.cmd"  "%_json%" 30
 SHIFT
 GOTO MAIN
