@@ -48,12 +48,6 @@ parser.add_argument("-t", "--test", action="store_true")
 TABSIZE = 3
 
 
-# ================
-# Initializations.
-# ================
-arguments = parser.parse_args()
-
-
 # ========
 # Logging.
 # ========
@@ -99,13 +93,21 @@ class CopyFilesFrom(MutableSequence):
         self._seq.insert(index, value)
 
 
+# ================
+# Initializations.
+# ================
+arguments = parser.parse_args()
+filestocopy = CopyFilesFrom(arguments.file)
+
+
 # ===============
 # Main algorithm.
 # ===============
 logger.debug("Delay: {0} second(s).".format(arguments.delay))
+logger.debug("{0:>5d} files to copy.".format(len(filestocopy)))
 if not arguments.delay:
-    CopyFilesFrom(arguments.file)(test=arguments.test)
+    filestocopy(test=arguments.test)
     sys.exit(0)
 s = sched.scheduler()
-s.enter(arguments.delay, 1, CopyFilesFrom(arguments.file), kwargs={"test": arguments.test})
+s.enter(arguments.delay, 1, filestocopy, kwargs={"test": arguments.test})
 s.run()
