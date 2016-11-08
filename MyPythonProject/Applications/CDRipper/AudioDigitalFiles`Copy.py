@@ -81,7 +81,7 @@ class CopyFilesFrom(MutableSequence):
         return len(self._seq)
 
     def __call__(self, *args, **kwargs):
-        for src, dst, profile in self:
+        for src, dst in self:
             if not exists(src):
                 logger.debug('"{0}" doesn\'t exist.'.format(src))
                 continue

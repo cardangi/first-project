@@ -47,5 +47,5 @@ REM ======================================================
 REM Ecrire les arguments de copie dans un un fichier JSON.
 REM ======================================================
 PUSHD %_PYTHONPROJECT%
-python -m Applications.CDRipper.AudioDigitalFiles`CopyArguments "%~2%" "%~1" "%_drive%:" -o "%_json%"
+python -m Applications.CDRipper.AudioDigitalFiles`CopyArguments "%~1" "%_drive%:" -o "%_json%"
 POPD

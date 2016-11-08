@@ -11,11 +11,6 @@ SET _me=%~n0
 SET _myparent=%~dp0
 
 
-REM ==================
-REM Initialisations 2.
-REM ==================
-
-
 REM =====================================================================
 REM Exécuter les copies énumérées dans le fichier JSON reçu en paramètre.
 REM =====================================================================
