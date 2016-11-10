@@ -16,7 +16,7 @@ REM Exécuter les copies énumérées dans le fichier JSON reçu en paramètre.
 REM =====================================================================
 IF EXIST "%~1" (
     PUSHD "%_PYTHONPROJECT%"
-    IF "%2" NEQ "" (
+    IF "%~2" NEQ "" (
         python -m Applications.CDRipper.AudioDigitalFiles`Copy "%~1" -d %~2
     ) ELSE (
         python -m Applications.CDRipper.AudioDigitalFiles`Copy "%~1"

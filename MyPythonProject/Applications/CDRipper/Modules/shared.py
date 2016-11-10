@@ -751,8 +751,8 @@ def validdelay(d):
         delay = int(d)
     except ValueError:
         raise argparse.ArgumentTypeError('"{0}" isn\'t a valid delay.'.format(d))
-    if delay > 60:
-        return 60
+    if delay > 120:
+        return 120
     return delay
 
 

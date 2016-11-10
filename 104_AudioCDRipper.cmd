@@ -15,7 +15,6 @@ REM ==================
 REM Initialisations 2.
 REM ==================
 SET _drives=%TEMP%\serial.txt
-SET _json=%TEMP%\arguments.json
 
 
 REM ==================================
@@ -42,8 +41,8 @@ REM ======================================================
 REM Ecrire les arguments de copie dans un un fichier JSON.
 REM ======================================================
 PUSHD %_PYTHONPROJECT%
-IF "%1" NEQ "" (
-    python -m Applications.CDRipper.AudioDigitalFiles`UpdateTags "%_drive%:" -d "%~1"
+IF "%~1" NEQ "" (
+    python -m Applications.CDRipper.AudioDigitalFiles`UpdateTags "%_drive%:" -d %~1
 ) ELSE (
     python -m Applications.CDRipper.AudioDigitalFiles`UpdateTags "%_drive%:"
 )

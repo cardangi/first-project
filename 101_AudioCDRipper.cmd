@@ -110,6 +110,6 @@ REM        -------------------
 REM  6 --> Change "album" tag.
 REM        -------------------
 :STEP6
-START "" /B /D %_COMPUTING% 104_AudioCDRipper.cmd 60
+START "" /B /D %_COMPUTING% 104_AudioCDRipper.cmd 90
 SHIFT
 GOTO MAIN

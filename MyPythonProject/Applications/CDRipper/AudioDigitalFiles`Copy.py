@@ -93,9 +93,13 @@ filestocopy = CopyFilesFrom(arguments.file)
 # ===============
 logger.debug("Delay: {0} second(s).".format(arguments.delay))
 logger.debug("{0:>5d} files to copy.".format(len(filestocopy)))
+
+# Mise à jour immédiate.
 if not arguments.delay:
     filestocopy(test=arguments.test)
     sys.exit(0)
+
+# Mise à jour différée.
 s = sched.scheduler()
 s.enter(arguments.delay, 1, filestocopy, kwargs={"test": arguments.test})
 s.run()
