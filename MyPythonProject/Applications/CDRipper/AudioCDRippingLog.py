@@ -1,20 +1,13 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
-
-# ===================
-# Absolute import(s).
-# ===================
+import os
 import sys
+import logging
 import sqlite3
 import argparse
 from datetime import datetime
-
-
-# ===================
-# Relative import(s).
-# ===================
 from .. import shared
+
+__author__ = 'Xavier ROSSET'
 
 
 # ==========
@@ -92,6 +85,12 @@ parser_del.add_argument("uid", nargs="+", help="Mandatory record unique ID", typ
 arguments = parser.parse_args()
 
 
+# ========
+# Logging.
+# ========
+logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
+
+
 # ===============
 # Main algorithm.
 # ===============
@@ -149,6 +148,7 @@ elif arguments.command == "update":
 #  4. Suppression d'un CD.
 elif arguments.command == "delete":
     for uid in arguments.uid:
+        logger.debug("Delete record with unique ID {0:>4d}".format(uid))
         if conn.cursor().execute("SELECT count(*) FROM rippinglog WHERE id=?", (uid,)).fetchone()[0]:
             conn.cursor().execute("DELETE FROM rippinglog WHERE id=?", (uid,))
 

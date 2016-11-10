@@ -15,7 +15,11 @@ __author__ = 'Xavier ROSSET'
 # Functions.
 # ==========
 def album(track):
-    if track.totaldiscs > 1:
+    try:
+        totaldiscs = int(track.totaldiscs)
+    except ValueError:
+        return track.album
+    if totaldiscs > 1:
         return "{o.album} ({o.discnumber}/{o.totaldiscs})".format(o=track)
     return track.album
 
