@@ -29,7 +29,7 @@ def validdrive(d):
 # =================
 parser = argparse.ArgumentParser()
 parser.add_argument("drive", type=validdrive)
-parser.add_argument("delay", type=shared.validdelay)
+parser.add_argument("-d", "--delay", type=shared.validdelay, default="0")
 parser.add_argument("-t", "--test", action="store_true")
 
 
