@@ -24,13 +24,13 @@ def chgcurdir(d):
 # ==========
 # Constants.
 # ==========
-CURDIR, JSON = os.path.join(os.path.expandvars("%_COMPUTING%"), "MyPythonProject"), os.path.join(os.path.expandvars("%TEMP%"), "rippinglog.json")
+CURDIR, JSON = os.path.expandvars("%_PYTHONPROJECT%"), os.path.join(os.path.expandvars("%TEMP%"), "rippinglog.json")
 
 
 # ================
 # Initializations.
 # ================
-tags, returncodes, dftcmd = [], [], [r"C:\Program Files (x86)\Python35-32\python.exe", "-m", "Applications.CDRipper.AudioCDRippingLog", "insert"]
+tags, returncodes, dftcmd = [], [], [r"C:\Program Files (x86)\Python35-32\python.exe", "-m", "Applications.CDRipper.AudioCD`RippingLog", "insert"]
 
 
 # ===============

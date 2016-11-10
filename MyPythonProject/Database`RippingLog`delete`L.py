@@ -24,7 +24,7 @@ numbers, status = None, 100
 # Commands.
 # =========
 cmd1 = ["python", "-m", "Applications.Database.RippingLog.delete`I"]  # "I" means Interface! "L" means Launcher!
-cmd2 = ["python", "-m", "Applications.CDRipper.AudioCDRippingLog", "delete"]
+cmd2 = ["python", "-m", "Applications.CDRipper.AudioCD`RippingLog", "delete"]
 
 
 # ==========

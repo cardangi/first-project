@@ -43,7 +43,7 @@ REM  1 --> Ripping log.
 REM        ------------
 :STEP1
 IF EXIST "%_jsonrippinglog%" (
-    python %_PYTHONPROJECT%\CDRipper`AudioCDRippingLog`L.py
+    python %_PYTHONPROJECT%\CDRipper`AudioCD`RippingLog`L.py
     DEL "%_jsonrippinglog%"
 )
 SHIFT
@@ -68,7 +68,7 @@ REM        -------------------------
 REM  3 --> Update Ripping log views.
 REM        -------------------------
 :STEP3
-python G:\Computing\MyPythonProject\Database`HTMLView`L.py RippingLog
+python %_PYTHONPROJECT%\Database`HTMLView`L.py RippingLog
 IF NOT ERRORLEVEL 1 (
     REM PUSHD %_PYTHONPROJECT%
     REM python -m Applications.Database.RippingLog.View2
@@ -82,7 +82,7 @@ REM        ------------------------------------
 REM  4 --> Update Digital Audio database views.
 REM        ------------------------------------
 :STEP4
-python G:\Computing\MyPythonProject\Database`HTMLView`L.py DigitalAudio
+python %_PYTHONPROJECT%\Database`HTMLView`L.py DigitalAudio
 IF NOT ERRORLEVEL 1 (
     PUSHD "%_PYTHONPROJECT%"
     python -m Applications.Database.DigitalAudio.View1

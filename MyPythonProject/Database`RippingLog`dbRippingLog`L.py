@@ -27,7 +27,7 @@ INPUT, PYTHON = os.path.join(os.path.expandvars("%TEMP%"), "arguments.json"), r"
 # ================
 # Initializations.
 # ================
-dftargs, view1 = [PYTHON, "-m", "Applications.CDRipper.AudioCDRippingLog", "update"], False
+dftargs, view1 = [PYTHON, "-m", "Applications.CDRipper.AudioCD`RippingLog", "update"], False
 
 
 # ===============
