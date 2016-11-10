@@ -1,10 +1,13 @@
 # -*- coding: ISO-8859-1 -*-
-from collections import MutableMapping, namedtuple
+from collections import MutableMapping, MutableSequence, namedtuple
 from jinja2 import Environment, FileSystemLoader
 from sortedcontainers import SortedDict
 from contextlib import ContextDecorator
 from datetime import datetime
+import mutagen.monkeysaudio
 from pytz import timezone
+import mutagen.flac
+import mutagen
 import logging
 import json
 import os
@@ -12,6 +15,12 @@ import re
 from ... import shared
 
 __author__ = 'Xavier ROSSET'
+
+
+# ==========
+# Constants.
+# ==========
+TABSIZE = 3
 
 
 # ========
@@ -622,6 +631,109 @@ class RippedCD(ContextDecorator):
         logger.debug('END "%s".' % (os.path.basename(__file__),))
 
 
+class AudioFilesCollection(MutableSequence):
+
+    rex1 = re.compile(r"^(?:{0})\.\d \-\B".format(shared.DFTYEARREGEX))
+    tags = ["albumsort", "album"]
+
+    def __init__(self, path):
+        self._seq = []
+
+    def __getitem__(self, item):
+        return self._seq[item]
+
+    def __setitem__(self, key, value):
+        self._seq[key] = value
+
+    def __delitem__(self, key):
+        del self._seq[key]
+
+    def __len__(self):
+        return len(self._seq)
+
+    def __call__(self, *psargs, **kwargs):
+        l = []
+        for num, fil, tags in [(a, b, c) for a, (b, c) in enumerate(self, 1)]:
+            album = "{0}.{1} - {2}".format(tags["albumsort"][2:6], tags["albumsort"][-1:], tags["album"])
+            logger.debug('{0:>3d}. "{1}".'.format(num, fil))
+            logger.debug('\tNew album: "{0}".'.format(album).expandtabs(TABSIZE))
+            if not kwargs["test"]:
+                try:
+                    tags["album"] = album
+                    tags.save()
+                except mutagen.MutagenError as err:
+                    logger.debug(err)
+                else:
+                    l.append(fil)
+        if l:
+            logger.debug("{0:>5d} files updated.".format(len(l)))
+
+    def insert(self, index, value):
+        self._seq.insert(index, value)
+
+
+class FLACFilesCollection(AudioFilesCollection):
+
+    rex2 = re.compile(r"^(?=1\.\d[\d\.]+$)(?=[\d\.]+\.13$)1\.(?:{0})0000\.\d\.13$".format(shared.DFTYEARREGEX))
+
+    def __init__(self, path):
+        super(FLACFilesCollection, self).__init__(path)
+
+        for fil in shared.filesinfolder(folder=path):
+            try:
+                audio = mutagen.flac.FLAC(fil)
+            except mutagen.MutagenError:
+                continue
+
+            # Contrôler que les tags obligatoires sont présents.
+            if any([tag not in audio for tag in self.tags]):
+                continue
+
+            # Ne retenir que les fichiers dont le tag "albumsort" est cohérent.
+            match = self.rex2.match(audio["albumsort"])
+            if not match:
+                continue
+
+            # Ne retenir que les fichiers dont le tag "album" n'a pas été déjà modifié.
+            match = self.rex1.match(audio["album"])
+            if match:
+                continue
+
+            # Retenir le fichier.
+            self._seq.append((fil, audio))
+
+
+class MonkeyFilesCollection(AudioFilesCollection):
+
+    rex2 = re.compile(r"^(?=1\.\d[\d\.]+$)(?=[\d\.]+\.15$)1\.(?:{0})0000\.\d\.15$".format(shared.DFTYEARREGEX))
+
+    def __init__(self, path):
+        super(MonkeyFilesCollection, self).__init__(path)
+
+        for fil in shared.filesinfolder(folder=path):
+            try:
+                audio = mutagen.monkeysaudio.MonkeysAudio(fil)
+            except mutagen.MutagenError:
+                continue
+
+            # Contrôler que les tags obligatoires sont présents.
+            if any([tag not in audio for tag in self.tags]):
+                continue
+
+            # Ne retenir que les fichiers dont le tag "albumsort" est cohérent.
+            match = self.rex2.match(audio["albumsort"])
+            if not match:
+                continue
+
+            # Ne retenir que les fichiers dont le tag "album" n'a pas été déjà modifié.
+            match = self.rex1.match(audio["album"])
+            if match:
+                continue
+
+            # Retenir le fichier.
+            self._seq.append((fil, audio))
+
+
 # ==========
 # Functions.
 # ==========
@@ -637,6 +749,16 @@ def canfilebeprocessed(fe, *tu):
     if fe.lower() in [item.lower() for item in tu]:
         return True
     return False
+
+
+def validdelay(d):
+    try:
+        delay = int(d)
+    except ValueError:
+        raise argparse.ArgumentTypeError('"{0}" isn\'t a valid delay.'.format(d))
+    if delay > 60:
+        return 60
+    return delay
 
 
 # ================

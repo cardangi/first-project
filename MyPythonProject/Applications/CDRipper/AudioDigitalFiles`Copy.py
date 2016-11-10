@@ -10,6 +10,7 @@ import sched
 import json
 import sys
 import os
+from .Modules import shared
 
 __author__ = 'Xavier ROSSET'
 
@@ -20,25 +21,12 @@ __author__ = 'Xavier ROSSET'
 basename, dirname, exists = os.path.basename, os.path.dirname, os.path.exists
 
 
-# ==========
-# Functions.
-# ==========
-def validdelay(d):
-    try:
-        delay = int(d)
-    except ValueError:
-        raise argparse.ArgumentTypeError('"{0}" isn\'t a valid delay.'.format(d))
-    if delay > 60:
-        return 60
-    return delay
-
-
 # =================
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
 parser.add_argument("file", type=argparse.FileType(mode="r"))
-parser.add_argument("-d", "--delay", type=validdelay, default="0")
+parser.add_argument("-d", "--delay", type=shared.validdelay, default="0")
 parser.add_argument("-t", "--test", action="store_true")
 
 

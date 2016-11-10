@@ -11,6 +11,15 @@ from .Modules import shared as s2
 __author__ = 'Xavier ROSSET'
 
 
+# ==========
+# Functions.
+# ==========
+def album(track):
+    if track.totaldiscs > 1:
+        return "{o.album} ({o.discnumber}/{o.totaldiscs})".format(o=track)
+    return track.album
+
+
 # =================
 # Arguments parser.
 # =================
@@ -104,7 +113,7 @@ else:
                         [
                             rippedcd.new.artist,
                             rippedcd.new.year,
-                            rippedcd.new.album,
+                            album(rippedcd.new),
                             rippedcd.new.genre,
                             rippedcd.new.upc,
                             rippedcd.new.albumsort[:-3],
