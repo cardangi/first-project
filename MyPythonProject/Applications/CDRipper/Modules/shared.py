@@ -18,12 +18,6 @@ from ... import shared
 __author__ = 'Xavier ROSSET'
 
 
-# ==========
-# Constants.
-# ==========
-TABSIZE = 3
-
-
 # ========
 # Logging.
 # ========
@@ -771,6 +765,7 @@ profile = namedtuple("profile", "exclusions isinstancedfrom")
 # ==========
 # Constants.
 # ==========
+TABSIZE = 3
 DFTPATTERN = r"^(?:\ufeff)?(?!#)(?:z_)?([^=]+)=(.+)$"
 GENRES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Genres.json")
 LANGUAGES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Languages.json")
@@ -782,10 +777,5 @@ PROFILES = {"default": profile(["albumsortcount", "bootleg", "live", "bonus"], D
             "default1": profile(["albumsortcount", "bootleg", "live", "bonus"], DefaultCDTrack.fromfile),
             "selftitled": profile(["albumsortcount", "bootleg", "live", "bonus"], SelfTitledCDTrack.fromfile),
             "sbootlegs": profile(["albumsortcount", "bootleg", "live", "bonus", "groupby"], SpringsteenBootlegCDTrack.fromfile)}
-
-
-# ================
-# Initializations.
-# ================
 with open(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), r"Applications/CDRipper/Mapping.json")) as fp:
     MAPPING = json.load(fp)
