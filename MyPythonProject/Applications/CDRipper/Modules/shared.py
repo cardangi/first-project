@@ -628,7 +628,7 @@ class RippedCD(ContextDecorator):
 
 class AudioFilesCollection(MutableSequence):
 
-    rex1 = re.compile(r"^(?:{0})\.\d \-\B".format(shared.DFTYEARREGEX))
+    rex1 = re.compile(r"^(?:{0})\.\d -\B".format(shared.DFTYEARREGEX))
     tags = ["albumsort", "album"]
 
     def __init__(self, path):
@@ -649,7 +649,7 @@ class AudioFilesCollection(MutableSequence):
     def __call__(self, *psargs, **kwargs):
         l = []
         for num, fil, tags in [(a, b, c) for a, (b, c) in enumerate(self, 1)]:
-            album = "{0}.{1} - {2}".format(tags["albumsort"][2:6], tags["albumsort"][-1:], tags["album"])
+            album = "{0}.{1} - {2}".format(tags["albumsort"][0][2:6], tags["albumsort"][0][11], tags["album"][0])
             logger.debug('{0:>3d}. "{1}".'.format(num, fil))
             logger.debug('\tNew album: "{0}".'.format(album).expandtabs(TABSIZE))
             if not kwargs["test"]:
@@ -669,7 +669,7 @@ class AudioFilesCollection(MutableSequence):
 
 class FLACFilesCollection(AudioFilesCollection):
 
-    rex2 = re.compile(r"^(?=1\.\d[\d\.]+$)(?=[\d\.]+\.13$)1\.(?:{0})0000\.\d\.13$".format(shared.DFTYEARREGEX))
+    rex2 = re.compile(r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.13$)1\.(?:{0})0000\.\d\.13$".format(shared.DFTYEARREGEX))
 
     def __init__(self, path):
         super(FLACFilesCollection, self).__init__(path)
@@ -685,12 +685,12 @@ class FLACFilesCollection(AudioFilesCollection):
                 continue
 
             # Ne retenir que les fichiers dont le tag "albumsort" est cohérent.
-            match = self.rex2.match(audio["albumsort"])
+            match = self.rex2.match(audio["albumsort"][0])
             if not match:
                 continue
 
             # Ne retenir que les fichiers dont le tag "album" n'a pas été déjà modifié.
-            match = self.rex1.match(audio["album"])
+            match = self.rex1.match(audio["album"][0])
             if match:
                 continue
 
@@ -716,12 +716,12 @@ class MonkeyFilesCollection(AudioFilesCollection):
                 continue
 
             # Ne retenir que les fichiers dont le tag "albumsort" est cohérent.
-            match = self.rex2.match(audio["albumsort"])
+            match = self.rex2.match(audio["albumsort"][0])
             if not match:
                 continue
 
             # Ne retenir que les fichiers dont le tag "album" n'a pas été déjà modifié.
-            match = self.rex1.match(audio["album"])
+            match = self.rex1.match(audio["album"][0])
             if match:
                 continue
 

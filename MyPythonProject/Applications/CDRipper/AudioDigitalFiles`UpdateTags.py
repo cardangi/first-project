@@ -59,7 +59,7 @@ logger.debug("{0:>5d} FLAC file(s) found.".format(len(collection)))
 
 # Mise à jour immédiate.
 if not arguments.delay:
-    collection(arguments.test)
+    collection(test=arguments.test)
     sys.exit(0)
 
 # Mise à jour différée.
