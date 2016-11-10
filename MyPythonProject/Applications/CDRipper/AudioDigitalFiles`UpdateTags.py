@@ -50,19 +50,21 @@ collection = shared.FLACFilesCollection(arguments.drive)
 # Logging.
 # ========
 logger = logging.getLogger("%s.%s" % (__package__, basename(__file__)))
+logger.debug("Delay: {0} second(s).".format(arguments.delay))
+logger.debug("{0:>5d} FLAC file(s) found.".format(len(collection)))
 
 
 # ===============
 # Main algorithm.
 # ===============
-logger.debug("{0:>5d} FLAC file(s) found.".format(len(collection)))
+if len(collection):
 
-# Mise à jour immédiate.
-if not arguments.delay:
-    collection(test=arguments.test)
-    sys.exit(0)
+    # Mise à jour immédiate.
+    if not arguments.delay:
+        collection(test=arguments.test)
+        sys.exit(0)
 
-# Mise à jour différée.
-s = sched.scheduler()
-s.enter(arguments.delay, 1, collection, kwargs={"test": arguments.test})
-s.run()
+    # Mise à jour différée.
+    s = sched.scheduler()
+    s.enter(arguments.delay, 1, collection, kwargs={"test": arguments.test})
+    s.run()
