@@ -34,6 +34,7 @@ IF "%~1" EQU "2" GOTO STEP2
 IF "%~1" EQU "3" GOTO STEP3
 IF "%~1" EQU "4" GOTO STEP4
 IF "%~1" EQU "5" GOTO STEP5
+IF "%~1" EQU "6" GOTO STEP6
 SHIFT
 GOTO MAIN
 
@@ -101,5 +102,14 @@ REM  5 --> Copy audio files.
 REM        -----------------
 :STEP5
 START "" /B /D %_COMPUTING% 102_AudioCDRipper.cmd "%_json%" 30
+SHIFT
+GOTO MAIN
+
+
+REM        -------------------
+REM  6 --> Change "album" tag.
+REM        -------------------
+:STEP6
+START "" /B /D %_COMPUTING% 104_AudioCDRipper.cmd 60
 SHIFT
 GOTO MAIN
