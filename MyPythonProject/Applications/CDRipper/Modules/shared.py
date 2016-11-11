@@ -700,7 +700,7 @@ class FLACFilesCollection(AudioFilesCollection):
 
 class MonkeyFilesCollection(AudioFilesCollection):
 
-    rex2 = re.compile(r"^(?=1\.\d[\d\.]+$)(?=[\d\.]+\.15$)1\.(?:{0})0000\.\d\.15$".format(shared.DFTYEARREGEX))
+    rex2 = re.compile(r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.15$)1\.(?:{0})0000\.\d\.15$".format(shared.DFTYEARREGEX))
 
     def __init__(self, path):
         super(MonkeyFilesCollection, self).__init__(path)
