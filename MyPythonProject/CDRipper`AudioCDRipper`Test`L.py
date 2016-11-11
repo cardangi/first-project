@@ -49,7 +49,7 @@ CURDIR = os.path.expandvars("%_PYTHONPROJECT%")
 # ================
 # Initializations.
 # ================
-returncodes, dftcmd = [], [r"C:\Program Files (x86)\Python35-32\python.exe", os.path.join(CURDIR, r"CDRipper`AudioCDRipper`L.py")]
+returncodes, dftcmd = [], [r"C:\Program Files (x86)\Python35-32\python.exe", os.path.join(CURDIR, r"CDRipper`AudioCD`Ripper`L.py")]
 
 
 # ===============
