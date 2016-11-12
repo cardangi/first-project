@@ -19,7 +19,7 @@ parser.add_argument("ofile")
 # ==========
 # Constants.
 # ==========
-JSON, TABSIZE = os.path.join(os.path.expandvars("%TEMP%"), "dirname.json"), 3
+JSON, TABSIZE = os.path.join(os.path.expandvars("%TEMP%"), "directories.json"), 3
 
 
 # ================
