@@ -4,7 +4,6 @@ import sys
 import json
 import operator
 import subprocess
-from operator import itemgetter
 from contextlib import contextmanager
 
 __author__ = 'Xavier ROSSET'
@@ -30,7 +29,7 @@ CURDIR, JSON = os.path.expandvars("%_PYTHONPROJECT%"), os.path.join(os.path.expa
 # ================
 # Initializations.
 # ================
-tags, returncodes, dftcmd = [], [], [r"C:\Program Files (x86)\Python35-32\python.exe", "-m", "Applications.CDRipper.AudioCD`RippingLog", "insert"]
+tags, returncodes, dftcmd = [], [], ["python", os.path.join("AudioCD", "RippingLog.py", "insert")]
 
 
 # ===============
