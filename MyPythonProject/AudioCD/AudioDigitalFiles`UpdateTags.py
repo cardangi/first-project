@@ -1,10 +1,10 @@
 # -*- coding: ISO-8859-1 -*-
+from Applications.AudioCD.shared import validdelay, FLACFilesCollection
 import argparse
 import logging
 import sched
 import sys
 import os
-from .Modules import shared
 
 __author__ = 'Xavier ROSSET'
 
@@ -25,7 +25,7 @@ def validdrive(d):
 
 
 def updatetags(d, test=True):
-    shared.FLACFilesCollection(d)(test=test)
+    FLACFilesCollection(d)(test=test)
 
 
 # =================
@@ -33,7 +33,7 @@ def updatetags(d, test=True):
 # =================
 parser = argparse.ArgumentParser()
 parser.add_argument("drive", type=validdrive)
-parser.add_argument("-d", "--delay", type=shared.validdelay, default="0")
+parser.add_argument("-d", "--delay", type=validdelay, default="0")
 parser.add_argument("-t", "--test", action="store_true")
 
 

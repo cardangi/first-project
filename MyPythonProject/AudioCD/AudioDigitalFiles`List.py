@@ -8,11 +8,11 @@ import collections
 from pytz import timezone
 from datetime import datetime
 from operator import itemgetter
+from Applications import shared as s1
 from os.path import normpath, splitext
-import xml.etree.ElementTree as ElementTree
 from sortedcontainers import SortedDict
-from .. import shared as s1
-from .Modules import shared as s2
+import xml.etree.ElementTree as ElementTree
+from Applications.AudioCD.shared import canfilebeprocessed
 
 __author__ = 'Xavier ROSSET'
 
@@ -72,7 +72,7 @@ for fil in s1.directorytree(normpath(arguments.directory)):
         ext_filter = arguments.extension
         if not ext_filter:
             ext_filter = []
-        if s2.canfilebeprocessed(splitext(fil)[1][1:], *tuple(ext_filter)):
+        if canfilebeprocessed(splitext(fil)[1][1:], *tuple(ext_filter)):
             ext = splitext(fil)[1][1:].upper()
             match = rex1.match(normpath(fil))
             if match:

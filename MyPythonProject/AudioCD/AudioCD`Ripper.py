@@ -5,23 +5,11 @@ import logging
 import argparse
 from operator import itemgetter
 from contextlib import ExitStack
-from .. import shared as s1
-from .Modules import shared as s2
+from Applications.shared import WRITE
+from Applications.AudioCD.shared import RippedCD, album
+
 
 __author__ = 'Xavier ROSSET'
-
-
-# ==========
-# Functions.
-# ==========
-def album(track):
-    try:
-        totaldiscs = int(track.totaldiscs)
-    except ValueError:
-        return track.album
-    if totaldiscs > 1:
-        return "{o.album} ({o.discnumber}/{o.totaldiscs})".format(o=track)
-    return track.album
 
 
 # =================
@@ -62,7 +50,7 @@ obj, arguments = [], parser.parse_args()
 # ===============
 stack = ExitStack()
 try:
-    rippedcd = stack.enter_context(s2.RippedCD(arguments.rippingprofile, arguments.tagsfile, arguments.test))
+    rippedcd = stack.enter_context(RippedCD(arguments.rippingprofile, arguments.tagsfile, arguments.test))
 except ValueError as e:
     logger.debug(e)
     logger.debug('END "%s".' % (os.path.basename(__file__),))
@@ -102,7 +90,7 @@ else:
                 )
             )
             obj = list(set(obj))
-            with open(DABJSON, s1.WRITE) as fp:
+            with open(DABJSON, WRITE) as fp:
                 json.dump(sorted(obj, key=itemgetter(0)), fp, indent=4, sort_keys=True)
             obj.clear()
 
@@ -131,6 +119,6 @@ else:
                     obj.clear()
                 else:
                     break
-            with open(RIPDBJSON, s1.WRITE) as fp:
+            with open(RIPDBJSON, WRITE) as fp:
                 json.dump(sorted(obj, key=itemgetter(0)), fp, indent=4, sort_keys=True)
             obj.clear()

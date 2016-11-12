@@ -5,7 +5,7 @@ import logging
 import sqlite3
 import argparse
 from datetime import datetime
-from .. import shared
+from Applications.shared import DATABASE
 
 __author__ = 'Xavier ROSSET'
 
@@ -96,7 +96,7 @@ logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 # ===============
 
 #  1. Ouverture de la connexion à la base de données.
-conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
+conn = sqlite3.connect(DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
 
 #  2. Insertion d'un CD.
 if arguments.command == "insert":

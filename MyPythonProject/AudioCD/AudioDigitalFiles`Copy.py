@@ -2,6 +2,7 @@
 """
 Exécuter des copies de fichiers en utilisant les arguments énumérés dans le fichier JSON reçu en paramètre.
 """
+from Applications.AudioCD.shared import validdelay
 from collections import MutableSequence
 import argparse
 import logging
@@ -10,7 +11,6 @@ import sched
 import json
 import sys
 import os
-from .Modules import shared
 
 __author__ = 'Xavier ROSSET'
 
@@ -26,7 +26,7 @@ basename, dirname, exists = os.path.basename, os.path.dirname, os.path.exists
 # =================
 parser = argparse.ArgumentParser()
 parser.add_argument("file", type=argparse.FileType(mode="r"))
-parser.add_argument("-d", "--delay", type=shared.validdelay, default="0")
+parser.add_argument("-d", "--delay", type=validdelay, default="0")
 parser.add_argument("-t", "--test", action="store_true")
 
 
