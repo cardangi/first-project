@@ -421,10 +421,5 @@ def repeatelement(elem, n):
         yield i
 
 
-# def sortedlist(l):
-#     for i, j in sorted(l, key=itemgetter(0)):
-#         yield i, j
-
-
 def now():
     return dateformat(UTC.localize(datetime.utcnow()).astimezone(LOCAL), TEMPLATE4)

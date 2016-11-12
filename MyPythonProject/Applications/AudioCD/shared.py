@@ -10,10 +10,11 @@ import mutagen.flac
 import argparse
 import mutagen
 import logging
+import shutil
 import json
 import os
 import re
-from ... import shared
+from .. import shared
 
 __author__ = 'Xavier ROSSET'
 
@@ -226,7 +227,7 @@ class AudioCDTrack(MutableMapping):
     def fromfile(cls, fil, enc=shared.UTF8):
         regex, d = re.compile(DFTPATTERN, re.IGNORECASE), {}
         with open(fil, encoding=enc) as f:
-            for line in cls.contents(f):
+            for line in filcontents(f):
                 match = regex.match(line)
                 if match:
                     d[match.group(1).rstrip().lower()] = match.group(2)
@@ -299,14 +300,14 @@ class AudioCDTrack(MutableMapping):
         # -------
         return s
 
-    @staticmethod
-    def contents(fil):
-        for line in fil:
-            if line.startswith("#"):
-                continue
-            if not line:
-                continue
-            yield line
+    # @staticmethod
+    # def contents(fil):
+    #     for line in fil:
+    #         if line.startswith("#"):
+    #             continue
+    #         if not line:
+    #             continue
+    #         yield line
 
     @staticmethod
     def splitfield(fld, rex):
@@ -362,8 +363,8 @@ class AudioCDTrack(MutableMapping):
 
     @staticmethod
     def deserialize(fil, enc=shared.UTF8):
-        with open(fil, encoding=enc) as fp:
-            for structure in json.load(fp):
+        with open(fil, encoding=enc) as fr:
+            for structure in json.load(fr):
                 yield structure
 
 
@@ -428,26 +429,6 @@ class SelfTitledCDTrack(DefaultCDTrack):
         # ----- Update album.
         logger.debug("Update album.")
         self._otags["album"] = "{year} (Self Titled)".format(year=self._otags["origyear"])
-
-
-# class FiioX5Track(DefaultCDTrack):
-#
-#     tags = {}
-#
-#     def __init__(self, **kwargs):
-#         super(FiioX5Track, self).__init__(**kwargs)
-#
-#         # ----- Check mandatory input tags.
-#         for item in [item for item in FiioX5Track.tags if FiioX5Track.tags[item]]:
-#             if item not in kwargs:
-#                 raise ValueError("{0} isn\'t available.".format(item))
-#
-#         # ----- Update tags.
-#         self._otags.update({key: kwargs[key] for key in kwargs if key in FiioX5Track.tags})
-#
-#         # ----- Update album.
-#         logger.debug("Update album.")
-#         self._otags["album"] = "{year}.{uid} - {album}".format(year=self._otags["origyear"], uid=self._otags["albumsortcount"], album=self._otags["album"])
 
 
 class BootlegCDTrack(AudioCDTrack):
@@ -531,7 +512,7 @@ class SpringsteenBootlegCDTrack(BootlegCDTrack):
 
 class RippedCD(ContextDecorator):
 
-    environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Templates")), trim_blocks=True, lstrip_blocks=True)
+    environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Templates")), trim_blocks=True, lstrip_blocks=True)
     outputtags = environment.get_template("AudioCDOutputTags")
 
     def __init__(self, ripprofile, tagsfile, test=True):
@@ -588,13 +569,18 @@ class RippedCD(ContextDecorator):
         logger.debug("Input tags.")
         if os.path.exists(self.tags):
             with open(self.tags, encoding=shared.UTF16) as fr:
-                for line in fr:
-                    logger.debug("\t{0}".format(line.splitlines()[0]).expandtabs(4))
+                for line in filcontents(fr):
+                    match = re.match(DFTPATTERN, line)
+                    if match:
+                        logger.debug("\t{0}".format("{0}={1}".format(match.group(1), match.group(2)).expandtabs(4)))
 
         # --> 3. Create AudioCDTrack instance.
         self._rippedcd = PROFILES[self.profile].isinstancedfrom(self.tags, shared.UTF16)  # l'attribut "_rippedcd" est une instance de type "AudioCDTrack".
 
-        # --> 4. Return instance.
+        # --> 4. Store input tags.
+        shutil.copy(src=self.tags, dst=os.path.join(os.path.expandvars("%TEMP%"), "T{0}.txt".format(self._rippedcd.tracknumber.zfill(2))))
+
+        # --> 5. Return instance.
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -614,13 +600,13 @@ class RippedCD(ContextDecorator):
             fw.write(self.outputtags.render(tags={key: self.new[key] for key in self.new if key not in PROFILES[self.profile].exclusions}))
 
         # --> 3. Store tags in JSON.
-        JSON, obj = os.path.join(os.path.expandvars("%TEMP%"), "tags.json"), []
-        if os.path.exists(JSON):
-            with open(JSON) as fp:
-                obj = json.load(fp)
+        tags, obj = os.path.join(os.path.expandvars("%TEMP%"), "tags.json"), []
+        if os.path.exists(tags):
+            with open(tags) as fr:
+                obj = json.load(fr)
         obj.append(dict(self.new))
-        with open(JSON, shared.WRITE) as fp:
-            json.dump(obj, fp, indent=4, sort_keys=True)
+        with open(tags, shared.WRITE) as fw:
+            json.dump(obj, fw, indent=4, sort_keys=True)
 
         # --> 4. Stop logging.
         logger.debug('END "%s".' % (os.path.basename(__file__),))
@@ -631,7 +617,7 @@ class AudioFilesCollection(MutableSequence):
     rex1 = re.compile(r"^(?:{0})\.\d -\B".format(shared.DFTYEARREGEX))
     tags = ["albumsort", "album"]
 
-    def __init__(self, path):
+    def __init__(self):
         self._seq = []
 
     def __getitem__(self, item):
@@ -672,7 +658,7 @@ class FLACFilesCollection(AudioFilesCollection):
     rex2 = re.compile(r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.13$)1\.(?:{0})0000\.\d\.13$".format(shared.DFTYEARREGEX))
 
     def __init__(self, path):
-        super(FLACFilesCollection, self).__init__(path)
+        super(FLACFilesCollection, self).__init__()
 
         for fil in shared.filesinfolder(folder=path):
             try:
@@ -703,7 +689,7 @@ class MonkeyFilesCollection(AudioFilesCollection):
     rex2 = re.compile(r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.15$)1\.(?:{0})0000\.\d\.15$".format(shared.DFTYEARREGEX))
 
     def __init__(self, path):
-        super(MonkeyFilesCollection, self).__init__(path)
+        super(MonkeyFilesCollection, self).__init__()
 
         for fil in shared.filesinfolder(folder=path):
             try:
@@ -756,6 +742,25 @@ def validdelay(d):
     return delay
 
 
+def filcontents(fil):
+    for line in fil:
+        if line.startswith("#"):
+            continue
+        if not line:
+            continue
+        yield line
+
+
+def album(track):
+    try:
+        totaldiscs = int(track.totaldiscs)
+    except ValueError:
+        return track.album
+    if totaldiscs > 1:
+        return "{o.album} ({o.discnumber}/{o.totaldiscs})".format(o=track)
+    return track.album
+
+
 # ================
 # Initializations.
 # ================
@@ -767,9 +772,9 @@ profile = namedtuple("profile", "exclusions isinstancedfrom")
 # ==========
 TABSIZE = 3
 DFTPATTERN = r"^(?:\ufeff)?(?!#)(?:z_)?([^=]+)=(.+)$"
-GENRES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Genres.json")
-LANGUAGES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Languages.json")
-ENCODERS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "CDRipper", "Encoders.json")
+GENRES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Genres.json")
+LANGUAGES = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Languages.json")
+ENCODERS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Encoders.json")
 TITLES = os.path.join(os.path.expandvars("%_COMPUTING%"), "Titles.json")
 ENC_KEYS = ["name", "code", "folder", "extension"]
 TIT_KEYS = ["number", "title", "overwrite"]
@@ -777,5 +782,5 @@ PROFILES = {"default": profile(["albumsortcount", "bootleg", "live", "bonus"], D
             "default1": profile(["albumsortcount", "bootleg", "live", "bonus"], DefaultCDTrack.fromfile),
             "selftitled": profile(["albumsortcount", "bootleg", "live", "bonus"], SelfTitledCDTrack.fromfile),
             "sbootlegs": profile(["albumsortcount", "bootleg", "live", "bonus", "groupby"], SpringsteenBootlegCDTrack.fromfile)}
-with open(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), r"Applications/CDRipper/Mapping.json")) as fp:
+with open(os.path.normpath(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Mapping.json"))) as fp:
     MAPPING = json.load(fp)
