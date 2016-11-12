@@ -39,7 +39,7 @@ def isvaliddirectory(d):
 # =================
 parser = argparse.ArgumentParser()
 parser.add_argument("directory", help="mandatory directory to walk through", type=isvaliddirectory)
-parser.add_argument("-e", "--ext", dest="extension", help="one or more extension(s) to filter out", nargs="*")
+parser.add_argument("-e", "--ext", dest="extensions", help="one or more extension(s) to filter out", nargs="*")
 arguments = parser.parse_args()
 
 
@@ -69,7 +69,7 @@ for fil in s1.directorytree(normpath(arguments.directory)):
     if not match:
         art = None
         ext = None
-        ext_filter = arguments.extension
+        ext_filter = arguments.extensions
         if not ext_filter:
             ext_filter = []
         if canfilebeprocessed(splitext(fil)[1][1:], *tuple(ext_filter)):
@@ -192,7 +192,7 @@ if liste:
         file = ElementTree.SubElement(se, "Artist", attrib=dict(number=str(item1), count=str(item3)))
         file.text = item2
 if any([lista, listb, listc, listd, liste]):
-    ElementTree.ElementTree(root).write(os.path.join(os.path.expandvars("%_COMPUTING%"), "AudioDigitalFilesList.xml"), encoding="UTF-8", xml_declaration=True)
+    ElementTree.ElementTree(root).write(os.path.join(os.path.expandvars("%_COMPUTING%"), "DigitalAudioFilesList.xml"), encoding="UTF-8", xml_declaration=True)
 
 
 #     ---------------
