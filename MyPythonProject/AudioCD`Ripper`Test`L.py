@@ -49,7 +49,7 @@ CURDIR = os.path.expandvars("%_PYTHONPROJECT%")
 # ================
 # Initializations.
 # ================
-returncodes, dftcmd = [], [r"C:\Program Files (x86)\Python35-32\python.exe", os.path.join(CURDIR, r"CDRipper`AudioCD`Ripper`L.py")]
+returncodes, dftcmd = [], ["python", os.path.join("AudioCD", "Ripper.py")]
 
 
 # ===============
@@ -58,15 +58,14 @@ returncodes, dftcmd = [], [r"C:\Program Files (x86)\Python35-32\python.exe", os.
 with tempfile.TemporaryDirectory() as tmpdir:
     tagsfile = os.path.join(tmpdir, "tags.txt")
     cmd = [item for item in dftcmd]
-    cmd.append(tagsfile)
-    cmd.append(arguments.profile)
+    cmd.extend([tagsfile, arguments.profile])
     with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "AudioCDRipperTest.json")) as fp:
         for element in json.load(fp):  # "element" est un dictionnaire.
             if arguments.profile in element:
                 for key in element[arguments.profile]:  # "key" est un dictionnaire.
                     with open(tagsfile, "w", encoding="UTF_16LE") as fw:
                         for subkey in element[arguments.profile][key]:
-                            fw.write("{}={}\n".format(subkey, element[arguments.profile][key][subkey]))
+                            fw.write("{0}={1}\n".format(subkey, element[arguments.profile][key][subkey]))
                     with chgcurdir(CURDIR):
                         if arguments.test:
                             cmd.append("--test")

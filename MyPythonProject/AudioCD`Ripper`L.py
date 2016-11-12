@@ -32,7 +32,7 @@ def chgcurdir(d):
 # ===============
 # Main algorithm.
 # ===============
-cmd = [r"C:\Program Files (x86)\Python35-32\python.exe", "-m", "Applications.CDRipper.AudioCD`Ripper", arguments.input, arguments.profile]
+cmd = ["python", os.path.join("AudioCD", "Ripper.py"), arguments.input, arguments.profile]
 if arguments.test:
     cmd.append("--test")
 if arguments.debug:
