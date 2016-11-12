@@ -572,7 +572,7 @@ class RippedCD(ContextDecorator):
                 for line in filcontents(fr):
                     match = re.match(DFTPATTERN, line)
                     if match:
-                        logger.debug("\t{0}".format("{0}={1}".format(match.group(1), match.group(2)).expandtabs(4)))
+                        logger.debug("\t{0}".format("{0}={1}".format(match.group(1), match.group(2))).expandtabs(4))
 
         # --> 3. Create AudioCDTrack instance.
         self._rippedcd = PROFILES[self.profile].isinstancedfrom(self.tags, shared.UTF16)  # l'attribut "_rippedcd" est une instance de type "AudioCDTrack".
