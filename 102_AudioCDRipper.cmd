@@ -17,9 +17,9 @@ REM =====================================================================
 IF EXIST "%~1" (
     PUSHD "%_PYTHONPROJECT%"
     IF "%~2" NEQ "" (
-        python -m Applications.CDRipper.AudioDigitalFiles`Copy "%~1" -d %~2
+        python AudioCD\DigitalAudioFiles`Copy.py "%~1" -d %~2
     ) ELSE (
-        python -m Applications.CDRipper.AudioDigitalFiles`Copy "%~1"
+        python AudioCD\DigitalAudioFiles`Copy.py "%~1"
     )
     POPD
     DEL "%~1"

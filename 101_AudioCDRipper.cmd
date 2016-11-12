@@ -44,7 +44,7 @@ REM  1 --> Ripping log.
 REM        ------------
 :STEP1
 IF EXIST "%_jsonrippinglog%" (
-    python %_PYTHONPROJECT%\CDRipper`AudioCD`RippingLog`L.py
+    python %_PYTHONPROJECT%\AudioCD`RippingLog`L.py
     DEL "%_jsonrippinglog%"
 )
 SHIFT

@@ -42,8 +42,8 @@ REM Ecrire les arguments de copie dans un un fichier JSON.
 REM ======================================================
 PUSHD %_PYTHONPROJECT%
 IF "%~1" NEQ "" (
-    python -m Applications.CDRipper.AudioDigitalFiles`UpdateTags "%_drive%:" -d %~1
+    python AudioCD\DigitalAudioFiles`UpdateTags.py "%_drive%:" -d %~1
 ) ELSE (
-    python -m Applications.CDRipper.AudioDigitalFiles`UpdateTags "%_drive%:"
+    python AudioCD\DigitalAudioFiles`UpdateTags.py "%_drive%:"
 )
 POPD

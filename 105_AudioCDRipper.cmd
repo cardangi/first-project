@@ -15,5 +15,5 @@ REM ======================================================
 REM Ecrire les arguments de copie dans un un fichier JSON.
 REM ======================================================
 PUSHD %_PYTHONPROJECT%
-python -m Applications.CDRipper.AudioCD`OutFiles "%~1"
+python AudioCD\OutFiles.py "%~1"
 POPD
