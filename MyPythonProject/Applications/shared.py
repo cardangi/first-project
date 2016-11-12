@@ -1,7 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 import io
 import os
-import re
 import locale
 import logging
 import argparse
@@ -12,7 +11,6 @@ from datetime import datetime
 from dateutil.tz import gettz
 from operator import itemgetter
 from dateutil.parser import parse
-from collections import namedtuple
 from contextlib import contextmanager
 from PIL import Image, TiffImagePlugin
 
