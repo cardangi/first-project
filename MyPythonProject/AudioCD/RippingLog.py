@@ -1,4 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
+import sys
 import argparse
 from Applications.Database.RippedCD.shared import insertfromfile
 
@@ -21,4 +22,10 @@ arguments = parser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-insertfromfile(arguments.tracks)
+status = insertfromfile(arguments.tracks)
+
+
+# ===============
+# Exit algorithm.
+# ===============
+sys.exit(status)
