@@ -6,8 +6,8 @@ from pytz import timezone
 from string import Template
 from dateutil import parser
 from datetime import datetime
+from Applications import shared
 from jinja2 import Environment, FileSystemLoader
-from ... import shared
 
 __author__ = 'Xavier ROSSET'
 
@@ -21,7 +21,7 @@ locale.setlocale(locale.LC_ALL, "")
 # ===================
 # Jinja2 environment.
 # ===================
-environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "Database", "RippingLog", "Templates")), trim_blocks=True, lstrip_blocks=True)
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Templates")), trim_blocks=True, lstrip_blocks=True)
 
 
 # ================

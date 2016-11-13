@@ -1,0 +1,26 @@
+{% extends "Main" %}
+
+{% block head %}
+            <h1>Audio CD ripping log</h1>
+            <p class="datetime">{{ now }}</p>
+{% endblock %}
+
+{% block content1 %}
+                <table class="content1">
+                {% for ripped, artist, year, album, cover in content1 %}
+                    <tr>
+                        <td class="cover"><img src="{{ cover }}" width="120" height="120" alt="No cover found"/></td>
+                        <td>
+                            <p class="logcontent">{{ ripped }}</p>
+                            <p class="logcontent">{{ artist }}</p>
+                            <p class="logcontent">{{ year }}</p>
+                            <p class="logcontent">{{ album }}</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </table>
+{% endblock %}
+
+{% block content2 %}
+    {{- content2 -}}
+{% endblock %}
