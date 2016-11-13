@@ -16,8 +16,8 @@ __author__ = 'Xavier ROSSET'
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("tagsfile", help="tags file")
-parser.add_argument("rippingprofile", help="rip profile")
+parser.add_argument("file", help="tags file")
+parser.add_argument("profile", help="rip profile")
 parser.add_argument("-t", "--test", action="store_true")
 
 
@@ -50,7 +50,7 @@ obj, arguments = [], parser.parse_args()
 # ===============
 stack = ExitStack()
 try:
-    rippedcd = stack.enter_context(RippedCD(arguments.rippingprofile, arguments.tagsfile, arguments.test))
+    rippedcd = stack.enter_context(RippedCD(arguments.profile, arguments.file, arguments.test))
 except ValueError as e:
     pass
     # logger.debug(e)
