@@ -36,7 +36,7 @@ exists, join, expandvars = os.path.exists, os.path.join, os.path.expandvars
 # ==========
 # Constants.
 # ==========
-DABJSON, RIPDBJSON = join(expandvars("%TEMP%"), "digitalaudiodatabase.json"), join(expandvars("%TEMP%"), "rippinglog.json")
+DADBJSON, CDDBJSON = join(expandvars("%TEMP%"), "digitalaudiodatabase.json"), join(expandvars("%TEMP%"), "rippinglog.json")
 
 
 # ==========
@@ -60,8 +60,8 @@ else:
         if rippedcd.profile in ["default", "selftitled"]:
 
             #  --> 1. Digital audio database.
-            if exists(DABJSON):
-                with open(DABJSON) as fp:
+            if exists(DADBJSON):
+                with open(DADBJSON) as fp:
                     obj = json.load(fp)
                 obj = [tuple(item) for item in obj]
             obj.append(
@@ -91,13 +91,13 @@ else:
                 )
             )
             obj = list(set(obj))
-            with open(DABJSON, WRITE) as fp:
+            with open(DADBJSON, WRITE) as fp:
                 json.dump(sorted(obj, key=itemgetter(0)), fp, indent=4, sort_keys=True)
             obj.clear()
 
             #  --> 2. Audio CD ripping database.
-            if exists(RIPDBJSON):
-                with open(RIPDBJSON) as fp:
+            if exists(CDDBJSON):
+                with open(CDDBJSON) as fp:
                     obj = json.load(fp)
                 obj = [tuple(item) for item in obj]
             while True:
@@ -120,6 +120,6 @@ else:
                     obj.clear()
                 else:
                     break
-            with open(RIPDBJSON, WRITE) as fp:
+            with open(CDDBJSON, WRITE) as fp:
                 json.dump(sorted(obj, key=itemgetter(0)), fp, indent=4, sort_keys=True)
             obj.clear()
