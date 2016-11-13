@@ -1,7 +1,7 @@
 # -*- coding: ISO-8859-1 -*-
 import os
 import json
-import logging
+# import logging
 import argparse
 from operator import itemgetter
 from contextlib import ExitStack
@@ -24,7 +24,7 @@ parser.add_argument("-t", "--test", action="store_true")
 # ========
 # Logging.
 # ========
-logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
+# logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 
 
 # ============
@@ -52,8 +52,9 @@ stack = ExitStack()
 try:
     rippedcd = stack.enter_context(RippedCD(arguments.rippingprofile, arguments.tagsfile, arguments.test))
 except ValueError as e:
-    logger.debug(e)
-    logger.debug('END "%s".' % (os.path.basename(__file__),))
+    pass
+    # logger.debug(e)
+    # logger.debug('END "%s".' % (os.path.basename(__file__),))
 else:
     with stack:
         if rippedcd.profile in ["default", "selftitled"]:

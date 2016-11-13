@@ -7,7 +7,7 @@ Le répertoire et le nom du fichier copié sont fonction des metadata "albumsort",
 """
 import mutagen.flac
 import argparse
-import logging
+# import logging
 import json
 import os
 import re
@@ -55,9 +55,9 @@ rex2 = re.compile(r"[a-z]:", re.IGNORECASE)
 # ========
 # Logging.
 # ========
-logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
-logger.debug("File.")
-logger.debug("\t{0}".format(arguments.file.name).expandtabs(TABSIZE))
+# logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
+# logger.debug("File.")
+# logger.debug("\t{0}".format(arguments.file.name).expandtabs(TABSIZE))
 
 
 # ===============
@@ -66,13 +66,14 @@ logger.debug("\t{0}".format(arguments.file.name).expandtabs(TABSIZE))
 try:
     audio = mutagen.flac.FLAC(arguments.file)
 except mutagen.MutagenError:
-    logger.debug('"{0}" is not a valid FLAC file.'.format(arguments.file.name))
+    pass
+    # logger.debug('"{0}" is not a valid FLAC file.'.format(arguments.file.name))
 else:
-    logger.debug("Tags.")
-    logger.debug("\tAlbumSort: {0}".format(audio["albumsort"][0][:-3]).expandtabs(TABSIZE))
-    logger.debug("\tDisc     : {0}".format(audio.get("disc", audio["discnumber"])[0]).expandtabs(TABSIZE))
-    logger.debug("\tTrack    : {0}".format(audio.get("track", audio["tracknumber"])[0]).expandtabs(TABSIZE))
-    logger.debug("\tTitle    : {0}".format(audio["title"][0]).expandtabs(TABSIZE))
+    # logger.debug("Tags.")
+    # logger.debug("\tAlbumSort: {0}".format(audio["albumsort"][0][:-3]).expandtabs(TABSIZE))
+    # logger.debug("\tDisc     : {0}".format(audio.get("disc", audio["discnumber"])[0]).expandtabs(TABSIZE))
+    # logger.debug("\tTrack    : {0}".format(audio.get("track", audio["tracknumber"])[0]).expandtabs(TABSIZE))
+    # logger.debug("\tTitle    : {0}".format(audio["title"][0]).expandtabs(TABSIZE))
     if os.path.exists(arguments.outjsonfile):
         with open(arguments.outjsonfile) as fp:
             args = json.load(fp)

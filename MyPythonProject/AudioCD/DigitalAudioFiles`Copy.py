@@ -5,7 +5,7 @@ Exécuter des copies de fichiers en utilisant les arguments énumérés dans le fich
 from Applications.AudioCD.shared import validdelay
 from collections import MutableSequence
 import argparse
-import logging
+# import logging
 import shutil
 import sched
 import json
@@ -59,15 +59,15 @@ class CopyFilesFrom(MutableSequence):
     def __call__(self, *args, **kwargs):
         for src, dst in self:
             if not exists(src):
-                logger.debug('"{0}" doesn\'t exist.'.format(src))
+                # logger.debug('"{0}" doesn\'t exist.'.format(src))
                 continue
-            logger.debug("Copy.")
+            # logger.debug("Copy.")
             if not exists(dirname(dst)):
-                logger.debug('\t"{0}" created.'.format(dirname(dst)).expandtabs(TABSIZE))
+                # logger.debug('\t"{0}" created.'.format(dirname(dst)).expandtabs(TABSIZE))
                 if not kwargs["test"]:
                     os.makedirs(dirname(dst))
-            logger.debug('\tSource     : "{0}"'.format(src).expandtabs(TABSIZE))
-            logger.debug('\tDestination: "{0}"'.format(dst).expandtabs(TABSIZE))
+            # logger.debug('\tSource     : "{0}"'.format(src).expandtabs(TABSIZE))
+            # logger.debug('\tDestination: "{0}"'.format(dst).expandtabs(TABSIZE))
             if not kwargs["test"]:
                 shutil.copy2(src=src, dst=dst)
 
@@ -85,9 +85,9 @@ filestocopy = CopyFilesFrom(arguments.file)
 # ========
 # Logging.
 # ========
-logger = logging.getLogger("%s.%s" % (__package__, basename(__file__)))
-logger.debug("Delay: {0} second(s).".format(arguments.delay))
-logger.debug("{0:>5d} files to copy.".format(len(filestocopy)))
+# logger = logging.getLogger("%s.%s" % (__package__, basename(__file__)))
+# logger.debug("Delay: {0} second(s).".format(arguments.delay))
+# logger.debug("{0:>5d} files to copy.".format(len(filestocopy)))
 
 
 # ===============
