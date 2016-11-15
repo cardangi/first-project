@@ -15,9 +15,6 @@ class Boolean(object):
         if s.upper() == "Y":
             self.bool = True
 
-    def __repr__(self):
-        return "{0}".format(self.bool).lower()
-
 
 # ==========
 # Functions.
