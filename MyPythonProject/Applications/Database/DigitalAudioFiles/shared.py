@@ -5,7 +5,7 @@ import sqlite3
 from datetime import datetime
 from ...shared import DATABASE
 from collections import MutableSequence
-from ..shared import Boolean, adapt_boolean
+from ..shared import Boolean, adapt_boolean, convert_boolean
 
 
 __author__ = 'Xavier ROSSET'
@@ -15,6 +15,12 @@ __author__ = 'Xavier ROSSET'
 # SQLite3 adapter.
 # ================
 sqlite3.register_adapter(Boolean, adapt_boolean)
+
+
+# ==================
+# SQLite3 converter.
+# ==================
+sqlite3.register_converter("boolean", convert_boolean)
 
 
 # ========
@@ -126,14 +132,9 @@ def validgenre(s):
     return s
 
 
-def validid(s):
-    regex = re.compile("^\d(?:\d(?:\d)?)?$")
-    s = str(s)
-    if not regex.match(s):
-        raise ValueError('"{0}" is not a valid ID'.format(s))
-    return int(s)
-
-
+# ===================================
+# Main functions to work with tables.
+# ===================================
 def insertfromfile(fil, db=DATABASE):
     statusss = []
     tracks = InsertTracksfromFile(fil)
@@ -141,7 +142,7 @@ def insertfromfile(fil, db=DATABASE):
         for album, disc, track in tracks:
             statuss, acount, dcount, tcount = [], 0, 0, 0
 
-            conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
+            conn = sqlite3.connect(db)
             try:
                 with conn:
 
@@ -176,78 +177,78 @@ def insertfromfile(fil, db=DATABASE):
     return statusss
 
 
-def selectfromuid(uid, db=DATABASE):
-
+def select(db=DATABASE):
     conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = sqlite3.Row
-    album, discs, tracks = None, [], []
-
-    for arow in conn.execute("SELECT albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, created, origyear FROM albums WHERE rowid=?", (uid,)):
-        album = tuple(arow)
+    for arow in conn.execute("SELECT albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, created, origyear FROM albums ORDER BY albumid"):
         for drow in conn.execute("SELECT albumid, discid, tracks, created FROM discs WHERE albumid=?", (arow["albumid"],)):
-            discs.append(tuple(drow))
             for trow in conn.execute("SELECT albumid, discid, trackid, title, created FROM tracks WHERE albumid=? AND discid=?", (arow["albumid"], drow["discid"])):
-                tracks.append(tuple(trow))
+                yield tuple(arow), tuple(drow), tuple(trow)
 
-    return album, discs, tracks
+
+def selectfromuid(uid, db=DATABASE):
+    conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
+    conn.row_factory = sqlite3.Row
+    for arow in conn.execute("SELECT albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, created, origyear FROM albums WHERE rowid=?", (uid,)):
+        for drow in conn.execute("SELECT albumid, discid, tracks, created FROM discs WHERE albumid=?", (arow["albumid"],)):
+            for trow in conn.execute("SELECT albumid, discid, trackid, title, created FROM tracks WHERE albumid=? AND discid=?", (arow["albumid"], drow["discid"])):
+                yield tuple(arow), tuple(drow), tuple(trow)
 
 
 def deletefromuid(uid, db=DATABASE):
 
-    status, acount, dcount, tcount, r1, r2, r3, conn = (0, 0, 0), 0, 0, 0, (), [], [], sqlite3.connect(db)
+    acount, dcount, tcount, discs, tracks, conn = 0, 0, 0, [], [], sqlite3.connect(db)
     conn.row_factory = sqlite3.Row
-    for arow in conn.execute("SELECT albumid FROM albums WHERE rowid=?", (uid,)):
-        r1 = (uid,)
-        for drow in conn.execute("SELECT rowid, discid FROM discs WHERE albumid=?", (arow["albumid"],)):
-            r2.append(drow["rowid"])
-            for trow in conn.execute("SELECT rowid FROM tracks WHERE albumid=? AND discid=?", (arow["albumid"], drow["discid"])):
-                r3.append(trow["rowid"])
 
-    if any([r1, r2, r3]):
-        try:
-            with conn:
-                conn.executemany("DELETE FROM albums WHERE rowid=?", [(i,) for i in r1])
-                acount = conn.total_changes
-                conn.executemany("DELETE FROM discs WHERE rowid=?", [(i,) for i in tuple(r2)])
-                dcount = conn.total_changes - acount
-                conn.executemany("DELETE FROM tracks WHERE rowid=?", [(i,) for i in tuple(r3)])
-                tcount = conn.total_changes - acount - dcount
-        except sqlite3.Error:
-            pass
+    for arow in conn.execute("SELECT albumid FROM albums WHERE rowid=?", (uid,)):
+        for drow in conn.execute("SELECT rowid, discid FROM discs WHERE albumid=?", (arow["albumid"],)):
+            discs.append(drow["rowid"])
+            for trow in conn.execute("SELECT rowid FROM tracks WHERE albumid=? AND discid=?", (arow["albumid"], drow["discid"])):
+                tracks.append(trow["rowid"])
+
+    try:
+        with conn:
+
+            # TRACKS table.
+            conn.executemany("DELETE FROM tracks WHERE rowid=?", [(i,) for i in tracks])
+            tcount = conn.total_changes
+
+            # DISCS table.
+            conn.executemany("DELETE FROM discs WHERE rowid=?", [(i,) for i in discs])
+            dcount = conn.total_changes - tcount
+
+            # ALBUMS table.
+            conn.execute("DELETE FROM albums WHERE rowid=?", (uid,))
+            acount = conn.total_changes - tcount - dcount
+
+    except (sqlite3.Error, ValueError):
+        return 0, 0, 0
+
     return acount, dcount, tcount
 
 
 def deletealbumsfromuid(*uid, db=DATABASE):
 
     status, conn = 0, sqlite3.connect(db)
-    try:
-        with conn:
-            conn.executemany("DELETE FROM albums WHERE rowid=?", [(i,) for i in list(uid)])
-            status = conn.total_changes
-    except (sqlite3.Error, ValueError):
-        pass
+    with conn:
+        conn.executemany("DELETE FROM albums WHERE rowid=?", [(i,) for i in uid])
+        status = conn.total_changes
     return status
 
 
 def deletediscsfromuid(*uid, db=DATABASE):
 
     status, conn = 0, sqlite3.connect(db)
-    try:
-        with conn:
-            conn.executemany("DELETE FROM discs WHERE rowid=?", [(i,) for i in list(uid)])
-            status = conn.total_changes
-    except (sqlite3.Error, ValueError):
-        pass
+    with conn:
+        conn.executemany("DELETE FROM discs WHERE rowid=?", [(i,) for i in uid])
+        status = conn.total_changes
     return status
 
 
 def deletetracksfromuid(*uid, db=DATABASE):
 
     status, conn = 0, sqlite3.connect(db)
-    try:
-        with conn:
-            conn.executemany("DELETE FROM tracks WHERE rowid=?", [(i,) for i in list(uid)])
-            status = conn.total_changes
-    except (sqlite3.Error, ValueError):
-        pass
+    with conn:
+        conn.executemany("DELETE FROM tracks WHERE rowid=?", [(i,) for i in uid])
+        status = conn.total_changes
     return status

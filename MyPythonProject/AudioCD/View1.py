@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
 import locale
-import sqlite3
 from pytz import timezone
 from string import Template
-from dateutil import parser
 from datetime import datetime
+from collections import Counter
+from operator import itemgetter
 from Applications import shared
 from jinja2 import Environment, FileSystemLoader
+from Applications.Database.RippedCD.shared import select
 
 __author__ = 'Xavier ROSSET'
 
@@ -42,72 +43,74 @@ path = Template(r"file:///C:/Users/Xavier/Documents/Album Art/$a/$b/$c/iPod-Fron
 # ===============
 
 
-#  1. Ouverture de la connexion à la base de données.
-conn = sqlite3.connect(shared.DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
-conn.row_factory = sqlite3.Row
+#     -----------------------
+#  1. Extraction des données.
+#     -----------------------
+data = list(select())
+months = dict(set([(
+                       shared.dateformat(timezone(shared.DFTTIMEZONE).localize(itemgetter(1)(item)), "$Y$m"),
+                       shared.dateformat(timezone(shared.DFTTIMEZONE).localize(itemgetter(1)(item)), "$month $Y")
+                   ) for item in data]))
 
 
+#     ----------------------
 #  2. Détail des CDs rippés.
-tr4 = [tuple([shared.dateformat(timezone(shared.DFTTIMEZONE).localize(row["ripped"]), shared.TEMPLATE2),
-              row["artist"],
-              row["year"],
-              row["album"],
-              path.substitute(a=row["artistsort"][0].upper(), b=row["artistsort"], c=row["albumsort"]).replace(" ", r"%20")
-              ])
-       for row in conn.cursor().execute("SELECT id, ripped, artistsort, albumsort, artist, year, album FROM rippinglog ORDER BY id DESC") if row["albumsort"] and row["artistsort"]
-       ]
+#     ----------------------
+# tr4 = [(
+#            shared.dateformat(timezone(shared.DFTTIMEZONE).localize(itemgetter(1)(item)), shared.TEMPLATE2),
+#            itemgetter(2)(item),
+#            itemgetter(3)(item),
+#            itemgetter(4)(item),
+#            path.substitute(a=itemgetter(9)(item)[0].upper(), b=itemgetter(9)(item), c=itemgetter(8)(item)).replace(" ", r"%20")
+#        ) for item in data]
 
 
+#     ---------------------------------------------------------------------
 #  3. Journal des CDs rippés. Cumul par artiste. Tri par artiste croissant.
+#     ---------------------------------------------------------------------
 tr1 = t2.render(id="artist1",
                 h2="Palmarès par artiste",
                 th=["artist", "count"],
-                tr=[tuple([row["artist"], row["count"]]) for row in conn.cursor().execute("SELECT artist, count(*) AS count from rippinglog GROUP BY artist ORDER BY artist")]
+                tr=sorted(list(Counter([itemgetter(2)(item) for item in data]).items()), key=itemgetter(0))
                 )
 
 
+#     ---------------------------------------------------------------------
 #  4. Journal des CDs rippés. Cumul par artiste. Tri par cumul décroissant.
+#     ---------------------------------------------------------------------
 tr2 = t2.render(id="artist2",
                 h2="Palmarès par artiste",
                 th=["artist", "count"],
-                tr=[tuple([row["artist"], row["count"]])
-                    for row in conn.cursor().execute("SELECT a.artist, a.count FROM (SELECT artist AS artist, count(*) AS count from rippinglog GROUP BY artist ORDER BY artist) a ORDER BY count DESC, artist")])
-
-
-#  5. Journal des CDs rippés. Cumul par genre. Tri par cumul décroissant.
-tr3 = t2.render(id="genre",
-                h2="Palmarès par genre",
-                th=["genre", "count"],
-                tr=[tuple([row["genre"], row["count"]])
-                    for row in conn.cursor().execute("SELECT a.genre, a.count FROM (SELECT genre AS genre, count(*) AS count from rippinglog GROUP BY genre ORDER BY genre) a ORDER BY count DESC, genre")])
-
-
-#  6. Journal des CDs rippés. Cumul par période. Tri par période croissante.
-#     Une date respectant le masque "SSAA MM 01" est parsée afin d'extraire le nom du mois et l'année.
-tr5 = t2.render(id="month",
-                h2="Palmarès par mois",
-                th=["month", "count"],
-                tr=[tuple(["%s %s" % (parser.parse("%s 01" % (row["ccyymm"],)).strftime("%B").capitalize(),
-                                      parser.parse("%s 01" % (row["ccyymm"],)).strftime("%Y")
-                                      ),
-                           row["count"]
-                           ])
-                    for row in conn.cursor().execute("SELECT a.ccyymm AS ccyymm, count(*) AS count FROM (SELECT strftime('%Y %m', ripped) AS ccyymm FROM rippinglog) a GROUP BY a.ccyymm ORDER BY a.ccyymm")
-                    ]
+                tr=sorted(sorted(list(Counter([itemgetter(2)(item) for item in data]).items()), key=itemgetter(0)), key=itemgetter(1), reverse=True)
                 )
 
 
-#     -----------------------------------------------
-#  8. Fermeture de la connexion à la base de données.
-#     -----------------------------------------------
-conn.close()
+#     -------------------------------------------------------------------
+#  5. Journal des CDs rippés. Cumul par genre. Tri par cumul décroissant.
+#     -------------------------------------------------------------------
+tr3 = t2.render(id="genre",
+                h2="Palmarès par genre",
+                th=["genre", "count"],
+                tr=sorted(sorted(list(Counter([itemgetter(6)(item) for item in data]).items()), key=itemgetter(0)), key=itemgetter(1), reverse=True)
+                )
+
+
+#     ----------------------------------------------------------------------
+#  6. Journal des CDs rippés. Cumul par période. Tri par période croissante.
+#     ----------------------------------------------------------------------
+tr5 = t2.render(id="month",
+                h2="Palmarès par mois",
+                th=["month", "count"],
+                tr=[(months[itemgetter(0)(item)], itemgetter(1)(item))
+                    for item in sorted(list(Counter([shared.dateformat(timezone(shared.DFTTIMEZONE).localize(itemgetter(1)(item)), "$Y$m") for item in data]).items()), key=itemgetter(0))]
+                )
 
 
 #     ------------
-#  9. HTML Output.
+#  2. HTML Output.
 #     ------------
-print(content.render(now=shared.dateformat(shared.UTC.localize(datetime.utcnow()).astimezone(shared.LOCAL), shared.TEMPLATE4),
-                     content1=tr4,
-                     content2="{0}{1}{2}{3}".format(tr1, tr2, tr3, tr5)
-                     )
-      )
+# print(content.render(now=shared.dateformat(shared.UTC.localize(datetime.utcnow()).astimezone(shared.LOCAL), shared.TEMPLATE4),
+#                      content1=tr4,
+#                      content2="{0}{1}{2}{3}".format(tr1, tr2, tr3, tr5)
+#                      )
+#       )
