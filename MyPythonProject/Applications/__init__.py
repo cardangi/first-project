@@ -1,9 +1,10 @@
 # -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
 import logging
 from . import shared
 from logging import handlers
+
+__author__ = 'Xavier ROSSET'
+
 
 # Create Logger.
 parent_logger = logging.getLogger(__name__)
