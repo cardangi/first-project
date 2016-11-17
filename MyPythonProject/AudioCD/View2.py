@@ -52,7 +52,6 @@ for item in sorted(select(arguments.database), key=itemgetter(0), reverse=True):
                                                       itemgetter(7)(item)
                                                       ]))))
 args = [shared.now(), dict(args)]
-print(args)
 if args:
     with open(OUTPUT, mode=shared.WRITE, encoding=shared.UTF8) as fp:
         json.dump(args, fp, indent=4, sort_keys=True)
