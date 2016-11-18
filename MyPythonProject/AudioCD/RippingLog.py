@@ -22,10 +22,4 @@ arguments = parser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-status = insertfromfile(arguments.tracks)
-
-
-# ===============
-# Exit algorithm.
-# ===============
-sys.exit(status)
+sys.exit(insertfromfile(arguments.tracks))
