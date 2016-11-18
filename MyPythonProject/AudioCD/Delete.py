@@ -1,6 +1,7 @@
 # -*- coding: ISO-8859-1 -*-
 import os
 import re
+import sys
 import argparse
 from Applications.Database.RippedCD.shared import deletefromuid
 
@@ -43,4 +44,4 @@ while True:
     args = regex.findall(numbers)
     if args:
         break
-deletefromuid(*args, db=arguments.database)
+sys.exit(deletefromuid(*args, db=arguments.database))
