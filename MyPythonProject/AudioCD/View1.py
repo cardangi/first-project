@@ -143,7 +143,7 @@ tr5 = t2.render(id="month",
 #     ------------
 #  8. HTML Output.
 #     ------------
-with open(OUTPUT, mode=shared.WRITE, encoding=shared.UTF8) as fp:
+with open(OUTPUT, mode=shared.WRITE) as fp:
     fp.write(content.render(now=shared.dateformat(shared.UTC.localize(datetime.utcnow()).astimezone(shared.LOCAL), shared.TEMPLATE4), 
                             content1=tr4, 
                             content2="{0}{1}{2}{3}".format(tr1, tr2, tr3, tr5)
