@@ -105,7 +105,7 @@ tr4 = [(
 tr1 = t2.render(id="artist1",
                 h2="Palmarès par artiste",
                 th=["artist", "count"],
-                tr=sorted(list(Counter([itemgetter(2)(item) for item in data]).items()), key=itemgetter(0))
+                tr=sorted(Counter([itemgetter(2)(item) for item in data]).items()), key=itemgetter(0)
                 )
 
 
@@ -115,7 +115,7 @@ tr1 = t2.render(id="artist1",
 tr2 = t2.render(id="artist2",
                 h2="Palmarès par artiste",
                 th=["artist", "count"],
-                tr=sorted(sorted(list(Counter([itemgetter(2)(item) for item in data]).items()), key=itemgetter(0)), key=itemgetter(1), reverse=True)
+                tr=sorted(sorted(Counter([itemgetter(2)(item) for item in data]).items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)
                 )
 
 
@@ -125,8 +125,8 @@ tr2 = t2.render(id="artist2",
 tr3 = t2.render(id="genre",
                 h2="Palmarès par genre",
                 th=["genre", "count"],
-                tr=sorted(sorted(list(Counter([itemgetter(6)(item) for item in data]).items()), key=itemgetter(0)), key=itemgetter(1), reverse=True)
-                )
+                tr=sorted(sorted(Counter([itemgetter(6)(item) for item in data]).items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)
+               )
 
 
 #     ----------------------------------------------------------------------
@@ -136,7 +136,7 @@ tr5 = t2.render(id="month",
                 h2="Palmarès par mois",
                 th=["month", "count"],
                 tr=[(months[itemgetter(0)(item)], itemgetter(1)(item))
-                    for item in sorted(list(Counter([shared.dateformat(timezone(shared.DFTTIMEZONE).localize(itemgetter(1)(item)), "$Y$m") for item in data]).items()), key=itemgetter(0))]
+                    for item in sorted(Counter([shared.dateformat(timezone(shared.DFTTIMEZONE).localize(itemgetter(1)(item)), "$Y$m") for item in data]).items(), key=itemgetter(0))]
                 )
 
 
