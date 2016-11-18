@@ -29,9 +29,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=validdb)
 
 
-# ===============
-# Main algorithm.
-# ===============
+# ================
+# Initializations.
+# ================
 arguments = parser.parse_args()
 
 
