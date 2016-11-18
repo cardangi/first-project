@@ -51,7 +51,6 @@ for item in sorted(select(arguments.database), key=itemgetter(0), reverse=True):
                                                       itemgetter(5)(item),
                                                       itemgetter(7)(item)
                                                       ]))))
-args = [shared.now(), dict(args)]
 if args:
     with open(OUTPUT, mode=shared.WRITE) as fp:
-        json.dump(args, fp, indent=4, sort_keys=True)
+        json.dump([shared.now(), dict(args)], fp, indent=4, sort_keys=True)
