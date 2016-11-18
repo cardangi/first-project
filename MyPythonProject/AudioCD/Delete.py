@@ -43,4 +43,4 @@ while True:
     args = regex.findall(numbers)
     if args:
         break
-deletefromuid(*args)
+deletefromuid(*args, db=arguments.database)
