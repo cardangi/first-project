@@ -58,7 +58,7 @@ def validdb(arg):
 # ==========
 # Constants.
 # ==========
-OUTPUT = os.path.join(os.path.expandvars("%TEMP%"), "rippedcd.html")
+OUTPUT = os.path.join(os.path.expandvars("%_COMPUTING%"), "RippedCD", "rippedcd.html")
 
 
 # =================
