@@ -53,5 +53,5 @@ for item in sorted(select(arguments.database), key=itemgetter(0), reverse=True):
                                                       ]))))
 args = [shared.now(), dict(args)]
 if args:
-    with open(OUTPUT, mode=shared.WRITE, encoding=shared.UTF8) as fp:
+    with open(OUTPUT, mode=shared.WRITE) as fp:
         json.dump(args, fp, indent=4, sort_keys=True)
