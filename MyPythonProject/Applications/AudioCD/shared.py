@@ -32,6 +32,7 @@ class AudioCDTrack(MutableMapping):
 
     tags = {"artistsort": True, "albumartistsort": False, "artist": True, "albumartist": False, "encoder": True, "disc": True, "track": True, "title": False, "profile": False, "source": False, "bootleg": True,
             "live": True, "incollection": True, "titlelanguage": False, "genre": False, "style": False, "rating": False, "_albumart_1_front album cover": False}
+    logger = logging.getLogger("{0}.AudioCDTrack".format(__name__))
 
     def __init__(self, **kwargs):
 
@@ -55,59 +56,59 @@ class AudioCDTrack(MutableMapping):
         self._otags = {key: kwargs[key] for key in kwargs if key in AudioCDTrack.tags}
 
         # ----- Set encodedby.
-        logger.debug("Set encodedby.")
+        self.logger.debug("Set encodedby.")
         self._otags["encodedby"] = "dBpoweramp 15.1 on {0}".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3))
 
         # ----- Set taggingtime.
-        logger.debug("Set taggingtime.")
+        self.logger.debug("Set taggingtime.")
         self._otags["taggingtime"] = shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE3)
 
         # ----- Set encodingtime.
-        logger.debug("Set encodingtime.")
+        self.logger.debug("Set encodingtime.")
         self._otags["encodingtime"] = int(datetime.now(tz=timezone(shared.DFTTIMEZONE)).timestamp())
 
         # ----- Set encodingyear.
-        logger.debug("Set encodingyear.")
+        self.logger.debug("Set encodingyear.")
         self._otags["encodingyear"] = datetime.now(tz=timezone(shared.DFTTIMEZONE)).strftime("%Y")
 
         # ----- Set encoder attributes.
-        logger.debug("Set encoder attributes.")
+        self.logger.debug("Set encoder attributes.")
         for encoder in self.deserialize(ENCODERS):  # "encoder" est un dictionnaire.
             if sorted(list(encoder.keys())) == sorted(ENC_KEYS):
                 if kwargs["encoder"] == encoder["name"]:
                     self._otags["encoder"] = kwargs["encoder"]
                     self._encoder = nt(encoder["name"], encoder["code"], encoder["folder"], encoder["extension"])
-                    logger.debug("Used encoder.")
-                    logger.debug("\t%s".expandtabs(4) % ("Name\t: %s".expandtabs(9) % (self._encoder.name,)),)
-                    logger.debug("\t%s".expandtabs(4) % ("Code\t: %s".expandtabs(9) % (self._encoder.code,)),)
-                    logger.debug("\t%s".expandtabs(4) % ("Folder\t: %s".expandtabs(9) % (self._encoder.folder,)),)
-                    logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (self._encoder.extension,)),)
+                    self.logger.debug("Used encoder.")
+                    self.logger.debug("\t%s".expandtabs(4) % ("Name\t: %s".expandtabs(9) % (self._encoder.name,)),)
+                    self.logger.debug("\t%s".expandtabs(4) % ("Code\t: %s".expandtabs(9) % (self._encoder.code,)),)
+                    self.logger.debug("\t%s".expandtabs(4) % ("Folder\t: %s".expandtabs(9) % (self._encoder.folder,)),)
+                    self.logger.debug("\t%s".expandtabs(4) % ("Extension: %s" % (self._encoder.extension,)),)
                     break
 
         # ----- Both update track and set total tracks.
-        logger.debug("Set track.")
+        self.logger.debug("Set track.")
         self._otags["track"], self._otags[MAPPING.get(kwargs["encoder"], MAPPING["default"])["totaltracks"]] = self.splitfield(kwargs["track"], regex)
 
         # ----- Both update disc and set total discs.
-        logger.debug("Set disc.")
+        self.logger.debug("Set disc.")
         self._otags["disc"], self._otags[MAPPING.get(kwargs["encoder"], MAPPING["default"])["totaldiscs"]] = self.splitfield(kwargs["disc"], regex)
 
         # ----- Update genre.
-        logger.debug("Update genre.")
+        self.logger.debug("Update genre.")
         for artist, genre in self.deserialize(GENRES):
             if kwargs["artist"].lower() == artist.lower():
                 self._otags["genre"] = genre
                 break
 
         # ----- Update titlelanguage.
-        logger.debug("Update titlelanguage.")
+        self.logger.debug("Update titlelanguage.")
         for artist, language in self.deserialize(LANGUAGES):
             if kwargs["artist"].lower() == artist.lower():
                 self._otags["titlelanguage"] = language
                 break
 
         # ----- Update title.
-        logger.debug("Update title.")
+        self.logger.debug("Update title.")
         for track in self.deserialize(TITLES):  # "track" est un dictionnaire.
             if sorted(list(track.keys())) == sorted(TIT_KEYS):
                 if self._otags["track"] == track["number"]:
@@ -300,15 +301,6 @@ class AudioCDTrack(MutableMapping):
         # -------
         return s
 
-    # @staticmethod
-    # def contents(fil):
-    #     for line in fil:
-    #         if line.startswith("#"):
-    #             continue
-    #         if not line:
-    #             continue
-    #         yield line
-
     @staticmethod
     def splitfield(fld, rex):
         m = rex.match(fld)
@@ -371,6 +363,7 @@ class AudioCDTrack(MutableMapping):
 class DefaultCDTrack(AudioCDTrack):
 
     tags = {"origyear": False, "year": True, "albumsortcount": True, "album": True, "upc": True, "label": True, "bonus": False}
+    logger = logging.getLogger("{0}.DefaultCDTrack".format(__name__))
 
     def __init__(self, **kwargs):
         super(DefaultCDTrack, self).__init__(**kwargs)
@@ -384,15 +377,15 @@ class DefaultCDTrack(AudioCDTrack):
         self._otags.update({key: kwargs[key] for key in kwargs if key in DefaultCDTrack.tags})
 
         # ----- Set origyear.
-        logger.debug("Set origyear.")
+        self.logger.debug("Set origyear.")
         self._otags["origyear"] = self._otags.get("origyear", self._otags["year"])
 
         # ----- Set albumsort.
-        logger.debug("Set albumsort.")
+        self.logger.debug("Set albumsort.")
         self._otags["albumsort"] = "1.{year}0000.{uid}.{enc}".format(year=self._otags["origyear"], uid=self._otags["albumsortcount"], enc=self._encoder.code)
 
         # ----- Set titlesort.
-        logger.debug("Set titlesort.")
+        self.logger.debug("Set titlesort.")
         self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["disc"],
                                                                                     track=self._otags["track"].zfill(2),
                                                                                     bonus=self._otags.get("bonus", "N"),
@@ -400,20 +393,21 @@ class DefaultCDTrack(AudioCDTrack):
                                                                                     bootleg=self._otags["bootleg"])
 
         # ----- Update album.
-        logger.debug("Update album.")
+        self.logger.debug("Update album.")
         self._otags["album"] = self.case(self._otags["album"])
 
         # ----- Log new tags.
-        logger.debug("Build tags.")
-        logger.debug("\talbum    : %s".expandtabs(4) % (self._otags["album"],))
-        logger.debug("\talbumsort: %s".expandtabs(4) % (self._otags["albumsort"],))
-        logger.debug("\ttitlesort: %s".expandtabs(4) % (self._otags["titlesort"],))
-        logger.debug("\torigyear : %s".expandtabs(4) % (self._otags["origyear"],))
+        self.logger.debug("Build tags.")
+        self.logger.debug("\talbum    : %s".expandtabs(4) % (self._otags["album"],))
+        self.logger.debug("\talbumsort: %s".expandtabs(4) % (self._otags["albumsort"],))
+        self.logger.debug("\ttitlesort: %s".expandtabs(4) % (self._otags["titlesort"],))
+        self.logger.debug("\torigyear : %s".expandtabs(4) % (self._otags["origyear"],))
 
 
 class SelfTitledCDTrack(DefaultCDTrack):
 
     tags = {}
+    logger = logging.getLogger("{0}.SelfTitledCDTrack".format(__name__))
 
     def __init__(self, **kwargs):
         super(SelfTitledCDTrack, self).__init__(**kwargs)
@@ -427,7 +421,7 @@ class SelfTitledCDTrack(DefaultCDTrack):
         self._otags.update({key: kwargs[key] for key in kwargs if key in SelfTitledCDTrack.tags})
 
         # ----- Update album.
-        logger.debug("Update album.")
+        self.logger.debug("Update album.")
         self._otags["album"] = "{year} (Self Titled)".format(year=self._otags["origyear"])
 
 
@@ -437,6 +431,7 @@ class BootlegCDTrack(AudioCDTrack):
     rex1 = re.compile(r"\W+")
     rex2 = re.compile(r", ([A-Z][a-z]+)$")
     DFTCOUNTRY = "United States"
+    logger = logging.getLogger("{0}.BootlegCDTrack".format(__name__))
 
     def __init__(self, **kwargs):
         super(BootlegCDTrack, self).__init__(**kwargs)
@@ -450,28 +445,28 @@ class BootlegCDTrack(AudioCDTrack):
         self._otags.update({key: kwargs[key] for key in kwargs if key in BootlegCDTrack.tags})
 
         # ----- Update bootlegtrackyear.
-        logger.debug("Update bootlegtrackyear.")
+        self.logger.debug("Update bootlegtrackyear.")
         self._otags["bootlegtrackyear"] = self.rex1.sub("-", self._otags["bootlegtrackyear"])
         
         # ----- Set bootlegtrackcountry.
-        logger.debug("Set bootlegtrackcountry.")
+        self.logger.debug("Set bootlegtrackcountry.")
         self._otags["bootlegtrackcountry"] = BootlegCDTrack.DFTCOUNTRY
         match = self.rex2.search(self._otags["bootlegtrackcity"])
         if match:
             self._otags["bootlegtrackcountry"] = match.group(1)
 
         # ----- Set year.
-        logger.debug("Set year.")
+        self.logger.debug("Set year.")
         self._otags["year"] = self._otags["bootlegtrackyear"][:4]
 
         # ----- Set albumsort.
-        logger.debug("Set albumsort.")
+        self.logger.debug("Set albumsort.")
         self._otags["albumsort"] = "2.{date}.{uid}.{enc}".format(date=self.rex1.sub("", self._otags.get("groupby", self._otags["bootlegtrackyear"])),
                                                                  uid=self._otags["albumsortcount"],
                                                                  enc=self._encoder.code)
 
         # ----- Set titlesort.
-        logger.debug("Set titlesort.")
+        self.logger.debug("Set titlesort.")
         self._otags["titlesort"] = "D{disc}.T{track}.{bonus}{live}{bootleg}".format(disc=self._otags["disc"],
                                                                                     track=self._otags["track"].zfill(2),
                                                                                     bonus=self._otags["bonus"],
@@ -482,6 +477,7 @@ class BootlegCDTrack(AudioCDTrack):
 class SpringsteenBootlegCDTrack(BootlegCDTrack):
 
     tags = {}
+    logger = logging.getLogger("{0}.SpringsteenBootlegCDTrack".format(__name__))
 
     def __init__(self, **kwargs):
         super(SpringsteenBootlegCDTrack, self).__init__(**kwargs)
@@ -495,25 +491,26 @@ class SpringsteenBootlegCDTrack(BootlegCDTrack):
         self._otags.update({key: kwargs[key] for key in kwargs if key in SpringsteenBootlegCDTrack.tags})
 
         # ----- Set album.
-        logger.debug("Set album.")
+        self.logger.debug("Set album.")
         self._otags["album"] = "{tour} - {date} - [{city}]".format(tour=self._otags["bootlegtracktour"], date=self.rex1.sub(".", self._otags["bootlegtrackyear"]), city=self._otags["bootlegtrackcity"])
 
         # ----- Update albumartist.
-        logger.debug("Update albumartist.")
+        self.logger.debug("Update albumartist.")
         self._otags["albumartist"] = "Bruce Springsteen And The E Street Band"
 
         # ----- Log new tags.
-        logger.debug("Build tags.")
-        logger.debug("\talbum    : %s".expandtabs(4) % (self._otags["album"],))
-        logger.debug("\talbumsort: %s".expandtabs(4) % (self._otags["albumsort"],))
-        logger.debug("\ttitlesort: %s".expandtabs(4) % (self._otags["titlesort"],))
-        logger.debug("\tyear     : %s".expandtabs(4) % (self._otags["year"],))
+        self.logger.debug("Build tags.")
+        self.logger.debug("\talbum    : %s".expandtabs(4) % (self._otags["album"],))
+        self.logger.debug("\talbumsort: %s".expandtabs(4) % (self._otags["albumsort"],))
+        self.logger.debug("\ttitlesort: %s".expandtabs(4) % (self._otags["titlesort"],))
+        self.logger.debug("\tyear     : %s".expandtabs(4) % (self._otags["year"],))
 
 
 class RippedCD(ContextDecorator):
 
     environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Templates")), trim_blocks=True, lstrip_blocks=True)
     outputtags = environment.get_template("AudioCDOutputTags")
+    logger = logging.getLogger("{0}.RippedCD".format(__name__))
 
     def __init__(self, ripprofile, tagsfile, test=True):
         self._rippedcd = None
@@ -559,20 +556,20 @@ class RippedCD(ContextDecorator):
     def __enter__(self):
 
         # --> 1. Start logging.
-        logger.debug("{0:=^140}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
-        logger.debug('START "%s".' % (os.path.basename(__file__),))
-        logger.debug('"{0}" used as ripping profile.'.format(self.profile))
+        self.logger.debug("{0:=^140}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
+        self.logger.debug('START "%s".' % (os.path.basename(__file__),))
+        self.logger.debug('"{0}" used as ripping profile.'.format(self.profile))
 
         # --> 2. Log input tags.
-        logger.debug("Input file.")
-        logger.debug('\t"{0}"'.format(self.tags).expandtabs(4))
-        logger.debug("Input tags.")
+        self.logger.debug("Input file.")
+        self.logger.debug('\t"{0}"'.format(self.tags).expandtabs(4))
+        self.logger.debug("Input tags.")
         if os.path.exists(self.tags):
             with open(self.tags, encoding=shared.UTF16) as fr:
                 for line in filcontents(fr):
                     match = re.match(DFTPATTERN, line)
                     if match:
-                        logger.debug("\t{0}".format("{0}={1}".format(match.group(1), match.group(2))).expandtabs(4))
+                        self.logger.debug("\t{0}".format("{0}={1}".format(match.group(1), match.group(2))).expandtabs(4))
 
         # --> 3. Create AudioCDTrack instance.
         self._rippedcd = PROFILES[self.profile].isinstancedfrom(self.tags, shared.UTF16)  # l'attribut "_rippedcd" est une instance de type "AudioCDTrack".
@@ -586,17 +583,17 @@ class RippedCD(ContextDecorator):
     def __exit__(self, exc_type, exc_val, exc_tb):
 
         # --> 1. Log output tags.
-        logger.debug("Output tags.")
+        self.logger.debug("Output tags.")
         for k, v in self.new.items():
-            logger.debug("\t{0}={1}".format(k, v).expandtabs(4))
+            self.logger.debug("\t{0}={1}".format(k, v).expandtabs(4))
 
         # --> 2. Store tags.
         fo, encoding = self.tags, shared.UTF16
         if self.test:
             fo, encoding = os.path.join(os.path.expandvars("%TEMP%"), "T{0}.txt".format(self.new.tracknumber.zfill(2))), shared.UTF8
         with open(fo, shared.WRITE, encoding=encoding) as fw:
-            logger.debug("Tags file.")
-            logger.debug("\t{0}".format(fo).expandtabs(4))
+            self.logger.debug("Tags file.")
+            self.logger.debug("\t{0}".format(fo).expandtabs(4))
             fw.write(self.outputtags.render(tags={key: self.new[key] for key in self.new if key not in PROFILES[self.profile].exclusions}))
 
         # --> 3. Store tags in JSON.
@@ -609,13 +606,14 @@ class RippedCD(ContextDecorator):
             json.dump(obj, fw, indent=4, sort_keys=True)
 
         # --> 4. Stop logging.
-        logger.debug('END "%s".' % (os.path.basename(__file__),))
+        self.logger.debug('END "%s".' % (os.path.basename(__file__),))
 
 
 class AudioFilesCollection(MutableSequence):
 
     rex1 = re.compile(r"^(?:{0})\.\d -\B".format(shared.DFTYEARREGEX))
     tags = ["albumsort", "album"]
+    logger = logging.getLogger("{0}.AudioFilesCollection".format(__name__))
 
     def __init__(self):
         self._seq = []
@@ -636,18 +634,18 @@ class AudioFilesCollection(MutableSequence):
         l = []
         for num, fil, tags in [(a, b, c) for a, (b, c) in enumerate(self, 1)]:
             album = "{0}.{1} - {2}".format(tags["albumsort"][0][2:6], tags["albumsort"][0][11], tags["album"][0])
-            logger.debug('{0:>3d}. "{1}".'.format(num, fil))
-            logger.debug('\tNew album: "{0}".'.format(album).expandtabs(TABSIZE))
+            self.logger.debug('{0:>3d}. "{1}".'.format(num, fil))
+            self.logger.debug('\tNew album: "{0}".'.format(album).expandtabs(TABSIZE))
             if not kwargs["test"]:
                 try:
                     tags["album"] = album
                     tags.save()
                 except mutagen.MutagenError as err:
-                    logger.debug(err)
+                    self.logger.debug(err)
                 else:
                     l.append(fil)
         if l:
-            logger.debug("{0:>5d} files updated.".format(len(l)))
+            self.logger.debug("{0:>5d} files updated.".format(len(l)))
 
     def insert(self, index, value):
         self._seq.insert(index, value)
