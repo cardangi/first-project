@@ -90,6 +90,8 @@ class TestCanFileBeProcessed(unittest.TestCase):
 class TestDefaultCDTrack(unittest.TestCase):
 
     def setUp(self):
+
+        # Default single CD.
         tags1 = {
             "Album": "Abigail",
             "Year": "1987",
@@ -114,6 +116,8 @@ class TestDefaultCDTrack(unittest.TestCase):
             "Bootleg": "N",
             "Title": "A Mansion in Darkness"
         }
+
+        # Single CD. Both "year" and "origyear" are provided.
         tags2 = {
             "Album": "Abigail",
             "Year": "2016",
@@ -139,6 +143,8 @@ class TestDefaultCDTrack(unittest.TestCase):
             "Title": "A Mansion in Darkness",
             "OrigYear": "1987"
         }
+
+        # Default multi CD. Check whether "album" is set correctly.
         tags3 = {
             "Album": "Abigail",
             "Year": "2016",
@@ -210,6 +216,7 @@ class TestDefaultCDTrack(unittest.TestCase):
     def test_14fourteenth(self):
         self.assertEqual(self.track2.albumsort, "1.19870000.1.13")
 
+    # Test "Applications.AudioCD.shared.rippinglog" for default single CD.
     def test_15fifteenth(self):
         first, second, reffile = None, None, r"G:\Computing\RippingLogTest.json"
         with tempfile.TemporaryDirectory() as dir:
@@ -225,6 +232,7 @@ class TestDefaultCDTrack(unittest.TestCase):
             self.assertTrue(second)
             self.assertListEqual(first, second)
 
+    # Test "Applications.AudioCD.shared.digitalaudiobase" for default single CD.
     def test_16Sixteenthh(self):
         first, second, reffile = None, None, r"G:\Computing\DigitalaudioBaseTest.json"
         with tempfile.TemporaryDirectory() as dir:
@@ -240,6 +248,7 @@ class TestDefaultCDTrack(unittest.TestCase):
             self.assertTrue(second)
             self.assertListEqual(first, second)
 
+    # Test "Applications.AudioCD.shared.rippinglog" for default multi CD.
     def test_17Seventeenth(self):
         first, second, reffile = None, None, r"G:\Computing\RippingLogTest17.json"
         with tempfile.TemporaryDirectory() as dir:
