@@ -1,10 +1,12 @@
 # -*- coding: ISO-8859-1 -*-
 import os
 import json
-# import logging
+import yaml
+import logging
 import argparse
 from operator import itemgetter
 from contextlib import ExitStack
+from logging.config import dictConfig
 from Applications.shared import WRITE
 from Applications.AudioCD.shared import RippedCD, album
 
@@ -24,7 +26,15 @@ parser.add_argument("-t", "--test", action="store_true")
 # ========
 # Logging.
 # ========
-# logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
+logger = None
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+    d = yaml.load(fp)
+if d:
+    dictConfig(d)
+    if __name__ == "__main__":
+        logger = logging.getLogger(os.path.basename(__file__))
+    else:
+        logger = logging.getLogger(__name__)
 
 
 # ============
@@ -52,9 +62,7 @@ stack = ExitStack()
 try:
     rippedcd = stack.enter_context(RippedCD(arguments.profile, arguments.file, arguments.test))
 except ValueError as e:
-    pass
-    # logger.debug(e)
-    # logger.debug('END "%s".' % (os.path.basename(__file__),))
+    logger.debug(e)
 else:
     with stack:
         if rippedcd.profile in ["default", "selftitled"]:

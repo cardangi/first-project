@@ -4,10 +4,12 @@ Exécuter des copies de fichiers en utilisant les arguments énumérés dans le fich
 """
 from Applications.AudioCD.shared import validdelay
 from collections import MutableSequence
+from logging.config import dictConfig
 import argparse
-# import logging
+import logging
 import shutil
 import sched
+import yaml
 import json
 import sys
 import os
@@ -85,9 +87,17 @@ filestocopy = CopyFilesFrom(arguments.file)
 # ========
 # Logging.
 # ========
-# logger = logging.getLogger("%s.%s" % (__package__, basename(__file__)))
-# logger.debug("Delay: {0} second(s).".format(arguments.delay))
-# logger.debug("{0:>5d} files to copy.".format(len(filestocopy)))
+logger = None
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+    d = yaml.load(fp)
+if d:
+    dictConfig(d)
+    if __name__ == "__main__":
+        logger = logging.getLogger(os.path.basename(__file__))
+    else:
+        logger = logging.getLogger(__name__)
+logger.debug("Delay: {0} second(s).".format(arguments.delay))
+logger.debug("{0:>5d} files to copy.".format(len(filestocopy)))
 
 
 # ===============

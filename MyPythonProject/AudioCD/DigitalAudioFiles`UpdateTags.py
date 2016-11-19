@@ -1,8 +1,10 @@
 # -*- coding: ISO-8859-1 -*-
 from Applications.AudioCD.shared import validdelay, FLACFilesCollection
+from logging.config import dictConfig
 import argparse
-# import logging
+import logging
 import sched
+import yaml
 import sys
 import os
 
@@ -52,9 +54,17 @@ arguments = parser.parse_args()
 # ========
 # Logging.
 # ========
-# logger = logging.getLogger("%s.%s" % (__package__, basename(__file__)))
-# logger.debug("Delay: {0} second(s).".format(arguments.delay))
-# logger.debug("Test : {0}.".format(arguments.test))
+logger = None
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+    d = yaml.load(fp)
+if d:
+    dictConfig(d)
+    if __name__ == "__main__":
+        logger = logging.getLogger(os.path.basename(__file__))
+    else:
+        logger = logging.getLogger(__name__)
+logger.debug("Delay: {0} second(s).".format(arguments.delay))
+logger.debug("Test : {0}.".format(arguments.test))
 
 
 # ===============

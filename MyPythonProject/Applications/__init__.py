@@ -1,24 +1,18 @@
 # -*- coding: ISO-8859-1 -*-
+import os
+import yaml
 import logging
-from . import shared
-from logging import handlers
+from logging.config import dictConfig
 
 __author__ = 'Xavier ROSSET'
 
 
-# Create Logger.
-parent_logger = logging.getLogger(__name__)
-parent_logger.setLevel(logging.DEBUG)
-
-# Create handler.
-handler = logging.handlers.RotatingFileHandler(shared.LOG, backupCount=5, maxBytes=500000)
-handler.setLevel(logging.DEBUG)
-
-# Create Formatter.
-formatter = shared.CustomFormatter(shared.LOGPATTERN)
-
-# Add formatter to handler
-handler.setFormatter(formatter)
-
-# Add handler to logger.
-parent_logger.addHandler(handler)
+# Load logging configuration.
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+    d = yaml.load(fp)
+if d:
+    dictConfig(d)
+    if __name__ == "__main__":
+        logger = logging.getLogger(os.path.basename(__file__))
+    else:
+        logger = logging.getLogger(__name__)

@@ -5,6 +5,7 @@ import locale
 import logging
 import argparse
 import itertools
+import logging.handlers
 from pytz import timezone
 from string import Template
 from datetime import datetime
@@ -325,6 +326,14 @@ def chgcurdir(d):
     os.chdir(d)
     yield
     os.chdir(wcdir)
+
+
+def customformatterfactory(pattern=LOGPATTERN):
+    return CustomFormatter(pattern)
+
+
+def customfilehandler(maxbytes, backupcount):
+    return logging.handlers.RotatingFileHandler(r"G:\Computing\pythonlog.log", maxBytes=maxbytes, backupCount=backupcount)
 
 
 def validpath(p):

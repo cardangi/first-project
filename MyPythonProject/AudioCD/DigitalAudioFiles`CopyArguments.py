@@ -5,9 +5,11 @@ La lettre identifiant le lecteur reçevant le fichier copié est reçue en qualité 
 Le nom du fichier JSON est reçu en qualité de troisième paramètre.
 Le répertoire et le nom du fichier copié sont fonction des metadata "albumsort", "disc", "track" et "title".
 """
+from logging.config import dictConfig
 import mutagen.flac
 import argparse
-# import logging
+import logging
+import yaml
 import json
 import os
 import re
@@ -55,9 +57,15 @@ rex2 = re.compile(r"[a-z]:", re.IGNORECASE)
 # ========
 # Logging.
 # ========
-# logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
-# logger.debug("File.")
-# logger.debug("\t{0}".format(arguments.file.name).expandtabs(TABSIZE))
+logger = None
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+    d = yaml.load(fp)
+if d:
+    dictConfig(d)
+    if __name__ == "__main__":
+        logger = logging.getLogger(os.path.basename(__file__))
+    else:
+        logger = logging.getLogger(__name__)
 
 
 # ===============
@@ -67,13 +75,13 @@ try:
     audio = mutagen.flac.FLAC(arguments.file)
 except mutagen.MutagenError:
     pass
-    # logger.debug('"{0}" is not a valid FLAC file.'.format(arguments.file.name))
+    logger.debug('"{0}" is not a valid FLAC file.'.format(arguments.file.name))
 else:
-    # logger.debug("Tags.")
-    # logger.debug("\tAlbumSort: {0}".format(audio["albumsort"][0][:-3]).expandtabs(TABSIZE))
-    # logger.debug("\tDisc     : {0}".format(audio.get("disc", audio["discnumber"])[0]).expandtabs(TABSIZE))
-    # logger.debug("\tTrack    : {0}".format(audio.get("track", audio["tracknumber"])[0]).expandtabs(TABSIZE))
-    # logger.debug("\tTitle    : {0}".format(audio["title"][0]).expandtabs(TABSIZE))
+    logger.debug("Tags.")
+    logger.debug("\tAlbumSort: {0}".format(audio["albumsort"][0][:-3]).expandtabs(TABSIZE))
+    logger.debug("\tDisc     : {0}".format(audio.get("disc", audio["discnumber"])[0]).expandtabs(TABSIZE))
+    logger.debug("\tTrack    : {0}".format(audio.get("track", audio["tracknumber"])[0]).expandtabs(TABSIZE))
+    logger.debug("\tTitle    : {0}".format(audio["title"][0]).expandtabs(TABSIZE))
     if os.path.exists(arguments.outjsonfile):
         with open(arguments.outjsonfile) as fp:
             args = json.load(fp)
