@@ -1,0 +1,17 @@
+version: 1
+formatters:
+  default:
+    (): Applications.shared.customformatterfactory
+handlers:
+  file:
+    formatter: default
+    (): Applications.shared.customfilehandler
+    maxbytes: 512000
+    backupcount: 3
+loggers:
+  default:
+    level: DEBUG
+    handlers: [file]
+root:
+  level: DEBUG
+  handlers: [file]
