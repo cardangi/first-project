@@ -9,10 +9,5 @@ __author__ = 'Xavier ROSSET'
 
 # Load logging configuration.
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
-    d = yaml.load(fp)
-if d:
-    dictConfig(d)
-    if __name__ == "__main__":
-        parent_logger = logging.getLogger(os.path.basename(__file__))
-    else:
-        parent_logger = logging.getLogger(__name__)
+    dictConfig(yaml.load(fp))
+parent_logger = logging.getLogger(os.path.basename(__file__))

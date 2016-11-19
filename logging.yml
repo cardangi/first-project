@@ -12,6 +12,7 @@ loggers:
   default:
     level: DEBUG
     handlers: [file]
+    propagate: no
 root:
   level: DEBUG
   handlers: [file]

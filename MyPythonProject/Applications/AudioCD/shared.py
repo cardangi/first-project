@@ -3,6 +3,7 @@ from collections import MutableMapping, MutableSequence, namedtuple
 from jinja2 import Environment, FileSystemLoader
 from sortedcontainers import SortedDict
 from contextlib import ContextDecorator
+from operator import itemgetter
 from datetime import datetime
 import mutagen.monkeysaudio
 from pytz import timezone
@@ -757,6 +758,81 @@ def album(track):
     if totaldiscs > 1:
         return "{o.album} ({o.discnumber}/{o.totaldiscs})".format(o=track)
     return track.album
+
+
+def rippinglog(track, fil=os.path.join(os.path.expandvars("%TEMP%"), "rippinglog.json")):
+
+    obj = []
+    if os.path.exists(fil):
+        with open(fil) as fr:
+            obj = json.load(fr)
+        obj = [tuple(item) for item in obj]
+    while True:
+        obj.append(
+            tuple(
+                [
+                    track.artist,
+                    track.year,
+                    album(track),
+                    track.genre,
+                    track.upc,
+                    track.albumsort[:-3],
+                    track.artistsort
+                ]
+            )
+        )
+        try:
+            obj = list(set(obj))
+        except TypeError:
+            obj.clear()
+        else:
+            break
+    with open(fil, shared.WRITE) as fw:
+        json.dump(sorted(obj, key=itemgetter(0)), fw, indent=4, sort_keys=True)
+
+
+def digitalaudiobase(track, fil=os.path.join(os.path.expandvars("%TEMP%"), "digitalaudiodatabase.json")):
+
+    obj = []
+    if os.path.exists(fil):
+        with open(fil) as fr:
+            obj = json.load(fr)
+        obj = [tuple(item) for item in obj]
+    while True:
+        obj.append(
+            tuple(
+                [
+                    track.index,
+                    track.albumsort[:-3],
+                    track.titlesort,
+                    track.artist,
+                    track.year,
+                    track.album,
+                    track.genre,
+                    track.discnumber,
+                    track.totaldiscs,
+                    track.label,
+                    track.tracknumber,
+                    track.totaltracks,
+                    track.title,
+                    track.live,
+                    track.bootleg,
+                    track.incollection,
+                    track.upc,
+                    track.encodingyear,
+                    track.titlelanguage,
+                    track.origyear
+                ]
+            )
+        )
+        try:
+            obj = list(set(obj))
+        except TypeError:
+            obj.clear()
+        else:
+            break
+    with open(fil, shared.WRITE) as fw:
+        json.dump(sorted(obj, key=itemgetter(0)), fw, indent=4, sort_keys=True)
 
 
 # ================

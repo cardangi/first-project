@@ -1,7 +1,10 @@
 # -*- coding: ISO-8859-1 -*-
+import os
+import json
 import unittest
+import tempfile
 from Applications import shared as s1
-from Applications.AudioCD import shared as s2
+from Applications.AudioCD.shared import DefaultCDTrack, canfilebeprocessed, digitalaudiobase, rippinglog
 
 __author__ = 'Xavier ROSSET'
 
@@ -36,52 +39,52 @@ class TestRegex(unittest.TestCase):
 class TestEnumerateTuplesList(unittest.TestCase):
 
     def test_01first(self):
-        self.assertEqual([(1, "path1", "file1"), (2, "path2", "file2"), (3, "path3", "file3"), (4, "path4", "file4"), (5, "path6", "file6")], s1.enumeratetupleslist([("path1", "file1"),
-                                                                                                                                                                      ("path2", "file2"),
-                                                                                                                                                                      ("path3", "file3"),
-                                                                                                                                                                      ("path6", "file6"),
-                                                                                                                                                                      ("path4", "file4")
-                                                                                                                                                                      ])
+        self.assertListEqual([(1, "path1", "file1"), (2, "path2", "file2"), (3, "path3", "file3"), (4, "path4", "file4"), (5, "path6", "file6")], s1.enumeratetupleslist([("path1", "file1"),
+                                                                                                                                                                          ("path2", "file2"),
+                                                                                                                                                                          ("path3", "file3"),
+                                                                                                                                                                          ("path6", "file6"),
+                                                                                                                                                                          ("path4", "file4")
+                                                                                                                                                                          ])
                          )
 
 
 class TestEnumerateSortedListContent(unittest.TestCase):
 
     def test_01first(self):
-        self.assertEqual([(1, "path1"), (2, "path2"), (3, "path3"), (4, "path4"), (5, "path6")], s1.enumeratesortedlistcontent(["path1", "path2", "path3", "path6", "path4"]))
+        self.assertListEqual([(1, "path1"), (2, "path2"), (3, "path3"), (4, "path4"), (5, "path6")], s1.enumeratesortedlistcontent(["path1", "path2", "path3", "path6", "path4"]))
 
 
 class TestCanFileBeProcessed(unittest.TestCase):
 
     def test_01first(self):
-        self.assertTrue(s2.canfilebeprocessed("flac", *()))
+        self.assertTrue(canfilebeprocessed("flac", *()))
 
     def test_02second(self):
-        self.assertFalse(s2.canfilebeprocessed("pdf", *()))
+        self.assertFalse(canfilebeprocessed("pdf", *()))
 
     def test_03third(self):
-        self.assertTrue(s2.canfilebeprocessed("flac", *("flac",)))
+        self.assertTrue(canfilebeprocessed("flac", *("flac",)))
 
     def test_04fourth(self):
-        self.assertFalse(s2.canfilebeprocessed("mp3", *("flac",)))
+        self.assertFalse(canfilebeprocessed("mp3", *("flac",)))
 
     def test_05fifth(self):
-        self.assertFalse(s2.canfilebeprocessed("flac", *("pdf",)))
+        self.assertFalse(canfilebeprocessed("flac", *("pdf",)))
 
     def test_06sixth(self):
-        self.assertTrue(s2.canfilebeprocessed("FLAC", *()))
+        self.assertTrue(canfilebeprocessed("FLAC", *()))
 
     def test_07seventh(self):
-        self.assertFalse(s2.canfilebeprocessed("PDF", *()))
+        self.assertFalse(canfilebeprocessed("PDF", *()))
 
     def test_08eighth(self):
-        self.assertTrue(s2.canfilebeprocessed("FLAC", *("flac",)))
+        self.assertTrue(canfilebeprocessed("FLAC", *("flac",)))
 
     def test_09ninth(self):
-        self.assertTrue(s2.canfilebeprocessed("flac", *("FLAC",)))
+        self.assertTrue(canfilebeprocessed("flac", *("FLAC",)))
 
     def test_10tenth(self):
-        self.assertTrue(s2.canfilebeprocessed("FLAC", *("FLAC",)))
+        self.assertTrue(canfilebeprocessed("FLAC", *("FLAC",)))
 
 
 class TestDefaultCDTrack(unittest.TestCase):
@@ -136,8 +139,34 @@ class TestDefaultCDTrack(unittest.TestCase):
             "Title": "A Mansion in Darkness",
             "OrigYear": "1987"
         }
-        self.track1 = s2.DefaultCDTrack(**{k.lower(): v for k, v in tags1.items()})
-        self.track2 = s2.DefaultCDTrack(**{k.lower(): v for k, v in tags2.items()})
+        tags3 = {
+            "Album": "Abigail",
+            "Year": "2016",
+            "Disc": "1/2",
+            "Label": "Roadrunner Records",
+            "UPC": "016861878825",
+            "Artist": "King Diamond",
+            "AlbumSortCount": "1",
+            "Live": "N",
+            "_albumart_1_Front Album Cover": r"C:\Users\Xavier\AppData\Local\Temp\dbp49F2.tmp\9.bin",
+            "Track": "9/13",
+            "Profile": "Default",
+            "Rating": "8",
+            "Source": "CD (Lossless)",
+            "Encoder": "(FLAC 1.3.0)",
+            "ArtistSort": "King Diamond",
+            "AlbumArtistSort": "King Diamond",
+            "AlbumArtist": "King Diamond",
+            "Genre": "Rock",
+            "InCollection": "Y",
+            "TitleLanguage": "English",
+            "Bootleg": "N",
+            "Title": "A Mansion in Darkness",
+            "OrigYear": "1987"
+        }
+        self.track1 = DefaultCDTrack(**{k.lower(): v for k, v in tags1.items()})
+        self.track2 = DefaultCDTrack(**{k.lower(): v for k, v in tags2.items()})
+        self.track3 = DefaultCDTrack(**{k.lower(): v for k, v in tags3.items()})
 
     def test_01first(self):
         self.assertEqual(self.track1.discnumber, "1")
@@ -180,6 +209,51 @@ class TestDefaultCDTrack(unittest.TestCase):
 
     def test_14fourteenth(self):
         self.assertEqual(self.track2.albumsort, "1.19870000.1.13")
+
+    def test_15fifteenth(self):
+        first, second, reffile = None, None, r"G:\Computing\RippingLogTest.json"
+        with tempfile.TemporaryDirectory() as dir:
+            outfile = os.path.join(dir, "rippinglog.json")
+            rippinglog(self.track1, fil=outfile)
+            if os.path.exists(reffile):
+                with open(reffile) as fr:
+                    first = json.load(fr)[0]
+            if os.path.exists(outfile):
+                with open(outfile) as fr:
+                    second = json.load(fr)[0]
+            self.assertTrue(first)
+            self.assertTrue(second)
+            self.assertListEqual(first, second)
+
+    def test_16Sixteenthh(self):
+        first, second, reffile = None, None, r"G:\Computing\DigitalaudioBaseTest.json"
+        with tempfile.TemporaryDirectory() as dir:
+            outfile = os.path.join(dir, "digitalaudiodatabase.json")
+            digitalaudiobase(self.track1, fil=outfile)
+            if os.path.exists(reffile):
+                with open(reffile) as fr:
+                    first = json.load(fr)[0]
+            if os.path.exists(outfile):
+                with open(outfile) as fr:
+                    second = json.load(fr)[0]
+            self.assertTrue(first)
+            self.assertTrue(second)
+            self.assertListEqual(first, second)
+
+    def test_17Seventeenth(self):
+        first, second, reffile = None, None, r"G:\Computing\RippingLogTest17.json"
+        with tempfile.TemporaryDirectory() as dir:
+            outfile = os.path.join(dir, "rippinglog.json")
+            rippinglog(self.track3, fil=outfile)
+            if os.path.exists(reffile):
+                with open(reffile) as fr:
+                    first = json.load(fr)[0]
+            if os.path.exists(outfile):
+                with open(outfile) as fr:
+                    second = json.load(fr)[0]
+            self.assertTrue(first)
+            self.assertTrue(second)
+            self.assertListEqual(first, second)
 
 
 # def testsuite():
