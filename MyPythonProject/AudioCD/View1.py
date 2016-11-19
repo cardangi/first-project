@@ -90,13 +90,13 @@ months = dict(set([(shared.dateformat(shared.LOCAL.localize(itemgetter(1)(item))
 #     ----------------------
 #  3. Détail des CDs rippés.
 #     ----------------------
-tr4 = [(
-           shared.dateformat(shared.LOCAL.localize(itemgetter(1)(item)), shared.TEMPLATE2),
-           itemgetter(2)(item),
-           itemgetter(3)(item),
-           itemgetter(4)(item),
-           path.substitute(a=getfirstletter(itemgetter(9)(item), itemgetter(2)(item)), b=itemgetter(9)(item), c=itemgetter(8)(item)).replace(" ", r"%20")
-       ) for item in data]
+tr4 = sorted([(
+                  shared.dateformat(shared.LOCAL.localize(itemgetter(1)(item)), shared.TEMPLATE2),
+                  itemgetter(2)(item),
+                  itemgetter(3)(item),
+                  itemgetter(4)(item),
+                  path.substitute(a=getfirstletter(itemgetter(9)(item), itemgetter(2)(item)), b=itemgetter(9)(item), c=itemgetter(8)(item)).replace(" ", r"%20")
+              ) for item in data], key=itemgetter(1), reverse=True)
 
 
 #     ---------------------------------------------------------------------
@@ -126,7 +126,7 @@ tr3 = t2.render(id="genre",
                 h2="Palmarès par genre",
                 th=["genre", "count"],
                 tr=sorted(sorted(Counter([itemgetter(6)(item) for item in data]).items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)
-               )
+                )
 
 
 #     ----------------------------------------------------------------------

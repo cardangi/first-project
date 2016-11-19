@@ -57,15 +57,9 @@ rex2 = re.compile(r"[a-z]:", re.IGNORECASE)
 # ========
 # Logging.
 # ========
-logger = None
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
-    d = yaml.load(fp)
-if d:
-    dictConfig(d)
-    if __name__ == "__main__":
-        logger = logging.getLogger(os.path.basename(__file__))
-    else:
-        logger = logging.getLogger(__name__)
+    dictConfig(yaml.load(fp))
+logger = logging.getLogger(os.path.basename(__file__))
 
 
 # ===============

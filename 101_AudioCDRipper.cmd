@@ -56,9 +56,9 @@ REM  2 --> Digital audio database.
 REM        -----------------------
 :STEP2
 IF EXIST "%_jsondigitalaudiobase%" (
-    PUSHD "%_PYTHONPROJECT%"
-    python -m Applications.Database.DigitalAudio.insert "%_jsondigitalaudiobase%"
-    POPD
+    REM PUSHD "%_PYTHONPROJECT%"
+    REM python -m Applications.Database.DigitalAudio.insert "%_jsondigitalaudiobase%"
+    REM POPD
     DEL "%_jsondigitalaudiobase%"
 )
 SHIFT
@@ -69,12 +69,8 @@ REM        -------------------------
 REM  3 --> Update Ripping log views.
 REM        -------------------------
 :STEP3
-python %_PYTHONPROJECT%\Database`HTMLView`L.py RippingLog
-IF NOT ERRORLEVEL 1 (
-    REM PUSHD %_PYTHONPROJECT%
-    REM python -m Applications.Database.RippingLog.View2
-    REM POPD
-)
+python %_PYTHONPROJECT%\AudioCD\View1.py
+python %_PYTHONPROJECT%\AudioCD\View2.py
 SHIFT
 GOTO MAIN
 
@@ -83,16 +79,16 @@ REM        ------------------------------------
 REM  4 --> Update Digital Audio database views.
 REM        ------------------------------------
 :STEP4
-python %_PYTHONPROJECT%\Database`HTMLView`L.py DigitalAudio
-IF NOT ERRORLEVEL 1 (
-    PUSHD "%_PYTHONPROJECT%"
-    python -m Applications.Database.DigitalAudio.View1
-    POPD
-    IF EXIST "%_xmldigitalaudiobase%" (
-        java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
-        DEL "%_xmldigitalaudiobase%"
-    )
-)
+REM python %_PYTHONPROJECT%\Database`HTMLView`L.py DigitalAudio
+REM IF NOT ERRORLEVEL 1 (
+    REM PUSHD "%_PYTHONPROJECT%"
+    REM python -m Applications.Database.DigitalAudio.View1
+    REM POPD
+    REM IF EXIST "%_xmldigitalaudiobase%" (
+        REM java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
+        REM DEL "%_xmldigitalaudiobase%"
+    REM )
+REM )
 SHIFT
 GOTO MAIN
 

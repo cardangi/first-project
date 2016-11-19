@@ -7,7 +7,6 @@ from ...shared import DATABASE
 from collections import MutableSequence
 from ..shared import Boolean, adapt_boolean, convert_boolean
 
-
 __author__ = 'Xavier ROSSET'
 
 
