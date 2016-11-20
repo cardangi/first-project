@@ -13,6 +13,7 @@ import mutagen
 import logging
 import shutil
 import json
+import yaml
 import os
 import re
 from .. import shared
@@ -557,7 +558,7 @@ class RippedCD(ContextDecorator):
     def __enter__(self):
 
         # --> 1. Start logging.
-        self.logger.debug("{0:=^140}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
+        # self.logger.debug("{0:=^140}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
         self.logger.debug('START "%s".' % (os.path.basename(__file__),))
         self.logger.debug('"{0}" used as ripping profile.'.format(self.profile))
 
@@ -576,37 +577,46 @@ class RippedCD(ContextDecorator):
         self._rippedcd = PROFILES[self.profile].isinstancedfrom(self.tags, shared.UTF16)  # l'attribut "_rippedcd" est une instance de type "AudioCDTrack".
 
         # --> 4. Store input tags.
-        shutil.copy(src=self.tags, dst=os.path.join(os.path.expandvars("%TEMP%"), "T{0}.txt".format(self._rippedcd.tracknumber.zfill(2))))
+        shutil.copy(src=self.tags, dst=os.path.join(os.path.expandvars("%TEMP%"), "iT{0}.txt".format(self._rippedcd.tracknumber.zfill(2))))
 
         # --> 5. Return instance.
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
 
+        outtags = {key: self.new[key] for key in self.new if key not in PROFILES[self.profile].exclusions}
+
         # --> 1. Log output tags.
         self.logger.debug("Output tags.")
-        for k, v in self.new.items():
+        for k, v in outtags.items():
             self.logger.debug("\t{0}={1}".format(k, v).expandtabs(4))
 
         # --> 2. Store tags.
+        self.logger.debug("Store tags.")
         fo, encoding = self.tags, shared.UTF16
         if self.test:
-            fo, encoding = os.path.join(os.path.expandvars("%TEMP%"), "T{0}.txt".format(self.new.tracknumber.zfill(2))), shared.UTF8
+            fo, encoding = os.path.join(os.path.expandvars("%TEMP%"), "oT{0}.txt".format(self.new.tracknumber.zfill(2))), shared.UTF8
         with open(fo, shared.WRITE, encoding=encoding) as fw:
-            self.logger.debug("Tags file.")
             self.logger.debug("\t{0}".format(fo).expandtabs(4))
-            fw.write(self.outputtags.render(tags={key: self.new[key] for key in self.new if key not in PROFILES[self.profile].exclusions}))
+            fw.write(self.outputtags.render(tags=outtags))
 
         # --> 3. Store tags in JSON.
+        self.logger.debug("Store tags in single JSON file.")
         tags, obj = os.path.join(os.path.expandvars("%TEMP%"), "tags.json"), []
         if os.path.exists(tags):
             with open(tags) as fr:
                 obj = json.load(fr)
-        obj.append(dict(self.new))
+        obj.append(outtags)
         with open(tags, shared.WRITE) as fw:
             json.dump(obj, fw, indent=4, sort_keys=True)
 
-        # --> 4. Stop logging.
+        # --> 4. Store tags in YAML.
+        self.logger.debug("Store tags in per track YAML file.")
+        tags = os.path.join(os.path.expandvars("%TEMP%"), "T{0}.yml".format(self.new.tracknumber.zfill(2)))
+        with open(tags, shared.WRITE) as fo:
+            yaml.dump(outtags, fo, indent=4)
+
+        # --> 5. Stop logging.
         self.logger.debug('END "%s".' % (os.path.basename(__file__),))
 
 
