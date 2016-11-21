@@ -92,3 +92,5 @@ else:
     if args:
         with open(arguments.outjsonfile, mode="w") as fp:
             json.dump(args, fp, indent=4)
+            logger.debug("Copy arguments written.")
+

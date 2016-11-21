@@ -1,7 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 import os
 import json
-import yaml
 import unittest
 import tempfile
 from Applications import shared
@@ -248,7 +247,7 @@ class Test02DefaultCDTrack(unittest.TestCase):
             "upc": "016861878825",
             "year": "1987"
         }
-        self.otags = os.path.join(os.path.expandvars("%TEMP%"), "T09.yml")
+        self.otags, self.tags = os.path.join(os.path.expandvars("%TEMP%"), "T09.json"), None
         with tempfile.TemporaryDirectory() as dir:
             itags = os.path.join(dir, "tags.txt")
             with open(itags, mode=shared.WRITE, encoding=shared.UTF16) as fo:
@@ -256,30 +255,24 @@ class Test02DefaultCDTrack(unittest.TestCase):
                     fo.write("{0}={1}\n".format(k, v))
             with RippedCD("default", itags):
                 pass
+        if os.path.exists(self.otags):
+            with open(self.otags) as fo:
+                self.tags = json.load(fo)
 
-    @unittest.skipIf(not os.path.exists(os.path.join(os.path.expandvars("%TEMP%"), "T09.yml")), "Reference tags file doesn\'t exist")
     def test_01first(self):
-        with open(self.otags) as fo:
-            self.assertIn("encodedby", yaml.load(fo))
+        self.assertIn("encodedby", self.tags)
 
-    @unittest.skipIf(not os.path.exists(os.path.join(os.path.expandvars("%TEMP%"), "T09.yml")), "Reference tags file doesn\'t exist")
     def test_02second(self):
-        with open(self.otags) as fo:
-            self.assertIn("encodingtime", yaml.load(fo))
+        self.assertIn("encodingtime", self.tags)
 
-    @unittest.skipIf(not os.path.exists(os.path.join(os.path.expandvars("%TEMP%"), "T09.yml")), "Reference tags file doesn\'t exist")
     def test_03third(self):
-        with open(self.otags) as fo:
-            self.assertIn("taggingtime", yaml.load(fo))
+        self.assertIn("taggingtime", self.tags)
 
-    @unittest.skipIf(not os.path.exists(os.path.join(os.path.expandvars("%TEMP%"), "T09.yml")), "Reference tags file doesn\'t exist")
     def test_04fourth(self):
-        with open(self.otags) as fo:
-            rippedcd = yaml.load(fo)
-        del rippedcd["encodedby"]
-        del rippedcd["encodingtime"]
-        del rippedcd["taggingtime"]
-        self.assertDictEqual(rippedcd, self.reftags)
+        del self.tags["encodedby"]
+        del self.tags["encodingtime"]
+        del self.tags["taggingtime"]
+        self.assertDictEqual(self.tags, self.reftags)
 
 
 class Test03DefaultCDTrack(unittest.TestCase):

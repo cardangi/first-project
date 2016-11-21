@@ -50,7 +50,7 @@ except ValueError as e:
     logger.debug(e)
 else:
     with stack:
-        if rippedcd.profile in ["default", "selftitled"]:
+        if arguments.profile in ["default", "selftitled"]:
 
             #  --> 1. Digital audio files database.
             digitalaudiobase(rippedcd.new)

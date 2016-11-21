@@ -14,6 +14,4 @@ SET _myparent=%~dp0
 REM ======================================================
 REM Ecrire les arguments de copie dans un un fichier JSON.
 REM ======================================================
-PUSHD %_PYTHONPROJECT%
-python AudioCD\OutFiles.py "%~1"
-POPD
+python G:\Computing\MyPythonProject\AudioCD\DigitalAudioFiles.py "%~1"

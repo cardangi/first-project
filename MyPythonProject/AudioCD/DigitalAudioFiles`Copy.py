@@ -43,6 +43,8 @@ TABSIZE = 3
 # ========
 class CopyFilesFrom(MutableSequence):
 
+    logger = logging.getLogger("{0}.CopyFilesFrom".format(os.path.basename(__file__)))
+
     def __init__(self, filobj):
         self._seq = json.load(filobj)
 
@@ -61,15 +63,14 @@ class CopyFilesFrom(MutableSequence):
     def __call__(self, *args, **kwargs):
         for src, dst in self:
             if not exists(src):
-                # logger.debug('"{0}" doesn\'t exist.'.format(src))
+                self.logger.debug('"{0}" doesn\'t exist.'.format(src))
                 continue
-            # logger.debug("Copy.")
             if not exists(dirname(dst)):
-                # logger.debug('\t"{0}" created.'.format(dirname(dst)).expandtabs(TABSIZE))
+                self.logger.debug('\t"{0}" created.'.format(dirname(dst)).expandtabs(TABSIZE))
                 if not kwargs["test"]:
                     os.makedirs(dirname(dst))
-            # logger.debug('\tSource     : "{0}"'.format(src).expandtabs(TABSIZE))
-            # logger.debug('\tDestination: "{0}"'.format(dst).expandtabs(TABSIZE))
+                    self.logger.debug('\tSource     : "{0}"'.format(src).expandtabs(TABSIZE))
+                    self.logger.debug('\tDestination: "{0}"'.format(dst).expandtabs(TABSIZE))
             if not kwargs["test"]:
                 shutil.copy2(src=src, dst=dst)
 
@@ -87,15 +88,9 @@ filestocopy = CopyFilesFrom(arguments.file)
 # ========
 # Logging.
 # ========
-logger = None
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
-    d = yaml.load(fp)
-if d:
-    dictConfig(d)
-    if __name__ == "__main__":
-        logger = logging.getLogger(os.path.basename(__file__))
-    else:
-        logger = logging.getLogger(__name__)
+    dictConfig(yaml.load(fp))
+logger = logging.getLogger(os.path.basename(__file__))
 logger.debug("Delay: {0} second(s).".format(arguments.delay))
 logger.debug("{0:>5d} files to copy.".format(len(filestocopy)))
 

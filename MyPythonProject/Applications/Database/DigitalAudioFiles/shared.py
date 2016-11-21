@@ -2,6 +2,7 @@
 import re
 import json
 import sqlite3
+import logging
 from datetime import datetime
 from ...shared import DATABASE
 from collections import MutableSequence
@@ -137,6 +138,7 @@ def validgenre(s):
 def insertfromfile(fil, db=DATABASE):
     statusss = []
     tracks = InsertTracksfromFile(fil)
+    logger = logging.getLogger("{0}.insertfromfile".format(__name__))
     if len(tracks):
         for album, disc, track in tracks:
             statuss, acount, dcount, tcount = [], 0, 0, 0
@@ -149,6 +151,7 @@ def insertfromfile(fil, db=DATABASE):
                     try:
                         conn.execute("INSERT INTO tracks (albumid, discid, trackid, title, created) VALUES (?, ?, ?, ?, ?)", track)
                         tcount = conn.total_changes
+                        logger.debug("TRACKS: {0} records inserted.".format(tcount))
                     except sqlite3.IntegrityError:
                         pass
 
@@ -156,6 +159,7 @@ def insertfromfile(fil, db=DATABASE):
                     try:
                         conn.execute("INSERT INTO discs (albumid, discid, tracks, created) VALUES (?, ?, ?, ?)", disc)
                         dcount = conn.total_changes - tcount
+                        logger.debug("DISCS: {0} records inserted.".format(dcount))
                     except sqlite3.IntegrityError:
                         pass
 
@@ -164,6 +168,7 @@ def insertfromfile(fil, db=DATABASE):
                         conn.execute("INSERT INTO albums (albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, created, origyear) "
                                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", album)
                         acount = conn.total_changes - tcount - dcount
+                        logger.debug("ALBUMS: {0} records inserted.".format(acount))
                     except sqlite3.IntegrityError:
                         pass
 

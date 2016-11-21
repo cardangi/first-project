@@ -15,9 +15,9 @@ REM ==================
 REM Initializations 2.
 REM ==================
 SET _json=%TEMP%\arguments.json
-SET _jsonrippinglog=%TEMP%\rippinglog.json
+SET _jsonrippedcd=%TEMP%\rippinglog.json
 SET _htmlrippinglog=%_COMPUTING%\rippingLog\rippinglog.html
-SET _jsondigitalaudiobase=%TEMP%\digitalaudiodatabase.json
+SET _jsonrippedtracks=%TEMP%\digitalaudiodatabase.json
 SET _xmldigitalaudiobase=%TEMP%\digitalaudiobase.xml
 SET _digitalaudiobase=%_COMPUTING%\digitalaudiobase\digitalaudiobase
 
@@ -43,9 +43,9 @@ REM        ------------
 REM  1 --> Ripping log.
 REM        ------------
 :STEP1
-IF EXIST "%_jsonrippinglog%" (
-    python %_PYTHONPROJECT%\AudioCD\RippingLog.py "%_jsonrippinglog%"
-    DEL "%_jsonrippinglog%"
+IF EXIST "%_jsonrippedcd%" (
+    python %_PYTHONPROJECT%\AudioCD\RippedCD.py "%_jsonrippedcd%"
+    DEL "%_jsonrippedcd%"
 )
 SHIFT
 GOTO MAIN
@@ -55,11 +55,9 @@ REM        -----------------------
 REM  2 --> Digital audio database.
 REM        -----------------------
 :STEP2
-IF EXIST "%_jsondigitalaudiobase%" (
-    REM PUSHD "%_PYTHONPROJECT%"
-    REM python -m Applications.Database.DigitalAudio.insert "%_jsondigitalaudiobase%"
-    REM POPD
-    DEL "%_jsondigitalaudiobase%"
+IF EXIST "%_jsonrippedtracks%" (
+    python %_PYTHONPROJECT%\AudioCD\RippedTracks.py "%_jsonrippedtracks%"
+    DEL "%_jsonrippedtracks%"
 )
 SHIFT
 GOTO MAIN
@@ -69,8 +67,8 @@ REM        -------------------------
 REM  3 --> Update Ripping log views.
 REM        -------------------------
 :STEP3
-python %_PYTHONPROJECT%\AudioCD\View1.py
-python %_PYTHONPROJECT%\AudioCD\View2.py
+python %_PYTHONPROJECT%\AudioCD\RippedCD`View1.py
+python %_PYTHONPROJECT%\AudioCD\RippedCD`View2.py
 SHIFT
 GOTO MAIN
 
@@ -79,15 +77,12 @@ REM        ------------------------------------
 REM  4 --> Update Digital Audio database views.
 REM        ------------------------------------
 :STEP4
-REM python %_PYTHONPROJECT%\Database`HTMLView`L.py DigitalAudio
-REM IF NOT ERRORLEVEL 1 (
-    REM PUSHD "%_PYTHONPROJECT%"
-    REM python -m Applications.Database.DigitalAudio.View1
-    REM POPD
-    REM IF EXIST "%_xmldigitalaudiobase%" (
-        REM java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
-        REM DEL "%_xmldigitalaudiobase%"
-    REM )
+PUSHD "%_PYTHONPROJECT%"
+REM python AudioCD\DigitalAudioFiles`View1.py
+POPD
+REM IF EXIST "%_xmldigitalaudiobase%" (
+    REM java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
+    REM DEL "%_xmldigitalaudiobase%"
 REM )
 SHIFT
 GOTO MAIN

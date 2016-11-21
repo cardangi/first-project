@@ -13,18 +13,11 @@ import mutagen
 import logging
 import shutil
 import json
-import yaml
 import os
 import re
 from .. import shared
 
 __author__ = 'Xavier ROSSET'
-
-
-# ========
-# Logging.
-# ========
-logger = logging.getLogger("%s.%s" % (__package__, os.path.basename(__file__)))
 
 
 # ========
@@ -610,11 +603,11 @@ class RippedCD(ContextDecorator):
         with open(tags, shared.WRITE) as fw:
             json.dump(obj, fw, indent=4, sort_keys=True)
 
-        # --> 4. Store tags in YAML.
-        self.logger.debug("Store tags in per track YAML file.")
-        tags = os.path.join(os.path.expandvars("%TEMP%"), "T{0}.yml".format(self.new.tracknumber.zfill(2)))
-        with open(tags, shared.WRITE) as fo:
-            yaml.dump(outtags, fo, indent=4)
+        # --> 4. Store tags in JSON.
+        self.logger.debug("Store tags in per track JSON file.")
+        tags = os.path.join(os.path.expandvars("%TEMP%"), "T{0}.json".format(self.new.tracknumber.zfill(2)))
+        with open(tags, shared.WRITE) as fw:
+            json.dump(outtags, fw, indent=4, sort_keys=True)
 
         # --> 5. Stop logging.
         self.logger.debug('END "%s".' % (os.path.basename(__file__),))
