@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
+import yaml
 import locale
+import logging
 import argparse
 from pytz import timezone
 from string import Template
@@ -8,6 +10,7 @@ from datetime import datetime
 from collections import Counter
 from operator import itemgetter
 from Applications import shared
+from logging.config import dictConfig
 from jinja2 import Environment, FileSystemLoader
 from Applications.Database.RippedCD.shared import select
 
@@ -68,6 +71,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=validdb)
 
 
+# ========
+# Logging.
+# ========
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+    dictConfig(yaml.load(fp))
+logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
+
+
 # ===============
 # Main algorithm.
 # ===============
@@ -87,16 +98,18 @@ months = dict(set([(shared.dateformat(shared.LOCAL.localize(itemgetter(1)(item))
                     shared.dateformat(shared.LOCAL.localize(itemgetter(1)(item)), "$month $Y")) for item in data]))
 
 
-#     ----------------------
-#  3. Détail des CDs rippés.
-#     ----------------------
-tr4 = sorted([(
-                  shared.dateformat(shared.LOCAL.localize(itemgetter(1)(item)), shared.TEMPLATE2),
-                  itemgetter(2)(item),
-                  itemgetter(3)(item),
-                  itemgetter(4)(item),
-                  path.substitute(a=getfirstletter(itemgetter(9)(item), itemgetter(2)(item)), b=itemgetter(9)(item), c=itemgetter(8)(item)).replace(" ", r"%20")
-              ) for item in data], key=itemgetter(1), reverse=True)
+#     -------------------------------------------------
+#  3. Détail des CDs rippés. Tri par date décroissante.
+#     -------------------------------------------------
+tr4 = [(shared.dateformat(shared.LOCAL.localize(a), shared.TEMPLATE2), b, c, d, e) for a, b, c, d, e in sorted([(
+                                                                                                                    itemgetter(1)(item),
+                                                                                                                    itemgetter(2)(item),
+                                                                                                                    itemgetter(3)(item),
+                                                                                                                    itemgetter(4)(item),
+                                                                                                                    path.substitute(a=getfirstletter(itemgetter(9)(item), itemgetter(2)(item)),
+                                                                                                                                    b=itemgetter(9)(item),
+                                                                                                                                    c=itemgetter(8)(item)).replace(" ", r"%20")
+                                                                                                                ) for item in data], key=itemgetter(0), reverse=True)]
 
 
 #     ---------------------------------------------------------------------

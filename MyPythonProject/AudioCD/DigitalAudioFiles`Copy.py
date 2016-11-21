@@ -13,6 +13,7 @@ import yaml
 import json
 import sys
 import os
+import re
 
 __author__ = 'Xavier ROSSET'
 
@@ -63,6 +64,7 @@ class CopyFilesFrom(MutableSequence):
     def __call__(self, *args, **kwargs):
         self.logger.debug("Test       : {0}".format(kwargs["test"]))
         for src, dst in self:
+            dst = os.path.join(os.path.dirname(dst), re.sub(":", "_", os.path.basename(dst)))
             if not exists(src):
                 self.logger.debug('"{0}" doesn\'t exist.'.format(src))
                 continue

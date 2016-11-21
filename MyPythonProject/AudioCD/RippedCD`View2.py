@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 import json
+import yaml
+import logging
 import argparse
 from operator import itemgetter
 from Applications import shared
+from logging.config import dictConfig
 from Applications.Database.RippedCD.shared import select
 
 __author__ = 'Xavier ROSSET'
@@ -35,6 +38,14 @@ parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.
 # Initializations.
 # ================
 args, arguments = [], parser.parse_args()
+
+
+# ========
+# Logging.
+# ========
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+    dictConfig(yaml.load(fp))
+logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 
 
 # ===============

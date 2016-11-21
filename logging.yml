@@ -8,7 +8,7 @@ handlers:
     formatter: default
     (): Applications.shared.customfilehandler
     maxbytes: 512000
-    backupcount: 3
+    backupcount: 6
 loggers:
   default:
     level: DEBUG
