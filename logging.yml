@@ -7,11 +7,19 @@ handlers:
   file:
     formatter: default
     (): Applications.shared.customfilehandler
-    maxbytes: 512000
+    maxbytes: 614400
     backupcount: 6
 loggers:
   default:
     level: DEBUG
+    handlers: [file]
+    propagate: no
+  info:
+    level: INFO
+    handlers: [file]
+    propagate: no
+  warning:
+    level: WARNING
     handlers: [file]
     propagate: no
 root:
