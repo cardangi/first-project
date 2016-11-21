@@ -639,7 +639,7 @@ class AudioFilesCollection(MutableSequence):
         for num, fil, tags in [(a, b, c) for a, (b, c) in enumerate(self, 1)]:
             album = "{0}.{1} - {2}".format(tags["albumsort"][0][2:6], tags["albumsort"][0][11], tags["album"][0])
             self.logger.debug('{0:>3d}. "{1}".'.format(num, fil))
-            self.logger.debug('\tNew album: "{0}".'.format(album).expandtabs(TABSIZE))
+            self.logger.debug('\t\tNew album: "{0}".'.format(album).expandtabs(TABSIZE))
             if not kwargs["test"]:
                 try:
                     tags["album"] = album
@@ -649,7 +649,7 @@ class AudioFilesCollection(MutableSequence):
                 else:
                     l.append(fil)
         if l:
-            self.logger.debug("{0:>5d} files updated.".format(len(l)))
+            self.logger.debug("{0:>3d} file(s) updated.".format(len(l)))
 
     def insert(self, index, value):
         self._seq.insert(index, value)

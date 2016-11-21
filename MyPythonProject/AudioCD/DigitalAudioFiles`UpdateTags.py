@@ -56,7 +56,7 @@ arguments = parser.parse_args()
 # ========
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
     dictConfig(yaml.load(fp))
-logger = logging.getLogger(os.path.basename(__file__))
+logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 logger.debug("Delay: {0} second(s).".format(arguments.delay))
 logger.debug("Test : {0}.".format(arguments.test))
 

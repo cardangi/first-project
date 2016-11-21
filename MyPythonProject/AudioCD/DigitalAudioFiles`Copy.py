@@ -43,7 +43,7 @@ TABSIZE = 3
 # ========
 class CopyFilesFrom(MutableSequence):
 
-    logger = logging.getLogger("{0}.CopyFilesFrom".format(os.path.basename(__file__)))
+    logger = logging.getLogger("{0}.CopyFilesFrom".format(os.path.splitext(os.path.basename(__file__))[0]))
 
     def __init__(self, filobj):
         self._seq = json.load(filobj)
@@ -61,18 +61,20 @@ class CopyFilesFrom(MutableSequence):
         return len(self._seq)
 
     def __call__(self, *args, **kwargs):
+        self.logger.debug("Test       : {0}".format(kwargs["test"]))
         for src, dst in self:
             if not exists(src):
                 self.logger.debug('"{0}" doesn\'t exist.'.format(src))
                 continue
             if not exists(dirname(dst)):
-                self.logger.debug('\t"{0}" created.'.format(dirname(dst)).expandtabs(TABSIZE))
+                self.logger.debug('"{0}" created.'.format(dirname(dst)))
                 if not kwargs["test"]:
                     os.makedirs(dirname(dst))
-                    self.logger.debug('\tSource     : "{0}"'.format(src).expandtabs(TABSIZE))
-                    self.logger.debug('\tDestination: "{0}"'.format(dst).expandtabs(TABSIZE))
+            self.logger.debug('Source     : "{0}"'.format(src))
+            self.logger.debug('Destination: "{0}"'.format(dst))
             if not kwargs["test"]:
                 shutil.copy2(src=src, dst=dst)
+                self.logger.debug("Source copied.")
 
     def insert(self, index, value):
         self._seq.insert(index, value)
@@ -90,9 +92,9 @@ filestocopy = CopyFilesFrom(arguments.file)
 # ========
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
     dictConfig(yaml.load(fp))
-logger = logging.getLogger(os.path.basename(__file__))
+logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 logger.debug("Delay: {0} second(s).".format(arguments.delay))
-logger.debug("{0:>5d} files to copy.".format(len(filestocopy)))
+logger.debug("{0:>5d} file(s) to copy.".format(len(filestocopy)))
 
 
 # ===============
