@@ -77,13 +77,13 @@ REM        ------------------------------------
 REM  4 --> Update Digital Audio database views.
 REM        ------------------------------------
 :STEP4
-REM PUSHD "%_PYTHONPROJECT%"
-REM python AudioCD\DigitalAudioFiles`View1.py
-REM POPD
-REM IF EXIST "%_xmldigitalaudiobase%" (
-    REM java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
-    REM DEL "%_xmldigitalaudiobase%"
-REM )
+PUSHD "%_PYTHONPROJECT%"
+python AudioCD\DigitalAudioFiles`View1.py
+POPD
+IF EXIST "%_xmldigitalaudiobase%" (
+    java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
+    DEL "%_xmldigitalaudiobase%"
+)
 SHIFT
 GOTO MAIN
 
