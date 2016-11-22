@@ -43,7 +43,7 @@ args, arguments = [], parser.parse_args()
 # ========
 # Logging.
 # ========
-with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding=shared.UTF8) as fp:
     dictConfig(yaml.load(fp))
 logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 
@@ -63,5 +63,5 @@ for item in sorted(select(arguments.database), key=itemgetter(0), reverse=True):
                                                       itemgetter(7)(item)
                                                       ]))))
 if args:
-    with open(OUTPUT, mode=shared.WRITE) as fp:
-        json.dump([shared.now(), dict(args)], fp, indent=4, sort_keys=True)
+    with open(OUTPUT, mode=shared.WRITE, encoding=shared.UTF8) as fp:
+        json.dump([shared.now(), dict(args)], fp, indent=4, sort_keys=True, ensure_ascii=False)

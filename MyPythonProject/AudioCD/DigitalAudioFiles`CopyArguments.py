@@ -30,7 +30,7 @@ def validdrive(d):
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("file", type=argparse.FileType(mode="rb"))
+parser.add_argument("file", type=argparse.FileType(mode="rb", encoding="UTF_8"))
 parser.add_argument("drive", type=validdrive)
 parser.add_argument("-o", "--out", dest="outjsonfile", default=os.path.join(os.path.expandvars("%TEMP%"), "arguments.json"))
 
@@ -57,7 +57,7 @@ rex2 = re.compile(r"[a-z]:", re.IGNORECASE)
 # ========
 # Logging.
 # ========
-with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
     dictConfig(yaml.load(fp))
 logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 
@@ -77,7 +77,7 @@ else:
     logger.debug("\tTrack    : {0}".format(audio.get("track", audio["tracknumber"])[0]).expandtabs(TABSIZE))
     logger.debug("\tTitle    : {0}".format(audio["title"][0]).expandtabs(TABSIZE))
     if os.path.exists(arguments.outjsonfile):
-        with open(arguments.outjsonfile) as fp:
+        with open(arguments.outjsonfile, encoding="UTF_8") as fp:
             args = json.load(fp)
     match = rex1.match(arguments.file.name)
     if match:
@@ -90,7 +90,7 @@ else:
                                )
         args.extend([(arguments.file.name, dst)])
     if args:
-        with open(arguments.outjsonfile, mode="w") as fp:
+        with open(arguments.outjsonfile, mode="w", encoding="UTF_8") as fp:
             json.dump(args, fp, indent=4)
             logger.debug("Copy arguments written.")
 

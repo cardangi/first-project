@@ -184,19 +184,35 @@ def insertfromfile(fil, db=DATABASE):
 def select(db=DATABASE):
     conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = sqlite3.Row
-    for arow in conn.execute("SELECT albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, created, origyear FROM albums ORDER BY albumid"):
-        for drow in conn.execute("SELECT albumid, discid, tracks, created FROM discs WHERE albumid=?", (arow["albumid"],)):
-            for trow in conn.execute("SELECT albumid, discid, trackid, title, created FROM tracks WHERE albumid=? AND discid=?", (arow["albumid"], drow["discid"])):
-                yield tuple(arow), tuple(drow), tuple(trow)
+    for arow in conn.execute("SELECT a.rowid, a.albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, a.created, origyear, b.discid, b.tracks, trackid, title "
+                             "FROM albums a "
+                             "JOIN discs b ON a.albumid=b.albumid "
+                             "JOIN tracks c ON a.albumid=c.albumid AND b.discid=c.discid "
+                             "ORDER BY a.albumid, b.discid, c.trackid"):
+            yield tuple(arow)
+
+
+def select2(db=DATABASE):
+    conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
+    conn.row_factory = sqlite3.Row
+    for arow in conn.execute("SELECT a.rowid, a.albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, a.created, origyear, b.discid, b.tracks, trackid, title "
+                             "FROM albums a "
+                             "JOIN discs b ON a.albumid=b.albumid "
+                             "JOIN tracks c ON a.albumid=c.albumid AND b.discid=c.discid "
+                             "ORDER BY a.created DESC, a.albumid, b.discid, c.trackid"):
+            yield tuple(arow)
 
 
 def selectfromuid(uid, db=DATABASE):
     conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = sqlite3.Row
-    for arow in conn.execute("SELECT albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, created, origyear FROM albums WHERE rowid=?", (uid,)):
-        for drow in conn.execute("SELECT albumid, discid, tracks, created FROM discs WHERE albumid=?", (arow["albumid"],)):
-            for trow in conn.execute("SELECT albumid, discid, trackid, title, created FROM tracks WHERE albumid=? AND discid=?", (arow["albumid"], drow["discid"])):
-                yield tuple(arow), tuple(drow), tuple(trow)
+    for arow in conn.execute("SELECT a.rowid, a.albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, a.created, origyear, b.discid, b.tracks, trackid, title "
+                             "FROM albums a "
+                             "JOIN discs b ON a.albumid=b.albumid "
+                             "JOIN tracks c ON a.albumid=c.albumid AND b.discid=c.discid "
+                             "WHERE a.rowid=? "
+                             "ORDER BY a.albumid, b.discid, c.trackid", (uid,)):
+            yield tuple(arow)
 
 
 def deletefromuid(uid, db=DATABASE):

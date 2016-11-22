@@ -200,4 +200,4 @@ if any([lista, listb, listc, listd, liste]):
 #     ---------------
 if any([ext_count1, ext_count2, art_count1, art_count2, artext_dict]):
     with open(OUTFILE, mode=s1.WRITE, encoding=s1.UTF8) as fp:
-        json.dump([s1.now(), ext_count1, ext_count2, art_count1, art_count2, artext_dict], fp, indent=4)
+        json.dump([s1.now(), ext_count1, ext_count2, art_count1, art_count2, artext_dict], fp, indent=4, ensure_ascii=False)

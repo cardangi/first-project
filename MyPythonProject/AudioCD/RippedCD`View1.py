@@ -74,7 +74,7 @@ parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.
 # ========
 # Logging.
 # ========
-with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding=shared.UTF8) as fp:
     dictConfig(yaml.load(fp))
 logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 
@@ -156,7 +156,7 @@ tr5 = t2.render(id="month",
 #     ------------
 #  8. HTML Output.
 #     ------------
-with open(OUTPUT, mode=shared.WRITE) as fp:
+with open(OUTPUT, mode=shared.WRITE, encoding=shared.UTF8) as fp:
     fp.write(content.render(now=shared.dateformat(shared.UTC.localize(datetime.utcnow()).astimezone(shared.LOCAL), shared.TEMPLATE4), 
                             content1=tr4, 
                             content2="{0}{1}{2}{3}".format(tr1, tr2, tr3, tr5)

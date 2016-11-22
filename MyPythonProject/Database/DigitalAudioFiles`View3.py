@@ -1,8 +1,10 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 import os
-import sys
+import json
 import argparse
-from Applications.Database.RippedCD.shared import insertfromfile
+import datetime
+from Applications.Database.DigitalAudioFiles.shared import select
+from Applications.shared import WRITE, LOCAL, TEMPLATE2, UTF8, dateformat
 
 __author__ = 'Xavier ROSSET'
 
@@ -16,11 +18,16 @@ def validdb(arg):
     return arg
 
 
+def thatfunc(d):
+    if isinstance(d, datetime.datetime):
+        return dateformat(LOCAL.localize(d), TEMPLATE2)
+    return d
+
+
 # =================
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("tracks", type=argparse.FileType(mode="r", encoding="UTF_8"))
 parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=validdb)
 
 
@@ -33,4 +40,9 @@ arguments = parser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-sys.exit(insertfromfile(arguments.tracks, db=arguments.database))
+obj = []
+for item in select(arguments.database):
+    obj.append(list(map(thatfunc, item)))
+if obj:
+    with open(os.path.join(os.path.expandvars("%TEMP%"), "digitalaudiofiles.json"), mode=WRITE, encoding=UTF8) as fw:
+        json.dump(obj, fw, indent=4, ensure_ascii=False)

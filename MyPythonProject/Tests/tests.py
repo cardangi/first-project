@@ -10,6 +10,9 @@ __author__ = 'Xavier ROSSET'
 
 
 class TestRegex(unittest.TestCase):
+    """
+    Test regular expressions.
+    """
 
     def test_01first(self):
         self.assertRegex("1.19840000.1.13", r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.13$)1\.(?:{0})0000\.\d\.13$".format(shared.DFTYEARREGEX))
@@ -88,10 +91,14 @@ class TestCanFileBeProcessed(unittest.TestCase):
 
 
 class Test01DefaultCDTrack(unittest.TestCase):
-
+    """
+    Test "Applications.AudioCD.shared.DefaultCDTrack".
+    """
     def setUp(self):
 
         # Default single CD tags.
+        # Both artist and artistsort are identical.
+        # "origyear" is not provided.
         tags1 = {
             "Album": "Abigail",
             "Year": "1987",
@@ -117,7 +124,9 @@ class Test01DefaultCDTrack(unittest.TestCase):
             "Title": "A Mansion in Darkness"
         }
 
-        # Single CD tags. Both "year" and "origyear" are provided.
+        # Default single CD tags.
+        # Both "artist" and "artistsort" are identical.
+        # "origyear" is provided.
         tags2 = {
             "Album": "Abigail",
             "Year": "2016",
@@ -190,10 +199,14 @@ class Test01DefaultCDTrack(unittest.TestCase):
 
 
 class Test02DefaultCDTrack(unittest.TestCase):
-
+    """
+    Test "Applications.AudioCD.shared.RippedCD".
+    """
     def setUp(self):
 
         # Default single CD tags.
+        # Both artist and artistsort are identical.
+        # "origyear" is not provided.
         tags = {
             "Album": "Abigail",
             "Year": "1987",
@@ -219,7 +232,9 @@ class Test02DefaultCDTrack(unittest.TestCase):
             "Title": "A Mansion in Darkness"
         }
 
-        # Default expected tags.
+        # Default single CD tags.
+        # Both "artist" and "artistsort" are identical.
+        # "origyear" is provided.
         self.reftags = {
             "_albumart_1_front album cover": r"C:\Users\Xavier\AppData\Local\Temp\dbp49F2.tmp\9.bin",
             "album": "Abigail",
@@ -276,8 +291,11 @@ class Test02DefaultCDTrack(unittest.TestCase):
 
 
 class Test03DefaultCDTrack(unittest.TestCase):
-    # Test "Applications.AudioCD.shared.rippinglog" for default single CD.
-
+    """
+    Test "Applications.AudioCD.shared.rippinglog" for default single CD.
+    Both artist and artistsort are identical.
+    "origyear" is not provided.
+    """
     def setUp(self):
         tags = {
             "Album": "Abigail",
@@ -319,8 +337,11 @@ class Test03DefaultCDTrack(unittest.TestCase):
 
 
 class Test04DefaultCDTrack(unittest.TestCase):
-    # Test "Applications.AudioCD.shared.digitalaudiobase" for default single CD.
-
+    """
+    Test "Applications.AudioCD.shared.digitalaudiobase" for default single CD.
+    Both artist and artistsort are identical.
+    "origyear" is not provided.
+    """
     def setUp(self):
         tags = {
             "Album": "Abigail",
@@ -363,8 +384,11 @@ class Test04DefaultCDTrack(unittest.TestCase):
 
 
 class Test05DefaultCDTrack(unittest.TestCase):
-    # Test "Applications.AudioCD.shared.rippinglog" for default multi CD.
-
+    """
+    Test "Applications.AudioCD.shared.rippinglog" for a multi CDs album.
+    Both artist and artistsort are identical.
+    "origyear" is provided.
+    """
     def setUp(self):
         tags = {
             "Album": "Abigail",

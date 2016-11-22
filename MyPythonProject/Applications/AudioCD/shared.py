@@ -589,7 +589,7 @@ class RippedCD(ContextDecorator):
         fo, encoding = self.tags, shared.UTF16
         if self.test:
             fo, encoding = os.path.join(os.path.expandvars("%TEMP%"), "oT{0}.txt".format(self.new.tracknumber.zfill(2))), shared.UTF8
-        with open(fo, shared.WRITE, encoding=encoding) as fw:
+        with open(fo, mode=shared.WRITE, encoding=encoding) as fw:
             self.logger.debug("\t{0}".format(fo).expandtabs(4))
             fw.write(self.outputtags.render(tags=outtags))
 
@@ -597,16 +597,16 @@ class RippedCD(ContextDecorator):
         self.logger.debug("Store tags in single JSON file.")
         tags, obj = os.path.join(os.path.expandvars("%TEMP%"), "tags.json"), []
         if os.path.exists(tags):
-            with open(tags) as fr:
+            with open(tags, encoding="UTF_8") as fr:
                 obj = json.load(fr)
         obj.append(outtags)
-        with open(tags, shared.WRITE) as fw:
+        with open(tags, mode=shared.WRITE, encoding="UTF_8") as fw:
             json.dump(obj, fw, indent=4, sort_keys=True)
 
         # --> 4. Store tags in JSON.
         self.logger.debug("Store tags in per track JSON file.")
         tags = os.path.join(os.path.expandvars("%TEMP%"), "T{0}.json".format(self.new.tracknumber.zfill(2)))
-        with open(tags, shared.WRITE) as fw:
+        with open(tags, mode=shared.WRITE, encoding="UTF_8") as fw:
             json.dump(outtags, fw, indent=4, sort_keys=True)
 
         # --> 5. Stop logging.
@@ -767,7 +767,7 @@ def rippinglog(track, fil=os.path.join(os.path.expandvars("%TEMP%"), "rippinglog
 
     obj = []
     if os.path.exists(fil):
-        with open(fil) as fr:
+        with open(fil, encoding="UTF_8") as fr:
             obj = json.load(fr)
         obj = [tuple(item) for item in obj]
     while True:
@@ -790,7 +790,7 @@ def rippinglog(track, fil=os.path.join(os.path.expandvars("%TEMP%"), "rippinglog
             obj.clear()
         else:
             break
-    with open(fil, shared.WRITE) as fw:
+    with open(fil, mode=shared.WRITE, encoding="UTF_8") as fw:
         json.dump(sorted(obj, key=itemgetter(0)), fw, indent=4, sort_keys=True)
 
 
@@ -798,7 +798,7 @@ def digitalaudiobase(track, fil=os.path.join(os.path.expandvars("%TEMP%"), "digi
 
     obj = []
     if os.path.exists(fil):
-        with open(fil) as fr:
+        with open(fil, encoding="UTF_8") as fr:
             obj = json.load(fr)
         obj = [tuple(item) for item in obj]
     while True:
@@ -834,7 +834,7 @@ def digitalaudiobase(track, fil=os.path.join(os.path.expandvars("%TEMP%"), "digi
             obj.clear()
         else:
             break
-    with open(fil, shared.WRITE) as fw:
+    with open(fil, mode=shared.WRITE, encoding="UTF_8") as fw:
         json.dump(sorted(obj, key=itemgetter(0)), fw, indent=4, sort_keys=True)
 
 
@@ -859,5 +859,5 @@ PROFILES = {"default": profile(["albumsortcount", "bootleg", "live", "bonus"], D
             "default1": profile(["albumsortcount", "bootleg", "live", "bonus"], DefaultCDTrack.fromfile),
             "selftitled": profile(["albumsortcount", "bootleg", "live", "bonus"], SelfTitledCDTrack.fromfile),
             "sbootlegs": profile(["albumsortcount", "bootleg", "live", "bonus", "groupby"], SpringsteenBootlegCDTrack.fromfile)}
-with open(os.path.normpath(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Mapping.json"))) as fp:
+with open(os.path.normpath(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Mapping.json")), encoding="UTF_8") as fp:
     MAPPING = json.load(fp)

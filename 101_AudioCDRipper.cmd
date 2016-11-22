@@ -79,6 +79,8 @@ REM        ------------------------------------
 :STEP4
 PUSHD "%_PYTHONPROJECT%"
 python AudioCD\DigitalAudioFiles`View1.py
+python AudioCD\DigitalAudioFiles`View2.py
+python Database\DigitalAudioFiles`View3.py
 POPD
 IF EXIST "%_xmldigitalaudiobase%" (
     java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"

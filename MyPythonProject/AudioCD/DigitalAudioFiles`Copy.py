@@ -28,7 +28,7 @@ basename, dirname, exists = os.path.basename, os.path.dirname, os.path.exists
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("file", type=argparse.FileType(mode="r"))
+parser.add_argument("file", type=argparse.FileType(mode="r", encoding="UTF_8"))
 parser.add_argument("-d", "--delay", type=validdelay, default="0")
 parser.add_argument("-t", "--test", action="store_true")
 
@@ -92,7 +92,7 @@ filestocopy = CopyFilesFrom(arguments.file)
 # ========
 # Logging.
 # ========
-with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml")) as fp:
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
     dictConfig(yaml.load(fp))
 logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 logger.debug("Delay: {0} second(s).".format(arguments.delay))
