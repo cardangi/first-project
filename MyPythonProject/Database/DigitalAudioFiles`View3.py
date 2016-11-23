@@ -29,6 +29,7 @@ def thatfunc(d):
 # =================
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=validdb)
+parser.add_argument("-o", "--output", default=os.path.join(os.path.expandvars("%TEMP%"), "digitalaudiofiles.json"), type=argparse.FileType(mode=WRITE, encoding=UTF8))
 
 
 # ================
@@ -40,5 +41,4 @@ arguments = parser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-with open(os.path.join(os.path.expandvars("%TEMP%"), "digitalaudiofiles.json"), mode=WRITE, encoding=UTF8) as fw:
-    json.dump([list(map(thatfunc, item)) for item in select(arguments.database)], fw, indent=4, ensure_ascii=False)
+json.dump([list(map(thatfunc, item)) for item in select(arguments.database)], arguments.output, indent=4, ensure_ascii=False)
