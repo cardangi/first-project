@@ -7,7 +7,7 @@ import argparse
 import datetime
 from logging.config import dictConfig
 from Applications.Database.DigitalAudioFiles.shared import select
-from Applications.shared import WRITE, LOCAL, TEMPLATE2, UTF8, dateformat
+from Applications.shared import WRITE, LOCAL, TEMPLATE2, UTC, UTF8, dateformat
 
 __author__ = 'Xavier ROSSET'
 
@@ -43,6 +43,12 @@ parser.add_argument("-l", "--logging", default=os.path.join(os.path.expandvars("
 parser.add_argument("-u", "--debug", action="store_true")
 
 
+# ================
+# Initializations.
+# ================
+arguments = parser.parse_args()
+
+
 # ========
 # Logging.
 # ========
@@ -52,13 +58,7 @@ logger.debug(__file__)
 logger.info(__file__)
 
 
-# ================
-# Initializations.
-# ================
-arguments = parser.parse_args()
-
-
 # ===============
 # Main algorithm.
 # ===============
-json.dump([list(map(thatfunc, item)) for item in select(arguments.database)], arguments.output, indent=4, ensure_ascii=False)
+json.dump([dateformat(UTC.localize(datetime.datetime.utcnow()).astimezone(LOCAL), TEMPLATE2), [list(map(thatfunc, item)) for item in select(arguments.database)]], arguments.output, indent=4, ensure_ascii=False)
