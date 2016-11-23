@@ -40,9 +40,5 @@ arguments = parser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-obj = []
-for item in select(arguments.database):
-    obj.append(list(map(thatfunc, item)))
-if obj:
-    with open(os.path.join(os.path.expandvars("%TEMP%"), "digitalaudiofiles.json"), mode=WRITE, encoding=UTF8) as fw:
-        json.dump(obj, fw, indent=4, ensure_ascii=False)
+with open(os.path.join(os.path.expandvars("%TEMP%"), "digitalaudiofiles.json"), mode=WRITE, encoding=UTF8) as fw:
+    json.dump([list(map(thatfunc, item)) for item in select(arguments.database)], fw, indent=4, ensure_ascii=False)
