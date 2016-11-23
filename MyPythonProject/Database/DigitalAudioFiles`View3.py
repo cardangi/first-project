@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
 import json
+import yaml
+import logging
 import argparse
 import datetime
+from logging.config import dictConfig
 from Applications.Database.DigitalAudioFiles.shared import select
 from Applications.shared import WRITE, LOCAL, TEMPLATE2, UTF8, dateformat
 
@@ -24,11 +27,29 @@ def thatfunc(d):
     return d
 
 
+def thatotherfunc(b):
+    if b:
+        return "default"
+    return "info"
+
+
 # =================
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=validdb)
+parser.add_argument("-o", "--output", default=os.path.join(os.path.expandvars("%TEMP%"), "digitalaudiofiles.json"), type=argparse.FileType(mode=WRITE, encoding=UTF8))
+parser.add_argument("-l", "--logging", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), type=argparse.FileType(encoding=UTF8))
+parser.add_argument("-u", "--debug", action="store_true")
+
+
+# ========
+# Logging.
+# ========
+dictConfig(yaml.load(arguments.logging))
+logger = logging.getLogger("{1}.{0}".format(os.path.splitext(os.path.basename(__file__))[0], thatotherfunc(arguments.debug)))
+logger.debug(__file__)
+logger.info(__file__)
 
 
 # ================
@@ -40,9 +61,4 @@ arguments = parser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-obj = []
-for item in select(arguments.database):
-    obj.append(list(map(thatfunc, item)))
-if obj:
-    with open(os.path.join(os.path.expandvars("%TEMP%"), "digitalaudiofiles.json"), mode=WRITE, encoding=UTF8) as fw:
-        json.dump(obj, fw, indent=4, ensure_ascii=False)
+json.dump([list(map(thatfunc, item)) for item in select(arguments.database)], arguments.output, indent=4, ensure_ascii=False)
