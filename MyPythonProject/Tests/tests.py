@@ -1,14 +1,31 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 import os
 import json
+import yaml
+import logging
+import sqlite3
 import unittest
 import tempfile
+from shutil import copy
 from Applications import shared
+from logging.config import dictConfig
+from Applications.Database.DigitalAudioFiles.shared import parser, updatealbum
 from Applications.AudioCD.shared import DefaultCDTrack, RippedCD, canfilebeprocessed, digitalaudiobase, rippinglog
 
 __author__ = 'Xavier ROSSET'
 
 
+# ========
+# Logging.
+# ========
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding=shared.UTF8) as fp:
+    dictConfig(yaml.load(fp))
+logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
+
+
+# ========
+# Classes.
+# ========
 class TestRegex(unittest.TestCase):
     """
     Test regular expressions.
@@ -263,15 +280,15 @@ class Test02DefaultCDTrack(unittest.TestCase):
             "year": "1987"
         }
         self.otags, self.tags = os.path.join(os.path.expandvars("%TEMP%"), "T09.json"), None
-        with tempfile.TemporaryDirectory() as dir:
-            itags = os.path.join(dir, "tags.txt")
+        with tempfile.TemporaryDirectory() as directory:
+            itags = os.path.join(directory, "tags.txt")
             with open(itags, mode=shared.WRITE, encoding=shared.UTF16) as fo:
                 for k, v in tags.items():
                     fo.write("{0}={1}\n".format(k, v))
             with RippedCD("default", itags):
                 pass
         if os.path.exists(self.otags):
-            with open(self.otags) as fo:
+            with open(self.otags, encoding=shared.UTF8) as fo:
                 self.tags = json.load(fo)
 
     def test_01first(self):
@@ -322,11 +339,11 @@ class Test03DefaultCDTrack(unittest.TestCase):
             "Title": "A Mansion in Darkness"
         }
         self.first, self.second = ["King Diamond", "1987", "Abigail", "Hard Rock", "016861878825", "1.19870000.1", "King Diamond"], None
-        with tempfile.TemporaryDirectory() as dir:
-            outfile = os.path.join(dir, "rippinglog.json")
+        with tempfile.TemporaryDirectory() as directory:
+            outfile = os.path.join(directory, "rippinglog.json")
             rippinglog(DefaultCDTrack(**{k.lower(): v for k, v in tags.items()}), fil=outfile)
             if os.path.exists(outfile):
-                with open(outfile) as fr:
+                with open(outfile, encoding=shared.UTF8) as fr:
                     self.second = json.load(fr)[0]
 
     def test_01first(self):
@@ -369,11 +386,11 @@ class Test04DefaultCDTrack(unittest.TestCase):
         }
         self.first, self.second = ["K.King Diamond.1.19870000.1.D1.T09.NNN", "1.19870000.1", "D1.T09.NNN", "King Diamond", "1987", "Abigail", "Hard Rock", "1", "1", "Roadrunner Records", "9",
                                    "13", "A Mansion in Darkness", "N", "N", "Y", "016861878825", "2016", "English", "1987"], None
-        with tempfile.TemporaryDirectory() as dir:
-            outfile = os.path.join(dir, "digitalaudiodatabase.json")
+        with tempfile.TemporaryDirectory() as directory:
+            outfile = os.path.join(directory, "digitalaudiodatabase.json")
             digitalaudiobase(DefaultCDTrack(**{k.lower(): v for k, v in tags.items()}), fil=outfile)
             if os.path.exists(outfile):
-                with open(outfile) as fr:
+                with open(outfile, encoding=shared.UTF8) as fr:
                     self.second = json.load(fr)[0]
 
     def test_01first(self):
@@ -416,11 +433,11 @@ class Test05DefaultCDTrack(unittest.TestCase):
             "OrigYear": "1987"
         }
         self.first, self.second = ["King Diamond", "2016", "Abigail (1/2)", "Hard Rock", "016861878825", "1.19870000.1", "King Diamond"], None
-        with tempfile.TemporaryDirectory() as dir:
-            outfile = os.path.join(dir, "rippinglog.json")
+        with tempfile.TemporaryDirectory() as directory:
+            outfile = os.path.join(directory, "rippinglog.json")
             rippinglog(DefaultCDTrack(**{k.lower(): v for k, v in tags.items()}), fil=outfile)
             if os.path.exists(outfile):
-                with open(outfile) as fr:
+                with open(outfile, encoding=shared.UTF8) as fr:
                     self.second = json.load(fr)[0]
 
     def test_01first(self):
@@ -428,6 +445,59 @@ class Test05DefaultCDTrack(unittest.TestCase):
 
     def test_02second(self):
         self.assertListEqual(self.first, self.second)
+
+
+class TestParser(unittest.TestCase):
+
+    def setUp(self):
+        self.arguments = parser.parse_args(["albums", "1", "2", "3", "4", "--album", "the album", "--year", "1987", "--genre", "Hard Rock", "--discs", "2"])
+
+    def test_01first(self):
+        self.assertDictEqual(self.arguments.args, {"album": "the album", "year": 1987, "genre": "Hard Rock", "discs": 2})
+
+    def test_02second(self):
+        self.assertListEqual(self.arguments.uid, [1, 2, 3, 4])
+
+
+class TestUpdateTables(unittest.TestCase):
+
+    def setUp(self):
+        self.database = shared.DATABASE
+        self.newalbum = "the album"
+        self.newgenre = "the genre"
+        self.row = "47"
+
+    def test_01first(self):
+        with tempfile.TemporaryDirectory() as directory:
+            dst = os.path.join(directory, os.path.basename(self.database))
+            copy(src=self.database, dst=dst)
+            arguments = parser.parse_args(["albums", self.row, "--album", self.newalbum])
+            self.assertTrue(updatealbum(*arguments.uid, db=dst, **arguments.args))
+            conn = sqlite3.connect(dst)
+            conn.row_factory = sqlite3.Row
+            try:
+                for row in conn.execute("SELECT album from albums WHERE rowid=?", (self.row,)):
+                    self.assertEqual(row["album"], self.newalbum)
+            except AssertionError:
+                raise
+            finally:
+                conn.close()
+
+    def test_02second(self):
+        with tempfile.TemporaryDirectory() as directory:
+            dst = os.path.join(directory, os.path.basename(self.database))
+            copy(src=self.database, dst=dst)
+            arguments = parser.parse_args(["albums", self.row, "--genre", self.newgenre])
+            self.assertTrue(updatealbum(*arguments.uid, db=dst, **arguments.args))
+            conn = sqlite3.connect(dst)
+            conn.row_factory = sqlite3.Row
+            try:
+                for row in conn.execute("SELECT genre from albums WHERE rowid=?", (self.row,)):
+                    self.assertEqual(row["genre"], self.newgenre)
+            except AssertionError:
+                raise
+            finally:
+                conn.close()
 
 
 # def testsuite():

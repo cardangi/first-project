@@ -3,8 +3,11 @@ import re
 import json
 import sqlite3
 import logging
+import argparse
+from itertools import repeat
 from datetime import datetime
 from ...shared import DATABASE
+from contextlib import suppress
 from collections import MutableSequence
 from ..shared import Boolean, adapt_boolean, convert_boolean
 
@@ -26,6 +29,19 @@ sqlite3.register_converter("boolean", convert_boolean)
 # ========
 # Classes.
 # ========
+class DictArguments(argparse.Action):
+
+    def __init__(self, option_strings, dest, **kwargs):
+        super(DictArguments, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parsobj, namespace, values, option_string=None):
+        d = {}
+        with suppress(AttributeError):
+            d = getattr(namespace, "args")
+        d[self.dest] = values
+        setattr(namespace, "args", d)
+
+
 class InsertTracksfromFile(MutableSequence):
 
     def __init__(self, fil):
@@ -106,6 +122,37 @@ class InsertTracksfromFile(MutableSequence):
 
     def insert(self, index, value):
         self._seq.insert(index, value)
+
+
+# =================
+# Arguments parser.
+# =================
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers(dest="table")
+
+# ----- Table "ALBUMS".
+parser_updatalb = subparsers.add_parser("albums")
+parser_updatalb.add_argument("uid", type=int, nargs="+")
+parser_updatalb.add_argument("--artist", help="Artist", action=DictArguments)
+parser_updatalb.add_argument("--year", help="Year", type=int, action=DictArguments)
+parser_updatalb.add_argument("--album", help="Album title", action=DictArguments)
+parser_updatalb.add_argument("--genre", help="Genre", action=DictArguments)
+parser_updatalb.add_argument("--discs", help="Discs number", type=int, action=DictArguments)
+
+# ----- Table "TRACKS".
+parser_updattck = subparsers.add_parser("tracks")
+parser_updattck.add_argument("uid", type=int, nargs="+")
+parser_updattck.add_argument("--title", help="Title", action=DictArguments)
+
+# ----- Table "DISCS".
+parser_updatdsc = subparsers.add_parser("discs")
+parser_updatdsc.add_argument("uid", type=int, nargs="+")
+parser_updatdsc.add_argument("--field", help="Define here the field to update", action=DictArguments)
+
+# ----- Table "RIPPINGLOG".
+parser_updatdsc = subparsers.add_parser("rippinglog")
+parser_updatdsc.add_argument("uid", type=int, nargs="+")
+parser_updatdsc.add_argument("--field", help="Define here the field to update", action=DictArguments)
 
 
 # ==========
@@ -271,4 +318,34 @@ def deletetracksfromuid(*uid, db=DATABASE):
     with conn:
         conn.executemany("DELETE FROM tracks WHERE rowid=?", [(i,) for i in uid])
         status = conn.total_changes
+    return status
+
+
+def updatealbum(*uid, db=DATABASE, **kwargs):
+
+    def thatfunc(a, b):
+        """
+        Append record unique ID b in list a.
+        :param a: list.
+        :param b: record unique ID.
+        :return: tupled list a.
+        """
+        a.append(b)
+        return tuple(a)
+
+    logger = logging.getLogger("{0}.updatealbum".format(__name__))
+    status, query, args = 0, "", []
+    for k, v in kwargs.items():
+        query = "{0}{1}=?, ".format(query, k)  # album=?, albumid=?, "
+        args.append(v)  # ["the album", "T.Toto.1.19840000.1.D1.T01.NNN"]
+    conn = sqlite3.connect(db)
+    try:
+        with conn:
+            conn.executemany("UPDATE albums SET {0} WHERE rowid=?".format(query[:-2]), list(map(thatfunc, repeat(args), uid)))
+            # [("the album", "T.Toto.1.19840000.1.D1.T01.NNN", 1), ("the album", "T.Toto.1.19840000.1.D1.T01.NNN", 2), ("the album", "T.Toto.1.19840000.1.D1.T01.NNN", 3)]
+            status = conn.total_changes
+    except (sqlite3.OperationalError, sqlite3.Error) as err:
+        logger.exception(err)
+    else:
+        logger.debug("{0:>3d} record(s) updated.".format(status))
     return status
