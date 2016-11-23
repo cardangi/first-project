@@ -29,7 +29,7 @@ def thatfunc(d):
 
 def thatotherfunc(b):
     if b:
-        return "debug"
+        return "default"
     return "info"
 
 
