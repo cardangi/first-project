@@ -145,6 +145,22 @@ class Test03(unittest.TestCase):
         self.assertListEqual(sorted(sorted(self.x, key=myfunc1), key=myfunc2), ["2015_00456", "2016_00001", "2016_00002", "2016_00003", "2016_00101"])
 
 
+# class Test04(unittest.TestCase):
+#
+#     def test_01first(self):
+#         try:
+#             # myimg = shared.Images(r"H:\201601\201701_00001.JPG")
+#             myimg = shared.Images(r"H:\201601\201601_00001.JPG")
+#             # myimg = shared.Images(r"C:\Users\Xavier\Documents\toto.txt")
+#         except shared.ExifError as e:
+#             print('{1} "{0}".'.format(e.file, e.error))
+#         except (FileNotFoundError, OSError) as e:
+#             print(e.args[0])
+#         else:
+#             print(myimg.originaldatetime)
+#             print(myimg)
+
+
 class TestRegex(unittest.TestCase):
     """
     Test regular expressions.
