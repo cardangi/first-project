@@ -7,6 +7,7 @@ import sqlite3
 import unittest
 import tempfile
 from shutil import copy
+from operator import eq, lt, gt
 from Applications import shared
 from logging.config import dictConfig
 from Applications.Database.DigitalAudioFiles.shared import parser, updatealbum
@@ -26,6 +27,27 @@ logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 # ========
 # Classes.
 # ========
+class Test01(unittest.TestCase):
+
+    def setUp(self):
+        self.ref = [1, 2, 3, 4, 5, 6, 7, 8]
+
+    def test_01first(self):
+        self.assertTrue(all([lt(x, 50) for x in self.ref]))
+
+    def test_02second(self):
+        self.assertFalse(all([gt(x, 50) for x in self.ref]))
+
+    def test_03third(self):
+        self.assertTrue(any([gt(x, 5) for x in self.ref]))
+
+    def test_04fourth(self):
+        self.assertTrue(any([eq(x, 5) for x in self.ref]))
+
+    def test_05fifth(self):
+        self.assertFalse(all([eq(x, 5) for x in self.ref]))
+
+
 class TestRegex(unittest.TestCase):
     """
     Test regular expressions.
