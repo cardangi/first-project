@@ -10,6 +10,7 @@ from shutil import copy
 from operator import eq, lt, gt
 from Applications import shared
 from logging.config import dictConfig
+from collections import MutableSequence
 from Applications.Database.DigitalAudioFiles.shared import parser, updatealbum
 from Applications.AudioCD.shared import DefaultCDTrack, RippedCD, canfilebeprocessed, digitalaudiobase, rippinglog
 
@@ -46,6 +47,67 @@ class Test01(unittest.TestCase):
 
     def test_05fifth(self):
         self.assertFalse(all([eq(x, 5) for x in self.ref]))
+
+
+class Test02(unittest.TestCase):
+
+    def setUp(self):
+
+        class MyClass(MutableSequence):
+
+            def __init__(self, seq):
+                self._index = 0
+                self._seq = sorted(sorted(sorted(seq, key=self.f1), key=self.f2), key=self.f3)
+
+            def __getitem__(self, item):
+                return self._seq[item]
+
+            def __setitem__(self, key, value):
+                self._seq[key] = value
+
+            def __delitem__(self, key):
+                del self._seq[key]
+
+            def __len__(self):
+                return len(self._seq)
+
+            def __iter__(self):
+                for item in self._seq:
+                    yield item[2:6]
+
+            def __call__(self):
+                self._index += 1
+                return self._seq[self._index - 1][2:6]
+
+            @property
+            def indexes(self):
+                return self._seq
+
+            def insert(self, index, value):
+                self._seq.insert(index, value)
+
+            @staticmethod
+            def f1(s):
+                return int(s.split(".")[0])
+
+            @staticmethod
+            def f2(s):
+                return int(s.split(".")[2])
+
+            @staticmethod
+            def f3(s):
+                return int(s.split(".")[1])
+
+        self.x = MyClass(["2.20160125.13", "2.20160201.13", "2.20160120.13", "1.20160625.13", "2.20160422.13", "1.20160422.13", "2.20160422.15", "2.19841102.13", "2.19990822.13", "2.20021014.13", "2.20000823.13", "2.20170101.13"])
+
+    def test_01first(self):
+        self.assertListEqual(self.x.indexes, ["2.19841102.13", "2.19990822.13", "2.20000823.13", "2.20021014.13", "2.20160120.13", "2.20160125.13", "2.20160201.13", "1.20160422.13", "2.20160422.13", "2.20160422.15", "1.20160625.13", "2.20170101.13"])
+
+    def test_02second(self):
+        self.assertListEqual(list(self.x), ["1984", "1999", "2000", "2002", "2016", "2016", "2016", "2016", "2016", "2016", "2016", "2017"])
+
+    def test_03third(self):
+        self.assertListEqual(list(iter(self.x, "2016")), ["1984", "1999", "2000", "2002"])
 
 
 class TestRegex(unittest.TestCase):
