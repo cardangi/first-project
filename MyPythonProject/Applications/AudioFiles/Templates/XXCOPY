@@ -1,1 +1,0 @@
-XXCOPY "{{ src }}" "{{ dst }}" /I /oA:"{{ log }}"

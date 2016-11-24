@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
 import json
-import yaml
 import logging
 import sqlite3
 import unittest
 import tempfile
 from shutil import copy
-from operator import eq, lt, gt
+from functools import partial
 from Applications import shared
-from logging.config import dictConfig
+from operator import lt, gt, eq
 from collections import MutableSequence
 from Applications.Database.DigitalAudioFiles.shared import parser, updatealbum
 from Applications.AudioCD.shared import DefaultCDTrack, RippedCD, canfilebeprocessed, digitalaudiobase, rippinglog
@@ -20,9 +19,7 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Logging.
 # ========
-with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding=shared.UTF8) as fp:
-    dictConfig(yaml.load(fp))
-logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
+logger = logging.getLogger(__name__)
 
 
 # ========
@@ -53,7 +50,7 @@ class Test02(unittest.TestCase):
 
     def setUp(self):
 
-        class MyClass(MutableSequence):
+        class ThatClass(MutableSequence):
 
             def __init__(self, seq):
                 self._index = 0
@@ -75,9 +72,12 @@ class Test02(unittest.TestCase):
                 for item in self._seq:
                     yield item[2:6]
 
-            def __call__(self):
+            def __call__(self, arg):
                 self._index += 1
-                return self._seq[self._index - 1][2:6]
+                try:
+                    return self._seq[self._index - 1][2:6]
+                except IndexError:
+                    return arg
 
             @property
             def indexes(self):
@@ -88,33 +88,67 @@ class Test02(unittest.TestCase):
 
             @staticmethod
             def f1(s):
-                return int(s.split(".")[0])
+                return int(s.split(".")[2])
 
             @staticmethod
             def f2(s):
-                return int(s.split(".")[2])
+                return int(s.split(".")[0])
 
             @staticmethod
             def f3(s):
                 return int(s.split(".")[1])
 
-        self.x = MyClass(["2.20160125.13", "2.20160201.13", "2.20160120.13", "1.20160625.13", "2.20160422.13", "1.20160422.13", "2.20160422.15", "2.19841102.13", "2.19990822.13", "2.20021014.13", "2.20000823.13", "2.20170101.13"])
+        self.x = ThatClass(["2.20160125.13", "2.20160201.13", "2.20160120.13", "1.20160625.13", "2.20160422.13", "1.20160422.13", "2.20160422.15", "2.19841102.13", "2.19990822.13", "2.20021014.13", "2.20000823.13",
+                            "2.20170101.13", "1.20160422.02"])
 
     def test_01first(self):
-        self.assertListEqual(self.x.indexes, ["2.19841102.13", "2.19990822.13", "2.20000823.13", "2.20021014.13", "2.20160120.13", "2.20160125.13", "2.20160201.13", "1.20160422.13", "2.20160422.13", "2.20160422.15", "1.20160625.13", "2.20170101.13"])
+        self.assertListEqual(self.x.indexes, ["2.19841102.13", "2.19990822.13", "2.20000823.13", "2.20021014.13", "2.20160120.13", "2.20160125.13", "2.20160201.13", "1.20160422.02", "1.20160422.13",
+                                              "2.20160422.13", "2.20160422.15", "1.20160625.13", "2.20170101.13"])
 
     def test_02second(self):
-        self.assertListEqual(list(self.x), ["1984", "1999", "2000", "2002", "2016", "2016", "2016", "2016", "2016", "2016", "2016", "2017"])
+        self.assertListEqual(list(self.x), ["1984", "1999", "2000", "2002", "2016", "2016", "2016", "2016", "2016", "2016", "2016", "2016", "2017"])
 
     def test_03third(self):
-        self.assertListEqual(list(iter(self.x, "2016")), ["1984", "1999", "2000", "2002"])
+        sentinel = "2016"
+        self.assertListEqual(list(iter(partial(self.x, sentinel), sentinel)), ["1984", "1999", "2000", "2002"])
+
+    def test_04fourth(self):
+        sentinel = "2018"
+        self.assertListEqual(list(iter(partial(self.x, sentinel), sentinel)), ["1984", "1999", "2000", "2002", "2016", "2016", "2016", "2016", "2016", "2016", "2016", "2016", "2017"])
+
+    def test_05fifth(self):
+        sentinel = "2017"
+        self.assertListEqual(sorted(set(iter(partial(self.x, sentinel), sentinel))), ["1984", "1999", "2000", "2002", "2016"])
+
+
+class Test03(unittest.TestCase):
+
+    def setUp(self):
+        self.x = ["2016_00001", "2016_00002", "2016_00003", "2016_00101", "2015_00456"]
+
+    def test_01first(self):
+        self.assertEqual(int(max(self.x).split("_")[1]), 101)
+
+    def test_02second(self):
+        self.assertEqual(int(max([i.split("_")[1] for i in self.x])), 456)
+
+    def test_03third(self):
+        def myfunc1(s):
+            return int(s.split("_")[1])
+        self.assertListEqual(sorted(self.x, key=myfunc1), ["2016_00001", "2016_00002", "2016_00003", "2016_00101", "2015_00456"])
+
+    def test_04fourth(self):
+        def myfunc1(s):
+            return int(s.split("_")[1])
+        def myfunc2(s):
+            return int(s.split("_")[0])
+        self.assertListEqual(sorted(sorted(self.x, key=myfunc1), key=myfunc2), ["2015_00456", "2016_00001", "2016_00002", "2016_00003", "2016_00101"])
 
 
 class TestRegex(unittest.TestCase):
     """
     Test regular expressions.
     """
-
     def test_01first(self):
         self.assertRegex("1.19840000.1.13", r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.13$)1\.(?:{0})0000\.\d\.13$".format(shared.DFTYEARREGEX))
 
@@ -582,19 +616,3 @@ class TestUpdateTables(unittest.TestCase):
                 raise
             finally:
                 conn.close()
-
-
-# def testsuite():
-#     suite = unittest.TestSuite()
-#     # suite.addTests([TestRegex(), TestEnumerateTuplesList(), TestEnumerateSortedListContent(), TestCanFileBeProcessed(), TestDefaultCDTrack()])
-#     suite.addTest(TestRegex("test_01first"))
-#     return suite
-#
-#
-# if __name__ == "__main__":
-#     print("toto")
-#     suite = unittest.TestSuite(TestRegex())
-#     # suite.addTests([TestRegex(), TestEnumerateTuplesList(), TestEnumerateSortedListContent(), TestCanFileBeProcessed(), TestDefaultCDTrack()])
-#     # suite.addTest(unittest.makeSuite(TestRegex))
-#     runner = unittest.TextTestRunner(verbosity=2)
-#     runner.run(suite)
