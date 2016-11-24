@@ -1,4 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
+from Applications.shared import rjustify, DFTENCODING
 from jinja2 import Environment, FileSystemLoader
 from collections import namedtuple
 from subprocess import run
@@ -6,7 +7,6 @@ import json
 import sys
 import os
 import re
-from .. import shared
 
 __author__ = 'Xavier ROSSET'
 
@@ -40,7 +40,7 @@ def rtabulate(s, l=COLUMN, tab=4):
 # ===================
 # Jinja2 environment.
 # ===================
-environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "Tasks", "Templates"), encoding=shared.DFTENCODING),
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "Tasks", "Templates"), encoding=DFTENCODING),
                           trim_blocks=True,
                           lstrip_blocks=True,
                           keep_trailing_newline=True)
@@ -50,7 +50,7 @@ environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvar
 # Jinja2 custom filters.
 # ======================
 environment.filters["rtabulate"] = rtabulate
-environment.filters["rjustify"] = shared.rjustify
+environment.filters["rjustify"] = rjustify
 
 
 # ================
