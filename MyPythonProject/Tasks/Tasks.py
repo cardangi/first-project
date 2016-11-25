@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 from Applications.shared import rjustify, DFTENCODING
 from jinja2 import Environment, FileSystemLoader
 from collections import namedtuple
@@ -68,7 +68,7 @@ rex1 = re.compile(r"^\d\d?$")
 # ================
 # Initializations.
 # ================
-choice, returncode, Task = 99, 100, namedtuple("Task", ["title", "number", "length"])
+choice, returncode, Task = 99, 100, namedtuple("Task", "title number length")
 
 
 # ===============
@@ -78,8 +78,8 @@ choice, returncode, Task = 99, 100, namedtuple("Task", ["title", "number", "leng
 # 1. Load tasks, numbers and return codes.
 with open(TASKS) as fp:
     data = json.load(fp)
-    tasks = [Task(title, str(number), len(title) + SPACES) for title, number, code in [tuple(item) for item in data]]
-    codes = dict([(str(number), code) for title, number, code in [tuple(item) for item in data]])
+    tasks = [Task(title, str(number), len(title) + SPACES) for title, number, code in data]
+    codes = dict([(str(number), code) for title, number, code in data])
 
 # 2. Choose task.
 if all([tasks, codes]):
