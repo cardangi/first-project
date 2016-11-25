@@ -231,11 +231,13 @@ def insertfromfile(fil, db=DATABASE):
 def select(db=DATABASE):
     conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = sqlite3.Row
+    logger = logging.getLogger("{0}.select".format(__name__))
     for arow in conn.execute("SELECT a.rowid, a.albumid, artist, year, album, discs, genre, live, bootleg, incollection, language, upc, encodingyear, a.created, origyear, b.discid, b.tracks, trackid, title "
                              "FROM albums a "
                              "JOIN discs b ON a.albumid=b.albumid "
                              "JOIN tracks c ON a.albumid=c.albumid AND b.discid=c.discid "
                              "ORDER BY a.albumid, b.discid, c.trackid"):
+            # logger.debug(tuple(arow))
             yield tuple(arow)
 
 
