@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 from jinja2 import Environment, FileSystemLoader
 
 __author__ = 'Xavier ROSSET'
