@@ -22,14 +22,13 @@ REM ===============
 REM Main algorithm.
 REM ===============
 COLOR 3F
-PUSHD %_PYTHONPROJECT%
 
 
 REM -------------
 REM Display menu.
 REM -------------
 :MENU
-python -m Applications.Tasks.Tasks
+python %_PYTHONPROJECT%\Tasks\Tasks.py
 
 
 REM ----------
@@ -65,17 +64,17 @@ REM Test function "Applications\AudioFiles\Testing\test_formatindexes.py".
 REM ----------------------------------------------------------------------
 IF ERRORLEVEL 31 (
     CLS
-    python -m Applications.AudioFiles.Testing.test_formatindexes
-    PAUSE
+    REM python -m Applications.AudioFiles.Testing.test_formatindexes
+    REM PAUSE
     GOTO MENU
 )
 
 
 REM -----------------------------
-REM RoppingLog table maintenance.
+REM RippingLog table maintenance.
 REM -----------------------------
 IF ERRORLEVEL 30 (
-    python G:\Computing\MyPythonProject\Database`RippingLog`dbRippingLog`L.py
+    REM python G:\Computing\MyPythonProject\Database`RippingLog`dbRippingLog`L.py
     GOTO MENU
 )
 
@@ -85,8 +84,8 @@ REM Test function "Applications\CDRipper\test_canfilebeprocessed.py".
 REM -----------------------------------------------------------------
 IF ERRORLEVEL 29 (
     CLS
-    python -m Applications.CDRipper.test_canfilebeprocessed
-    PAUSE
+    REM python -m Applications.CDRipper.test_canfilebeprocessed
+    REM PAUSE
     GOTO MENU
 )
 
@@ -95,7 +94,7 @@ REM ----------------------------------------
 REM Springsteen 200* bootlegs series backup.
 REM ----------------------------------------
 IF ERRORLEVEL 28 (
-    python Backups`Areca`L.py music --check --debug --target 1222562470
+    REM python Backups`Areca`L.py music --check --debug --target 1222562470
     GOTO MENU
 )
 
@@ -104,7 +103,7 @@ REM ----------------------------------------
 REM Springsteen 2009 bootlegs series backup.
 REM ----------------------------------------
 IF ERRORLEVEL 27 (
-    python Backups`Areca`L.py music --check --debug --target 1068554868
+    REM python Backups`Areca`L.py music --check --debug --target 1068554868
     GOTO MENU
 )
 
@@ -113,7 +112,7 @@ REM ----------------------------------------
 REM Springsteen 201* bootlegs series backup.
 REM ----------------------------------------
 IF ERRORLEVEL 26 (
-    python Backups`Areca`L.py music --check --debug --target 1306312508
+    REM python Backups`Areca`L.py music --check --debug --target 1306312508
     GOTO MENU
 )
 
@@ -122,7 +121,7 @@ REM ----------------------------------------
 REM Springsteen 2016 bootlegs series backup.
 REM ----------------------------------------
 IF ERRORLEVEL 25 (
-    python Backups`Areca`L.py music --check --debug --target 1066663185
+    REM python Backups`Areca`L.py music --check --debug --target 1066663185
     GOTO MENU
 )
 
@@ -131,8 +130,8 @@ REM -------------------
 REM Convert Unix epoch.
 REM -------------------
 IF ERRORLEVEL 24 (
-    python Applications`convertUnixEpoch`L.py
-    IF ERRORLEVEL 11 GOTO MENU
+    REM python Applications`convertUnixEpoch`L.py
+    REM IF ERRORLEVEL 11 GOTO MENU
     GOTO MENU
 )
 
@@ -141,7 +140,7 @@ REM -------------------------
 REM Get Unix epoch from date.
 REM -------------------------
 IF ERRORLEVEL 23 (
-    python Applications`getUnixEpoch`L.py
+    REM python Applications`getUnixEpoch`L.py
     GOTO MENU
 )
 
@@ -150,7 +149,7 @@ REM ----------------------
 REM Timestamp audio files.
 REM ----------------------
 IF ERRORLEVEL 22 (
-    python AudioFiles`Taggingtime`L.py
+    REM python AudioFiles`Taggingtime`L.py
     GOTO MENU
 )
 
@@ -159,7 +158,7 @@ REM -------------------
 REM Rename audio files.
 REM -------------------
 IF ERRORLEVEL 21 (
-    python AudioFiles`renameFiles`L.py
+    REM python AudioFiles`renameFiles`L.py
     GOTO MENU
 )
 
@@ -168,7 +167,7 @@ REM ----------------------------------
 REM Copy audio files from audio drive.
 REM ----------------------------------
 IF ERRORLEVEL 20 (
-    REM CALL "G:\Computing\802_copyAudioFiles.cmd"
+    REM REM CALL "G:\Computing\802_copyAudioFiles.cmd"
     GOTO MENU
 )
 
@@ -177,7 +176,7 @@ REM ----------------------------------
 REM Import audio files to audio drive.
 REM ----------------------------------
 IF ERRORLEVEL 19 (
-    CALL "G:\Computing\801_importAudioFiles.cmd"
+    REM CALL "G:\Computing\801_importAudioFiles.cmd"
     GOTO MENU
 )
 
@@ -186,7 +185,7 @@ REM ---------------------------
 REM Display geometric sequence.
 REM ---------------------------
 IF ERRORLEVEL 18 (
-    python Math`Sequences`L.py G
+    REM python Math`Sequences`L.py G
     GOTO MENU
 )
 
@@ -195,7 +194,7 @@ REM ----------------------------
 REM Display arithmetic sequence.
 REM ---------------------------
 IF ERRORLEVEL 17 (
-    python Math`Sequences`L.py A
+    REM python Math`Sequences`L.py A
     GOTO MENU
 )
 
@@ -204,7 +203,7 @@ REM ---------------------------
 REM RippingLog HTML fancy view.
 REM ---------------------------
 IF ERRORLEVEL 16 (
-    python G:\Computing\MyPythonProject\Database`HTMLView`L.py RippingLog
+    python %_PYTHONPROJECT%\AudioCD\RippedCD`View1.py
     GOTO MENU
 )
 
@@ -213,16 +212,16 @@ REM ---------------------
 REM RippingLog JSON view.
 REM ---------------------
 IF ERRORLEVEL 15 (
-    python -m Applications.Database.RippingLog.View2
+    python %_PYTHONPROJECT%\AudioCD\RippedCD`View2.py
     GOTO MENU
 )
 
 
-REM ------------------------------
-REM Digital Audio HTML fancy view.
-REM ------------------------------
+REM ------------------------------------
+REM Digital audio files HTML fancy view.
+REM ------------------------------------
 IF ERRORLEVEL 14 (
-    python -m Applications.Database.DigitalAudio.View1
+    python %_PYTHONPROJECT%\AudioCD\DigitalAudioFiles`View1.py
     IF NOT ERRORLEVEL 1 (
         IF EXIST "%_xmldigitalaudiobase%" (
             java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
@@ -233,11 +232,11 @@ IF ERRORLEVEL 14 (
 )
 
 
-REM ---------------------------------
-REM "Digital Audio" HTML simple view.
-REM ---------------------------------
+REM -------------------------------------
+REM Digital audio files HTML simple view.
+REM -------------------------------------
 IF ERRORLEVEL 13 (
-    python G:\Computing\MyPythonProject\Database`HTMLView`L.py DigitalAudio
+    python %_PYTHONPROJECT%\AudioCD\DigitalAudioFiles`View2.py
     GOTO MENU
 )
 
@@ -246,7 +245,7 @@ REM --------------------------------
 REM "LastRunDates" HTML simple view.
 REM --------------------------------
 IF ERRORLEVEL 12 (
-    python G:\Computing\MyPythonProject\Database`HTMLView`L.py LastRunDates
+    REM python G:\Computing\MyPythonProject\Database`HTMLView`L.py LastRunDates
     GOTO MENU
 )
 
@@ -255,7 +254,7 @@ REM --------------------------
 REM "Backup" HTML simple view.
 REM --------------------------
 IF ERRORLEVEL 11 (
-    python G:\Computing\MyPythonProject\Database`HTMLView`L.py Backups
+    REM python G:\Computing\MyPythonProject\Database`HTMLView`L.py Backups
     GOTO MENU
 )
 
@@ -284,10 +283,10 @@ REM -----------------
 IF ERRORLEVEL 8 (
 
     REM Run Backup.
-    python Backups`Areca`L.py documents --check --debug --target 1282856126
+    REM python Backups`Areca`L.py documents --check --debug --target 1282856126
 
     REM Update last run date.
-    python -m Applications.Database.LastRunDates.dbLastRunDates update 123456797
+    REM python -m Applications.Database.LastRunDates.dbLastRunDates update 123456797
 
     GOTO MENU
 )
@@ -297,7 +296,7 @@ REM --------------------------------------
 REM Pearl Jam 2011 bootlegs series backup.
 REM --------------------------------------
 IF ERRORLEVEL 7 (
-    python Backups`Areca`L.py music --check --debug --target 1484552884
+    REM python Backups`Areca`L.py music --check --debug --target 1484552884
     GOTO MENU
 )
 
@@ -306,7 +305,7 @@ REM --------------------------------------
 REM Pearl Jam 2010 bootlegs series backup.
 REM --------------------------------------
 IF ERRORLEVEL 6 (
-    python Backups`Areca`L.py music --check --debug --target 445045058
+    REM python Backups`Areca`L.py music --check --debug --target 445045058
     GOTO MENU
 )
 
@@ -315,7 +314,7 @@ REM --------------------------------------
 REM Pearl Jam 2006 bootlegs series backup.
 REM --------------------------------------
 IF ERRORLEVEL 5 (
-    python Backups`Areca`L.py music --check --debug --target 1404261019
+    REM python Backups`Areca`L.py music --check --debug --target 1404261019
     GOTO MENU
 )
 
@@ -324,7 +323,7 @@ REM --------------------------------------
 REM Pearl Jam 2003 bootlegs series backup.
 REM --------------------------------------
 IF ERRORLEVEL 4 (
-    python Backups`Areca`L.py music --check --debug --target 1557918403
+    REM python Backups`Areca`L.py music --check --debug --target 1557918403
     GOTO MENU
 )
 
@@ -333,7 +332,7 @@ REM --------------------------------------
 REM Pearl Jam 2000 bootlegs series backup.
 REM --------------------------------------
 IF ERRORLEVEL 3 (
-    python Backups`Areca`L.py music --check --debug --target 1460302155
+    REM python Backups`Areca`L.py music --check --debug --target 1460302155
     GOTO MENU
 )
 
@@ -342,7 +341,7 @@ REM --------------------------
 REM Pearl Jam bootlegs backup.
 REM --------------------------
 IF ERRORLEVEL 2 (
-    python Backups`Areca`L.py music --check --debug --target 1460302155 1557918403 1404261019 445045058 1484552884
+    REM python Backups`Areca`L.py music --check --debug --target 1460302155 1557918403 1404261019 445045058 1484552884
     GOTO MENU
 )
 
@@ -351,7 +350,7 @@ REM ---------------------------
 REM Default audio files backup.
 REM ---------------------------
 IF ERRORLEVEL 1 (
-    python Backups`Areca`L.py music --check --debug --target 854796030 1674209532 1196865155 1535780732 204959095
+    REM python Backups`Areca`L.py music --check --debug --target 854796030 1674209532 1196865155 1535780732 204959095
     GOTO MENU
 )
 
@@ -360,6 +359,5 @@ REM ==========
 REM Exit menu.
 REM ==========
 :EXIT
-POPD
 CLS
 EXIT /B 0
