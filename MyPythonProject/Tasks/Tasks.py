@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from Applications.shared import rjustify, DFTENCODING
 from jinja2 import Environment, FileSystemLoader
+from contextlib import contextmanager
 from collections import namedtuple
 from subprocess import run
 import json
@@ -22,10 +23,10 @@ SPACES = 5
 # ==========
 # Functions.
 # ==========
-def pprint(t):
-    run("CLS", shell=True)
-    if t:
-        print(t)
+@contextmanager
+def clearscreen():
+    subprocess.run("CLS", shell=True)
+    yield
 
 
 def rtabulate(s, l=COLUMN, tab=4):
@@ -85,7 +86,8 @@ with open(TASKS) as fp:
 if all([tasks, codes]):
     o = template.render(tasks=tasks, column=COLUMN)
     while True:
-        pprint(t=o)
+        with clearscreen():
+            print(t=o)
         choice = input("\t\tPlease enter task: ".expandtabs(4))
         if choice:
             if not rex1.match(choice):
