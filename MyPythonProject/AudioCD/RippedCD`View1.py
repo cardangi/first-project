@@ -26,7 +26,7 @@ locale.setlocale(locale.LC_ALL, "")
 # ===================
 # Jinja2 environment.
 # ===================
-environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Templates")), trim_blocks=True, lstrip_blocks=True)
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "RippedCD")), trim_blocks=True, lstrip_blocks=True)
 
 
 # ================

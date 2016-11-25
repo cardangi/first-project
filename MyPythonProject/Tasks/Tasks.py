@@ -15,7 +15,7 @@ __author__ = 'Xavier ROSSET'
 # ==========
 # Constants.
 # ==========
-TASKS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "Tasks", "Tasks.json")
+TASKS = os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Tasks", "Tasks.json")
 COLUMN = 56
 SPACES = 5
 
@@ -25,7 +25,7 @@ SPACES = 5
 # ==========
 @contextmanager
 def clearscreen():
-    subprocess.run("CLS", shell=True)
+    run("CLS", shell=True)
     yield
 
 
@@ -41,7 +41,7 @@ def rtabulate(s, l=COLUMN, tab=4):
 # ===================
 # Jinja2 environment.
 # ===================
-environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "Tasks", "Templates"), encoding=DFTENCODING),
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Tasks", "Templates"), encoding=DFTENCODING),
                           trim_blocks=True,
                           lstrip_blocks=True,
                           keep_trailing_newline=True)
@@ -82,7 +82,7 @@ with open(TASKS) as fp:
     tasks = [Task(title, str(number), len(title) + SPACES) for title, number, code in data]
     codes = dict([(str(number), code) for title, number, code in data])
 
-# 2. Choose task.
+# 2. Display tasks launcher.
 if all([tasks, codes]):
     o = template.render(tasks=tasks, column=COLUMN)
     while True:

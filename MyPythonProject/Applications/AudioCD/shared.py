@@ -503,8 +503,8 @@ class SpringsteenBootlegCDTrack(BootlegCDTrack):
 
 class RippedCD(ContextDecorator):
 
-    environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "Templates")), trim_blocks=True, lstrip_blocks=True)
-    outputtags = environment.get_template("AudioCDOutputTags")
+    environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD")), trim_blocks=True, lstrip_blocks=True)
+    outputtags = environment.get_template("Tags")
     logger = logging.getLogger("{0}.RippedCD".format(__name__))
 
     def __init__(self, ripprofile, tagsfile, test=True):

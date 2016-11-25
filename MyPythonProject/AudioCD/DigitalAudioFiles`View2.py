@@ -40,17 +40,16 @@ HTML = os.path.join(os.path.expandvars("%_COMPUTING%"), "digitalaudiobase", "raw
 # =====================
 # Jinja2 environment(s).
 # =====================
-environment1 = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "Database", "DigitalAudio", "Templates")), trim_blocks=True, lstrip_blocks=True)
-environment2 = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "Applications", "Database", "Templates")), trim_blocks=True, lstrip_blocks=True)
+environment = Environment(loader=FileSystemLoader(os.path.join(os.path.expandvars("%_PYTHONPROJECT%"), "AudioCD", "DigitalAudioFiles")), trim_blocks=True, lstrip_blocks=True)
 
 
 # ===================
 # Jinja2 template(s).
 # ===================
-content = environment1.get_template("Content")
-t3 = environment2.get_template("T3")
-t4 = environment2.get_template("T4")
-t5 = environment2.get_template("T5")
+content = environment.get_template("Content")
+t3 = environment.get_template("T3")
+t4 = environment.get_template("T4")
+t5 = environment.get_template("T5")
 
 
 # ==========
