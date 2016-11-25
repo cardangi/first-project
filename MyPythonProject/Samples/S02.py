@@ -4,6 +4,7 @@ import os
 
 __author__ = 'Xavier ROSSET'
 
+
 # Fonction décorée par la fonction "contextmanager".
 # La clause try... except... finally est utile pour interceptée les exceptions levées.
 # Le texte "After" n'est pas restitué si une exception est levée mais n'est pas interceptée !
@@ -14,7 +15,7 @@ def firstfunction():
     try:
         yield
     except ValueError:
-        print("Some error occured.")
+        print("Some error occurred.")
     finally:
         print("After")
 
@@ -75,7 +76,7 @@ if __name__ == "__main__":
     print("# 1. ----- #")
     with firstfunction():
         thirdfunction("Some text.")
-        raise ValueError("Some error occured.")
+        raise ValueError("Some error occurred.")
 
     print("# 2. ----- #")
     print(os.getcwd())
@@ -96,4 +97,4 @@ if __name__ == "__main__":
     print("# 6. ----- #")
     with FirstClass():
         thirdfunction("Some text 2")
-        raise ValueError("Some error occured.")
+        raise ValueError("Some error occurred.")
