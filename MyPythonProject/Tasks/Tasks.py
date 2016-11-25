@@ -87,7 +87,7 @@ if all([tasks, codes]):
     o = template.render(tasks=tasks, column=COLUMN)
     while True:
         with clearscreen():
-            print(t=o)
+            print(o)
         choice = input("\t\tPlease enter task: ".expandtabs(4))
         if choice:
             if not rex1.match(choice):
