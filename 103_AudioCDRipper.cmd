@@ -20,7 +20,6 @@ REM ==================
 REM Initialisations 2.
 REM ==================
 SET _drives=%TEMP%\serial.txt
-SET _json=%TEMP%\arguments.json
 
 
 REM ==================================
@@ -47,5 +46,5 @@ REM ======================================================
 REM Ecrire les arguments de copie dans un un fichier JSON.
 REM ======================================================
 PUSHD %_PYTHONPROJECT%
-python AudioCD\DigitalAudioFiles`CopyArguments.py "%~1" "%_drive%:" -o "%_json%"
+python AudioCD\DigitalAudioFiles`CopyArguments.py "%~1" "%_drive%:"
 POPD

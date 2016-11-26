@@ -30,7 +30,7 @@ def validdrive(d):
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("file", type=argparse.FileType(mode="rb", encoding="UTF_8"))
+parser.add_argument("file", type=argparse.FileType(mode="rb"))
 parser.add_argument("drive", type=validdrive)
 parser.add_argument("-o", "--out", dest="outjsonfile", default=os.path.join(os.path.expandvars("%TEMP%"), "arguments.json"))
 
