@@ -12,7 +12,7 @@ from operator import itemgetter
 from Applications import shared
 from logging.config import dictConfig
 from jinja2 import Environment, FileSystemLoader
-from Applications.Database.RippedCD.shared import select
+from Applications.Database.AudioCD.shared import select
 
 __author__ = 'Xavier ROSSET'
 

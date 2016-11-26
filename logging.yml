@@ -22,6 +22,10 @@ loggers:
     level: WARNING
     handlers: [file]
     propagate: no
+  audiocd:
+    level: DEBUG
+    handlers: [file]
+    propagate: no
 root:
   level: DEBUG
   handlers: [file]

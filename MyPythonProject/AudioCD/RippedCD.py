@@ -2,7 +2,7 @@
 import os
 import sys
 import argparse
-from Applications.Database.RippedCD.shared import insertfromfile
+from Applications.Database.AudioCD.shared import insertfromfile
 
 __author__ = 'Xavier ROSSET'
 

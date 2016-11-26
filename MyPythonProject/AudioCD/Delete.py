@@ -3,7 +3,7 @@ import os
 import re
 import sys
 import argparse
-from Applications.Database.RippedCD.shared import deletefromuid
+from Applications.Database.AudioCD.shared import deletefromuid
 
 __author__ = 'Xavier ROSSET'
 
