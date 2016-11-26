@@ -10,20 +10,12 @@ handlers:
     maxbytes: 614400
     backupcount: 6
 loggers:
-  default:
+  Default:
     level: DEBUG
     handlers: [file]
     propagate: no
-  info:
+  AudioCD:
     level: INFO
-    handlers: [file]
-    propagate: no
-  warning:
-    level: WARNING
-    handlers: [file]
-    propagate: no
-  audiocd:
-    level: DEBUG
     handlers: [file]
     propagate: no
 root:

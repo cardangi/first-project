@@ -45,7 +45,6 @@ args, arguments = [], parser.parse_args()
 # ========
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding=shared.UTF8) as fp:
     dictConfig(yaml.load(fp))
-logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 
 
 # ===============
