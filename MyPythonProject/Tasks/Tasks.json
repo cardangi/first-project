@@ -28,9 +28,9 @@
     ["Get Unix epoch", 32, 23],
     ["Convert Unix epoch", 33, 24],
     ["Exit", 99, 99],
-    ["-canfilebeprocessed- function", 15, 29],
+    ["Regular expressions", 15, 29],
     ["Update RippingLog", 25, 30],
-    ["-formatindexes- function", 16, 31],
-    ["-getfilefromindex- function", 17, 32],
-    ["-grabdiscnumber- function", 18, 33]
+    ["Parser", 16, 31],
+    ["Default Audio CD rip", 17, 32],
+    ["Sort lists", 18, 33]
 ]

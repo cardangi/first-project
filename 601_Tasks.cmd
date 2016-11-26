@@ -37,35 +37,41 @@ REM ----------
 IF ERRORLEVEL 99 GOTO EXIT
 
 
-REM -----------------------------------------------------------------------
-REM Test function "Applications\AudioFiles\Testing\test_grabdiscnumber.py".
-REM -----------------------------------------------------------------------
+REM ------------------
+REM Sort lists tester.
+REM ------------------
 IF ERRORLEVEL 33 (
     CLS
-    REM python -m Applications.AudioFiles.Testing.test_grabdiscnumber
-    REM PAUSE
+    PUSHD %_PYTHONPROJECT%
+    python -m unittest -v Applications.Tests.module1.Test03
+    POPD
+    PAUSE
     GOTO MENU
 )
 
 
-REM -------------------------------------------------------------------------
-REM Test function "Applications\AudioFiles\Testing\test_getfilefromindex.py".
-REM ------------------------------------------------------------------------
+REM ----------------------------
+REM Default Audio CD rip tester.
+REM ----------------------------
 IF ERRORLEVEL 32 (
     CLS
-    REM python -m Applications.AudioFiles.Testing.test_getfilefromindex
-    REM PAUSE
+    PUSHD %_PYTHONPROJECT%
+    python -m unittest -v Applications.Tests.module1.Test01DefaultCDTrack Applications.Tests.module1.Test02DefaultCDTrack Applications.Tests.module1.Test03DefaultCDTrack Applications.Tests.module1.Test04DefaultCDTrack Applications.Tests.module1.Test05DefaultCDTrack
+    POPD
+    PAUSE
     GOTO MENU
 )
 
 
-REM ----------------------------------------------------------------------
-REM Test function "Applications\AudioFiles\Testing\test_formatindexes.py".
-REM ----------------------------------------------------------------------
+REM --------------
+REM Parser tester.
+REM --------------
 IF ERRORLEVEL 31 (
     CLS
-    REM python -m Applications.AudioFiles.Testing.test_formatindexes
-    REM PAUSE
+    PUSHD %_PYTHONPROJECT%
+    python -m unittest -v Applications.Tests.module2.TestParser
+    POPD
+    PAUSE
     GOTO MENU
 )
 
@@ -79,13 +85,15 @@ IF ERRORLEVEL 30 (
 )
 
 
-REM -----------------------------------------------------------------
-REM Test function "Applications\CDRipper\test_canfilebeprocessed.py".
-REM -----------------------------------------------------------------
+REM ---------------------------
+REM Regular expressions tester.
+REM ---------------------------
 IF ERRORLEVEL 29 (
     CLS
-    REM python -m Applications.CDRipper.test_canfilebeprocessed
-    REM PAUSE
+    PUSHD %_PYTHONPROJECT%
+    python -m unittest -v Applications.Tests.module1.TestRegex
+    POPD
+    PAUSE
     GOTO MENU
 )
 
