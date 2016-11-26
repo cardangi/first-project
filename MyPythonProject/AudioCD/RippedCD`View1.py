@@ -2,7 +2,6 @@
 import os
 import yaml
 import locale
-import logging
 import argparse
 from pytz import timezone
 from string import Template

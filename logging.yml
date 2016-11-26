@@ -31,6 +31,12 @@ loggers:
     handlers: [file]
     propagate: no
 #
+# Logger for backup Application.
+  Backup:
+    level: DEBUG
+    handlers: [file]
+    propagate: no
+#
 # Root logger.
 root:
   level: DEBUG

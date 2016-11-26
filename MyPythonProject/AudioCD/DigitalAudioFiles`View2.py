@@ -3,7 +3,6 @@ from jinja2 import Environment, FileSystemLoader
 from Applications.shared import WRITE, UTF8
 from logging.config import dictConfig
 import argparse
-import logging
 import sqlite3
 import locale
 import yaml
@@ -23,9 +22,6 @@ locale.setlocale(locale.LC_ALL, "")
 # ========
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
     dictConfig(yaml.load(fp))
-logger = logging.getLogger("info.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
-logger.debug(__file__)
-logger.info(__file__)
 
 
 # ==========

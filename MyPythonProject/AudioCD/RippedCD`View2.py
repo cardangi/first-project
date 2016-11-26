@@ -2,7 +2,6 @@
 import os
 import json
 import yaml
-import logging
 import argparse
 from operator import itemgetter
 from Applications import shared
