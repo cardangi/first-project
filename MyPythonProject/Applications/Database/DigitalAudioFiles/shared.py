@@ -150,9 +150,9 @@ parser_updatdsc.add_argument("uid", type=int, nargs="+")
 parser_updatdsc.add_argument("--field", help="Define here the field to update", action=DictArguments)
 
 # ----- Table "RIPPINGLOG".
-parser_updatdsc = subparsers.add_parser("rippinglog")
-parser_updatdsc.add_argument("uid", type=int, nargs="+")
-parser_updatdsc.add_argument("--field", help="Define here the field to update", action=DictArguments)
+parser_updatrip = subparsers.add_parser("rippinglog")
+parser_updatrip.add_argument("uid", type=int, nargs="+")
+parser_updatrip.add_argument("--field", help="Define here the field to update", action=DictArguments)
 
 
 # ==========

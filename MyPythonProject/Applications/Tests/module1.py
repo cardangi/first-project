@@ -579,18 +579,6 @@ class Test05DefaultCDTrack(unittest.TestCase):
         self.assertListEqual(self.first, self.second)
 
 
-class TestParser(unittest.TestCase):
-
-    def setUp(self):
-        self.arguments = parser.parse_args(["albums", "1", "2", "3", "4", "--album", "the album", "--year", "1987", "--genre", "Hard Rock", "--discs", "2"])
-
-    def test_01first(self):
-        self.assertDictEqual(self.arguments.args, {"album": "the album", "year": 1987, "genre": "Hard Rock", "discs": 2})
-
-    def test_02second(self):
-        self.assertListEqual(self.arguments.uid, [1, 2, 3, 4])
-
-
 class TestUpdateTables(unittest.TestCase):
 
     def setUp(self):
