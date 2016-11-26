@@ -11,7 +11,7 @@ handlers:
     backupcount: 6
 loggers:
 #
-# Default loggers.
+# Default logger.
   Default:
     level: DEBUG
     handlers: [file]
@@ -31,7 +31,7 @@ loggers:
     handlers: [file]
     propagate: no
 #
-# Roor logger.
+# Root logger.
 root:
   level: DEBUG
   handlers: [file]
