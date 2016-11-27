@@ -80,7 +80,7 @@ REM -----------------------------
 REM RippingLog table maintenance.
 REM -----------------------------
 IF ERRORLEVEL 30 (
-    REM python G:\Computing\MyPythonProject\Database`RippingLog`dbRippingLog`L.py
+    REM python %_PYTHONPROJECT%\Database`RippingLog`dbRippingLog`L.py
     GOTO MENU
 )
 
@@ -102,7 +102,7 @@ REM ----------------------------------------
 REM Springsteen 200* bootlegs series backup.
 REM ----------------------------------------
 IF ERRORLEVEL 28 (
-    REM python Backups`Areca`L.py music --check --debug --target 1222562470
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 1222562470
     GOTO MENU
 )
 
@@ -111,7 +111,7 @@ REM ----------------------------------------
 REM Springsteen 2009 bootlegs series backup.
 REM ----------------------------------------
 IF ERRORLEVEL 27 (
-    REM python Backups`Areca`L.py music --check --debug --target 1068554868
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 1068554868
     GOTO MENU
 )
 
@@ -120,7 +120,7 @@ REM ----------------------------------------
 REM Springsteen 201* bootlegs series backup.
 REM ----------------------------------------
 IF ERRORLEVEL 26 (
-    REM python Backups`Areca`L.py music --check --debug --target 1306312508
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 1306312508
     GOTO MENU
 )
 
@@ -129,7 +129,7 @@ REM ----------------------------------------
 REM Springsteen 2016 bootlegs series backup.
 REM ----------------------------------------
 IF ERRORLEVEL 25 (
-    REM python Backups`Areca`L.py music --check --debug --target 1066663185
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 1066663185
     GOTO MENU
 )
 
@@ -253,7 +253,7 @@ REM --------------------------------
 REM "LastRunDates" HTML simple view.
 REM --------------------------------
 IF ERRORLEVEL 12 (
-    REM python G:\Computing\MyPythonProject\Database`HTMLView`L.py LastRunDates
+    REM python %_PYTHONPROJECT%\Database`HTMLView`L.py LastRunDates
     GOTO MENU
 )
 
@@ -262,7 +262,7 @@ REM --------------------------
 REM "Backup" HTML simple view.
 REM --------------------------
 IF ERRORLEVEL 11 (
-    REM python G:\Computing\MyPythonProject\Database`HTMLView`L.py Backups
+    REM python %_PYTHONPROJECT%\Database`HTMLView`L.py Backups
     GOTO MENU
 )
 
@@ -271,7 +271,7 @@ REM ----------------------
 REM Backup python scripts.
 REM ----------------------
 IF ERRORLEVEL 10 (
-    CALL "G:\Computing\start.cmd" 6
+    REM CALL "G:\Computing\start.cmd" 6
     GOTO MENU
 )
 
@@ -280,7 +280,7 @@ REM --------------
 REM Backup videos.
 REM --------------
 IF ERRORLEVEL 9 (
-    CALL "G:\Computing\start.cmd" 12
+    REM CALL "G:\Computing\start.cmd" 12
     GOTO MENU
 )
 
@@ -291,7 +291,7 @@ REM -----------------
 IF ERRORLEVEL 8 (
 
     REM Run Backup.
-    REM python Backups`Areca`L.py documents --check --debug --target 1282856126
+    python G:\Computing\MyPythonProject\Areca\Areca.py -c documents 1282856126
 
     REM Update last run date.
     REM python -m Applications.Database.LastRunDates.dbLastRunDates update 123456797
@@ -304,7 +304,7 @@ REM --------------------------------------
 REM Pearl Jam 2011 bootlegs series backup.
 REM --------------------------------------
 IF ERRORLEVEL 7 (
-    REM python Backups`Areca`L.py music --check --debug --target 1484552884
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 1484552884
     GOTO MENU
 )
 
@@ -313,7 +313,7 @@ REM --------------------------------------
 REM Pearl Jam 2010 bootlegs series backup.
 REM --------------------------------------
 IF ERRORLEVEL 6 (
-    REM python Backups`Areca`L.py music --check --debug --target 445045058
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 445045058
     GOTO MENU
 )
 
@@ -322,7 +322,7 @@ REM --------------------------------------
 REM Pearl Jam 2006 bootlegs series backup.
 REM --------------------------------------
 IF ERRORLEVEL 5 (
-    REM python Backups`Areca`L.py music --check --debug --target 1404261019
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 1404261019
     GOTO MENU
 )
 
@@ -331,7 +331,7 @@ REM --------------------------------------
 REM Pearl Jam 2003 bootlegs series backup.
 REM --------------------------------------
 IF ERRORLEVEL 4 (
-    REM python Backups`Areca`L.py music --check --debug --target 1557918403
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 1557918403
     GOTO MENU
 )
 
@@ -340,7 +340,7 @@ REM --------------------------------------
 REM Pearl Jam 2000 bootlegs series backup.
 REM --------------------------------------
 IF ERRORLEVEL 3 (
-    REM python Backups`Areca`L.py music --check --debug --target 1460302155
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 1460302155
     GOTO MENU
 )
 
@@ -349,7 +349,7 @@ REM --------------------------
 REM Pearl Jam bootlegs backup.
 REM --------------------------
 IF ERRORLEVEL 2 (
-    REM python Backups`Areca`L.py music --check --debug --target 1460302155 1557918403 1404261019 445045058 1484552884
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 1460302155 1557918403 1404261019 445045058 1484552884
     GOTO MENU
 )
 
@@ -358,7 +358,7 @@ REM ---------------------------
 REM Default audio files backup.
 REM ---------------------------
 IF ERRORLEVEL 1 (
-    REM python Backups`Areca`L.py music --check --debug --target 854796030 1674209532 1196865155 1535780732 204959095
+    python %_PYTHONPROJECT%\Areca\Areca.py -c music 854796030 1674209532 1196865155 1535780732 204959095
     GOTO MENU
 )
 
