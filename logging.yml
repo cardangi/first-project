@@ -9,6 +9,7 @@ handlers:
     (): Applications.shared.customfilehandler
     maxbytes: 614400
     backupcount: 6
+    encoding: utf-8
 loggers:
 #
 # Default logger.
@@ -23,11 +24,11 @@ loggers:
     handlers: [file]
     propagate: no
   Applications.Database.AudioCD:
-    level: INFO
+    level: DEBUG
     handlers: [file]
     propagate: no
   Applications.AudioCD:
-    level: INFO
+    level: DEBUG
     handlers: [file]
     propagate: no
 #

@@ -3,6 +3,7 @@ from collections import MutableMapping, MutableSequence, namedtuple
 from jinja2 import Environment, FileSystemLoader
 from sortedcontainers import SortedDict
 from contextlib import ContextDecorator
+from mutagen.apev2 import APETextValue
 from operator import itemgetter
 from datetime import datetime
 import mutagen.monkeysaudio
@@ -636,16 +637,16 @@ class AudioFilesCollection(MutableSequence):
 
     def __call__(self, *psargs, **kwargs):
         l = []
-        for num, fil, tags in [(a, b, c) for a, (b, c) in enumerate(self, 1)]:
-            album = "{0}.{1} - {2}".format(tags["albumsort"][0][2:6], tags["albumsort"][0][11], tags["album"][0])
+        for num, fil, audio, metadata in [(a, b, c, d) for a, (b, c, d) in enumerate(self, 1)]:
+            album = "{0}.{1} - {2}".format(metadata["albumsort"][2:6], metadata["albumsort"][11], metadata["album"])
             self.logger.debug('{0:>3d}. "{1}".'.format(num, fil))
             self.logger.debug('\t\tNew album: "{0}".'.format(album).expandtabs(TABSIZE))
             if not kwargs["test"]:
                 try:
-                    tags["album"] = album
-                    tags.save()
+                    audio["album"] = album
+                    audio.save()
                 except mutagen.MutagenError as err:
-                    self.logger.debug(err)
+                    self.logger.exception(err)
                 else:
                     l.append(fil)
         if l:
@@ -667,23 +668,24 @@ class FLACFilesCollection(AudioFilesCollection):
                 audio = mutagen.flac.FLAC(fil)
             except mutagen.MutagenError:
                 continue
+            metadata = dict([(k.lower(), v) for k, v in audio.tags])
 
             # Contrôler que les tags obligatoires sont présents.
-            if any([tag not in audio for tag in self.tags]):
+            if any([tag not in metadata for tag in self.tags]):
                 continue
 
             # Ne retenir que les fichiers dont le tag "albumsort" est cohérent.
-            match = self.rex2.match(audio["albumsort"][0])
+            match = self.rex2.match(metadata["albumsort"])
             if not match:
                 continue
 
             # Ne retenir que les fichiers dont le tag "album" n'a pas été déjà modifié.
-            match = self.rex1.match(audio["album"][0])
+            match = self.rex1.match(metadata["album"])
             if match:
                 continue
 
             # Retenir le fichier.
-            self._seq.append((fil, audio))
+            self._seq.append((fil, audio, metadata))
 
 
 class MonkeyFilesCollection(AudioFilesCollection):
@@ -698,23 +700,24 @@ class MonkeyFilesCollection(AudioFilesCollection):
                 audio = mutagen.monkeysaudio.MonkeysAudio(fil)
             except mutagen.MutagenError:
                 continue
+            metadata = {k.lower(): str(v) for k, v in fil.tags.items() if isinstance(v, APETextValue)}
 
             # Contrôler que les tags obligatoires sont présents.
-            if any([tag not in audio for tag in self.tags]):
+            if any([tag not in metadata for tag in self.tags]):
                 continue
 
             # Ne retenir que les fichiers dont le tag "albumsort" est cohérent.
-            match = self.rex2.match(audio["albumsort"][0])
+            match = self.rex2.match(metadata["albumsort"])
             if not match:
                 continue
 
             # Ne retenir que les fichiers dont le tag "album" n'a pas été déjà modifié.
-            match = self.rex1.match(audio["album"][0])
+            match = self.rex1.match(metadata["album"])
             if match:
                 continue
 
             # Retenir le fichier.
-            self._seq.append((fil, audio))
+            self._seq.append((fil, audio, metadata))
 
 
 # ==========
@@ -836,6 +839,45 @@ def digitalaudiobase(track, fil=os.path.join(os.path.expandvars("%TEMP%"), "digi
             break
     with open(fil, mode=shared.WRITE, encoding="UTF_8") as fw:
         json.dump(sorted(obj, key=itemgetter(0)), fw, indent=4, sort_keys=True)
+
+
+def getmetadata(audiofil):
+
+    tags, result = {}, namedtuple("result", "found tags")
+
+    # Guess "audiofil" type.
+    try:
+        fil = mutagen.File(audiofil)
+    except mutagen.MutagenError:
+        return result(False, {})
+
+    # Is "audiofil" a valid audio file?
+    if not fil:
+        return result(False, {})
+
+    # Is "audiofil" type FLAC or Monkey's Audio?
+    if any([isinstance(fil, mutagen.flac.FLAC), isinstance(fil, mutagen.monkeysaudio.MonkeysAudio)]):
+
+        # --> FLAC.
+        try:
+            assert isinstance(fil, mutagen.flac.FLAC) is True
+        except AssertionError:
+            pass
+        else:
+            tags = dict([(k.lower(), v) for k, v in fil.tags])
+
+        # --> Monkey's audio.
+        try:
+            assert isinstance(fil, mutagen.monkeysaudio.MonkeysAudio) is True
+        except AssertionError:
+            pass
+        else:
+            tags = {k.lower(): str(v) for k, v in fil.tags.items() if isinstance(v, APETextValue)}
+
+    # Have "audiofil" metadata been retrieved?
+    if not tags:
+        return result(False, tags)
+    return result(True, tags)
 
 
 # ================

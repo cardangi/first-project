@@ -1,5 +1,5 @@
 # -*- coding: ISO-8859-1 -*-
-from Applications.AudioCD.shared import validdelay, FLACFilesCollection
+from Applications.AudioCD.shared import validdelay, FLACFilesCollection, MonkeyFilesCollection
 from logging.config import dictConfig
 import argparse
 import logging
@@ -28,6 +28,7 @@ def validdrive(d):
 
 def updatetags(d, test=True):
     FLACFilesCollection(d)(test=test)
+    MonkeyFilesCollection(d)(test=test)
 
 
 # =================
