@@ -121,7 +121,7 @@ for target in arguments.targets:
         command.append("-f")
     if arguments.check:
         command.append("-c")
-    command.append("-wdir", '"{0}"'.format(join(expandvars("%TEMP%"), "tmp-Xavier")), "-config", '"{0}"'.format(cfgfile))
+    command.extend(["-wdir", '"{0}"'.format(join(expandvars("%TEMP%"), "tmp-Xavier")), "-config", '"{0}"'.format(cfgfile)])
     logger.debug("Backup command.")
     logger.debug('\t%s.'.expandtabs(4) % ("".join(command),))
 
