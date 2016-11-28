@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 import io
 import os
 import locale
@@ -332,8 +332,8 @@ def customformatterfactory(pattern=LOGPATTERN):
     return CustomFormatter(pattern)
 
 
-def customfilehandler(maxbytes, backupcount):
-    return logging.handlers.RotatingFileHandler(r"G:\Computing\pythonlog.log", maxBytes=maxbytes, backupCount=backupcount)
+def customfilehandler(maxbytes, backupcount, encoding=UTF8):
+    return logging.handlers.RotatingFileHandler(r"G:\Computing\pythonlog.log", maxBytes=maxbytes, backupCount=backupcount, encoding=encoding)
 
 
 def validpath(p):

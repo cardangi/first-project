@@ -1,9 +1,9 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 """
-Stocker dans un fichier JSON les arguments permettant de copier un fichier audio FLAC reçu en qualité de premier paramètre.
-La lettre identifiant le lecteur reçevant le fichier copié est reçue en qualité de deuxième paramètre.
-Le nom du fichier JSON est reçu en qualité de troisième paramètre.
-Le répertoire et le nom du fichier copié sont fonction des metadata "albumsort", "disc", "track" et "title".
+Stocker dans un fichier JSON les arguments permettant de copier un fichier audio FLAC reÃ§u en qualitÃ© de premier paramÃ¨tre.
+La lettre identifiant le lecteur reÃ§evant le fichier copiÃ© est reÃ§ue en qualitÃ© de deuxiÃ¨me paramÃ¨tre.
+Le nom du fichier JSON est reÃ§u en qualitÃ© de troisiÃ¨me paramÃ¨tre.
+Le rÃ©pertoire et le nom du fichier copiÃ© sont fonction des metadata "albumsort", "disc", "track" et "title".
 """
 from Applications.AudioCD.shared import getmetadata
 from logging.config import dictConfig
@@ -78,8 +78,8 @@ metadata = getmetadata(arguments.file)
 
 #  2. Process metadata.
 if metadata.found:
-    disc = metadata.tags.get("disc", None) or metadata.tags.get("discnumber", None)
-    track = metadata.tags.get("track", None) or metadata.tags.get("tracknumber", None)
+    disc = metadata.tags.get("disc") or metadata.tags.get("discnumber")
+    track = metadata.tags.get("track") or metadata.tags.get("tracknumber")
     logger.debug("Tags.")
     logger.debug("\tAlbumSort: {0}".format(metadata.tags["albumsort"][:-3]).expandtabs(TABSIZE))
     logger.debug("\tDisc     : {0}".format(disc).expandtabs(TABSIZE))

@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 from Applications.AudioCD.shared import validdelay, FLACFilesCollection, MonkeyFilesCollection
 from logging.config import dictConfig
 import argparse
@@ -27,7 +27,11 @@ def validdrive(d):
 
 
 def updatetags(d, test=True):
+
+    # --> Update FLAC files "album" tags.
     FLACFilesCollection(d)(test=test)
+
+    # --> Update Monkey's Audio files "album" tags.
     MonkeyFilesCollection(d)(test=test)
 
 
@@ -66,12 +70,12 @@ logger.debug("Test : {0}.".format(arguments.test))
 # Main algorithm.
 # ===============
 
-# Mise à jour immédiate.
+# Mise Ã  jour immÃ©diate.
 if not arguments.delay:
     updatetags(arguments.drive, test=arguments.test)
     sys.exit(0)
 
-# Mise à jour différée.
+# Mise Ã  jour diffÃ©rÃ©e.
 s = sched.scheduler()
 s.enter(arguments.delay, 1, updatetags, argument=(arguments.drive,), kwargs={"test": arguments.test})
 s.run()

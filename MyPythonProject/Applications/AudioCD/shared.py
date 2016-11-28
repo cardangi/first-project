@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 from collections import MutableMapping, MutableSequence, namedtuple
 from jinja2 import Environment, FileSystemLoader
 from sortedcontainers import SortedDict
@@ -240,17 +240,17 @@ class AudioCDTrack(MutableMapping):
                  "5": r"[\.\-]+"}
 
         # ---------------------------------------------
-        # Chaque mot est formatÈ en lettres minuscules.
+        # Chaque mot est format√© en lettres minuscules.
         # ---------------------------------------------
         s = re.compile(r"(?i)^(.+)$").sub(cls.low, s)
 
         # --------------------------
-        # Chaque mot est capitalisÈ.
+        # Chaque mot est capitalis√©.
         # --------------------------
         s = re.compile(r"(?i)\b([a-z]+)\b").sub(cls.cap1, s)
 
         # -------------------------------------------------------------
-        # Les conjonctions demeurent entiËrement en lettres minsucules.
+        # Les conjonctions demeurent enti√®rement en lettres minsucules.
         # -------------------------------------------------------------
         s = re.compile(r"(?i)\b{0}\b".format(regex["1"])).sub(cls.low, s)
         s = re.compile(r"(?i)\b{0}\b".format(regex["2"])).sub(cls.low, s)
@@ -258,7 +258,7 @@ class AudioCDTrack(MutableMapping):
         s = re.compile(r"(?i)\b{0}\b".format(regex["4"])).sub(cls.low, s)
 
         # -------------------------------------
-        # Le dÈbut du titre demeure capitalisÈ.
+        # Le d√©but du titre demeure capitalis√©.
         # -------------------------------------
         s = re.compile(r"(?i)^{0}\b".format(regex["1"])).sub(cls.cap1, s)
         s = re.compile(r"(?i)^{0}\b".format(regex["2"])).sub(cls.cap1, s)
@@ -270,19 +270,19 @@ class AudioCDTrack(MutableMapping):
         s = re.compile(r"(?i)^({0})({1})\b".format(regex["5"], regex["4"])).sub(cls.cap2, s)
 
         # ------------------------------------
-        # Les acronymes demeurent capitalisÈs.
+        # Les acronymes demeurent capitalis√©s.
         # ------------------------------------
         s = re.compile(r"(?i)\b(u\.?s\.?a\.?)").sub(cls.upp, s)
         s = re.compile(r"(?i)\b(u\.?k\.?)").sub(cls.upp, s)
         s = re.compile(r"(?i)\b(dj)\b").sub(cls.upp, s)
 
         # ----------------------------------
-        # Autres mots demeurant capitalisÈs.
+        # Autres mots demeurant capitalis√©s.
         # ----------------------------------
         s = re.compile(r"(?i)\b({0})({1})\b".format(regex["5"], regex["3"])).sub(cls.cap2, s)
 
         # -----------------------------------------------------------------
-        # Les mots prÈcÈdÈs d'une apostrophe demeurent en lettre minuscule.
+        # Les mots pr√©c√©d√©s d'une apostrophe demeurent en lettre minuscule.
         #  ----------------------------------------------------------------
         s = re.compile(r"(?i)\b('[a-z])\b").sub(cls.low, s)
 
@@ -659,65 +659,73 @@ class AudioFilesCollection(MutableSequence):
 class FLACFilesCollection(AudioFilesCollection):
 
     rex2 = re.compile(r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.13$)1\.(?:{0})0000\.\d\.13$".format(shared.DFTYEARREGEX))
+    logger = logging.getLogger("{0}.FLACFilesCollection".format(__name__))
 
     def __init__(self, path):
         super(FLACFilesCollection, self).__init__()
 
         for fil in shared.filesinfolder(folder=path):
             try:
-                audio = mutagen.flac.FLAC(fil)
+                audio = mutagen.flac.FLAC(os.path.normpath(fil))
             except mutagen.MutagenError:
                 continue
             metadata = dict([(k.lower(), v) for k, v in audio.tags])
 
-            # ContrÙler que les tags obligatoires sont prÈsents.
+            # Contr√¥ler que les tags obligatoires sont pr√©sents.
             if any([tag not in metadata for tag in self.tags]):
                 continue
 
-            # Ne retenir que les fichiers dont le tag "albumsort" est cohÈrent.
+            # Ne retenir que les fichiers dont le tag "albumsort" est coh√©rent.
             match = self.rex2.match(metadata["albumsort"])
             if not match:
                 continue
 
-            # Ne retenir que les fichiers dont le tag "album" n'a pas ÈtÈ dÈj‡ modifiÈ.
+            # Ne retenir que les fichiers dont le tag "album" n'a pas √©t√© d√©j√† modifi√©.
             match = self.rex1.match(metadata["album"])
             if match:
                 continue
 
             # Retenir le fichier.
-            self._seq.append((fil, audio, metadata))
+            self._seq.append((os.path.normpath(fil), audio, metadata))
+
+        for item in self._seq:
+            self.logger.debug(itemgetter(0)(item))
 
 
 class MonkeyFilesCollection(AudioFilesCollection):
 
-    rex2 = re.compile(r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.15$)1\.(?:{0})0000\.\d\.15$".format(shared.DFTYEARREGEX))
+    rex2 = re.compile(r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.12$)1\.(?:{0})0000\.\d\.12$".format(shared.DFTYEARREGEX))
+    logger = logging.getLogger("{0}.MonkeyFilesCollection".format(__name__))
 
     def __init__(self, path):
         super(MonkeyFilesCollection, self).__init__()
 
         for fil in shared.filesinfolder(folder=path):
             try:
-                audio = mutagen.monkeysaudio.MonkeysAudio(fil)
+                audio = mutagen.monkeysaudio.MonkeysAudio(os.path.normpath(fil))
             except mutagen.MutagenError:
                 continue
-            metadata = {k.lower(): str(v) for k, v in fil.tags.items() if isinstance(v, APETextValue)}
+            metadata = {k.lower(): str(v) for k, v in audio.tags.items() if isinstance(v, APETextValue)}
 
-            # ContrÙler que les tags obligatoires sont prÈsents.
+            # Contr√¥ler que les tags obligatoires sont pr√©sents.
             if any([tag not in metadata for tag in self.tags]):
                 continue
 
-            # Ne retenir que les fichiers dont le tag "albumsort" est cohÈrent.
+            # Ne retenir que les fichiers dont le tag "albumsort" est coh√©rent.
             match = self.rex2.match(metadata["albumsort"])
             if not match:
                 continue
 
-            # Ne retenir que les fichiers dont le tag "album" n'a pas ÈtÈ dÈj‡ modifiÈ.
+            # Ne retenir que les fichiers dont le tag "album" n'a pas √©t√© d√©j√† modifi√©.
             match = self.rex1.match(metadata["album"])
             if match:
                 continue
 
             # Retenir le fichier.
-            self._seq.append((fil, audio, metadata))
+            self._seq.append((os.path.normpath(fil), audio, metadata))
+
+        for item in self._seq:
+            self.logger.debug(itemgetter(0)(item))
 
 
 # ==========
@@ -876,7 +884,7 @@ def getmetadata(audiofil):
 
     # Have "audiofil" metadata been retrieved?
     if not tags:
-        return result(False, tags)
+        return result(False, {})
     return result(True, tags)
 
 
