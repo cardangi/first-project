@@ -7,7 +7,6 @@ import logging
 import argparse
 import operator
 import subprocess
-from string import Template
 from operator import itemgetter
 from Applications.shared import ARECA
 from logging.config import dictConfig
@@ -61,18 +60,10 @@ with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encod
 logger = logging.getLogger("Backup.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
 
-# ==========
-# Templates.
-# ==========
-t1 = Template("$command $full")
-t2 = Template("$command $check")
-t3 = Template(r'$command -wdir "$temp\tmp-Xavier" -config "$config"')
-
-
 # ================
 # Initializations.
 # ================
-returncode, arguments = [], parser.parse_args()
+status, returncode, arguments = 100, [], parser.parse_args()
 
 
 # ===============
@@ -122,23 +113,22 @@ for target in arguments.targets:
         assert exists(directory) is True
     except AssertionError:
         logger.debug('\t"{0}" doesn\'t exist: backup can\'t be processed!'.format(directory).expandtabs(4))
-        # continue
+        continue
 
     #  2.c. Build backup command.
-    command = ARECA + " backup"
+    command = [ARECA, " backup"]
     if arguments.full:
-        command = t1.substitute(command=command, full="-f")
+        command.append("-f")
     if arguments.check:
-        command = t2.substitute(command=command, check="-c")
-    args = t3.substitute(command=command, temp=expandvars("%TEMP%"), config=cfgfile)
-    args = args.split()
+        command.append("-c")
+    command.extend(["-wdir", '"{0}"'.format(join(expandvars("%TEMP%"), "tmp-Xavier")), "-config", '"{0}"'.format(cfgfile)])
     logger.debug("Backup command.")
-    logger.debug('\t%s.'.expandtabs(4) % (args,))
+    logger.debug('\t%s.'.expandtabs(4) % ("".join(command),))
 
     #  2.d. Run backup command.
     code = 0
     if not arguments.test:
-        process = subprocess.run(args, stdout=subprocess.PIPE, universal_newlines=True)
+        process = subprocess.run(command, stdout=subprocess.PIPE, universal_newlines=True)
         code = process.returncode
         if process.returncode:
             logger.debug('"{0}" was returned by "areca_cl.exe". Backup failed.'.format(process.returncode))
@@ -152,6 +142,6 @@ for target in arguments.targets:
 # ===============
 # Exit algorithm.
 # ===============
-if all(not operator.eq(i, 0) for i in returncode):
-    sys.exit(99)
-sys.exit(0)
+if all(operator.eq(i, 0) for i in returncode):
+    status = 0
+sys.exit(status)
