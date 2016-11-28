@@ -125,20 +125,19 @@ for target in arguments.targets:
         # continue
 
     #  2.c. Build backup command.
-    command = ARECA + " backup"
+    command = [ARECA, " backup"]
     if arguments.full:
-        command = t1.substitute(command=command, full="-f")
+        command.append("-f")
     if arguments.check:
-        command = t2.substitute(command=command, check="-c")
-    args = t3.substitute(command=command, temp=expandvars("%TEMP%"), config=cfgfile)
-    args = args.split()
+        command.append("-c")
+    command.append("-wdir", '"{0}"'.format(os.path.join(expandvars("%TEMP%"), "tmp-Xavier")), "-config", '"{0}"'.format(cfgfile))
     logger.debug("Backup command.")
-    logger.debug('\t%s.'.expandtabs(4) % (args,))
+    logger.debug('\t%s.'.expandtabs(4) % ("".join(command),))
 
     #  2.d. Run backup command.
     code = 0
     if not arguments.test:
-        process = subprocess.run(args, stdout=subprocess.PIPE, universal_newlines=True)
+        process = subprocess.run(command, stdout=subprocess.PIPE, universal_newlines=True)
         code = process.returncode
         if process.returncode:
             logger.debug('"{0}" was returned by "areca_cl.exe". Backup failed.'.format(process.returncode))
