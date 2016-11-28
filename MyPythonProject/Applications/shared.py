@@ -519,5 +519,5 @@ zipfileparser.add_argument("destination", choices=["documents", "backup", "temp"
 zipfileparser.add_argument("files", choices=["documents", "computing"], action=GetExtensions)
 group = zipfileparser.add_mutually_exclusive_group()
 group.add_argument("-e", "--exc", dest="exclude", nargs="*", action=ExcludeExtensions, help="exclude some extensions from the group")
-group.add_argument("-r", "--ret", dest="retain", nargs="*", action=RetainExtensions, help="retain only to some extensions from the group")
+group.add_argument("-r", "--ret", dest="retain", nargs="*", action=RetainExtensions, help="retain some extensions from the group")
 zipfileparser.add_argument("-i", "--inc", dest="include", nargs="*", action=IncludeExtensions, help="include some extensions not included in the group")
