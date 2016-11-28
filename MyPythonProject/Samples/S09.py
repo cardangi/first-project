@@ -15,4 +15,4 @@ logger = logging.getLogger("{0}".format(os.path.splitext(os.path.basename(__file
 arguments = zipfileparser.parse_args()
 
 for fil in filesinfolder(arguments.source):
-  logger.debug(fil)
+    logger.debug(fil)
