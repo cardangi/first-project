@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from ..shared import zipfileparser
 import argparse
 import unittest
 import os
@@ -55,3 +56,41 @@ class TestParser(unittest.TestCase):
         self.assertEqual(arguments.archive, "documents")
         self.assertEqual(arguments.destination, os.path.expandvars("%TEMP%"))
         self.assertIsNone(arguments.extensions)
+
+
+class TestSecondParser(unittest.TestCase):
+
+    def setUp(self):
+        self.documents = os.path.expandvars("%_MYDOCUMENTS%")
+
+    def test_01first(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "documents"])
+        self.assertListEqual(arguments.extensions, ["doc", "txt", "pdf", "xav"])
+
+    def test_02second(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "documents", "-e", "doc"])
+        self.assertListEqual(arguments.extensions, ["txt", "pdf", "xav"])
+
+    def test_03third(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "documents", "-r", "pdf"])
+        self.assertListEqual(arguments.extensions, ["pdf"])
+
+    def test_04fourth(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "documents", "-e", "doc", "txt", "pdf", "xav"])
+        self.assertListEqual(arguments.extensions, [])
+
+    def test_05fifth(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "computing"])
+        self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "css", "xsl"])
+
+    def test_06sixth(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "-i", "pdf"])
+        self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "css", "xsl", "pdf"])
+
+    def test_07seventh(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "-e", "cmd", "-i", "pdf", "txt"])
+        self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "css", "xsl", "pdf", "txt"])
+
+    def test_08eigth(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "-r", "py", "-i", "pdf", "txt"])
+        self.assertListEqual(arguments.extensions, ["py", "pdf", "txt"])

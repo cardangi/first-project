@@ -53,6 +53,7 @@ ARECA = r'"C:\Program Files\Areca\areca_cl.exe"'
 MUSIC = "F:\\"
 EXIT = 11
 BACK = 12
+EXTENSIONS = {"computing": ["py", "json", "yaml", "cmd", "css", "xsl"], "documents": ["doc", "txt", "pdf", "xav"]}
 
 
 # ========
@@ -317,6 +318,83 @@ class CustomFormatter(logging.Formatter):
         return s
 
 
+class GetPath(argparse.Action):
+    """
+    Set "destination" attribute with the full path corresponding to the "values".
+    """
+    destinations = {"documents": os.path.expandvars("%_MYDOCUMENTS%"), "temp": os.path.expandvars("%TEMP%"), "backup": os.path.expandvars("%_BACKUP%")}
+
+    def __init__(self, option_strings, dest, **kwargs):
+        super(GetPath, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parsobj, namespace, values, option_string=None):
+        setattr(namespace, self.dest, self.destinations[values])
+
+
+class GetExtensions(argparse.Action):
+    """
+    Set "files" attribute with a list of extensions.
+    Set "extensions" attribute with a list of extensions to process.
+    """
+    def __init__(self, option_strings, dest, **kwargs):
+        super(GetExtensions, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parsobj, namespace, values, option_string=None):
+        setattr(namespace, self.dest, EXTENSIONS[values])
+        setattr(namespace, "extensions", EXTENSIONS[values])
+
+
+class ExcludeExtensions(argparse.Action):
+    """
+    Set "exclude" attribute with a list of extensions to exclude.
+    Set "extensions" attribute with a list of extensions to process.
+    """
+    def __init__(self, option_strings, dest, **kwargs):
+        super(ExcludeExtensions, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parsobj, namespace, values, option_string=None):
+        setattr(namespace, self.dest, values)
+        lext = []
+        for ext in getattr(namespace, "files"):
+            if ext not in values:
+                lext.append(ext)
+        setattr(namespace, "extensions", lext)
+
+
+class RetainExtensions(argparse.Action):
+    """
+    Set "retain" attribute with a list of extensions to retain.
+    Set "extensions" attribute with a list of extensions to process.
+    """
+    def __init__(self, option_strings, dest, **kwargs):
+        super(RetainExtensions, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parsobj, namespace, values, option_string=None):
+        setattr(namespace, self.dest, values)
+        lext = []
+        for ext in values:
+            if ext in getattr(namespace, "files"):
+                lext.append(ext)
+        setattr(namespace, "extensions", lext)
+
+
+class IncludeExtensions(argparse.Action):
+    """
+    Set "include" attribute with a list of extensions to include.
+    Set "extensions" attribute with a list of extensions to process.
+    """
+    def __init__(self, option_strings, dest, **kwargs):
+        super(IncludeExtensions, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parsobj, namespace, values, option_string=None):
+        setattr(namespace, self.dest, values)
+        lext = getattr(namespace, "extensions")
+        for ext in values:
+            if ext not in lext:
+                lext.append(ext)
+        setattr(namespace, "extensions", lext)
+
+
 # ==========
 # Functions.
 # ==========
@@ -430,3 +508,16 @@ def repeatelement(elem, n):
 
 def now():
     return dateformat(UTC.localize(datetime.utcnow()).astimezone(LOCAL), TEMPLATE4)
+
+
+# ========
+# Parsers.
+# ========
+zipfileparser = argparse.ArgumentParser()
+zipfileparser.add_argument("source")
+zipfileparser.add_argument("destination", choices=["documents", "backup", "temp", "onedrive"], action=GetPath)
+zipfileparser.add_argument("files", choices=["documents", "computing"], action=GetExtensions)
+group = zipfileparser.add_mutually_exclusive_group()
+group.add_argument("-e", "--exc", dest="exclude", nargs="*", action=ExcludeExtensions, help="exclude some extensions from the group")
+group.add_argument("-r", "--ret", dest="retain", nargs="*", action=RetainExtensions, help="retain only to some extensions from the group")
+zipfileparser.add_argument("-i", "--inc", dest="include", nargs="*", action=IncludeExtensions, help="include some extensions not included in the group")
