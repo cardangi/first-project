@@ -1,7 +1,7 @@
 -*- coding: utf-8 -*-
 import argparse
 
-__AUTHOR__ = "Xavier ROSSET"
+__author__ = "Xavier ROSSET"
 
 
 zipfileparser = argparse.ArgumentParser()
