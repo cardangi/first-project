@@ -14,6 +14,7 @@ from operator import itemgetter
 from dateutil.parser import parse
 from contextlib import contextmanager
 from PIL import Image, TiffImagePlugin
+from collections import MutableMappings
 
 __author__ = 'Xavier'
 
@@ -29,8 +30,8 @@ locale.setlocale(locale.LC_ALL, "")
 # ==========
 APPEND = "a"
 WRITE = "w"
-DATABASE = r"g:\computing\database.db"
-LOG = r"g:\computing\log.log"
+DATABASE = os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db")
+# LOG = r"g:\computing\log.log"
 DFTENCODING = "ISO-8859-1"
 DFTTIMEZONE = "Europe/Paris"
 UTC = timezone("UTC")
@@ -51,6 +52,7 @@ DFTDAYREGEX = "0[1-9]|[12]\d|3[01]"
 ACCEPTEDANSWERS = ["N", "Y"]
 ARECA = r'"C:\Program Files\Areca\areca_cl.exe"'
 MUSIC = "F:\\"
+IMAGES = "H:\\"
 EXIT = 11
 BACK = 12
 EXTENSIONS = {"computing": ["py", "json", "yaml", "cmd", "css", "xsl"], "documents": ["doc", "txt", "pdf", "xav"]}
@@ -70,18 +72,27 @@ class ExifError(ImageError):
         super(ExifError, self).__init__(file, error)
 
 
-class Files(object):
-
-    def __contains__(self, itm):
-        return itm in self.metadata
-
-    def __getitem__(self, itm):
-        return self.metadata[itm]
+class Files(MutableMappings):
 
     def __init__(self, fil):
         self._fil = None
         self.fil = fil
         self._metadata = {i: getattr(self, i) for i in ["ctime", "mtime", "dirname", "basename", "extension", "parts"]}
+
+    def __getitem__(self, item):
+        return self.metadata[item]
+
+    def __setitem__(self, key, value):
+        self.metadata[key] = value
+
+    def __delitem__(self, item):
+        del self.metadata[item]
+
+    def __len__(self):
+        return len(self.metadata)
+
+    def __iter__(self):
+        return iter(self.metadata)
 
     @property
     def fil(self):
@@ -120,16 +131,6 @@ class Files(object):
     @property
     def metadata(self):
         return self._metadata
-
-    def __iter__(self):
-        for k, v in self.metadata.items():
-            yield k, v
-
-    def __len__(self):
-        return len(self.metadata)
-
-    def __repr__(self):
-        return repr(self.metadata)
 
 
 class Images(Files):
@@ -273,20 +274,18 @@ class Images(Files):
         return v
 
     @staticmethod
-    def defaultlocation(year, month, day):
+    def defaultlocation(year, month, day, drive=IMAGES):
 
-        defaultdrive = MUSIC
-
-        # Cas 1 : "h:\CCYY\MM\DD".
+        # Cas 1 : "H:\CCYY\MM\DD".
         if year in [2011, 2012]:
-            return os.path.join(defaultdrive, str(year), str(month).zfill(2), str(day).zfill(2))
+            return os.path.normpath(os.path.join(drive, str(year), str(month).zfill(2), str(day).zfill(2)))
 
-        # Cas 2 : "h:\CCYY\MM.DD".
-        elif year == 2014:
-            return os.path.join(defaultdrive, str(year), "{0}.{1}".format(str(month).zfill(2), str(day).zfill(2)))
+        # Cas 2 : "H:\CCYY\MM.DD".
+        if year == 2014:
+            return os.path.normpath(os.path.join(drive, str(year), "{0}.{1}".format(str(month).zfill(2), str(day).zfill(2))))
 
-        # Cas 3 : "h:\CCYYMM".
-        return os.path.join(defaultdrive, "{0}{1}".format(year, str(month).zfill(2)))
+        # Cas 3 : "H:\CCYYMM".
+        return os.path.normpath(os.path.join(drive, "{0}{1}".format(year, str(month).zfill(2))))
 
 
 class Header(object):
@@ -411,7 +410,7 @@ def customformatterfactory(pattern=LOGPATTERN):
 
 
 def customfilehandler(maxbytes, backupcount, encoding=UTF8):
-    return logging.handlers.RotatingFileHandler(r"G:\Computing\pythonlog.log", maxBytes=maxbytes, backupCount=backupcount, encoding=encoding)
+    return logging.handlers.RotatingFileHandler(os.path.join(os.path.expandvars("%_COMPUTING%"), "pythonlog.log"), maxBytes=maxbytes, backupCount=backupcount, encoding=encoding)
 
 
 def validpath(p):
@@ -514,7 +513,7 @@ def now():
 # Parsers.
 # ========
 zipfileparser = argparse.ArgumentParser()
-zipfileparser.add_argument("source")
+zipfileparser.add_argument("source", type=validpath)
 zipfileparser.add_argument("destination", choices=["documents", "backup", "temp", "onedrive"], action=GetPath)
 zipfileparser.add_argument("files", choices=["documents", "computing"], action=GetExtensions)
 group = zipfileparser.add_mutually_exclusive_group()
