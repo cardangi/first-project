@@ -14,9 +14,9 @@ from operator import itemgetter
 from dateutil.parser import parse
 from contextlib import contextmanager
 from PIL import Image, TiffImagePlugin
-from collections import MutableMappings
+from collections import MutableMapping
 
-__author__ = 'Xavier'
+__author__ = 'Xavier ROSSET'
 
 
 # ==========================
@@ -31,7 +31,6 @@ locale.setlocale(locale.LC_ALL, "")
 APPEND = "a"
 WRITE = "w"
 DATABASE = os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db")
-# LOG = r"g:\computing\log.log"
 DFTENCODING = "ISO-8859-1"
 DFTTIMEZONE = "Europe/Paris"
 UTC = timezone("UTC")
@@ -72,7 +71,7 @@ class ExifError(ImageError):
         super(ExifError, self).__init__(file, error)
 
 
-class Files(MutableMappings):
+class Files(MutableMapping):
 
     def __init__(self, fil):
         self._fil = None
@@ -80,19 +79,19 @@ class Files(MutableMappings):
         self._metadata = {i: getattr(self, i) for i in ["ctime", "mtime", "dirname", "basename", "extension", "parts"]}
 
     def __getitem__(self, item):
-        return self.metadata[item]
+        return self._metadata[item]
 
     def __setitem__(self, key, value):
-        self.metadata[key] = value
+        self._metadata[key] = value
 
-    def __delitem__(self, item):
-        del self.metadata[item]
+    def __delitem__(self, key):
+        del self._metadata[key]
 
     def __len__(self):
-        return len(self.metadata)
+        return len(self._metadata)
 
     def __iter__(self):
-        return iter(self.metadata)
+        return iter(self._metadata)
 
     @property
     def fil(self):
@@ -127,10 +126,6 @@ class Files(MutableMappings):
     @property
     def mtime(self):
         return int(os.path.getmtime(self.fil))
-
-    @property
-    def metadata(self):
-        return self._metadata
 
 
 class Images(Files):
