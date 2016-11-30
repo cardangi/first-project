@@ -850,7 +850,12 @@ def digitalaudiobase(track, fil=os.path.join(os.path.expandvars("%TEMP%"), "digi
 
 
 def getmetadata(audiofil):
-
+    """
+    Return metada from an audio file. FLAC or Monkey's Audio are only processed.
+    Return a two attributes named tuple:
+        - "found". Boolean value depending on whether metadata have been found or not.
+        - "tags". Dictionary enumerating each metadata found.
+    """
     tags, result = {}, namedtuple("result", "found tags")
 
     # Guess "audiofil" type.
