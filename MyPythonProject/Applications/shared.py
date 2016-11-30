@@ -334,8 +334,11 @@ class GetExtensions(argparse.Action):
         super(GetExtensions, self).__init__(option_strings, dest, **kwargs)
 
     def __call__(self, parsobj, namespace, values, option_string=None):
-        setattr(namespace, self.dest, EXTENSIONS[values])
-        setattr(namespace, "extensions", EXTENSIONS[values])
+        setattr(namespace, self.dest, values)
+        lext = []
+        for file in values:
+            lext.extend(EXTENSIONS[file])
+        setattr(namespace, "extensions", lext)
 
 
 class ExcludeExtensions(argparse.Action):
@@ -349,7 +352,7 @@ class ExcludeExtensions(argparse.Action):
     def __call__(self, parsobj, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)
         lext = []
-        for ext in getattr(namespace, "files"):
+        for ext in getattr(namespace, "extensions"):
             if ext not in values:
                 lext.append(ext)
         setattr(namespace, "extensions", lext)
@@ -367,7 +370,7 @@ class RetainExtensions(argparse.Action):
         setattr(namespace, self.dest, values)
         lext = []
         for ext in values:
-            if ext in getattr(namespace, "files"):
+            if ext in getattr(namespace, "extensions"):
                 lext.append(ext)
         setattr(namespace, "extensions", lext)
 
@@ -510,7 +513,7 @@ def now():
 zipfileparser = argparse.ArgumentParser()
 zipfileparser.add_argument("source", type=validpath)
 zipfileparser.add_argument("destination", choices=["documents", "backup", "temp", "onedrive"], action=GetPath)
-zipfileparser.add_argument("files", choices=["documents", "computing"], action=GetExtensions)
+zipfileparser.add_argument("files", nargs="+", choices=["documents", "computing"], action=GetExtensions)
 group = zipfileparser.add_mutually_exclusive_group()
 group.add_argument("-e", "--exc", dest="exclude", nargs="*", action=ExcludeExtensions, help="exclude some extensions from the group")
 group.add_argument("-r", "--ret", dest="retain", nargs="*", action=RetainExtensions, help="retain some extensions from the group")

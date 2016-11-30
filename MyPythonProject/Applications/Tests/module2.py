@@ -94,3 +94,11 @@ class TestSecondParser(unittest.TestCase):
     def test_08eigth(self):
         arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "-r", "py", "-i", "pdf", "txt"])
         self.assertListEqual(arguments.extensions, ["py", "pdf", "txt"])
+
+    def test_09ninth(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "documents"])
+        self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "css", "xsl", "doc", "txt", "pdf", "xav"])
+
+    def test_10tenth(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "documents", "-e", "doc", "css"])
+        self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "xsl", "txt", "pdf", "xav"])
