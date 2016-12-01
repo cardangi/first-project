@@ -467,8 +467,7 @@ def filesinfolder(*extensions, folder=os.getcwd()):
                 select_file = True
             if not select_file:
                 continue
-            else:
-                yield os.path.join(root, file)
+            yield os.path.join(root, file)
 
 
 def getdatetime(epoch, timzon):

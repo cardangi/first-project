@@ -25,5 +25,5 @@ arguments = zipfileparser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-for fil in filesinfolder(arguments.source):
+for fil in filesinfolder(*arguments.extensions, folder=arguments.source):
     logger.debug(fil)
