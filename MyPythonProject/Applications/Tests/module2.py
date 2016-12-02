@@ -64,41 +64,45 @@ class TestSecondParser(unittest.TestCase):
         self.documents = os.path.expandvars("%_MYDOCUMENTS%")
 
     def test_01first(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "documents"])
+        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "documents"])
         self.assertListEqual(arguments.extensions, ["doc", "txt", "pdf", "xav"])
 
     def test_02second(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "documents", "-e", "doc"])
+        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "documents", "-e", "doc"])
         self.assertListEqual(arguments.extensions, ["txt", "pdf", "xav"])
 
     def test_03third(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "documents", "-r", "pdf"])
+        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "documents", "-k", "pdf"])
         self.assertListEqual(arguments.extensions, ["pdf"])
 
     def test_04fourth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "documents", "-e", "doc", "txt", "pdf", "xav"])
+        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "documents", "-e", "doc", "txt", "pdf", "xav"])
         self.assertListEqual(arguments.extensions, [])
 
     def test_05fifth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "computing"])
+        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing"])
         self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "css", "xsl"])
 
     def test_06sixth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "-i", "pdf"])
+        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing", "-i", "pdf"])
         self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "css", "xsl", "pdf"])
 
     def test_07seventh(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "-e", "cmd", "-i", "pdf", "txt"])
+        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing", "-e", "cmd", "-i", "pdf", "txt"])
         self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "css", "xsl", "pdf", "txt"])
 
     def test_08eigth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "-r", "py", "-i", "pdf", "txt"])
+        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing", "-k", "py", "-i", "pdf", "txt"])
         self.assertListEqual(arguments.extensions, ["py", "pdf", "txt"])
 
     def test_09ninth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "documents"])
+        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing", "documents"])
         self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "css", "xsl", "doc", "txt", "pdf", "xav"])
 
     def test_10tenth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "computing", "documents", "-e", "doc", "css"])
+        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing", "documents", "-e", "doc", "css"])
         self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "xsl", "txt", "pdf", "xav"])
+
+    def test_11eleventh(self):
+        arguments = zipfileparser.parse_args([self.documents, "temp", "singled", "doc", "pdf", "txt", "css", "abc"])
+        self.assertListEqual(arguments.extensions, ["doc", "pdf", "txt", "css", "abc"])
