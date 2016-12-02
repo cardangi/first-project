@@ -509,11 +509,24 @@ def now():
 # ========
 # Parsers.
 # ========
+# python script "source" "destination" singled doc pdf txt xav
+# python script "source" "destination" grouped "documents" 
+# python script "source" "destination" grouped "documents" -e pdf
+# python script "source" "destination" grouped "documents" -r pdf
+# python script "source" "destination" grouped "documents" -i py
 zipfileparser = argparse.ArgumentParser()
 zipfileparser.add_argument("source", type=validpath)
 zipfileparser.add_argument("destination", choices=["documents", "backup", "temp", "onedrive"], action=GetPath)
-zipfileparser.add_argument("files", nargs="+", choices=["documents", "computing"], action=GetExtensions)
-group = zipfileparser.add_mutually_exclusive_group()
-group.add_argument("-e", "--exc", dest="exclude", nargs="*", action=ExcludeExtensions, help="exclude some extensions from the group")
-group.add_argument("-r", "--ret", dest="retain", nargs="*", action=RetainExtensions, help="retain some extensions from the group")
-zipfileparser.add_argument("-i", "--inc", dest="include", nargs="*", action=IncludeExtensions, help="include some extensions not included in the group")
+subparsers = zipfileparser.add_subparsers()
+
+# Singled extensions.
+parser_s = subparsers.add_parser("singled")
+parser_s.add_argument("extensions", nargs="+")
+
+# Grouped extensions.
+parser_g = subparsers.add_parser("grouped")
+parser_g.add_argument("group", nargs="+", choices=["documents", "computing"], action=GetExtensions)
+group = parser_g.add_mutually_exclusive_group()
+group.add_argument("-e", "--exc", dest="exclude", nargs="*", action=ExcludeExtensions, help="exclude enumerated extension(s)")
+group.add_argument("-r", "--ret", dest="retain", nargs="*", action=RetainExtensions, help="exclude all extensions but enumerated extension(s)")
+parser_g.add_argument("-i", "--inc", dest="include", nargs="*", action=IncludeExtensions, help="include enumerated extension(s)")
