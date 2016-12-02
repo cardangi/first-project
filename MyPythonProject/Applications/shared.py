@@ -604,7 +604,7 @@ subparsers = deleterippinglogparser.add_subparsers()
 
 # Singled record(s) unique ID.
 parser3_s = subparsers.add_parser("singled")
-parser3_s.add_argument("uid", nargs="+",type=int)
+parser3_s.add_argument("uid", nargs="+", type=int)
 
 # Ranged records unique ID.
 parser3_g = subparsers.add_parser("ranged")
