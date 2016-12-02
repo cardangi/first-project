@@ -358,13 +358,13 @@ class ExcludeExtensions(argparse.Action):
         setattr(namespace, "extensions", lext)
 
 
-class RetainExtensions(argparse.Action):
+class KeepExtensions(argparse.Action):
     """
     Set "retain" attribute with a list of extensions to retain.
     Set "extensions" attribute with a list of extensions to process.
     """
     def __init__(self, option_strings, dest, **kwargs):
-        super(RetainExtensions, self).__init__(option_strings, dest, **kwargs)
+        super(KeepExtensions, self).__init__(option_strings, dest, **kwargs)
 
     def __call__(self, parsobj, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)
@@ -528,5 +528,5 @@ parser_g = subparsers.add_parser("grouped")
 parser_g.add_argument("group", nargs="+", choices=["documents", "computing"], action=GetExtensions)
 group = parser_g.add_mutually_exclusive_group()
 group.add_argument("-e", "--excl", dest="exclude", nargs="*", action=ExcludeExtensions, help="exclude enumerated extension(s)")
-group.add_argument("-k", "--keep", nargs="*", action=RetainExtensions, help="exclude all extensions but enumerated extension(s)")
+group.add_argument("-k", "--keep", nargs="*", action=KeepExtensions, help="exclude all extensions but enumerated extension(s)")
 parser_g.add_argument("-i", "--incl", dest="include", nargs="*", action=IncludeExtensions, help="include enumerated extension(s)")
