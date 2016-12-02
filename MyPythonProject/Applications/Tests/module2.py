@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from ..shared import zipfileparser
+from ..shared import zipfileparser, epochconverterparser, deleterippinglogparser
 import argparse
 import unittest
 import os
@@ -106,3 +106,50 @@ class TestSecondParser(unittest.TestCase):
     def test_11eleventh(self):
         arguments = zipfileparser.parse_args([self.documents, "temp", "singled", "doc", "pdf", "txt", "css", "abc"])
         self.assertListEqual(arguments.extensions, ["doc", "pdf", "txt", "css", "abc"])
+
+
+class TestThirdParser(unittest.TestCase):
+
+    def test_01first(self):
+        arguments = epochconverterparser.parse_args(["1480717470", "1480717479"])
+        self.assertEqual(arguments.start, 1480717470)
+        self.assertEqual(arguments.end, 1480717479)
+        self.assertEqual(arguments.zone, "Europe/Paris")
+
+    def test_02second(self):
+        arguments = epochconverterparser.parse_args(["1480717470"])
+        self.assertEqual(arguments.start, 1480717470)
+        self.assertEqual(arguments.end, 1480717470)
+        self.assertEqual(arguments.zone, "Europe/Paris")
+
+    def test_03third(self):
+        arguments = epochconverterparser.parse_args(["1480717470", "-z", "US/Eastern"])
+        self.assertEqual(arguments.start, 1480717470)
+        self.assertEqual(arguments.end, 1480717470)
+        self.assertEqual(arguments.zone, "US/Eastern")
+
+    def test_04fourth(self):
+        arguments = epochconverterparser.parse_args(["1480717470", "1480717479", "-z", "US/Eastern"])
+        self.assertEqual(arguments.start, 1480717470)
+        self.assertEqual(arguments.end, 1480717479)
+        self.assertEqual(arguments.zone, "US/Eastern")
+
+
+class TestFourthParser(unittest.TestCase):
+
+    def test_01first(self):
+        arguments = deleterippinglogparser.parse_args(["singled", "1", "100"])
+        self.assertListEqual(arguments.uid, [1, 100])
+
+    def test_02second(self):
+        arguments = deleterippinglogparser.parse_args(["singled", "1", "2", "3", "4", "100"])
+        self.assertListEqual(arguments.uid, [1, 2, 3, 4, 100])
+
+    def test_03third(self):
+        arguments = deleterippinglogparser.parse_args(["ranged", "1", "100"])
+        self.assertListEqual(arguments.uid, list(range(1, 101)))
+
+    def test_04fourth(self):
+        arguments = deleterippinglogparser.parse_args(["ranged", "100"])
+        self.assertListEqual(arguments.uid, list(range(100, 10000)))
+
