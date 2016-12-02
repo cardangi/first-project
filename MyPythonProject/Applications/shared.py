@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 import io
 import os
 import locale
@@ -8,6 +9,7 @@ import itertools
 import logging.handlers
 from pytz import timezone
 from string import Template
+from itertools import repeat
 from datetime import datetime
 from dateutil.tz import gettz
 from operator import itemgetter
@@ -55,6 +57,7 @@ IMAGES = "H:\\"
 EXIT = 11
 BACK = 12
 EXTENSIONS = {"computing": ["py", "json", "yaml", "cmd", "css", "xsl"], "documents": ["doc", "txt", "pdf", "xav"]}
+ZONES = ["US/Pacific", "US/Eastern", "Indian/Mayotte", "Asia/Tokyo", "Australia/Sydney"]
 
 
 # ========
@@ -482,6 +485,32 @@ def enumeratetupleslist(thatlist):
     return [(a, b, c) for a, (b, c) in enumerate(sorted(thatlist, key=itemgetter(0)), 1)]
 
 
+def getdatefromepoch(start, end, zone=DFTTIMEZONE):
+
+    def func1(item, iterable, pos=0):
+        iterable.insert(pos, item)
+        return iterable
+
+    def func2(item, iterable, pos=0):
+        iterable.insert(pos, dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(item)), TEMPLATE3))
+        return iterable
+
+    logger = logging.getLogger("{0}.getdatefromepoch".format(__name__))
+    if start > end:
+        raise ValueError("Start epoch {0} must be lower than or equal to end epoch {1}".format(start, end))
+    epochlist, epoch, zones = [], list(range(start, end + 1)), list(ZONES)
+    zones.insert(2, zone)
+    epochlist = [list(i) for i in zip(*[list(map(getdatetime, epoch, repeat(zone))) for zone in zones])]
+    epochlist = list(map(func1, epoch, epochlist))
+    return list(map(func2, epoch, epochlist, repeat(1)))
+
+
+def validepoch(ep):
+    if not re.match(r"^\d{10}$", ep):
+        raise argparse.ArgumentTypeError('"{0}" is not a valid epoch'.format(ep))
+    return int(ep)
+
+
 # ==========================
 # Jinja2 Customized filters.
 # ==========================
@@ -509,11 +538,11 @@ def now():
 # ========
 # Parsers.
 # ========
-# python script "source" "destination" singled doc pdf txt xav
-# python script "source" "destination" grouped "documents" 
-# python script "source" "destination" grouped "documents" -e pdf
-# python script "source" "destination" grouped "documents" -k pdf
-# python script "source" "destination" grouped "documents" -i py
+
+
+#     ---------
+#  1. PARSER 1.
+#     ---------
 zipfileparser = argparse.ArgumentParser()
 zipfileparser.add_argument("source", type=validpath)
 zipfileparser.add_argument("destination", choices=["documents", "backup", "temp", "onedrive"], action=GetPath)
@@ -530,3 +559,12 @@ group = parser_g.add_mutually_exclusive_group()
 group.add_argument("-e", "--excl", dest="exclude", nargs="*", action=ExcludeExtensions, help="exclude enumerated extension(s)")
 group.add_argument("-k", "--keep", nargs="*", action=KeepExtensions, help="exclude all extensions but enumerated extension(s)")
 parser_g.add_argument("-i", "--incl", dest="include", nargs="*", action=IncludeExtensions, help="include enumerated extension(s)")
+
+
+#     ---------
+#  2. PARSER 2.
+#     ---------
+epochconverterparser = argparse.ArgumentParser()
+epochconverterparser.add_argument("start", help="Start epoch", type=validepoch)
+epochconverterparser.add_argument("end", help="End epoch", type=validepoch)
+epochconverterparser.add_argument("-z", "--zone", help="Time zone", default=DFTTIMEZONE)
