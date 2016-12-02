@@ -152,3 +152,7 @@ class TestFourthParser(unittest.TestCase):
     def test_04fourth(self):
         arguments = deleterippinglogparser.parse_args(["ranged", "100"])
         self.assertListEqual(arguments.uid, list(range(100, 10000)))
+
+    def test_05fifth(self):
+        arguments = deleterippinglogparser.parse_args(["ranged", "245", "368"])
+        self.assertListEqual(arguments.uid, list(range(245, 369)))
