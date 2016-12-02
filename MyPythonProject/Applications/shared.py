@@ -512,7 +512,7 @@ def now():
 # python script "source" "destination" singled doc pdf txt xav
 # python script "source" "destination" grouped "documents" 
 # python script "source" "destination" grouped "documents" -e pdf
-# python script "source" "destination" grouped "documents" -r pdf
+# python script "source" "destination" grouped "documents" -k pdf
 # python script "source" "destination" grouped "documents" -i py
 zipfileparser = argparse.ArgumentParser()
 zipfileparser.add_argument("source", type=validpath)
@@ -527,6 +527,6 @@ parser_s.add_argument("extensions", nargs="+")
 parser_g = subparsers.add_parser("grouped")
 parser_g.add_argument("group", nargs="+", choices=["documents", "computing"], action=GetExtensions)
 group = parser_g.add_mutually_exclusive_group()
-group.add_argument("-e", "--exc", dest="exclude", nargs="*", action=ExcludeExtensions, help="exclude enumerated extension(s)")
-group.add_argument("-r", "--ret", dest="retain", nargs="*", action=RetainExtensions, help="exclude all extensions but enumerated extension(s)")
-parser_g.add_argument("-i", "--inc", dest="include", nargs="*", action=IncludeExtensions, help="include enumerated extension(s)")
+group.add_argument("-e", "--excl", dest="exclude", nargs="*", action=ExcludeExtensions, help="exclude enumerated extension(s)")
+group.add_argument("-k", "--keep", nargs="*", action=RetainExtensions, help="exclude all extensions but enumerated extension(s)")
+parser_g.add_argument("-i", "--incl", dest="include", nargs="*", action=IncludeExtensions, help="include enumerated extension(s)")
