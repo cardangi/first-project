@@ -69,7 +69,7 @@ REM --------------
 IF ERRORLEVEL 31 (
     CLS
     PUSHD %_PYTHONPROJECT%
-    python -m unittest -v Applications.Tests.module2.TestParser
+    python -m unittest -v Applications.Tests.module2
     POPD
     PAUSE
     GOTO MENU

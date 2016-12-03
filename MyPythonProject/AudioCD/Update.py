@@ -5,6 +5,7 @@ import sys
 import yaml
 import logging
 import argparse
+from Applications import shared
 from logging.config import dictConfig
 from collections import MutableMapping
 from Applications.Database.AudioCD.shared import update
@@ -67,7 +68,7 @@ class UpdateRippingLog(MutableMapping):
     # -------------
     @property
     def uid(self):
-        return list(self._uid)
+        return self._uid
 
     @uid.setter
     def uid(self, arg):
@@ -177,7 +178,10 @@ parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.
 # ================
 # Initializations.
 # ================
-regex, arguments = re.compile("\d(?:\d(?:\d(?:\d)?)?)?"), parser.parse_args()
+rex1, rex2, rex3, arguments = re.compile("\d(?:\d(?:\d(?:\d)?)?)?"), \
+                              re.compile(r"^(?:{0})$".format(shared.DFTYEARREGEX)), \
+                              re.compile(r"^1\.(?:{0})0000\.\d$".format(shared.DFTYEARREGEX)), \
+                              parser.parse_args()
 
 
 # ===============
@@ -195,19 +199,37 @@ if __name__ == "__main__":
             inp, fld = records()
             while True:
                 choice = input("{0}. {1}: ".format(records.index, inp))
-                if records.index == 1:
-                    uid = regex.findall(choice)
+
+                # Check if record(s) ID are composed of digits only.
+                if fld == "uid":
+                    uid = rex1.findall(choice)
                     if uid:
                         choice = uid
                         break
                     continue
+
+                # Check if year is coherent.
+                elif fld == "year":
+                    if rex2.match(choice):
+                        choice = int(choice)
+                        break
+                    continue
+
+                # Check if albumsort is coherent.
+                elif fld == "albumsort":
+                    if rex3.match(choice):
+                        break
+                    continue
+
                 break
             if choice:
                 setattr(records, fld, choice)
+
         except KeyError:
             break
 
     logger.debug(records.uid)
     for tup in records.items():
         logger.debug("{t[0]}: {t[1]}".format(t=tup))
+        logger.debug(type(tup[1]))
     sys.exit(update(*records.uid, db=arguments.database, **records))

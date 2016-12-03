@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import argparse
 from . import shared
 
@@ -39,6 +40,7 @@ epochconverterparser.add_argument("-z", "--zone", help="Time zone", default=shar
 #  3. PARSER 3.
 #     =========
 deleterippinglogparser = argparse.ArgumentParser()
+deleterippinglogparser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=shared.validdb)
 subparsers = deleterippinglogparser.add_subparsers()
 
 # Singled record(s) unique ID.
