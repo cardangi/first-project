@@ -41,12 +41,12 @@ def convert_encoder(e):
 if __name__ == "__main__":
 
     sqlite3.register_adapter(Encoder, adapt_encoder)
-    sqlite3.register_converter("encoder", convert_encoder)
+    sqlite3.register_converter("toto", convert_encoder)
 
     c = sqlite3.connect(DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
     c.row_factory = sqlite3.Row
     c.execute("DROP TABLE IF EXISTS encoders")
-    c.execute("CREATE TABLE IF NOT EXISTS encoders (encoder ENCODER NOT NULL)")
+    c.execute("CREATE TABLE IF NOT EXISTS encoders (encoder TOTO NOT NULL)")
     c.execute("INSERT INTO encoders (encoder) VALUES (?)", (Encoder("FLAC", "13", "1.Lossless Audio Codec", "some informations"),))
     for row in c.execute("SELECT encoder FROM encoders ORDER BY encoder"):
         print(row["encoder"].name)

@@ -2,7 +2,8 @@
 import re
 import json
 import sqlite3
-import  logging
+import logging
+from itertools import repeat
 from datetime import datetime
 from ...shared import DATABASE
 from collections import MutableSequence
@@ -144,3 +145,33 @@ def selectfromuid(uid, db=DATABASE):
         for item in tuple(row):
             logger.debug("\t{0}".format(item).expandtabs(3))
         yield tuple(row)
+
+
+def update(*uid, db=DATABASE, **kwargs):
+
+    def thatfunc(a, b):
+        """
+        Append record unique ID b in list a.
+        :param a: list.
+        :param b: record unique ID.
+        :return: tupled list a.
+        """
+        a.append(b)
+        return tuple(a)
+
+    logger = logging.getLogger("{0}.update".format(__name__))
+    status, query, args = 0, "", []
+    for k, v in kwargs.items():
+        query = "{0}{1}=?, ".format(query, k)  # album=?, albumid=?, "
+        args.append(v)  # ["the album", "T.Toto.1.19840000.1.D1.T01.NNN"]
+    conn = sqlite3.connect(db)
+    try:
+        with conn:
+            conn.executemany("UPDATE rippinglog SET {0} WHERE rowid=?".format(query[:-2]), list(map(thatfunc, repeat(args), uid)))
+            # [("the album", "T.Toto.1.19840000.1.D1.T01.NNN", 1), ("the album", "T.Toto.1.19840000.1.D1.T01.NNN", 2), ("the album", "T.Toto.1.19840000.1.D1.T01.NNN", 3)]
+            status = conn.total_changes
+    except (sqlite3.OperationalError, sqlite3.Error) as err:
+        logger.exception(err)
+    else:
+        logger.debug("{0:>3d} record(s) updated.".format(status))
+    return status
