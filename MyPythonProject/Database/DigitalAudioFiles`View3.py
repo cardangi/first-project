@@ -29,8 +29,8 @@ def thatfunc(d):
 
 def thatotherfunc(b):
     if b:
-        return "default"
-    return "info"
+        return "Default"
+    return "Info"
 
 
 # =================
@@ -55,7 +55,6 @@ arguments = parser.parse_args()
 dictConfig(yaml.load(arguments.logging))
 logger = logging.getLogger("{1}.{0}".format(os.path.splitext(os.path.basename(__file__))[0], thatotherfunc(arguments.debug)))
 logger.debug(__file__)
-logger.info(__file__)
 
 
 # ===============

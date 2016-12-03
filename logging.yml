@@ -18,17 +18,23 @@ loggers:
     handlers: [file]
     propagate: no
 #
+# INFO logger.
+  Info:
+    level: INFO
+    handlers: [file]
+    propagate: no
+#
 # Loggers for Audio CD processing Application.
   Ripper:
-    level: DEBUG
+    level: INFO
     handlers: [file]
     propagate: no
   Applications.Database.AudioCD:
-    level: DEBUG
+    level: INFO
     handlers: [file]
     propagate: no
   Applications.AudioCD:
-    level: DEBUG
+    level: INFO
     handlers: [file]
     propagate: no
 #
