@@ -1,19 +1,11 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 import os
 import sys
 import argparse
+from Applications.shared import validdb
 from Applications.Database.DigitalAudioFiles.shared import insertfromfile
 
 __author__ = 'Xavier ROSSET'
-
-
-# ==========
-# Functions.
-# ==========
-def validdb(arg):
-    if not os.path.exists(arg):
-        raise argparse.ArgumentTypeError('"{0}" doesn\'t exist.'.format(arg))
-    return arg
 
 
 # =================
