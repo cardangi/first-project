@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from ..shared import zipfileparser, epochconverterparser, deleterippinglogparser
+from ..parsers import zipfileparser, epochconverterparser, deleterippinglogparser
 import argparse
 import unittest
 import os

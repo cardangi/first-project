@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from Applications.Database.AudioCD.shared import deletefromuid
-from Applications.shared import deleterippinglogparser
+from Applications.parsers import deleterippinglogparser
 from logging.config import dictConfig
 import logging
 import yaml

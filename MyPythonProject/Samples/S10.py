@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from Applications.shared import now, getdatefromepoch, WRITE, UTF8, epochconverterparser
+from Applications.shared import now, getdatefromepoch, WRITE, UTF8
+from Applications.parsers import  epochconverterparser
 from logging.config import dictConfig
 import logging
 import json
