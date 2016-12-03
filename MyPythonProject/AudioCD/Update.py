@@ -16,7 +16,7 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Classes.
 # ========
-class UpdateRippingLog(MutableMapping):
+class RippingLog(MutableMapping):
 
     inputs = {"1": ("Enter record(s) unique ID", "uid"),
               "2": ("Enter artist new value ", "artist"),
@@ -159,20 +159,11 @@ class UpdateRippingLog(MutableMapping):
         self._query["artistsort"] = arg
 
 
-# ==========
-# Functions.
-# ==========
-def validdb(arg):
-    if not os.path.exists(arg):
-        raise argparse.ArgumentTypeError('"{0}" doesn\'t exist.'.format(arg))
-    return arg
-
-
 # =================
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=validdb)
+parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=shared.validdb)
 
 
 # ================
@@ -193,14 +184,14 @@ if __name__ == "__main__":
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
-    choice, records = None, UpdateRippingLog()
+    choice, record = None, RippingLog()
     while True:
         try:
-            inp, fld = records()
+            inp, fld = record()
             while True:
-                choice = input("{0}. {1}: ".format(records.index, inp))
+                choice = input("{0}. {1}: ".format(record.index, inp))
 
-                # Check if record(s) ID are composed of digits only.
+                # Check if record(s) ID are coherent.
                 if fld == "uid":
                     uid = rex1.findall(choice)
                     if uid:
@@ -223,13 +214,13 @@ if __name__ == "__main__":
 
                 break
             if choice:
-                setattr(records, fld, choice)
+                setattr(record, fld, choice)
 
         except KeyError:
             break
 
-    logger.debug(records.uid)
-    for tup in records.items():
+    logger.debug(record.uid)
+    for tup in record.items():
         logger.debug("{t[0]}: {t[1]}".format(t=tup))
         logger.debug(type(tup[1]))
-    sys.exit(update(*records.uid, db=arguments.database, **records))
+    sys.exit(update(*record.uid, db=arguments.database, **record))
