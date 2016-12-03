@@ -453,10 +453,10 @@ def validpath(p):
     return p
 
 
-def validdb(arg):
-    if not os.path.exists(arg):
-        raise argparse.ArgumentTypeError('"{0}" doesn\'t exist.'.format(arg))
-    return arg
+def validdb(db):
+    if not os.path.exists(db):
+        raise argparse.ArgumentTypeError('"{0}" doesn\'t exist.'.format(db))
+    return db
 
 
 def directorytree(tree):
