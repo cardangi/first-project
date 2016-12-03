@@ -1,8 +1,10 @@
-# -*- coding: ISO-8859-1 -*-
-__author__ = 'Xavier ROSSET'
-
+# -*- coding: utf-8 -*-
+from Applications.shared import DATABASE
 import sqlite3
 
-conn = sqlite3.connect(r"g:\computing\database.db")
+__author__ = 'Xavier ROSSET'
+
+
+conn = sqlite3.connect(DATABASE)
 conn.execute("VACUUM")
 conn.close()
