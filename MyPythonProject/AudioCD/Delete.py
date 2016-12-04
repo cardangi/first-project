@@ -40,16 +40,16 @@ arguments = parser.parse_args()
 while True:
     arg = input("Please enter record(s) unique ID: ")
 
-    # Ranged UID.
+    # Ranged Unique ID.
     match = rex2.match(arg)
     if match:
         uid = range(int(match.group(1)), int(match.group(2)) + 1)
         break
 
-    # Singled UID.
+    # Singled Unique ID.
     uid = rex1.findall(arg)
     if uid:
         uid = map(int, uid)
         break
 
-sys.exit(deletefromuid(*uid, db=arguments.database))
+sys.exit(deletefromuid(*list(uid), db=arguments.database))
