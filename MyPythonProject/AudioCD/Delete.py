@@ -1,26 +1,24 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 import os
 import re
 import sys
 import argparse
+from Applications.shared import validdb
 from Applications.Database.AudioCD.shared import deletefromuid
 
 __author__ = 'Xavier ROSSET'
 
 
-# ==========
-# Functions.
-# ==========
-def validdb(arg):
-    if not os.path.exists(arg):
-        raise argparse.ArgumentTypeError('"{0}" doesn\'t exist.'.format(arg))
-    return arg
+# ================
+# Initializations.
+# ================
+digits = r"\d(?:\d(?:\d(?:\d)?)?)?"
 
 
 # ====================
 # Regular expressions.
 # ====================
-regex = re.compile("\d(?:\d(?:\d(?:\d)?)?)?")
+rex1, rex2 = re.compile(digits), re.compile(r"^({0})\b\s?-\s?\b({0})$".format(digits))
 
 
 # =================
@@ -40,8 +38,18 @@ arguments = parser.parse_args()
 # Main algorithm.
 # ===============
 while True:
-    numbers = input("Please enter record(s) unique ID: ")
-    args = regex.findall(numbers)
-    if args:
+    arg = input("Please enter record(s) unique ID: ")
+
+    # Ranged UID.
+    match = rex2.match(arg)
+    if match:
+        uid = range(int(match.group(1)), int(match.group(2)) + 1)
         break
-sys.exit(deletefromuid(*args, db=arguments.database))
+
+    # Singled UID.
+    uid = rex1.findall(arg)
+    if uid:
+        uid = map(int, uid)
+        break
+
+sys.exit(deletefromuid(*uid, db=arguments.database))

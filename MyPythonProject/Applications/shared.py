@@ -531,14 +531,12 @@ def getdatefromepoch(start, end, zone=DFTTIMEZONE):
     def func3(ts, tz):
         return dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(ts)).astimezone(timezone(tz)), TEMPLATE3)
 
-    # logger = logging.getLogger("{0}.getdatefromepoch".format(__name__))
     if start > end:
         raise ValueError("Start epoch {0} must be lower than or equal to end epoch {1}".format(start, end))
-    epochlist, epoch, zones = [], list(range(start, end + 1)), list(ZONES)
+    epoch, zones = list(range(start, end + 1)), list(ZONES)
     zones.insert(2, zone)
-    epochlist = [list(i) for i in zip(*[list(map(func3, epoch, repeat(zone))) for zone in zones])]
-    epochlist = list(map(func1, epoch, epochlist))
-    return list(map(func2, epoch, epochlist, repeat(1)))
+    epochlist = [list(i) for i in zip(*[map(func3, epoch, repeat(zone)) for zone in zones])]
+    return list(map(func2, epoch, map(func1, epoch, epochlist), repeat(1)))
 
 
 def validepoch(ep):
@@ -563,5 +561,5 @@ def ljustify(s, width):
 
 
 def repeatelement(elem, n):
-    for i in list(itertools.repeat(elem, n)):
+    for i in itertools.repeat(elem, n):
         yield i
