@@ -63,8 +63,8 @@ class ImagesCollection(MutableSequence):
         collection = list()
         for i in range(1, 13):
             month = "{0}{1:0>2}".format(m, i)
-            if os.path.exists(os.path.normpath(os.path.join(r"h:\\", month))):
-                collection.append((month, list(glob.iglob(os.path.normpath(os.path.join(r"h:\\", month, r"*.jpg"))))))
+            if os.path.exists(os.path.normpath(os.path.join(shared.IMAGES, month))):
+                collection.append((month, list(glob.iglob(os.path.normpath(os.path.join(shared.IMAGES, month, r"*.jpg"))))))
         return collection
 
     @staticmethod
@@ -108,8 +108,8 @@ class Log(object):
         return self._index
 
     @index.setter
-    def index(self, psarg):
-        self._index = psarg
+    def index(self, arg):
+        self._index = arg
 
     def __call__(self, *args, **kwargs):
         self.index += 1
@@ -182,7 +182,7 @@ status, nt, results, log, arguments = 99, namedtuple("nt", "match sequence"), []
 # ========
 # Logging.
 # ========
-with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding=shared.UTF8) as fp:
     dictConfig(yaml.load(fp))
 logger = logging.getLogger("Images.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 logger.info(MODES[arguments.test].upper())
@@ -198,8 +198,8 @@ for year in arguments.year:
         logger.exception("Value error: {0}.".format(exception))
     else:
         for keys, values in collection:
-            curdir = os.path.normpath(os.path.join(r"h:\\", keys))
-            files = sorted(glob.glob(os.path.normpath(os.path.join(r"h:\\", keys, r"*.jpg"))))
+            curdir = os.path.normpath(os.path.join(shared.IMAGES, keys))
+            files = sorted(glob.glob(os.path.normpath(os.path.join(shared.IMAGES, keys, r"*.jpg"))))
             args = list(zip(map(os.path.basename, files), map(func2, files), map(func3, repeat(keys), values)))
 
             #    -------------------------------------------------------------------
