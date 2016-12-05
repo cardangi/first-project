@@ -38,7 +38,7 @@ class AudioCDTrack(MutableMapping):
         self._otags = dict()
 
         # ----- Check mandatory input tags.
-        for item in [item for item in AudioCDTrack.tags if AudioCDTrack.tags[item]]:
+        for item in (item for item in AudioCDTrack.tags if AudioCDTrack.tags[item]):
             if item not in kwargs:
                 raise ValueError("{0} isn\'t available.".format(item))
         if not regex.match(kwargs["track"]):
@@ -70,7 +70,7 @@ class AudioCDTrack(MutableMapping):
         # ----- Set encoder attributes.
         self.logger.debug("Set encoder attributes.")
         for encoder in self.deserialize(ENCODERS):  # "encoder" est un dictionnaire.
-            if sorted(list(encoder.keys())) == sorted(ENC_KEYS):
+            if sorted(encoder) == sorted(ENC_KEYS):
                 if kwargs["encoder"] == encoder["name"]:
                     self._otags["encoder"] = kwargs["encoder"]
                     self._encoder = nt(encoder["name"], encoder["code"], encoder["folder"], encoder["extension"])
@@ -365,7 +365,7 @@ class DefaultCDTrack(AudioCDTrack):
         super(DefaultCDTrack, self).__init__(**kwargs)
 
         # ----- Check mandatory input tags.
-        for item in [item for item in DefaultCDTrack.tags if DefaultCDTrack.tags[item]]:
+        for item in (item for item in DefaultCDTrack.tags if DefaultCDTrack.tags[item]):
             if item not in kwargs:
                 raise ValueError("{0} isn\'t available.".format(item))
 
@@ -409,7 +409,7 @@ class SelfTitledCDTrack(DefaultCDTrack):
         super(SelfTitledCDTrack, self).__init__(**kwargs)
 
         # ----- Check mandatory input tags.
-        for item in [item for item in SelfTitledCDTrack.tags if SelfTitledCDTrack.tags[item]]:
+        for item in (item for item in SelfTitledCDTrack.tags if SelfTitledCDTrack.tags[item]):
             if item not in kwargs:
                 raise ValueError("{0} isn\'t available.".format(item))
 
@@ -433,7 +433,7 @@ class BootlegCDTrack(AudioCDTrack):
         super(BootlegCDTrack, self).__init__(**kwargs)
 
         # ----- Check mandatory input tags.
-        for item in [item for item in BootlegCDTrack.tags if BootlegCDTrack.tags[item]]:
+        for item in (item for item in BootlegCDTrack.tags if BootlegCDTrack.tags[item]):
             if item not in kwargs:
                 raise ValueError("{0} isn\'t available.".format(item))
 
@@ -479,7 +479,7 @@ class SpringsteenBootlegCDTrack(BootlegCDTrack):
         super(SpringsteenBootlegCDTrack, self).__init__(**kwargs)
 
         # ----- Check mandatory input tags.
-        for item in [item for item in SpringsteenBootlegCDTrack.tags if SpringsteenBootlegCDTrack.tags[item]]:
+        for item in (item for item in SpringsteenBootlegCDTrack.tags if SpringsteenBootlegCDTrack.tags[item]):
             if item not in kwargs:
                 raise ValueError("{0} isn\'t available.".format(item))
 
@@ -740,7 +740,7 @@ def canfilebeprocessed(fe, *tu):
         return False
     if not tu:
         return True
-    if fe.lower() in [item.lower() for item in tu]:
+    if fe.lower() in (item.lower() for item in tu):
         return True
     return False
 
@@ -869,7 +869,7 @@ def getmetadata(audiofil):
         return result(False, {})
 
     # Is "audiofil" type FLAC or Monkey's Audio?
-    if any([isinstance(fil, mutagen.flac.FLAC), isinstance(fil, mutagen.monkeysaudio.MonkeysAudio)]):
+    if any(isinstance(fil, mutagen.flac.FLAC), isinstance(fil, mutagen.monkeysaudio.MonkeysAudio)):
 
         # --> FLAC.
         try:
