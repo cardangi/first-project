@@ -493,19 +493,16 @@ def dateformat(dt, template):
                                          )
 
 
-def filesinfolder(*extensions, folder=os.getcwd()):
-    l = []
-    if extensions:
-        l = sorted([i.lower() for i in extensions])
+def filesinfolder(*extensions, folder):
     for root, folders, files in os.walk(folder):
         for file in files:
-            select_file = False
+            return_file = False
             ext = os.path.splitext(file)[1][1:].lower()
-            if not l:
-                select_file = True
-            elif l and ext in l:
-                select_file = True
-            if not select_file:
+            if not extensions:
+                return_file = True
+            elif extensions and ext in (i.lower() for i in extensions):
+                return_file = True
+            if not return_file:
                 continue
             yield os.path.join(root, file)
 
@@ -533,10 +530,10 @@ def getdatefromepoch(start, end, zone=DFTTIMEZONE):
 
     if start > end:
         raise ValueError("Start epoch {0} must be lower than or equal to end epoch {1}".format(start, end))
-    epoch, zones = list(range(start, end + 1)), list(ZONES)
+    seconds, zones = range(start, end + 1), list(ZONES)
     zones.insert(2, zone)
-    epochlist = [list(i) for i in zip(*[map(func3, epoch, repeat(zone)) for zone in zones])]
-    return list(map(func2, epoch, map(func1, epoch, epochlist), repeat(1)))
+    genexp = (list(i) for i in zip(*(map(func3, seconds, repeat(zone)) for zone in zones)))
+    return map(func2, seconds, map(func1, seconds, genexp), repeat(1))
 
 
 def validepoch(ep):
