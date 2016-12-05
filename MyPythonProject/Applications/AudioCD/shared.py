@@ -106,7 +106,7 @@ class AudioCDTrack(MutableMapping):
         # ----- Update title.
         self.logger.debug("Update title.")
         for track in self.deserialize(TITLES):  # "track" est un dictionnaire.
-            if sorted(list(track.keys())) == sorted(TIT_KEYS):
+            if sorted(track) == sorted(TIT_KEYS):
                 if self._otags["track"] == track["number"]:
                     if track["overwrite"]:
                         self._otags["title"] = track["title"]
