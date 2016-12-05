@@ -494,6 +494,12 @@ def dateformat(dt, template):
 
 
 def filesinfolder(*extensions, folder):
+    """
+    Return a generator object yielding files stored in "folder" having extension enumerated in "extensions".
+    :param extensions: not mandatory list of extension(s) to filter files.
+    :param folder: folder to walk through.
+    :return: generator object.
+    """
     for root, folders, files in os.walk(folder):
         for file in files:
             return_file = False
@@ -507,16 +513,14 @@ def filesinfolder(*extensions, folder):
             yield os.path.join(root, file)
 
 
-def enumeratesortedlistcontent(thatlist):
-    return sorted(enumerate(sorted(thatlist), 1), key=itemgetter(0))
-
-
-def enumeratetupleslist(thatlist):
-    return [(a, b, c) for a, (b, c) in enumerate(sorted(thatlist, key=itemgetter(0)), 1)]
-
-
-def getdatefromepoch(start, end, zone=DFTTIMEZONE):
-
+def getdatefromepoch(start, stop, zone=DFTTIMEZONE):
+    """
+    Return a map object yielding human readable dates corresponding to a range of seconds since the epoch.
+    :param start: range start seconds.
+    :param stop: range stop seconds.
+    :param zone: not mandatory time zone appended to the map object.
+    :return: map object.
+    """
     def func1(item, iterable, pos=0):
         iterable.insert(pos, item)
         return iterable
@@ -528,18 +532,25 @@ def getdatefromepoch(start, end, zone=DFTTIMEZONE):
     def func3(ts, tz):
         return dateformat(timezone("UTC").localize(datetime.utcfromtimestamp(ts)).astimezone(timezone(tz)), TEMPLATE3)
 
-    if start > end:
-        raise ValueError("Start epoch {0} must be lower than or equal to end epoch {1}".format(start, end))
-    seconds, zones = range(start, end + 1), list(ZONES)
+    if start > stop:
+        raise ValueError("Start epoch {0} must be lower than or equal to end epoch {1}".format(start, stop))
+    seconds, zones = range(start, stop + 1), list(ZONES)
     zones.insert(2, zone)
-    genexp = (list(i) for i in zip(*(map(func3, seconds, repeat(zone)) for zone in zones)))
-    return map(func2, seconds, map(func1, seconds, genexp), repeat(1))
+    return map(func2, seconds, map(func1, seconds, (list(i) for i in zip(*(map(func3, seconds, repeat(zone)) for zone in zones)))), repeat(1))
 
 
-def validepoch(ep):
-    if not re.match(r"^\d{10}$", ep):
-        raise argparse.ArgumentTypeError('"{0}" is not a valid epoch'.format(ep))
-    return int(ep)
+def validseconds(seconds):
+    if not re.match(r"^\d{10}$", seconds):
+        raise argparse.ArgumentTypeError('"{0}" is not a valid epoch'.format(seconds))
+    return int(seconds)
+
+
+def enumeratesortedlistcontent(thatlist):
+    return sorted(enumerate(sorted(thatlist), 1), key=itemgetter(0))
+
+
+def enumeratetupleslist(thatlist):
+    return [(a, b, c) for a, (b, c) in enumerate(sorted(thatlist, key=itemgetter(0)), 1)]
 
 
 # ==========================

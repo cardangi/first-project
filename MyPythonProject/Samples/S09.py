@@ -3,7 +3,8 @@ import os
 import yaml
 import logging
 from logging.config import dictConfig
-from Applications.shared import filesinfolder, zipfileparser
+from Applications.shared import filesinfolder
+from Applications.parsers import zipfileparser
 
 __author__ = "Xavier ROSSET"
 

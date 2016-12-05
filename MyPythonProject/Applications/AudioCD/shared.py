@@ -552,7 +552,6 @@ class RippedCD(ContextDecorator):
     def __enter__(self):
 
         # --> 1. Start logging.
-        # self.logger.debug("{0:=^140}".format(" {0} ".format(shared.dateformat(datetime.now(tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1))))
         self.logger.debug('START "%s".' % (os.path.basename(__file__),))
         self.logger.debug('"{0}" used as ripping profile.'.format(self.profile))
 
@@ -852,24 +851,26 @@ def digitalaudiobase(track, fil=os.path.join(os.path.expandvars("%TEMP%"), "digi
 def getmetadata(audiofil):
     """
     Return metada from an audio file. FLAC or Monkey's Audio are only processed.
-    Return a two attributes named tuple:
+    Return a four attributes named tuple:
+        - "file". Both dirname and basename of the audio file.
         - "found". Boolean value depending on whether metadata have been found or not.
         - "tags". Dictionary enumerating each metadata found.
+        - "object". Mutagen object.
     """
-    tags, result = {}, namedtuple("result", "found tags")
+    tags, result = {}, namedtuple("result", "file found tags object")
 
     # Guess "audiofil" type.
     try:
         fil = mutagen.File(audiofil)
     except mutagen.MutagenError:
-        return result(False, {})
+        return result(audiofil, False, {}, None)
 
     # Is "audiofil" a valid audio file?
     if not fil:
-        return result(False, {})
+        return result(audiofil, False, {}, None)
 
     # Is "audiofil" type FLAC or Monkey's Audio?
-    if any(isinstance(fil, mutagen.flac.FLAC), isinstance(fil, mutagen.monkeysaudio.MonkeysAudio)):
+    if any([isinstance(fil, mutagen.flac.FLAC), isinstance(fil, mutagen.monkeysaudio.MonkeysAudio)]):
 
         # --> FLAC.
         try:
@@ -889,8 +890,18 @@ def getmetadata(audiofil):
 
     # Have "audiofil" metadata been retrieved?
     if not tags:
-        return result(False, {})
-    return result(True, tags)
+        return result(audiofil, False, {}, None)
+    return result(audiofil, True, tags, fil)
+
+
+def audiofilesinfolder(*extensions, folder):
+    """
+    Return a generator object yielding both FLAC and Monkey's Audio files stored in "folder" having extension enumerated in "extensions".
+    :param extensions: not mandatory list of extension(s) to filter files.
+    :param folder: folder to walk through.
+    :return: generator object.
+    """
+    return ((result.file, result.object, result.tags) for result in map(getmetadata, shared.filesinfolder(*extensions, folder=folder)) if result.found)
 
 
 # ================

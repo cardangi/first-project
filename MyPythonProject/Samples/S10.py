@@ -28,7 +28,7 @@ arguments = epochconverterparser.parse_args()
 # Main algorithm.
 # ===============
 try:
-    mylist = getdatefromepoch(arguments.start, arguments.end, arguments.zone)
+    mylist = list(getdatefromepoch(arguments.start, arguments.end, arguments.zone))
 except ValueError as err:
     logger.exception(err)
 else:
