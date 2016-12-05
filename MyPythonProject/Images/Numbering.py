@@ -111,9 +111,9 @@ class Log(object):
     def index(self, psarg):
         self._index = psarg
 
-    def __call__(self, src, dst):
+    def __call__(self, *args, **kwargs):
         self.index += 1
-        return '{index:>4d}. Rename "{src}" to "{dst}".'.format(index=self.index, src=src, dst=dst)
+        return '{index:>4d}. Rename "{src}" to "{dst}".'.format(index=self.index, src=kwargs["src"], dst=kwargs["dst"])
 
 
 # ==========
@@ -205,7 +205,7 @@ for year in arguments.year:
             #    -------------------------------------------------------------------
             # 1. Tous les fichiers du répertoire répondent au masque "CCYYMM_xxxxx".
             #    -------------------------------------------------------------------
-            if all([i.match for i in map(func1, map(os.path.basename, files))]):
+            if all(i.match for i in map(func1, map(os.path.basename, files))):
                 try:
                     assert [int(i.sequence) for i in map(func1, map(os.path.basename, files))] == values
                 except AssertionError:
@@ -242,7 +242,7 @@ for year in arguments.year:
             #    ---------------------------------------------------------------
             # 2. Aucun fichier du répertoire ne répond au masque "CCYYMM_xxxxx".
             #    ---------------------------------------------------------------
-            if all([not i.match for i in map(func1, map(os.path.basename, files))]):
+            if all(not i.match for i in map(func1, map(os.path.basename, files))):
                 msg = '"{0}": renaming needed.'.format(curdir)
                 with decorator(logger, msg):
                     logger.info(msg)
