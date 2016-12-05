@@ -92,14 +92,14 @@ data = list(select(arguments.database))
 #     --------------------------------------------
 #  2. Initialisation des variables intermédiaires.
 #     --------------------------------------------
-months = dict(set([(shared.dateformat(shared.LOCAL.localize(itemgetter(1)(item)), "$Y$m"),
-                    shared.dateformat(shared.LOCAL.localize(itemgetter(1)(item)), "$month $Y")) for item in data]))
+months = dict(set((shared.dateformat(shared.LOCAL.localize(itemgetter(1)(item)), "$Y$m"),
+                    shared.dateformat(shared.LOCAL.localize(itemgetter(1)(item)), "$month $Y")) for item in data))
 
 
 #     -------------------------------------------------
 #  3. Détail des CDs rippés. Tri par date décroissante.
 #     -------------------------------------------------
-tr4 = [(shared.dateformat(shared.LOCAL.localize(a), shared.TEMPLATE2), b, c, d, e) for a, b, c, d, e in sorted([(
+tr4 = [(shared.dateformat(shared.LOCAL.localize(a), shared.TEMPLATE2), b, c, d, e) for a, b, c, d, e in sorted(((
                                                                                                                     itemgetter(1)(item),
                                                                                                                     itemgetter(2)(item),
                                                                                                                     itemgetter(3)(item),
@@ -107,7 +107,7 @@ tr4 = [(shared.dateformat(shared.LOCAL.localize(a), shared.TEMPLATE2), b, c, d, 
                                                                                                                     path.substitute(a=getfirstletter(itemgetter(9)(item), itemgetter(2)(item)),
                                                                                                                                     b=itemgetter(9)(item),
                                                                                                                                     c=itemgetter(8)(item)).replace(" ", r"%20")
-                                                                                                                ) for item in data], key=itemgetter(0), reverse=True)]
+                                                                                                                ) for item in data), key=itemgetter(0), reverse=True)]
 
 
 #     ---------------------------------------------------------------------
@@ -116,7 +116,7 @@ tr4 = [(shared.dateformat(shared.LOCAL.localize(a), shared.TEMPLATE2), b, c, d, 
 tr1 = t2.render(id="artist1",
                 h2="Palmarès par artiste",
                 th=["artist", "count"],
-                tr=sorted(Counter([itemgetter(2)(item) for item in data]).items()), key=itemgetter(0)
+                tr=sorted(Counter(itemgetter(2)(item) for item in data).items()), key=itemgetter(0)
                 )
 
 
@@ -126,7 +126,7 @@ tr1 = t2.render(id="artist1",
 tr2 = t2.render(id="artist2",
                 h2="Palmarès par artiste",
                 th=["artist", "count"],
-                tr=sorted(sorted(Counter([itemgetter(2)(item) for item in data]).items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)
+                tr=sorted(sorted(Counter(itemgetter(2)(item) for item in data).items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)
                 )
 
 
@@ -136,7 +136,7 @@ tr2 = t2.render(id="artist2",
 tr3 = t2.render(id="genre",
                 h2="Palmarès par genre",
                 th=["genre", "count"],
-                tr=sorted(sorted(Counter([itemgetter(6)(item) for item in data]).items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)
+                tr=sorted(sorted(Counter(itemgetter(6)(item) for item in data).items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)
                 )
 
 
@@ -147,7 +147,7 @@ tr5 = t2.render(id="month",
                 h2="Palmarès par mois",
                 th=["month", "count"],
                 tr=[(months[itemgetter(0)(item)], itemgetter(1)(item))
-                    for item in sorted(Counter([shared.dateformat(timezone(shared.DFTTIMEZONE).localize(itemgetter(1)(item)), "$Y$m") for item in data]).items(), key=itemgetter(0))]
+                    for item in sorted(Counter(shared.dateformat(timezone(shared.DFTTIMEZONE).localize(itemgetter(1)(item)), "$Y$m") for item in data).items(), key=itemgetter(0))]
                 )
 
 
