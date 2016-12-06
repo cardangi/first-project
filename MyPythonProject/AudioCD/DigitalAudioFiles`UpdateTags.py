@@ -34,7 +34,7 @@ def updatetags(*extensions, folder=folder, test=True):
     rex = re.compile(r"^(?:{0})\.\d -\B".format(shared.DFTYEARREGEX))
     l = []
 
-    for num, (fil, obj, tags) in enumerate(audiofilesinfolder(*extensions, folder=folder), start=1):
+    for num, (fil, audioobj, tags) in enumerate(audiofilesinfolder(*extensions, folder=folder), start=1):
         if any(tag not in tags for tag in ["album", "albumsort"]):
             continue
         if rex.match(tags["album"]):
@@ -43,18 +43,24 @@ def updatetags(*extensions, folder=folder, test=True):
         logger.debug('{0:>3d}. "{1}".'.format(num, fil))
         logger.debug('\t\tNew album: "{0}".'.format(album).expandtabs(5))
         if not test:
-            try:
-                obj["album"] = album
-                obj.save()
-            except mutagen.MutagenError as err:
-                logger.exception(err)
-            else:
+            if updatetags2(audioobj, album=album):
                 logger.debug('\t"{0}" updated.'.format(fil).expandtabs(5))
                 l.append(fil)
 
     if l:
         logger.debug("{0:>3d} file(s) updated.".format(len(l)))
 
+
+def updatetags2(audioobj, **kwargs):
+
+    try:
+        for k, v in kwargs.items():
+            audioobj[k] = v
+        audioobj.save()
+    except mutagen.MutagenError as err:
+        logger.exception(err)
+        return False
+    return True
 
 # =================
 # Arguments parser.
