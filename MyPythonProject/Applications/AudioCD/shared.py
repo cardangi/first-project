@@ -613,120 +613,6 @@ class RippedCD(ContextDecorator):
         self.logger.debug('END "%s".' % (os.path.basename(__file__),))
 
 
-class AudioFilesCollection(MutableSequence):
-
-    rex1 = re.compile(r"^(?:{0})\.\d -\B".format(shared.DFTYEARREGEX))
-    tags = ["albumsort", "album"]
-    logger = logging.getLogger("{0}.AudioFilesCollection".format(__name__))
-
-    def __init__(self):
-        self._seq = []
-
-    def __getitem__(self, item):
-        return self._seq[item]
-
-    def __setitem__(self, key, value):
-        self._seq[key] = value
-
-    def __delitem__(self, key):
-        del self._seq[key]
-
-    def __len__(self):
-        return len(self._seq)
-
-    def __call__(self, *psargs, **kwargs):
-        l = []
-        for num, fil, audio, metadata in [(a, b, c, d) for a, (b, c, d) in enumerate(self, 1)]:
-            album = "{0}.{1} - {2}".format(metadata["albumsort"][2:6], metadata["albumsort"][11], metadata["album"])
-            self.logger.debug('{0:>3d}. "{1}".'.format(num, fil))
-            self.logger.debug('\t\tNew album: "{0}".'.format(album).expandtabs(TABSIZE))
-            if not kwargs["test"]:
-                try:
-                    audio["album"] = album
-                    audio.save()
-                except mutagen.MutagenError as err:
-                    self.logger.exception(err)
-                else:
-                    l.append(fil)
-        if l:
-            self.logger.debug("{0:>3d} file(s) updated.".format(len(l)))
-
-    def insert(self, index, value):
-        self._seq.insert(index, value)
-
-
-class FLACFilesCollection(AudioFilesCollection):
-
-    rex2 = re.compile(r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.13$)1\.(?:{0})0000\.\d\.13$".format(shared.DFTYEARREGEX))
-    logger = logging.getLogger("{0}.FLACFilesCollection".format(__name__))
-
-    def __init__(self, path):
-        super(FLACFilesCollection, self).__init__()
-
-        for fil in shared.filesinfolder(folder=path):
-            try:
-                audio = mutagen.flac.FLAC(os.path.normpath(fil))
-            except mutagen.MutagenError:
-                continue
-            metadata = dict([(k.lower(), v) for k, v in audio.tags])
-
-            # Contrôler que les tags obligatoires sont présents.
-            if any([tag not in metadata for tag in self.tags]):
-                continue
-
-            # Ne retenir que les fichiers dont le tag "albumsort" est cohérent.
-            match = self.rex2.match(metadata["albumsort"])
-            if not match:
-                continue
-
-            # Ne retenir que les fichiers dont le tag "album" n'a pas été déjà modifié.
-            match = self.rex1.match(metadata["album"])
-            if match:
-                continue
-
-            # Retenir le fichier.
-            self._seq.append((os.path.normpath(fil), audio, metadata))
-
-        for item in self._seq:
-            self.logger.debug(itemgetter(0)(item))
-
-
-class MonkeyFilesCollection(AudioFilesCollection):
-
-    rex2 = re.compile(r"^(?=1\.\d[\d.]+$)(?=[\d.]+\.12$)1\.(?:{0})0000\.\d\.12$".format(shared.DFTYEARREGEX))
-    logger = logging.getLogger("{0}.MonkeyFilesCollection".format(__name__))
-
-    def __init__(self, path):
-        super(MonkeyFilesCollection, self).__init__()
-
-        for fil in shared.filesinfolder(folder=path):
-            try:
-                audio = mutagen.monkeysaudio.MonkeysAudio(os.path.normpath(fil))
-            except mutagen.MutagenError:
-                continue
-            metadata = {k.lower(): str(v) for k, v in audio.tags.items() if isinstance(v, APETextValue)}
-
-            # Contrôler que les tags obligatoires sont présents.
-            if any([tag not in metadata for tag in self.tags]):
-                continue
-
-            # Ne retenir que les fichiers dont le tag "albumsort" est cohérent.
-            match = self.rex2.match(metadata["albumsort"])
-            if not match:
-                continue
-
-            # Ne retenir que les fichiers dont le tag "album" n'a pas été déjà modifié.
-            match = self.rex1.match(metadata["album"])
-            if match:
-                continue
-
-            # Retenir le fichier.
-            self._seq.append((os.path.normpath(fil), audio, metadata))
-
-        for item in self._seq:
-            self.logger.debug(itemgetter(0)(item))
-
-
 # ==========
 # Functions.
 # ==========
@@ -850,48 +736,69 @@ def digitalaudiobase(track, fil=os.path.join(os.path.expandvars("%TEMP%"), "digi
 
 def getmetadata(audiofil):
     """
-    Return metada from an audio file. FLAC or Monkey's Audio are only processed.
-    Return a four attributes named tuple:
-        - "file". Both dirname and basename of the audio file.
-        - "found". Boolean value depending on whether metadata have been found or not.
-        - "tags". Dictionary enumerating each metadata found.
-        - "object". Mutagen object.
+    Get metada from an audio file.
+    FLAC or Monkey's Audio are only processed.
+    :param audiofil: characters string representing an audio file.
+    :return: four attributes named tuple:
+                - "file". Both dirname and basename of the audio file.
+                - "found". Boolean value depending on whether metadata have been found or not.
+                - "tags". Dictionary enumerating each metadata found.
+                - "object". Audio file object.
     """
     tags, result = {}, namedtuple("result", "file found tags object")
 
     # Guess "audiofil" type.
     try:
-        fil = mutagen.File(audiofil)
+        audioobj = mutagen.File(audiofil)
     except mutagen.MutagenError:
         return result(audiofil, False, {}, None)
 
     # Is "audiofil" a valid audio file?
-    if not fil:
+    if not audioobj:
         return result(audiofil, False, {}, None)
 
     # Is "audiofil" type FLAC or Monkey's Audio?
-    if any([isinstance(fil, mutagen.flac.FLAC), isinstance(fil, mutagen.monkeysaudio.MonkeysAudio)]):
+    if any([isinstance(audioobj, mutagen.flac.FLAC), isinstance(audioobj, mutagen.monkeysaudio.MonkeysAudio)]):
 
         # --> FLAC.
         try:
-            assert isinstance(fil, mutagen.flac.FLAC) is True
+            assert isinstance(audioobj, mutagen.flac.FLAC) is True
         except AssertionError:
             pass
         else:
-            tags = dict([(k.lower(), v) for k, v in fil.tags])
+            tags = dict([(k.lower(), v) for k, v in audioobj.tags])
 
         # --> Monkey's audio.
         try:
-            assert isinstance(fil, mutagen.monkeysaudio.MonkeysAudio) is True
+            assert isinstance(audioobj, mutagen.monkeysaudio.MonkeysAudio) is True
         except AssertionError:
             pass
         else:
-            tags = {k.lower(): str(v) for k, v in fil.tags.items() if isinstance(v, APETextValue)}
+            tags = {k.lower(): str(v) for k, v in audioobj.tags.items() if isinstance(v, APETextValue)}
 
     # Have "audiofil" metadata been retrieved?
     if not tags:
         return result(audiofil, False, {}, None)
-    return result(audiofil, True, tags, fil)
+    return result(audiofil, True, tags, audioobj)
+
+
+def updatemetadata(audioobj, logger=None, **kwargs):
+    """
+    Update metadata of an audio file.
+    :param audioobj: audio file object.
+    :param logger: logger to log raised exception(s).
+    :param kwargs: dictionary enumerating metadata to update.
+    :return: boolean value depending on whether metadata have been updated or not.
+    """
+    for k, v in kwargs.items():
+        audioobj[k] = v
+    try:
+        audioobj.save()
+    except mutagen.MutagenError as err:
+        if logger:
+            logger.exception(err)
+        return False
+    return True
 
 
 def audiofilesinfolder(*extensions, folder):
@@ -902,18 +809,6 @@ def audiofilesinfolder(*extensions, folder):
     :return: generator object.
     """
     return ((result.file, result.object, result.tags) for result in map(getmetadata, shared.filesinfolder(*extensions, folder=folder)) if result.found)
-
-
-def updatetags(audioobj, **kwargs):
-
-    try:
-        for k, v in kwargs.items():
-            audioobj[k] = v
-        audioobj.save()
-    except mutagen.MutagenError as err:
-        logger.exception(err)
-        return False
-    return True
 
 
 # ================

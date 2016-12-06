@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from Applications.AudioCD.shared import validdelay
+from Applications.AudioCD.shared import validdelay, audiofilesinfolder, updatemetadata
+from Applications.shared import DFTYEARREGEX, UTF8
 from logging.config import dictConfig
-from Applications.shared import UTF8
 import argparse
 import logging
 import sched
@@ -28,39 +28,36 @@ def validfolder(f):
     return f
 
 
-def updatetags(*extensions, folder=folder, test=True):
+def updatetags(*args, **kwargs):
 
     logger = logging.getLogger("Default.{0}.updatetags".format(splitext(basename(__file__))[0]))
-    rex = re.compile(r"^(?:{0})\.\d -\B".format(shared.DFTYEARREGEX))
+    rex = re.compile(r"^(?:{0})\.\d -\B".format(DFTYEARREGEX))
+    if "folder" not in kwargs:
+        return False
+    if "test" not in kwargs:
+        return False
     l = []
 
-    for num, (fil, audioobj, tags) in enumerate(audiofilesinfolder(*extensions, folder=folder), start=1):
+    for num, (fil, audioobj, tags) in enumerate(audiofilesinfolder(*args, folder=kwargs["folder"]), start=1):
         if any(tag not in tags for tag in ["album", "albumsort"]):
             continue
         if rex.match(tags["album"]):
             continue
         album = "{0}.{1} - {2}".format(tags["albumsort"][2:6], tags["albumsort"][11], tags["album"])
         logger.debug('{0:>3d}. "{1}".'.format(num, fil))
-        logger.debug('\t\tNew album: "{0}".'.format(album).expandtabs(5))
-        if not test:
-            if updatetags2(audioobj, album=album):
+        logger.debug("\t{0}".format(type(audioobj)).expandtabs(5))
+        logger.debug('\tNew album: "{0}".'.format(album).expandtabs(5))
+        if not kwargs["test"]:
+            if updatemetadata(audioobj, logger=logger, album=album):
                 logger.debug('\t"{0}" updated.'.format(fil).expandtabs(5))
                 l.append(fil)
 
     if l:
         logger.debug("{0:>3d} file(s) updated.".format(len(l)))
+        return True
 
+    return False
 
-def updatetags2(audioobj, **kwargs):
-
-    try:
-        for k, v in kwargs.items():
-            audioobj[k] = v
-        audioobj.save()
-    except mutagen.MutagenError as err:
-        logger.exception(err)
-        return False
-    return True
 
 # =================
 # Arguments parser.
@@ -71,10 +68,17 @@ parser.add_argument("-d", "--delay", type=validdelay, default="0")
 parser.add_argument("-t", "--test", action="store_true")
 
 
+# ==========
+# Constants.
+# ==========
+ARGS = ("FLAC", "APE")
+
+
 # ================
 # Initializations.
 # ================
 arguments = parser.parse_args()
+kywargs = {"folder": arguments.folder, "test": arguments.test}
 
 
 # ========
@@ -93,10 +97,10 @@ logger.debug("Test : {0}.".format(arguments.test))
 
 # Mise à jour immédiate.
 if not arguments.delay:
-    updatetags("flac", "ape", folder=arguments.folder, test=arguments.test)
+    updatetags(*ARGS, **kywargs)
     sys.exit(0)
 
 # Mise à jour différée.
 s = sched.scheduler()
-s.enter(arguments.delay, 1, updatetags, argument=("flac", "ape"), kwargs={"folder": arguments.folder, "test": arguments.test})
+s.enter(arguments.delay, 1, updatetags, argument=ARGS, kwargs=kywargs)
 s.run()
