@@ -904,6 +904,18 @@ def audiofilesinfolder(*extensions, folder):
     return ((result.file, result.object, result.tags) for result in map(getmetadata, shared.filesinfolder(*extensions, folder=folder)) if result.found)
 
 
+def updatetags(audioobj, **kwargs):
+
+    try:
+        for k, v in kwargs.items():
+            audioobj[k] = v
+        audioobj.save()
+    except mutagen.MutagenError as err:
+        logger.exception(err)
+        return False
+    return True
+
+
 # ================
 # Initializations.
 # ================
