@@ -35,11 +35,11 @@ class RippingLog(MutableMapping):
         self._artist = None
         self._albumsort = None
         self._artistsort = None
-        self._index, self._uid, self._query = 0, [], {}
+        self._step, self._uid, self._query = 0, [], {}
 
     def __call__(self, *args, **kwargs):
-        self._index += 1
-        return self.inputs[str(self._index)]
+        self._step += 1
+        return self.inputs[str(self.index)]
 
     def __getitem__(self, item):
         return self._query[item]
@@ -62,6 +62,17 @@ class RippingLog(MutableMapping):
     @property
     def index(self):
         return self._index
+
+    @index.setter
+    def index(self, arg):
+        self._index = arg
+
+    # -----
+    # STEP.
+    # -----
+    @property
+    def step(self):
+        return self._step
 
     # -------------
     # RECORD(S) ID.
@@ -185,11 +196,13 @@ if __name__ == "__main__":
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
     choice, record = None, RippingLog()
+    record.index = 0
     while True:
         try:
+            record.index += 1
             inp, fld = record()
             while True:
-                choice = input("{0}. {1}: ".format(record.index, inp))
+                choice = input("{0}. {1}: ".format(record.step, inp))
 
                 # Check if record(s) ID are coherent.
                 if fld == "uid":
