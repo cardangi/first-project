@@ -459,17 +459,6 @@ def validdb(db):
     return db
 
 
-def directorytree(tree):
-    """
-    :param tree:
-    :return:
-    """
-    for a, b, c in os.walk(tree):
-        if c:
-            for d in c:
-                yield os.path.normpath(os.path.join(a, d))
-
-
 def dateformat(dt, template):
     """
     :param dt:
