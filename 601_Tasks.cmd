@@ -41,12 +41,19 @@ REM --------------------
 REM Edit folder content.
 REM --------------------
 IF ERRORLEVEL 34 (
+    :ITER1
     CLS
     SET /P folder="Please enter folder to walk through: "
-    SET /P extensions="Please enter extension(s): " 
+    IF "%folder%" EQU "" GOTO ITER1
+    CLS
+    SET /P extensions="Please enter extension(s): "
+    IF "%extensions%" EQU "" SET extensions=
+    CLS
     PUSHD %_PYTHONPROJECT%
     python General\FolderContent.py %folder% %extensions%
     POPD
+    SET folder=
+    SET extensions=
     GOTO MENU
 )
 
