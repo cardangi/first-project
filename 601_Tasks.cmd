@@ -41,6 +41,7 @@ REM --------------------
 REM Edit folder content.
 REM --------------------
 IF ERRORLEVEL 34 (
+    script = General\FolderContent.py
 
     REM Set folder. Mandatory.
     :ITER1
@@ -57,10 +58,10 @@ IF ERRORLEVEL 34 (
     CLS
     PUSHD %_PYTHONPROJECT%
     IF DEFINED extensions (
-        python General\FolderContent.py %folder% %extensions%
+        python "%script%" %folder% %extensions%
         SET extensions=
     ) ELSE (
-        python General\FolderContent.py %folder%
+        python "%script%" %folder%
     )
     POPD
     SET folder=
