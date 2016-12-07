@@ -37,6 +37,19 @@ REM ----------
 IF ERRORLEVEL 99 GOTO EXIT
 
 
+REM --------------------
+REM Edit folder content.
+REM --------------------
+IF ERRORLEVEL 34 (
+    CLS
+    SET /P folder="Please enter folder to walk through: "
+    PUSHD %_PYTHONPROJECT%
+    python General\FolderContent.py %folder%
+    POPD
+    GOTO MENU
+)
+
+
 REM ------------------
 REM Sort lists tester.
 REM ------------------
