@@ -422,6 +422,17 @@ class SetUID(argparse.Action):
         setattr(namespace, "uid", list(range(getattr(namespace, "start"), values + 1)))
 
 
+class SetExtensions(argparse.Action):
+    """
+    Set "extensions" attribute.
+    """
+    def __init__(self, option_strings, dest, **kwargs):
+        super(SetExtensions, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parsobj, namespace, values, option_string=None):
+        setattr(namespace, self.dest, " ".join(values).split())
+
+
 # ==========
 # Functions.
 # ==========
