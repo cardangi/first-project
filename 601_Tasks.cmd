@@ -43,8 +43,9 @@ REM --------------------
 IF ERRORLEVEL 34 (
     CLS
     SET /P folder="Please enter folder to walk through: "
+    SET /P extensions="Please enter extension(s): " 
     PUSHD %_PYTHONPROJECT%
-    python General\FolderContent.py %folder%
+    python General\FolderContent.py %folder% %extensions%
     POPD
     GOTO MENU
 )
