@@ -8,11 +8,10 @@ import collections
 from pytz import timezone
 from datetime import datetime
 from operator import itemgetter
-from Applications import shared as s1
+from Applications import shared
 from os.path import normpath, splitext
 from sortedcontainers import SortedDict
 import xml.etree.ElementTree as ElementTree
-from Applications.AudioCD.shared import canfilebeprocessed
 
 __author__ = 'Xavier ROSSET'
 
@@ -39,7 +38,7 @@ def isvaliddirectory(d):
 # =================
 parser = argparse.ArgumentParser()
 parser.add_argument("directory", help="mandatory directory to walk through", type=isvaliddirectory)
-parser.add_argument("-e", "--ext", dest="extensions", help="one or more extension(s) to filter out", nargs="*")
+parser.add_argument("extensions", help="one or more extension(s) to filter out", nargs="*")
 arguments = parser.parse_args()
 
 
@@ -48,11 +47,11 @@ arguments = parser.parse_args()
 # ==========
 OUTFILE = os.path.join(os.path.expandvars("%TEMP%"), "ranking.json")
 
+
 # ================
 # Initializations.
 # ================
-reflist, lista, listb, listc, listd, liste, ext_list, art_list, artext_dict, extensions, artists, ext_count, art_count = [], [], [], [], [], [], [], [], SortedDict(), SortedDict(), SortedDict(), \
-                                                                                                                         collections.Counter(), collections.Counter()
+reflist, lista, listb, listc, listd, liste, ext_list, art_list, artext_dict, extensions, artists = [], None, None, None, None, None, [], [], SortedDict(), SortedDict(), SortedDict()
 rex1, rex2 = re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\"), re.compile("recycle", re.IGNORECASE)
 
 
@@ -64,22 +63,16 @@ rex1, rex2 = re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\"), re.compile("recycle", re
 #     ------------------------
 #  1. Inventaire des fichiers.
 #     ------------------------
-for fil in s1.directorytree(normpath(arguments.directory)):
+for fil in shared.filesinfolder(*arguments.extensions, folder=normpath(arguments.directory)):
     match = rex2.search(fil)
     if not match:
         art = None
-        ext = None
-        ext_filter = arguments.extensions
-        if not ext_filter:
-            ext_filter = []
-        if canfilebeprocessed(splitext(fil)[1][1:], *tuple(ext_filter)):
-            ext = splitext(fil)[1][1:].upper()
-            match = rex1.match(normpath(fil))
-            if match:
-                reflist.append((fil, int(os.path.getctime(fil)), "Créé le %s" % (s1.dateformat(datetime.fromtimestamp(os.path.getctime(fil), tz=timezone(s1.DFTTIMEZONE)), s1.TEMPLATE1),), len(fil)))
-                art = match.group(1)
-        if ext:
-            ext_list.append(ext)
+        ext = splitext(fil)[1][1:].upper()
+        ext_list.append(ext)
+        match = rex1.match(normpath(fil))
+        if match:
+            reflist.append((fil, int(os.path.getctime(fil)), "Créé le %s" % (shared.dateformat(datetime.fromtimestamp(os.path.getctime(fil), tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1),), len(fil)))
+            art = match.group(1)
         if art:
             art_list.append(art)
         if all([art, ext]):
@@ -91,8 +84,7 @@ for fil in s1.directorytree(normpath(arguments.directory)):
 #     --------------------
 #  2. Total par extension.
 #     --------------------
-for extension in ext_list:
-    ext_count[extension] += 1
+ext_count = collections.Counter(ext_list)
 
 #  Tri par nom croissant.
 ext_count1 = collections.OrderedDict(sorted(ext_count.items(), key=itemgetter(0)))
@@ -104,8 +96,7 @@ ext_count2 = collections.OrderedDict(sorted(sorted(ext_count.items(), key=itemge
 #     ------------------
 #  3. Total par artiste.
 #     ------------------
-for artist in art_list:
-    art_count[artist] += 1
+art_count = collections.Counter(art_list)
 
 #  Tri par nom croissant.
 art_count1 = collections.OrderedDict(sorted(art_count.items(), key=itemgetter(0)))
@@ -117,17 +108,9 @@ art_count2 = collections.OrderedDict(sorted(sorted(art_count.items(), key=itemge
 #     -----------------------------------
 #  4. Total par couple artiste/extension.
 #     -----------------------------------
-
-#  Total des extensions respectives à chaque artiste.
 for artist in artext_dict:
-    artext_count = collections.Counter()
-    for extension in artext_dict[artist]:
-        artext_count[extension] += 1
-    artext_dict[artist] = artext_count
+    artext_dict[artist] = collections.OrderedDict(sorted(collections.Counter(artext_dict[artist]).items(), key=itemgetter(0)))
 
-#  Tri par extension croissante.
-for artist in artext_dict:
-    artext_dict[artist] = collections.OrderedDict(sorted(artext_dict[artist].items(), key=itemgetter(0)))
 
 #     ------
 #  4. Files.
@@ -135,17 +118,17 @@ for artist in artext_dict:
 if reflist:
 
     # ----- Liste des fichiers. Tri par nom croissant.
-    lista = [(a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(2)(item)) for item in sorted(reflist, key=itemgetter(0))], 1)]
+    lista = ((a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(2)(item)) for item in sorted(reflist, key=itemgetter(0))], 1))
 
     # ----- Liste des 50 fichiers créés dernièrement. Tri par date décroissante, puis nom croissant.
-    listb = [(a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(2)(item)) for item in sorted(sorted(reflist, key=itemgetter(0)), key=itemgetter(1), reverse=True)[:50]], 1)]
+    listb = ((a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(2)(item)) for item in sorted(sorted(reflist, key=itemgetter(0)), key=itemgetter(1), reverse=True)[:50]], 1))
 
 
 #     -----------
 #  5. Extensions.
 #     -----------
 if extensions:
-    listc = [(a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(extensions.items(), key=itemgetter(0))], 1)]
+    listc = ((a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(extensions.items(), key=itemgetter(0))], 1))
 
 
 #     --------
@@ -154,10 +137,10 @@ if extensions:
 if artists:
 
     # ----- Liste des artistes. Tri par nom croissant.
-    listd = [(a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(artists.items(), key=itemgetter(0))], 1)]
+    listd = ((a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(artists.items(), key=itemgetter(0))], 1))
 
     # ----- Liste des artistes. Tri par ranking décroissant, puis nom croissant.
-    liste = [(a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(sorted(artists.items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)], 1)]
+    liste = ((a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(sorted(artists.items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)], 1))
 
 
 #     -----------
@@ -165,7 +148,7 @@ if artists:
 #     -----------
 root = ElementTree.Element("Data", attrib=dict(css="firstcss.css"))
 se = ElementTree.SubElement(root, "Updated")
-se.text = s1.now()
+se.text = shared.now()
 if lista:
     se = ElementTree.SubElement(root, "Files")
     for item1, item2, item3 in lista:
@@ -199,5 +182,5 @@ if any([lista, listb, listc, listd, liste]):
 #  8. Ranking Output.
 #     ---------------
 if any([ext_count1, ext_count2, art_count1, art_count2, artext_dict]):
-    with open(OUTFILE, mode=s1.WRITE, encoding=s1.UTF8) as fp:
-        json.dump([s1.now(), ext_count1, ext_count2, art_count1, art_count2, artext_dict], fp, indent=4, ensure_ascii=False)
+    with open(OUTFILE, mode=shared.WRITE, encoding=shared.UTF8) as fp:
+        json.dump([shared.now(), ext_count1, ext_count2, art_count1, art_count2, artext_dict], fp, indent=4, ensure_ascii=False)
