@@ -56,12 +56,14 @@ IF ERRORLEVEL 34 (
     REM Run python script.
     CLS
     PUSHD %_PYTHONPROJECT%
-    python General\FolderContent.py %folder% %extensions%
+    IF DEFINED extensions (
+        python General\FolderContent.py %folder% %extensions%
+        SET extensions=
+    ) ELSE (
+        python General\FolderContent.py %folder%
+    )
     POPD
-    
-    REM Remove variables.
     SET folder=
-    SET extensions=
     
     REM Go back to main menu.
     GOTO MENU
