@@ -32,5 +32,6 @@
     ["Update RippingLog", 25, 30],
     ["Parser", 16, 31],
     ["Default Audio CD rip", 17, 32],
-    ["Sort lists", 18, 33]
+    ["Sort lists", 18, 33],
+    ["Folder content", 34, 34]
 ]

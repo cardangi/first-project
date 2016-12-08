@@ -41,31 +41,33 @@ REM --------------------
 REM Edit folder content.
 REM --------------------
 IF ERRORLEVEL 34 (
-    script = General\FolderContent.py
+
+    SET script=Files\FolderContent.py
 
     REM Set folder. Mandatory.
     :ITER1
     CLS
     SET /P folder="Please enter folder to walk through: "
-    IF "%folder%" EQU "" GOTO ITER1
+    IF NOT DEFINED folder GOTO ITER1
+    SET folder=!folder:"=!
 
     REM Set extensions. Not mandatory.
     CLS
     SET /P extensions="Please enter extension(s): "
-    IF "%extensions%" EQU "" SET extensions=
-    
+    IF DEFINED extensions SET extensions=!extensions:"=!
+
     REM Run python script.
     CLS
     PUSHD %_PYTHONPROJECT%
     IF DEFINED extensions (
-        python "%script%" %folder% %extensions%
+        python "!script!" "!folder!" "!extensions!"
         SET extensions=
     ) ELSE (
-        python "%script%" %folder%
+        python "!script!" "!folder!"
     )
     POPD
     SET folder=
-    
+
     REM Go back to main menu.
     GOTO MENU
 

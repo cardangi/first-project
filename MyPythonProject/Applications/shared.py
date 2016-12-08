@@ -424,7 +424,7 @@ class SetUID(argparse.Action):
 
 class SetExtensions(argparse.Action):
     """
-    Set "extensions" attribute.
+    Set "extensions" attribute from "foldercontent" parser.
     """
     def __init__(self, option_strings, dest, **kwargs):
         super(SetExtensions, self).__init__(option_strings, dest, **kwargs)

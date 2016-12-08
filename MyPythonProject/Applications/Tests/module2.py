@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from ..parsers import zipfileparser, epochconverterparser, deleterippinglogparser
+from ..parsers import zipfile, epochconverter, deleterippinglog, foldercontent
 import argparse
 import unittest
 import os
@@ -64,72 +64,72 @@ class TestSecondParser(unittest.TestCase):
         self.documents = os.path.expandvars("%_MYDOCUMENTS%")
 
     def test_01first(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "documents"])
+        arguments = zipfile.parse_args([self.documents, "temp", "grouped", "documents"])
         self.assertListEqual(arguments.extensions, ["doc", "txt", "pdf", "xav"])
 
     def test_02second(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "documents", "-e", "doc"])
+        arguments = zipfile.parse_args([self.documents, "temp", "grouped", "documents", "-e", "doc"])
         self.assertListEqual(arguments.extensions, ["txt", "pdf", "xav"])
 
     def test_03third(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "documents", "-k", "pdf"])
+        arguments = zipfile.parse_args([self.documents, "temp", "grouped", "documents", "-k", "pdf"])
         self.assertListEqual(arguments.extensions, ["pdf"])
 
     def test_04fourth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "documents", "-e", "doc", "txt", "pdf", "xav"])
+        arguments = zipfile.parse_args([self.documents, "temp", "grouped", "documents", "-e", "doc", "txt", "pdf", "xav"])
         self.assertListEqual(arguments.extensions, [])
 
     def test_05fifth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing"])
+        arguments = zipfile.parse_args([self.documents, "temp", "grouped", "computing"])
         self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "css", "xsl"])
 
     def test_06sixth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing", "-i", "pdf"])
+        arguments = zipfile.parse_args([self.documents, "temp", "grouped", "computing", "-i", "pdf"])
         self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "css", "xsl", "pdf"])
 
     def test_07seventh(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing", "-e", "cmd", "-i", "pdf", "txt"])
+        arguments = zipfile.parse_args([self.documents, "temp", "grouped", "computing", "-e", "cmd", "-i", "pdf", "txt"])
         self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "css", "xsl", "pdf", "txt"])
 
     def test_08eigth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing", "-k", "py", "-i", "pdf", "txt"])
+        arguments = zipfile.parse_args([self.documents, "temp", "grouped", "computing", "-k", "py", "-i", "pdf", "txt"])
         self.assertListEqual(arguments.extensions, ["py", "pdf", "txt"])
 
     def test_09ninth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing", "documents"])
+        arguments = zipfile.parse_args([self.documents, "temp", "grouped", "computing", "documents"])
         self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "css", "xsl", "doc", "txt", "pdf", "xav"])
 
     def test_10tenth(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "grouped", "computing", "documents", "-e", "doc", "css"])
+        arguments = zipfile.parse_args([self.documents, "temp", "grouped", "computing", "documents", "-e", "doc", "css"])
         self.assertListEqual(arguments.extensions, ["py", "json", "yaml", "cmd", "xsl", "txt", "pdf", "xav"])
 
     def test_11eleventh(self):
-        arguments = zipfileparser.parse_args([self.documents, "temp", "singled", "doc", "pdf", "txt", "css", "abc"])
+        arguments = zipfile.parse_args([self.documents, "temp", "singled", "doc", "pdf", "txt", "css", "abc"])
         self.assertListEqual(arguments.extensions, ["doc", "pdf", "txt", "css", "abc"])
 
 
 class TestThirdParser(unittest.TestCase):
 
     def test_01first(self):
-        arguments = epochconverterparser.parse_args(["1480717470", "1480717479"])
+        arguments = epochconverter.parse_args(["1480717470", "1480717479"])
         self.assertEqual(arguments.start, 1480717470)
         self.assertEqual(arguments.end, 1480717479)
         self.assertEqual(arguments.zone, "Europe/Paris")
 
     def test_02second(self):
-        arguments = epochconverterparser.parse_args(["1480717470"])
+        arguments = epochconverter.parse_args(["1480717470"])
         self.assertEqual(arguments.start, 1480717470)
         self.assertEqual(arguments.end, 1480717470)
         self.assertEqual(arguments.zone, "Europe/Paris")
 
     def test_03third(self):
-        arguments = epochconverterparser.parse_args(["1480717470", "-z", "US/Eastern"])
+        arguments = epochconverter.parse_args(["1480717470", "-z", "US/Eastern"])
         self.assertEqual(arguments.start, 1480717470)
         self.assertEqual(arguments.end, 1480717470)
         self.assertEqual(arguments.zone, "US/Eastern")
 
     def test_04fourth(self):
-        arguments = epochconverterparser.parse_args(["1480717470", "1480717479", "-z", "US/Eastern"])
+        arguments = epochconverter.parse_args(["1480717470", "1480717479", "-z", "US/Eastern"])
         self.assertEqual(arguments.start, 1480717470)
         self.assertEqual(arguments.end, 1480717479)
         self.assertEqual(arguments.zone, "US/Eastern")
@@ -138,21 +138,44 @@ class TestThirdParser(unittest.TestCase):
 class TestFourthParser(unittest.TestCase):
 
     def test_01first(self):
-        arguments = deleterippinglogparser.parse_args(["singled", "1", "100"])
+        arguments = deleterippinglog.parse_args(["singled", "1", "100"])
         self.assertListEqual(arguments.uid, [1, 100])
 
     def test_02second(self):
-        arguments = deleterippinglogparser.parse_args(["singled", "1", "2", "3", "4", "100"])
+        arguments = deleterippinglog.parse_args(["singled", "1", "2", "3", "4", "100"])
         self.assertListEqual(arguments.uid, [1, 2, 3, 4, 100])
 
     def test_03third(self):
-        arguments = deleterippinglogparser.parse_args(["ranged", "1", "100"])
+        arguments = deleterippinglog.parse_args(["ranged", "1", "100"])
         self.assertListEqual(arguments.uid, list(range(1, 101)))
 
     def test_04fourth(self):
-        arguments = deleterippinglogparser.parse_args(["ranged", "100"])
+        arguments = deleterippinglog.parse_args(["ranged", "100"])
         self.assertListEqual(arguments.uid, list(range(100, 10000)))
 
     def test_05fifth(self):
-        arguments = deleterippinglogparser.parse_args(["ranged", "245", "368"])
+        arguments = deleterippinglog.parse_args(["ranged", "245", "368"])
         self.assertListEqual(arguments.uid, list(range(245, 369)))
+
+
+class TestFifthParser(unittest.TestCase):
+
+    def test_01first(self):
+        arguments = foldercontent.parse_args([r"G:\Videos\Samsung S5", "jpg", "mp4"])
+        self.assertListEqual(arguments.extensions, ["jpg", "mp4"])
+
+    def test_02second(self):
+        arguments = foldercontent.parse_args([r"G:\Videos\Samsung S5"])
+        self.assertListEqual(arguments.extensions, [])
+
+    def test_03third(self):
+        arguments = foldercontent.parse_args([r"G:\Videos\Samsung S5", "jpg mp4"])
+        self.assertListEqual(arguments.extensions, ["jpg", "mp4"])
+
+    def test_04fourth(self):
+        arguments = foldercontent.parse_args([r"G:\Videos\Samsung S5", "jpg mp4", "txt"])
+        self.assertListEqual(arguments.extensions, ["jpg", "mp4", "txt"])
+
+    def test_05fifth(self):
+        arguments = foldercontent.parse_args([r"G:\Videos\Samsung S5", "jpg mp4 aaa bbb", "txt", "xxx"])
+        self.assertListEqual(arguments.extensions, ["jpg", "mp4", "aaa", "bbb", "txt", "xxx"])
