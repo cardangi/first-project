@@ -131,14 +131,18 @@ def decorator(obj, s):
 
                         
 @contextmanager
-def rename(src, dst):
-    try:
-        os.rename(src=src, dst=dst)
-    except OSError:
-        result = True
-    else:
-        result = False
+def rename(src, dst, test=True, logger=None, msg=None):
+    result = False
+    if test:
+        try:
+            os.rename(src=src, dst=dst)
+        except OSError:
+            result = True
+        else:
+            result = False
     yield result
+    if msg and logger:
+        logger.info("{log} {result}.".format(log=msg, result=RESULTS[result]))
 
 
 def year(y):
@@ -221,12 +225,8 @@ for year in arguments.year:
 
                         log.index = 0
                         for src, dst in args:
-                            msg = log(src=src, dst=dst)
-                            if not arguments.test:
-                                with rename(src=src, dst=dst) as result:
-                                    results.append(result)
-                                msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
-                            logger.info(msg)
+                            with rename(src=src, dst=dst, logger=logger, msg=log(src=src, dst=dst), test=arguments.test) as result:
+                                results.append(result)
 
                         log.index = 0
                         for src, dst in args:
