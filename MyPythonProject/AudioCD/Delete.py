@@ -27,6 +27,10 @@ arguments = deleterippinglog.parse_args()
 # ===============
 # Main algorithm.
 # ===============
+
+# --> Log arguments.
 logger.debug(arguments.uid)
 logger.debug(arguments.database)
+
+# --> Delete records.
 sys.exit(deletefromuid(*arguments.uid, db=arguments.database))
