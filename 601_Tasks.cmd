@@ -52,7 +52,7 @@ IF ERRORLEVEL 35 (
     REM Run python script.
     CLS
     PUSHD %_PYTHONPROJECT%
-    python AudioCD\Delete.py "!input!"
+    python AudioCD\Delete.py !input!
     POPD
     SET input=
 
