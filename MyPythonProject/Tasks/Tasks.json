@@ -33,5 +33,6 @@
     ["Parser", 16, 31],
     ["Default Audio CD rip", 17, 32],
     ["Sort lists", 18, 33],
-    ["Folder content", 34, 34]
+    ["Edit folder content", 34, 34],
+    ["Delete RippingLog table record(s)", 35, 35]
 ]
