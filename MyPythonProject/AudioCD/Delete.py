@@ -9,7 +9,7 @@ from Applications.Database.AudioCD.shared import deletefromuid
 __author__ = 'Xavier ROSSET'
 
 
-lass SetExtensions(argparse.Action):
+class SetExtensions(argparse.Action):
     """
     Set "uid" attribute.
     """
