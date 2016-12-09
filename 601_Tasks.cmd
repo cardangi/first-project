@@ -99,6 +99,31 @@ IF ERRORLEVEL 34 (
 )
 
 
+REM ----------
+REM Numbering.
+REM ----------
+IF ERRORLEVEL 35 (
+
+    REM Set record(s) unique ID. Mandatory.
+    :ITER3
+    CLS
+    SET /P input="Please enter year: "
+    IF NOT DEFINED %input% GOTO ITER3
+    SET input=!input:"=!
+
+    REM Run python script.
+    CLS
+    PUSHD %_PYTHONPROJECT%
+    python Images\Numbering.py !input! --test
+    POPD
+    SET input=
+
+    REM Go back to main menu.
+    GOTO MENU
+
+)
+
+
 REM ------------------
 REM Sort lists tester.
 REM ------------------
