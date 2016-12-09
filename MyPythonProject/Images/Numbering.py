@@ -48,8 +48,9 @@ class ImagesCollection(MutableSequence):
         value = str(psarg)
         if not re.match(r"^(?=\d{4})20[0-2]\d$", value):
             raise ValueError('"{0}" is not a valid year'.format(psarg))
-        months = sorted(dict(self.func3(psarg)), key=int)
-        totals = sorted(accumulate(self.func1(self.func2(dict(self.func3(psarg))))))
+        collection = dict(self.func3(psarg))
+        months = sorted(list(collection), key=int)
+        totals = sorted(accumulate(self.func1(self.func2(collection)))
         totals.insert(0, 1)
         self._collection = list(zip(months, map(list, self.func0(totals))))
 
@@ -60,12 +61,14 @@ class ImagesCollection(MutableSequence):
         :param m: month.
         :return: files grouped by month.
         """
-        collection = list()
-        for i in range(1, 13):
-            month = "{0}{1:0>2}".format(m, i)
-            if os.path.exists(os.path.normpath(os.path.join(shared.IMAGES, month))):
-                collection.append((month, list(glob.iglob(os.path.normpath(os.path.join(shared.IMAGES, month, r"*.jpg"))))))
-        return collection
+        # collection = list()
+        # for i in range(1, 13):
+        #    month = "{0}{1:0>2}".format(m, i)
+        #    if os.path.exists(os.path.normpath(os.path.join(r"h:\\", month))):
+        #        collection.append((month, list(glob.iglob(os.path.normpath(os.path.join(r"h:\\", month, r"*.jpg"))))))
+        # return collection
+        # months = ("{0}{1:0>2}".format(m, i)  for i in range(1, 13))
+        return [(month, list(glob.iglob(os.path.normpath(os.path.join(IMAGES, month, r"*.jpg"))))) for month in ("{0}{1:0>2}".format(m, i) for i in range(1, 13))]
 
     @staticmethod
     def func2(d):
@@ -126,6 +129,17 @@ def decorator(obj, s):
     yield
     obj.info(sep)
 
+                        
+@contextmanager
+def rename(src, dst):
+    try:
+        os.rename(src=src, dst=dst)
+    except OSError:
+        result = True
+    else:
+        result = False
+    yield result
+
 
 def year(y):
     import re
@@ -148,15 +162,6 @@ def func2(s):
 
 def func3(s, i):
     return "{0}_{1:0>5d}.jpg".format(s, i)
-
-
-def rename(src, dst):
-    try:
-        os.rename(src=src, dst=dst)
-    except OSError:
-        return True
-    else:
-        return False
 
 
 # =================
@@ -198,9 +203,9 @@ for year in arguments.year:
         logger.exception("Value error: {0}.".format(exception))
     else:
         for keys, values in collection:
-            curdir = os.path.normpath(os.path.join(shared.IMAGES, keys))
-            files = sorted(glob.glob(os.path.normpath(os.path.join(shared.IMAGES, keys, r"*.jpg"))))
-            args = list(zip(map(os.path.basename, files), map(func2, files), map(func3, repeat(keys), values)))
+            curdir = os.path.normpath(os.path.join(IMAGES, keys))
+            files = sorted(glob.glob(os.path.normpath(os.path.join(IMAGES, keys, r"*.jpg"))))
+            args = zip(map(os.path.basename, files), map(func2, files), map(func3, repeat(keys), values)))
 
             #    -------------------------------------------------------------------
             # 1. Tous les fichiers du répertoire répondent au masque "CCYYMM_xxxxx".
@@ -218,8 +223,8 @@ for year in arguments.year:
                         for src, dst in args:
                             msg = log(src=src, dst=dst)
                             if not arguments.test:
-                                result = rename(src=src, dst=dst)
-                                results.append(result)
+                                with rename(src=src, dst=dst) as result:
+                                    results.append(result)
                                 msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
                             logger.info(msg)
 
@@ -227,8 +232,8 @@ for year in arguments.year:
                         for src, dst in args:
                             msg = log(src=src, dst=dst)
                             if not arguments.test:
-                                result = rename(src=src, dst=dst)
-                                results.append(result)
+                                with rename(src=src, dst=dst) as result:
+                                    results.append(result)
                                 msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
                             logger.info(msg)
 
@@ -251,8 +256,8 @@ for year in arguments.year:
                     for src, dst in args:
                         msg = log(src=src, dst=dst)
                         if not arguments.test:
-                            result = rename(src=src, dst=dst)
-                            results.append(result)
+                            with rename(src=src, dst=dst) as result:
+                                results.append(result)
                             msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
                         logger.info(msg)
                 continue
@@ -269,8 +274,8 @@ for year in arguments.year:
                 for src, dst in args:
                     msg = log(src=src, dst=dst)
                     if not arguments.test:
-                        result = rename(src=src, dst=dst)
-                        results.append(result)
+                        with rename(src=src, dst=dst) as result:
+                            results.append(result)
                         msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
                     logger.info(msg)
 
@@ -278,8 +283,8 @@ for year in arguments.year:
                 for src, dst in args:
                     msg = log(src=src, dst=dst)
                     if not arguments.test:
-                        result = rename(src=src, dst=dst)
-                        results.append(result)
+                        with rename(src=src, dst=dst) as result:
+                            results.append(result)
                         msg = "{log} {result}.".format(log=msg, result=RESULTS[result])
                     logger.info(msg)
 
