@@ -25,6 +25,7 @@ rex1, rex2 = re.compile(digits), re.compile(r"^({0})\b\s?-\s?\b({0})$".format(di
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
+parser.add_argument("input", action=GetUID)
 parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=validdb)
 
 
@@ -37,19 +38,4 @@ arguments = parser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-while True:
-    arg = input("Please enter record(s) unique ID: ")
-
-    # Ranged Unique ID.
-    match = rex2.match(arg)
-    if match:
-        uid = range(int(match.group(1)), int(match.group(2)) + 1)
-        break
-
-    # Singled Unique ID.
-    uid = rex1.findall(arg)
-    if uid:
-        uid = map(int, uid)
-        break
-
-sys.exit(deletefromuid(*list(uid), db=arguments.database))
+sys.exit(deletefromuid(*arguments.uid, db=arguments.database))
