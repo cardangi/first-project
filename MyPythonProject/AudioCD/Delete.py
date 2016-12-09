@@ -14,7 +14,7 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Classes.
 # ========
-class SetExtensions(argparse.Action):
+class SetUID(argparse.Action):
     """
     Set "uid" attribute.
     """
@@ -49,7 +49,7 @@ logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basenam
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("input", action=GetUID)
+parser.add_argument("input", action=SetUID)
 parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=validdb)
 
 
