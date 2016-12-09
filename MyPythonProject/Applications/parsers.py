@@ -57,5 +57,5 @@ parser3_g.add_argument("end", nargs="?", default="9999", type=int, action=shared
 #  4. PARSER 4.
 #     =========
 foldercontent = argparse.ArgumentParser()
-foldercontent.add_argument("folder")
+foldercontent.add_argument("folder", type=shared.validpath)
 foldercontent.add_argument("extensions", nargs="*", action=shared.SetExtensions)
