@@ -46,7 +46,7 @@ IF ERRORLEVEL 35 (
     :ITER2
     CLS
     SET /P input="Please enter records unique ID: "
-    IF NOT DEFINED %input% GOTO ITER2
+    IF NOT DEFINED input GOTO ITER2
     SET input=!input:"=!
 
     REM Run python script.
