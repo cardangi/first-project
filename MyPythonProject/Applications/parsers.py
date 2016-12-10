@@ -31,8 +31,8 @@ parser1_g.add_argument("-i", "--incl", dest="include", nargs="*", action=shared.
 #  2. PARSER 2.
 #     =========
 epochconverter = argparse.ArgumentParser()
-epochconverter.add_argument("start", help="Start epoch", type=shared.validepoch)
-epochconverter.add_argument("end", help="End epoch", type=shared.validepoch, nargs="?", action=shared.SetEndEpoch)
+epochconverter.add_argument("start", help="Start epoch", type=shared.validseconds)
+epochconverter.add_argument("end", help="End epoch", type=shared.validseconds, nargs="?", action=shared.SetEndEpoch)
 epochconverter.add_argument("-z", "--zone", help="Time zone", default=shared.DFTTIMEZONE)
 
 

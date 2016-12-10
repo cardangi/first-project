@@ -4,7 +4,7 @@ import yaml
 import logging
 from logging.config import dictConfig
 from Applications.shared import filesinfolder
-from Applications.parsers import zipfileparser
+from Applications.parsers import zipfile
 
 __author__ = "Xavier ROSSET"
 
@@ -20,7 +20,7 @@ logger = logging.getLogger("{0}".format(os.path.splitext(os.path.basename(__file
 # ==========
 # Arguments.
 # ==========
-arguments = zipfileparser.parse_args()
+arguments = zipfile.parse_args()
 
 
 # ===============

@@ -470,11 +470,18 @@ def validdb(db):
     return db
 
 
+def validseconds(seconds):
+    if not re.match(r"^\d{10}$", seconds):
+        raise argparse.ArgumentTypeError('"{0}" is not a valid epoch'.format(seconds))
+    return int(seconds)
+
+
 def dateformat(dt, template):
     """
-    :param dt:
-    :param template:
-    :return:
+    Return a human readable date from a datetime object.
+    :param dt: datetime object.
+    :param template: template used to return datetime oject.
+    :return: human readable date.
     """
     return Template(template).substitute(day=dt.strftime("%A").capitalize(),
                                          month=dt.strftime("%B").capitalize(),
@@ -537,12 +544,6 @@ def getdatefromepoch(start, stop, zone=DFTTIMEZONE):
     seconds, zones = range(start, stop + 1), list(ZONES)
     zones.insert(2, zone)
     return map(func2, seconds, map(func1, seconds, (list(i) for i in zip(*(map(func3, seconds, repeat(zone)) for zone in zones)))), repeat(1))
-
-
-def validseconds(seconds):
-    if not re.match(r"^\d{10}$", seconds):
-        raise argparse.ArgumentTypeError('"{0}" is not a valid epoch'.format(seconds))
-    return int(seconds)
 
 
 def enumeratesortedlistcontent(thatlist):

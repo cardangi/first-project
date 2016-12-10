@@ -37,6 +37,31 @@ REM ----------
 IF ERRORLEVEL 99 GOTO EXIT
 
 
+REM ----------
+REM Numbering.
+REM ----------
+IF ERRORLEVEL 35 (
+
+    REM Set year. Mandatory.
+    :ITER3
+    CLS
+    SET /P input="Please enter year: "
+    IF NOT DEFINED input GOTO ITER3
+    SET input=!input:"=!
+
+    REM Run python script.
+    CLS
+    PUSHD %_PYTHONPROJECT%
+    python Images\Numbering.py !input! --test
+    POPD
+    SET input=
+
+    REM Go back to main menu.
+    GOTO MENU
+
+)
+
+
 REM ----------------------------------
 REM Delete "RippingLog" table records.
 REM ----------------------------------
@@ -92,31 +117,6 @@ IF ERRORLEVEL 34 (
     )
     POPD
     SET folder=
-
-    REM Go back to main menu.
-    GOTO MENU
-
-)
-
-
-REM ----------
-REM Numbering.
-REM ----------
-IF ERRORLEVEL 35 (
-
-    REM Set record(s) unique ID. Mandatory.
-    :ITER3
-    CLS
-    SET /P input="Please enter year: "
-    IF NOT DEFINED %input% GOTO ITER3
-    SET input=!input:"=!
-
-    REM Run python script.
-    CLS
-    PUSHD %_PYTHONPROJECT%
-    python Images\Numbering.py !input! --test
-    POPD
-    SET input=
 
     REM Go back to main menu.
     GOTO MENU

@@ -35,7 +35,7 @@ class RippingLog(MutableMapping):
         self._artist = None
         self._albumsort = None
         self._artistsort = None
-        self._step, self._uid, self._query = 0, [], {}
+        self._index, self._step, self._uid, self._query = None, 0, [], {}
 
     def __call__(self, *args, **kwargs):
         self._step += 1
@@ -194,6 +194,7 @@ if __name__ == "__main__":
     with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
+    logger.debug(arguments.database)
 
     choice, record = None, RippingLog()
     record.index = 0
