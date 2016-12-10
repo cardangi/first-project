@@ -111,7 +111,7 @@ IF ERRORLEVEL 34 (
     CLS
     PUSHD %_PYTHONPROJECT%
     IF DEFINED extensions (
-        python "!script!" "!folder!" "!extensions!"
+        python "!script!" "!folder!" !extensions!
         SET extensions=
     ) ELSE (
         python "!script!" "!folder!"
