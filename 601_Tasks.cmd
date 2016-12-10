@@ -40,7 +40,7 @@ IF ERRORLEVEL 99 GOTO EXIT
 REM ----------
 REM Numbering.
 REM ----------
-IF ERRORLEVEL 35 (
+IF ERRORLEVEL 36 (
 
     REM Set year. Mandatory.
     :ITER3
@@ -82,6 +82,7 @@ IF ERRORLEVEL 35 (
     SET input=
 
     REM Go back to main menu.
+    PAUSE
     GOTO MENU
 
 )
