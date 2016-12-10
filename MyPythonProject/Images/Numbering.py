@@ -45,14 +45,13 @@ class ImagesCollection(MutableSequence):
         return self._collection
 
     @collection.setter
-    def collection(self, psarg):
-        value = str(psarg)
-        if not re.match(r"^(?=\d{4})20[0-2]\d$", value):
-            raise ValueError('"{0}" is not a valid year'.format(psarg))
-        images = {k: v for k, v in dict(self.func3(psarg)).items() if v}
+    def collection(self, arg):
+        if not re.match(r"^(?=\d{4})20[0-2]\d$", str(arg)):
+            raise ValueError('"{0}" is not a valid year'.format(arg))
+        totals = [1]
+        images = {k: v for k, v in dict(self.func3(arg)).items() if v}
         months = sorted(list(images), key=int)
-        totals = sorted(accumulate(self.func1(self.func2(images))))
-        totals.insert(0, 1)
+        totals.extend(sorted(accumulate(self.func1(self.func2(images)))))
         self._collection = list(zip(months, map(list, self.func0(totals))))
 
     @staticmethod
