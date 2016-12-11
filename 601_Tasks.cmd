@@ -164,11 +164,11 @@ IF ERRORLEVEL 31 (
 )
 
 
-REM -----------------------------
-REM RippingLog table maintenance.
-REM -----------------------------
+REM ----------------------------------
+REM Update "RippingLog" table records.
+REM ----------------------------------
 IF ERRORLEVEL 30 (
-    REM python %_PYTHONPROJECT%\Database`RippingLog`dbRippingLog`L.py
+    REM %_PYTHONPROJECT%\AudioCD\Update.py
     GOTO MENU
 )
 
@@ -295,35 +295,12 @@ IF ERRORLEVEL 17 (
 )
 
 
-REM ---------------------------
-REM RippingLog HTML fancy view.
-REM ---------------------------
-IF ERRORLEVEL 16 (
-    python %_PYTHONPROJECT%\AudioCD\RippedCD`View1.py
-    GOTO MENU
-)
-
-
-REM ---------------------
-REM RippingLog JSON view.
-REM ---------------------
+REM ------------------------
+REM Edit RippingLog Content.
+REM ------------------------
 IF ERRORLEVEL 15 (
+    python %_PYTHONPROJECT%\AudioCD\RippedCD`View1.py
     python %_PYTHONPROJECT%\AudioCD\RippedCD`View2.py
-    GOTO MENU
-)
-
-
-REM ------------------------------------
-REM Digital audio files HTML fancy view.
-REM ------------------------------------
-IF ERRORLEVEL 14 (
-    python %_PYTHONPROJECT%\AudioCD\DigitalAudioFiles`View1.py
-    IF NOT ERRORLEVEL 1 (
-        IF EXIST "%_xmldigitalaudiobase%" (
-            java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
-            DEL "%_xmldigitalaudiobase%"
-        )
-    )
     GOTO MENU
 )
 
@@ -332,7 +309,15 @@ REM -------------------------------------
 REM Digital audio files HTML simple view.
 REM -------------------------------------
 IF ERRORLEVEL 13 (
+    python %_PYTHONPROJECT%\AudioCD\DigitalAudioFiles`View1.py
+    IF NOT ERRORLEVEL 1 (
+        IF EXIST "%_xmldigitalaudiobase%" (
+            java -cp "%_SAXON%" net.sf.saxon.Transform -s:"%_xmldigitalaudiobase%" -xsl:"%_digitalaudiobase%.xsl" -o:"%_digitalaudiobase%.html"
+            DEL "%_xmldigitalaudiobase%"
+        )
+    )
     python %_PYTHONPROJECT%\AudioCD\DigitalAudioFiles`View2.py
+    python %_PYTHONPROJECT%\Database\DigitalAudioFiles`View3.py
     GOTO MENU
 )
 

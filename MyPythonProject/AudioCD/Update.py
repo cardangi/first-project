@@ -4,7 +4,6 @@ import re
 import sys
 import yaml
 import logging
-import argparse
 from Applications import shared
 from logging.config import dictConfig
 from collections import MutableMapping
@@ -25,7 +24,8 @@ class RippingLog(MutableMapping):
               "5": ("Enter UPC new value", "upc"),
               "6": ("Enter genre new value", "genre"),
               "7": ("Enter albumsort new value", "albumsort"),
-              "8": ("Enter artistsort new value", "artistsort")}
+              "8": ("Enter artistsort new value", "artistsort"),
+              "9": ("Enter database to update", "database")}
 
     def __init__(self):
         self._upc = None
@@ -170,20 +170,13 @@ class RippingLog(MutableMapping):
         self._query["artistsort"] = arg
 
 
-# =================
-# Arguments parser.
-# =================
-parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=shared.validdb)
-
-
 # ================
 # Initializations.
 # ================
-rex1, rex2, rex3, arguments = re.compile("\d(?:\d(?:\d(?:\d)?)?)?"), \
-                              re.compile(r"^(?:{0})$".format(shared.DFTYEARREGEX)), \
-                              re.compile(r"^1\.(?:{0})0000\.\d$".format(shared.DFTYEARREGEX)), \
-                              parser.parse_args()
+database, rex1, rex2, rex3 = None, \
+                             re.compile("\d(?:\d(?:\d(?:\d)?)?)?"), \
+                             re.compile(r"^(?:{0})$".format(shared.DFTYEARREGEX)), \
+                             re.compile(r"^1\.(?:{0})0000\.\d$".format(shared.DFTYEARREGEX)), \
 
 
 # ===============
@@ -194,7 +187,6 @@ if __name__ == "__main__":
     with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
-    logger.debug(arguments.database)
 
     choice, record = None, RippingLog()
     record.index = 0
@@ -226,6 +218,16 @@ if __name__ == "__main__":
                         break
                     continue
 
+                # Check chosen database.
+                elif fld == "database":
+                    if choice:
+                        choice = choice.replace('"', '')
+                    if choice and os.path.exists(choice) and os.path.isfile(choice):
+                        database = choice
+                        break
+                    database = shared.DATABASE
+                    break
+
                 break
             if choice:
                 setattr(record, fld, choice)
@@ -233,8 +235,9 @@ if __name__ == "__main__":
         except KeyError:
             break
 
+    logger.debug(database)
     logger.debug(record.uid)
     for tup in record.items():
         logger.debug("{t[0]}: {t[1]}".format(t=tup))
         logger.debug(type(tup[1]))
-    sys.exit(update(*record.uid, db=arguments.database, **record))
+    sys.exit(update(*record.uid, db=database, **record))
