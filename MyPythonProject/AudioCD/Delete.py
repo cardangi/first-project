@@ -35,7 +35,7 @@ class RippingLog(object):
 
     def __call__(self, *args, **kwargs):
         self._step += 1
-        return self.inputs[str(self.index)]
+        return self.inputs[str(self._index)]
 
     # ------
     # INDEX.
@@ -112,7 +112,7 @@ class RippingLog(object):
             raise ValueError('Please enter record(s) unique ID.')
         arg = self.regex.findall(arg)
         if not arg:
-            raise ValueError('Please enter record(s) unique ID.')
+            raise ValueError('Please enter coherent record(s) unique ID.')
         self._uid = arg
         self._arguments.extend(arg)
         raise StopIteration
