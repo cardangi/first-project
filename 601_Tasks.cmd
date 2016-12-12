@@ -66,25 +66,8 @@ REM ----------------------------------
 REM Delete "RippingLog" table records.
 REM ----------------------------------
 IF ERRORLEVEL 35 (
-
-    REM Set record(s) unique ID. Mandatory.
-    :ITER2
-    CLS
-    SET /P input="Please enter records unique ID: "
-    IF NOT DEFINED input GOTO ITER2
-    SET input=!input:"=!
-
-    REM Run python script.
-    CLS
-    PUSHD %_PYTHONPROJECT%
-    python AudioCD\Delete.py !input!
-    POPD
-    SET input=
-
-    REM Go back to main menu.
-    PAUSE
+    python %_PYTHONPROJECT%\AudioCD\Delete.py
     GOTO MENU
-
 )
 
 
@@ -168,7 +151,7 @@ REM ----------------------------------
 REM Update "RippingLog" table records.
 REM ----------------------------------
 IF ERRORLEVEL 30 (
-    REM %_PYTHONPROJECT%\AudioCD\Update.py
+    python %_PYTHONPROJECT%\AudioCD\Update.py
     GOTO MENU
 )
 

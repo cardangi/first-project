@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from contextlib import contextmanager, ContextDecorator
+from contextlib import contextmanager, ContextDecorator, ExitStack
 import os
 
 __author__ = 'Xavier ROSSET'
@@ -50,6 +50,16 @@ class FirstClass(object):
         print("After")
 
 
+class FourthClass(object):
+
+    def __enter__(self):
+        print("Before")
+        raise ValueError("Value error!")
+
+    def __exit__(self, *exc):
+        print("After")
+
+
 # Un context manager créé intégralement par définition des méthodes "__enter__" et "__exit__".
 # A utiliser également avec le mot clé "with".
 # Mais peut être aussi utilisé comme décorateur de fonction.
@@ -94,7 +104,24 @@ if __name__ == "__main__":
     with SecondClass():
         thirdfunction("Some text 5")
 
-    print("# 6. ----- #")
-    with FirstClass():
-        thirdfunction("Some text 2")
-        raise ValueError("Some error occurred.")
+    # print("# 6. ----- #")
+    # with FirstClass():
+    #     thirdfunction("Some text 2")
+    #     raise ValueError("Some error occurred.")
+
+    print("# 7. ----- #")
+    stack = ExitStack()
+    try:
+        stack.enter_context(FourthClass())
+    except ValueError as err:
+        print(err)
+    else:
+        with stack:
+            thirdfunction("Some text 6")
+
+    print("# 8. ----- #")
+    try:
+        with FourthClass():
+            thirdfunction("Some text 8")
+    except ValueError as err:
+        print(err)
