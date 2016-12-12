@@ -46,12 +46,26 @@ class ImagesCollection(MutableSequence):
 
     @collection.setter
     def collection(self, arg):
+
+        # Argument must be a coherent year.
         if not re.match(r"^(?=\d{4})20[0-2]\d$", str(arg)):
             raise ValueError('"{0}" is not a valid year'.format(arg))
+
+        # Dictionary of images grouped by month.
+        # Example: {"201001": ["file", "file2", "file3"], "201002": ["file", "file2", "file3"]}
         images = {k: v for k, v in dict(self.func3(arg)).items() if v}
-        months = sorted(images.keys(), key=int)
+
+        # List of found months.
+        # Example: ["201001", "201002"]
+        months = sorted(images, key=int)
+
+        # List of accumulated counts.
+        # Example: [100", 145]
         counts = [1]
         counts.extend(sorted(accumulate(self.func1(self.func2(images)))))
+
+        # List of accumulated counts grouped by months.
+        # Example: [("201001", 100), ("201002", 145)]
         self._collection = list(zip(months, map(list, self.func0(counts))))
 
     @staticmethod
@@ -70,7 +84,7 @@ class ImagesCollection(MutableSequence):
         :param d: dictionnary of files grouped by month.
         :return: counts by month.
         """
-        return {k: len(d[k]) for k in list(d)}
+        return {k: len(v) for k, v in d.items()}
 
     @staticmethod
     def func1(d):
