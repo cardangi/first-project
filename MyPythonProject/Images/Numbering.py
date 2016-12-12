@@ -21,9 +21,9 @@ __author__ = 'Xavier ROSSET'
 # ========
 class ImagesCollection(MutableSequence):
 
-    def __init__(self, ccyy):
-        self._collection = list()
-        self.collection = ccyy
+    def __init__(self, year):
+        self._collection = None
+        self.collection = year
 
     def __getitem__(self, item):
         return self.collection[item]
@@ -48,11 +48,11 @@ class ImagesCollection(MutableSequence):
     def collection(self, arg):
         if not re.match(r"^(?=\d{4})20[0-2]\d$", str(arg)):
             raise ValueError('"{0}" is not a valid year'.format(arg))
-        totals = [1]
         images = {k: v for k, v in dict(self.func3(arg)).items() if v}
-        months = sorted(list(images), key=int)
-        totals.extend(sorted(accumulate(self.func1(self.func2(images)))))
-        self._collection = list(zip(months, map(list, self.func0(totals))))
+        months = sorted(images.keys(), key=int)
+        counts = [1]
+        counts.extend(sorted(accumulate(self.func1(self.func2(images)))))
+        self._collection = list(zip(months, map(list, self.func0(counts))))
 
     @staticmethod
     def func3(m):
