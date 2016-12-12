@@ -17,19 +17,29 @@ __author__ = 'Xavier ROSSET'
 # ========
 class RippingLog(object):
 
+    regex = re.compile(r"\d+")
     inputs = {"1": ("Enter database to update", "database"),
               "2": ("Singled or Ranged ", "type"),
               "3": ("Enter record(s) unique ID", "uid"),
-              "4": ("Enter from", "min"),
-              "5": ("Enter to", "max")}
+              "4": ("Enter ranged from record unique ID", "from_uid"),
+              "5": ("Enter ranged to record unique ID", "to_uid")}
 
     def __init__(self):
         self._index, self._step = None, 0
+        self._database = None
+        self._type = None
+        self._uid = None
+        self._from_uid = None
+        self._to_uid = None
+        self._arguments = []
 
     def __call__(self, *args, **kwargs):
         self._step += 1
         return self.inputs[str(self.index)]
 
+    # ------
+    # INDEX.
+    # ------
     @property
     def index(self):
         return self._index
@@ -38,15 +48,109 @@ class RippingLog(object):
     def index(self, arg):
         self._index = arg
 
+    # -----
+    # STEP.
+    # -----
     @property
     def step(self):
         return self._step
 
+    # ----------
+    # ARGUMENTS.
+    # ----------
+    @property
+    def arguments(self):
+        return self._arguments
 
-# ================
-# Initializations.
-# ================
-regex1, args = re.compile(r"\d+"), []
+    # ---------
+    # DATABASE.
+    # ---------
+    @property
+    def database(self):
+        return self._database
+
+    @database.setter
+    def database(self, arg):
+        val = DATABASE
+        if arg:
+            arg = arg.replace('"', '')
+        if arg and not(os.path.exists(arg) and os.path.isfile(arg)):
+            raise ValueError('"{0}" isn\'t a valid database.'.format(arg))
+        elif arg and os.path.exists(arg) and os.path.isfile(arg):
+            val = arg
+        self._database = val
+        self._arguments.extend(["--db", val])
+
+    # -----
+    # TYPE.
+    # -----
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, arg):
+        if arg.upper() not in ["R", "S"]:
+            raise ValueError('"{0}" isn\'t a valid choice.'.format(arg))
+        self._type = arg.upper()
+        if arg.upper() == "S":
+            self._arguments.extend(["singled"])
+        elif arg.upper() == "R":
+            self._arguments.extend(["ranged"])
+            self._index += 1
+
+    # ----
+    # UID.
+    # ----
+    @property
+    def uid(self):
+        return self._uid
+
+    @uid.setter
+    def uid(self, arg):
+        if not arg:
+            raise ValueError('Please enter record(s) unique ID.')
+        arg = self.regex.findall(arg)
+        if not arg:
+            raise ValueError('Please enter record(s) unique ID.')
+        self._uid = arg
+        self._arguments.extend(arg)
+        raise StopIteration
+
+    # ---------
+    # FROM_UID.
+    # ---------
+    @property
+    def from_uid(self):
+        return self._from_uid
+
+    @from_uid.setter
+    def from_uid(self, arg):
+        if not arg:
+            raise ValueError('Please enter ranged from UID.')
+        match = self.regex.match(arg)
+        if not match:
+            raise ValueError('Please enter coherent ranged from UID.')
+        self._from_uid = arg
+        self._arguments.append(arg)
+
+    # -------
+    # TO_UID.
+    # -------
+    @property
+    def to_uid(self):
+        return self._to_uid
+
+    @to_uid.setter
+    def to_uid(self, arg):
+        val = "9999"
+        if arg:
+            match = self.regex.match(arg)
+            if not match:
+                raise ValueError('Please enter coherent ranged to UID.')
+            self._to_uid = arg
+            val = arg
+        self._arguments.append(val)
 
 
 # ===============
@@ -58,70 +162,26 @@ if __name__ == "__main__":
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
-    choice, record = None, RippingLog()
+    value, record = None, RippingLog()
     record.index = 0
     while True:
+
         try:
             record.index += 1
-            inp, fld = record()
+            inp, dest = record()
             while True:
-                choice = input("{0}. {1}: ".format(record.step, inp))
-
-                if fld == "database":
-                    if choice:
-                        choice = choice.replace('"', '')
-                    if choice and not(os.path.exists(choice) and os.path.isfile(choice)):
-                        continue
-                    elif choice and os.path.exists(choice) and os.path.isfile(choice):
-                        args.extend(["--db", choice])
-                        break
-                    args.extend(["--db", DATABASE])
-                    break
-
-                elif fld == "type":
-                    if choice not in ["R", "S"]:
-                        continue
-                    if choice.upper() == "S":
-                        args.extend(["singled"])
-                    elif choice.upper() == "R":
-                        args.extend(["ranged"])
-                        record.index += 1
-                    break
-
-                elif fld == "uid":
-                    if not choice:
-                        continue
-                    choice = regex1.findall(choice)
-                    if not choice:
-                        continue
-                    args.extend(choice)
-                    break
-
-                elif fld == "min":
-                    if not choice:
-                        continue
-                    match = regex1.match(choice)
-                    if not match:
-                        continue
-                    args.append(choice)
-                    break
-
-                elif fld == "max":
-                    if choice:
-                        match = regex1.match(choice)
-                        if not match:
-                            continue
-                        args.append(choice)
-                    break
-
-            if fld == "uid":
+                value = input("{0}. {1}: ".format(record.step, inp))
+                try:
+                    setattr(record, dest, value)
+                except ValueError:
+                    continue
                 break
 
-        except KeyError:
+        except (StopIteration, KeyError):
             break
 
     # --> Parse arguments.
-    arguments = deleterippinglog.parse_args(args)
+    arguments = deleterippinglog.parse_args(record.arguments)
 
     # --> Log arguments.
     logger.debug(arguments.uid)
