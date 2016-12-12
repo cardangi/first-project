@@ -196,8 +196,8 @@ logger.info(MODES[arguments.test].upper())
 for year in arguments.year:
     try:
         collection = ImagesCollection(year)
-    except ValueError as exception:
-        logger.exception("Value error: {0}.".format(exception))
+    except ValueError as err:
+        logger.exception(err)
     else:
         for keys, values in collection:
             curdir = os.path.normpath(os.path.join(shared.IMAGES, keys))
