@@ -19,6 +19,72 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Classes.
 # ========
+class Interface(object):
+
+    _regex = re.compile(r"(?:{0})".format(shared.DFTYEARREGEX))
+    _inputs = [("Test Mode?", "test"), ("Enter year", "year")]
+
+    def __init__(self):
+        self._index, self._step = 0, 0
+        self._year = None
+        self._test = None
+        self._arguments = []
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._index >= len(self._inputs):
+            raise StopIteration
+        self._index += 1
+        self._step += 1
+        return self._inputs[self._index - 1]
+
+    # -----
+    # STEP.
+    # -----
+    @property
+    def step(self):
+        return self._step
+
+    # ----------
+    # ARGUMENTS.
+    # ----------
+    @property
+    def arguments(self):
+        return self._arguments
+
+    # -----
+    # YEAR.
+    # -----
+    @property
+    def year(self):
+        return self._year
+
+    @year.setter
+    def year(self, arg):
+        value = self._regex.findall(arg)
+        if not value:
+            raise ValueError("Please enter coherent year(s).")
+        self._year = value
+        self._arguments.extend(value)
+
+    # -----
+    # TEST.
+    # -----
+    @property
+    def test(self):
+        return self._test
+
+    @test.setter
+    def test(self, arg):
+        if arg not in shared.ACCEPTEDANSWERS:
+            raise ValueError("Please enter coherent answer.")
+        self._test = arg
+        if arg.upper() == "Y":
+            self._arguments.append("--test")
+
+
 class ImagesCollection(MutableSequence):
 
     def __init__(self, year):
@@ -183,110 +249,118 @@ parser.add_argument("year", type=year, nargs="+")
 parser.add_argument("-t", "--test", action="store_true")
 
 
-# ==========
-# Constants.
-# ==========
-MODES = {True: "test mode.", False: "rename mode."}
-
-
-# ================
-# Initializations.
-# ================
-status, nt, results, log, arguments = 99, namedtuple("nt", "match sequence"), [], Log(), parser.parse_args()
-
-
-# ========
-# Logging.
-# ========
-with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding=shared.UTF8) as fp:
-    dictConfig(yaml.load(fp))
-logger = logging.getLogger("Images.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
-logger.info(MODES[arguments.test].upper())
-
-
 # ===============
 # Main algorithm.
 # ===============
-for year in arguments.year:
-    try:
-        collection = ImagesCollection(year)
-    except ValueError as err:
-        logger.exception(err)
-    else:
-        for keys, values in collection:
-            curdir = os.path.normpath(os.path.join(shared.IMAGES, keys))
-            files = sorted(glob.glob(os.path.normpath(os.path.join(shared.IMAGES, keys, r"*.jpg"))))
-            args = zip(map(os.path.basename, files), map(func2, files), map(func3, repeat(keys), values))
+if __name__ == "__main__":
 
-            #    -------------------------------------------------------------------
-            # 1. Tous les fichiers du répertoire répondent au masque "CCYYMM_xxxxx".
-            #    -------------------------------------------------------------------
-            if all(i.match for i in map(func1, map(os.path.basename, files))):
-                try:
-                    assert [int(i.sequence) for i in map(func1, map(os.path.basename, files))] == values
-                except AssertionError:
+    # --> Constants.
+    MODES = {True: "test mode.", False: "rename mode."}
+
+    # --> Initializations.
+    status, nt, results, log = 99, namedtuple("nt", "match sequence"), [], Log()
+
+    # --> Logging.
+    with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
+        dictConfig(yaml.load(fp))
+    logger = logging.getLogger("Images.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
+
+    # --> Interface.
+    interface = Interface()
+    for inp, dest in interface:
+        while True:
+            value = input("{0}. {1}: ".format(interface.step, inp))
+            try:
+                setattr(interface, dest, value)
+            except ValueError:
+                continue
+            break
+
+    # --> Parse arguments.
+    arguments = parser.parse_args(interface.arguments)
+
+    # --> Log arguments.
+    logger.debug(arguments.test)
+    logger.debug(arguments.year)
+
+    # --> Main algorithm.
+    for year in arguments.year:
+        try:
+            collection = ImagesCollection(year)
+        except ValueError as err:
+            logger.exception(err)
+        else:
+            for keys, values in collection:
+                curdir = os.path.normpath(os.path.join(shared.IMAGES, keys))
+                files = sorted(glob.glob(os.path.normpath(os.path.join(shared.IMAGES, keys, r"*.jpg"))))
+                args = zip(map(os.path.basename, files), map(func2, files), map(func3, repeat(keys), values))
+
+                #    -------------------------------------------------------------------
+                # 1. Tous les fichiers du répertoire répondent au masque "CCYYMM_xxxxx".
+                #    -------------------------------------------------------------------
+                if all(i.match for i in map(func1, map(os.path.basename, files))):
+                    try:
+                        assert [int(i.sequence) for i in map(func1, map(os.path.basename, files))] == values
+                    except AssertionError:
+                        msg = '"{0}": renaming needed.'.format(curdir)
+                        with decorator(logger, msg):
+                            logger.info(msg)
+                        with shared.chgcurdir(curdir):
+
+                            log.index = 0
+                            for arg in args:
+                                with rename(itemgetter(0)(arg), itemgetter(1)(arg), obj=logger, message=log(itemgetter(0)(arg), itemgetter(1)(arg)), test=arguments.test) as result:
+                                    results.append(result)
+
+                            log.index = 0
+                            for arg in args:
+                                with rename(itemgetter(1)(arg), itemgetter(2)(arg), obj=logger, message=log(itemgetter(1)(arg), itemgetter(2)(arg)), test=arguments.test) as result:
+                                    results.append(result)
+
+                        continue
+
+                    msg = '"{0}": no renaming needed.'.format(curdir)
+                    with decorator(logger, msg):
+                        logger.info(msg)
+                    continue
+
+                #    ---------------------------------------------------------------
+                # 2. Aucun fichier du répertoire ne répond au masque "CCYYMM_xxxxx".
+                #    ---------------------------------------------------------------
+                if all(not i.match for i in map(func1, map(os.path.basename, files))):
                     msg = '"{0}": renaming needed.'.format(curdir)
                     with decorator(logger, msg):
                         logger.info(msg)
                     with shared.chgcurdir(curdir):
-
                         log.index = 0
                         for arg in args:
-                            with rename(itemgetter(0)(arg), itemgetter(1)(arg), obj=logger, message=log(itemgetter(0)(arg), itemgetter(1)(arg)), test=arguments.test) as result:
+                            with rename(itemgetter(0)(arg), itemgetter(2)(arg), obj=logger, message=log(itemgetter(0)(arg), itemgetter(2)(arg)), test=arguments.test) as result:
                                 results.append(result)
-
-                        log.index = 0
-                        for arg in args:
-                            with rename(itemgetter(1)(arg), itemgetter(2)(arg), obj=logger, message=log(itemgetter(1)(arg), itemgetter(2)(arg)), test=arguments.test) as result:
-                                results.append(result)
-
                     continue
 
-                msg = '"{0}": no renaming needed.'.format(curdir)
-                with decorator(logger, msg):
-                    logger.info(msg)
-                continue
-
-            #    ---------------------------------------------------------------
-            # 2. Aucun fichier du répertoire ne répond au masque "CCYYMM_xxxxx".
-            #    ---------------------------------------------------------------
-            if all(not i.match for i in map(func1, map(os.path.basename, files))):
+                #    ------------------------------------------------------------------
+                # 3. Au moins un fichier du répertoire répond au masque "CCYYMM_xxxxx".
+                #    ------------------------------------------------------------------
                 msg = '"{0}": renaming needed.'.format(curdir)
                 with decorator(logger, msg):
                     logger.info(msg)
                 with shared.chgcurdir(curdir):
+
                     log.index = 0
                     for arg in args:
-                        with rename(itemgetter(0)(arg), itemgetter(2)(arg), obj=logger, message=log(itemgetter(0)(arg), itemgetter(2)(arg)), test=arguments.test) as result:
+                        with rename(itemgetter(0)(arg), itemgetter(1)(arg), obj=logger, message=log(itemgetter(0)(arg), itemgetter(1)(arg)), test=arguments.test) as result:
                             results.append(result)
+
+                    log.index = 0
+                    for arg in args:
+                        with rename(itemgetter(1)(arg), itemgetter(2)(arg), obj=logger, message=log(itemgetter(1)(arg), itemgetter(2)(arg)), test=arguments.test) as result:
+                            results.append(result)
+
                 continue
 
-            #    ------------------------------------------------------------------
-            # 3. Au moins un fichier du répertoire répond au masque "CCYYMM_xxxxx".
-            #    ------------------------------------------------------------------
-            msg = '"{0}": renaming needed.'.format(curdir)
-            with decorator(logger, msg):
-                logger.info(msg)
-            with shared.chgcurdir(curdir):
-
-                log.index = 0
-                for arg in args:
-                    with rename(itemgetter(0)(arg), itemgetter(1)(arg), obj=logger, message=log(itemgetter(0)(arg), itemgetter(1)(arg)), test=arguments.test) as result:
-                        results.append(result)
-
-                log.index = 0
-                for arg in args:
-                    with rename(itemgetter(1)(arg), itemgetter(2)(arg), obj=logger, message=log(itemgetter(1)(arg), itemgetter(2)(arg)), test=arguments.test) as result:
-                        results.append(result)
-
-            continue
-
-
-# ===============
-# Exit algorithm.
-# ===============
-if not arguments.test:
-    if all(results):
-        status = 0
-    sys.exit(status)
-sys.exit(0)
+    # --> Exit algorithm.
+    if not arguments.test:
+        if all(results):
+            status = 0
+        sys.exit(status)
+    sys.exit(0)
