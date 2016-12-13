@@ -41,24 +41,8 @@ REM ----------
 REM Numbering.
 REM ----------
 IF ERRORLEVEL 36 (
-
-    REM Set year. Mandatory.
-    :ITER3
-    CLS
-    SET /P input="Please enter year: "
-    IF NOT DEFINED input GOTO ITER3
-    SET input=!input:"=!
-
-    REM Run python script.
-    CLS
-    PUSHD %_PYTHONPROJECT%
-    python Images\Numbering.py !input! --test
-    POPD
-    SET input=
-
-    REM Go back to main menu.
+    python %_PYTHONPROJECT%\Images\Numbering.py
     GOTO MENU
-
 )
 
 
@@ -75,36 +59,8 @@ REM --------------------
 REM Edit folder content.
 REM --------------------
 IF ERRORLEVEL 34 (
-
-    SET script=Files\FolderContent.py
-
-    REM Set folder. Mandatory.
-    :ITER1
-    CLS
-    SET /P folder="Please enter folder to walk through: "
-    IF NOT DEFINED folder GOTO ITER1
-    SET folder=!folder:"=!
-
-    REM Set extensions. Not mandatory.
-    CLS
-    SET /P extensions="Please enter extension(s): "
-    IF DEFINED extensions SET extensions=!extensions:"=!
-
-    REM Run python script.
-    CLS
-    PUSHD %_PYTHONPROJECT%
-    IF DEFINED extensions (
-        python "!script!" "!folder!" !extensions!
-        SET extensions=
-    ) ELSE (
-        python "!script!" "!folder!"
-    )
-    POPD
-    SET folder=
-
-    REM Go back to main menu.
+    python %_PYTHONPROJECT%\Files\FolderContent.py
     GOTO MENU
-
 )
 
 
