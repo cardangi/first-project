@@ -17,15 +17,15 @@ __author__ = 'Xavier ROSSET'
 # ========
 class RippingLog(object):
 
-    regex = re.compile(r"\d+")
-    inputs = {"1": ("Enter database to update", "database"),
-              "2": ("Singled or Ranged ", "type"),
-              "3": ("Enter record(s) unique ID", "uid"),
-              "4": ("Enter ranged from record unique ID", "from_uid"),
-              "5": ("Enter ranged to record unique ID", "to_uid")}
+    _regex = re.compile(r"\d+")
+    _inputs = [("Enter database to update", "database"),
+               ("Singled or Ranged ", "type"),
+               ("Enter record(s) unique ID", "uid"),
+               ("Enter ranged from record unique ID", "from_uid"),
+               ("Enter ranged to record unique ID", "to_uid")]
 
     def __init__(self):
-        self._index, self._step = None, 0
+        self._index, self._step = 0, 0
         self._database = None
         self._type = None
         self._uid = None
@@ -33,20 +33,17 @@ class RippingLog(object):
         self._to_uid = None
         self._arguments = []
 
-    def __call__(self, *args, **kwargs):
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._index >= len(self._inputs):
+            raise StopIteration
+        if self._uid:
+            raise StopIteration
+        self._index += 1
         self._step += 1
-        return self.inputs[str(self._index)]
-
-    # ------
-    # INDEX.
-    # ------
-    @property
-    def index(self):
-        return self._index
-
-    @index.setter
-    def index(self, arg):
-        self._index = arg
+        return self._inputs[self._index - 1]
 
     # -----
     # STEP.
@@ -97,7 +94,7 @@ class RippingLog(object):
             self._arguments.extend(["singled"])
         elif arg.upper() == "R":
             self._arguments.extend(["ranged"])
-            self._index += 1
+            self._index = 3
 
     # ----
     # UID.
@@ -110,12 +107,12 @@ class RippingLog(object):
     def uid(self, arg):
         if not arg:
             raise ValueError('Please enter record(s) unique ID.')
-        arg = self.regex.findall(arg)
+        arg = self._regex.findall(arg)
         if not arg:
             raise ValueError('Please enter coherent record(s) unique ID.')
         self._uid = arg
         self._arguments.extend(arg)
-        raise StopIteration
+        # raise StopIteration
 
     # ---------
     # FROM_UID.
@@ -128,7 +125,7 @@ class RippingLog(object):
     def from_uid(self, arg):
         if not arg:
             raise ValueError('Please enter ranged from UID.')
-        match = self.regex.match(arg)
+        match = self._regex.match(arg)
         if not match:
             raise ValueError('Please enter coherent ranged from UID.')
         self._from_uid = arg
@@ -145,7 +142,7 @@ class RippingLog(object):
     def to_uid(self, arg):
         val = "9999"
         if arg:
-            match = self.regex.match(arg)
+            match = self._regex.match(arg)
             if not match:
                 raise ValueError('Please enter coherent ranged to UID.')
             self._to_uid = arg
@@ -162,22 +159,14 @@ if __name__ == "__main__":
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
-    value, record = None, RippingLog()
-    record.index = 0
-    while True:
-
-        try:
-            record.index += 1
-            inp, dest = record()
-            while True:
-                value = input("{0}. {1}: ".format(record.step, inp))
-                try:
-                    setattr(record, dest, value)
-                except ValueError:
-                    continue
-                break
-
-        except (StopIteration, KeyError):
+    record = RippingLog()
+    for inp, dest in record:
+        while True:
+            value = input("{0}. {1}: ".format(record.step, inp))
+            try:
+                setattr(record, dest, value)
+            except ValueError:
+                continue
             break
 
     # --> Parse arguments.
@@ -188,4 +177,4 @@ if __name__ == "__main__":
     logger.debug(arguments.database)
 
     # --> Delete records.
-    sys.exit(deletefromuid(*arguments.uid, db=arguments.database))
+    # sys.exit(deletefromuid(*arguments.uid, db=arguments.database))
