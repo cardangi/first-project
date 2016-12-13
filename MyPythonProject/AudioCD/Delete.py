@@ -15,14 +15,14 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Classes.
 # ========
-class RippingLog(object):
+class Interface(object):
 
     _regex = re.compile(r"\d+")
     _inputs = [("Enter database to update", "database"),
                ("Singled or Ranged ", "type"),
-               ("Enter record(s) unique ID", "uid"),
-               ("Enter ranged from record unique ID", "from_uid"),
-               ("Enter ranged to record unique ID", "to_uid")]
+               ("Enter interface(s) unique ID", "uid"),
+               ("Enter ranged from interface unique ID", "from_uid"),
+               ("Enter ranged to interface unique ID", "to_uid")]
 
     def __init__(self):
         self._index, self._step = 0, 0
@@ -106,10 +106,10 @@ class RippingLog(object):
     @uid.setter
     def uid(self, arg):
         if not arg:
-            raise ValueError('Please enter record(s) unique ID.')
+            raise ValueError('Please enter interface(s) unique ID.')
         arg = self._regex.findall(arg)
         if not arg:
-            raise ValueError('Please enter coherent record(s) unique ID.')
+            raise ValueError('Please enter coherent interface(s) unique ID.')
         self._uid = arg
         self._arguments.extend(arg)
         # raise StopIteration
@@ -159,22 +159,22 @@ if __name__ == "__main__":
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
-    record = RippingLog()
-    for inp, dest in record:
+    interface = Interface()
+    for inp, dest in interface:
         while True:
-            value = input("{0}. {1}: ".format(record.step, inp))
+            value = input("{0}. {1}: ".format(interface.step, inp))
             try:
-                setattr(record, dest, value)
+                setattr(interface, dest, value)
             except ValueError:
                 continue
             break
 
     # --> Parse arguments.
-    arguments = deleterippinglog.parse_args(record.arguments)
+    arguments = deleterippinglog.parse_args(interface.arguments)
 
     # --> Log arguments.
     logger.debug(arguments.uid)
     logger.debug(arguments.database)
 
-    # --> Delete records.
+    # --> Delete interfaces.
     # sys.exit(deletefromuid(*arguments.uid, db=arguments.database))
