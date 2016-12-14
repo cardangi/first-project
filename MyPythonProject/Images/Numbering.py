@@ -187,7 +187,7 @@ class Log(object):
     def index(self, arg):
         self._index = arg
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, **kwargs):
         self.index += 1
         return '{index:>4d}. Rename "{src}" to "{dst}".'.format(index=self.index, src=kwargs["src"], dst=kwargs["dst"])
 
