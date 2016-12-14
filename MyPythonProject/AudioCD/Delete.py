@@ -5,7 +5,7 @@ import sys
 import yaml
 import logging
 from logging.config import dictConfig
-from Applications.shared import DATABASE
+from Applications.shared import DATABASE, interface
 from Applications.parsers import deleterippinglog
 from Applications.Database.AudioCD.shared import deletefromuid
 
@@ -159,22 +159,15 @@ if __name__ == "__main__":
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
-    interface = Interface()
-    for inp, dest in interface:
-        while True:
-            value = input("{0}. {1}: ".format(interface.step, inp))
-            try:
-                setattr(interface, dest, value)
-            except ValueError:
-                continue
-            break
+    # --> User interface.
+    gui = interface(Interface())
 
     # --> Parse arguments.
-    arguments = deleterippinglog.parse_args(interface.arguments)
+    arguments = deleterippinglog.parse_args(gui.arguments)
 
     # --> Log arguments.
     logger.debug(arguments.uid)
     logger.debug(arguments.database)
 
     # --> Delete interfaces.
-    # sys.exit(deletefromuid(*arguments.uid, db=arguments.database))
+    sys.exit(deletefromuid(*arguments.uid, db=arguments.database))

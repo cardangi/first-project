@@ -547,12 +547,12 @@ def getdatefromepoch(start, stop, zone=DFTTIMEZONE):
     return map(func2, seconds, map(func1, seconds, (list(i) for i in zip(*(map(func3, seconds, repeat(zone)) for zone in zones)))), repeat(1))
 
 
-def interface(interface)
-    for inp, fld in interface:
+def interface(interface):
+    for inp, dest in interface:
         while True:
-            value = inputs(inp)
+            value = input("{0}. {1}: ".format(interface.step, inp))
             try:
-                setattr(interface, fld, value)
+                setattr(interface, dest, value)
             except ValueError:
                 continue
             break

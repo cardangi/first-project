@@ -205,7 +205,7 @@ def decorator(obj, s):
 
 @contextmanager
 def rename(src, dst, test=True, obj=None, message=None):
-    failed, results = False, {True: "Failed", False: "Succeeded"}
+    failed, result = False, {True: "Failed", False: "Succeeded"}
     if not test:
         try:
             os.rename(src=src, dst=dst)
@@ -215,7 +215,7 @@ def rename(src, dst, test=True, obj=None, message=None):
                 obj.exception(err)
     yield failed
     if message and obj:
-        obj.info("{log} {result}.".format(log=message, result=results[failed]))
+        obj.info("{log} {result}.".format(log=message, result=result[failed]))
 
 
 def year(y):
@@ -265,19 +265,11 @@ if __name__ == "__main__":
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Images.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
-    # --> Interface.
-    interface = Interface()
-    for inp, dest in interface:
-        while True:
-            value = input("{0}. {1}: ".format(interface.step, inp))
-            try:
-                setattr(interface, dest, value)
-            except ValueError:
-                continue
-            break
+    # --> User interface.
+    gui = shared.interface(Interface())
 
     # --> Parse arguments.
-    arguments = parser.parse_args(interface.arguments)
+    arguments = parser.parse_args(gui.arguments)
 
     # --> Log arguments.
     logger.debug(arguments.test)
