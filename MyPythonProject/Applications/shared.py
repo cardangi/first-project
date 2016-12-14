@@ -547,6 +547,18 @@ def getdatefromepoch(start, stop, zone=DFTTIMEZONE):
     return map(func2, seconds, map(func1, seconds, (list(i) for i in zip(*(map(func3, seconds, repeat(zone)) for zone in zones)))), repeat(1))
 
 
+def interface(interface)
+    for inp, fld in interface:
+        while True:
+            value = inputs(inp)
+            try:
+                setattr(interface, fld, value)
+            except ValueError:
+                continue
+            break
+    return interface
+
+
 def enumeratesortedlistcontent(thatlist):
     return sorted(enumerate(sorted(thatlist), 1), key=itemgetter(0))
 
