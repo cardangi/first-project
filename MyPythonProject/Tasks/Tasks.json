@@ -32,7 +32,7 @@
   ["Update RippingLog", 23, 30],
   ["Regular expressions", 16, 29],
   ["Sort lists", 17, 33],
-  ["Parser", 18, 31],
+  ["Parsers", 18, 31],
   ["Delete RippingLog", 24, 35],
   ["Numbering", 35, 36],
   ["Exit", 99, 99]

@@ -4,9 +4,9 @@ REM
 SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
 
 
-REM ================
-REM Initializations.
-REM ================
+REM ==================
+REM Initializations 1.
+REM ==================
 SET _me=%~n0
 SET _myparent=%~dp0
 
@@ -37,9 +37,9 @@ REM ----------
 IF ERRORLEVEL 99 GOTO EXIT
 
 
-REM ----------
-REM Numbering.
-REM ----------
+REM -------------------
+REM Numbering pictures.
+REM -------------------
 IF ERRORLEVEL 36 (
     python %_PYTHONPROJECT%\Images\Numbering.py
     GOTO MENU
@@ -77,9 +77,9 @@ IF ERRORLEVEL 33 (
 )
 
 
-REM ----------------------------
-REM Default Audio CD rip tester.
-REM ----------------------------
+REM -------------------------------
+REM Default Audio CD ripper tester.
+REM -------------------------------
 IF ERRORLEVEL 32 (
     CLS
     PUSHD %_PYTHONPROJECT%
@@ -90,9 +90,9 @@ IF ERRORLEVEL 32 (
 )
 
 
-REM --------------
-REM Parser tester.
-REM --------------
+REM ---------------
+REM Parsers tester.
+REM ---------------
 IF ERRORLEVEL 31 (
     CLS
     PUSHD %_PYTHONPROJECT%

@@ -22,7 +22,7 @@ __author__ = 'Xavier ROSSET'
 class Interface(object):
 
     _regex = re.compile(r"(?:{0})".format(shared.DFTYEARREGEX))
-    _inputs = [("Test Mode?", "test"), ("Enter year", "year")]
+    _inputs = [("Would you like to run test Mode? [Y/N]", "test"), ("Please enter year", "year")]
 
     def __init__(self):
         self._index, self._step = 0, 0
