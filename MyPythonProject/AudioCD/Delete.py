@@ -19,7 +19,7 @@ class Interface(object):
 
     _regex = re.compile(r"\d+")
     _inputs = [("Please enter database to update", "database"),
-               ("Would you to update singled or ranged records [S/R]?", "type"),
+               ("Would you to update singled or ranged records? [S/R]", "type"),
                ("Please enter record(s) unique ID", "uid"),
                ("Please enter ranged from record unique ID", "from_uid"),
                ("Please enter ranged to record unique ID", "to_uid")]
