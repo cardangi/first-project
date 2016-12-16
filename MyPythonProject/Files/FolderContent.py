@@ -60,7 +60,7 @@ class Interface(object):
         if arg:
             arg = arg.replace('"', '')
         if not os.path.exists(arg):
-            raise ValueError('"{0}" doesn\'t exist.'.format(arg))
+            raise ValueError('"{0}" isn\'t a valid folder.'.format(arg))
         self._folder = arg
         self._arguments.append(arg)
 
@@ -73,11 +73,9 @@ class Interface(object):
 
     @extensions.setter
     def extensions(self, arg):
-        value = self._regex.split(arg)
-        if not value:
-            raise ValueError("Please enter coherent extension(s).")
-        self._extensions = arg
-        self._arguments.extend(value)
+        if arg:
+            self._extensions = arg
+            self._arguments.extend(self._regex.split(arg))
 
 
 # ===============
