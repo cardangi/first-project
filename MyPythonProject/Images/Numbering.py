@@ -22,7 +22,7 @@ __author__ = 'Xavier ROSSET'
 class Interface(object):
 
     _regex = re.compile(r"(?:{0})".format(shared.DFTYEARREGEX))
-    _inputs = [("Would you like to run test Mode? [Y/N]", "test"), ("Please enter year", "year")]
+    _inputs = [("Would you like to use test mode? [Y/N]", "test"), ("Please enter year", "year")]
 
     def __init__(self):
         self._index, self._step = 0, 0
@@ -79,7 +79,7 @@ class Interface(object):
     @test.setter
     def test(self, arg):
         if arg not in shared.ACCEPTEDANSWERS:
-            raise ValueError("Please enter coherent answer.")
+            raise ValueError('"{0}" isn\'t a valid choice. Accepted choices are only "N" or "Y".'.format(arg))
         self._test = arg
         if arg.upper() == "Y":
             self._arguments.append("--test")
