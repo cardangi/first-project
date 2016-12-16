@@ -18,11 +18,11 @@ __author__ = 'Xavier ROSSET'
 class Interface(object):
 
     _regex = re.compile(r"\d+")
-    _inputs = [("Enter database to update", "database"),
-               ("Singled or Ranged ", "type"),
-               ("Enter interface(s) unique ID", "uid"),
-               ("Enter ranged from interface unique ID", "from_uid"),
-               ("Enter ranged to interface unique ID", "to_uid")]
+    _inputs = [("Please enter database to update", "database"),
+               ("Would you to update singled or ranged records [S/R]?", "type"),
+               ("Please enter record(s) unique ID", "uid"),
+               ("Please enter ranged from record unique ID", "from_uid"),
+               ("Please enter ranged to record unique ID", "to_uid")]
 
     def __init__(self):
         self._index, self._step = 0, 0
@@ -88,7 +88,7 @@ class Interface(object):
     @type.setter
     def type(self, arg):
         if arg.upper() not in ["R", "S"]:
-            raise ValueError('"{0}" isn\'t a valid choice.'.format(arg))
+            raise ValueError('"{0}" isn\'t a valid choice. Accepted choices are only "R" or "S".'.format(arg))
         self._type = arg.upper()
         if arg.upper() == "S":
             self._arguments.extend(["singled"])
@@ -106,10 +106,10 @@ class Interface(object):
     @uid.setter
     def uid(self, arg):
         if not arg:
-            raise ValueError('Please enter interface(s) unique ID.')
+            raise ValueError('Please enter record(s) unique ID.')
         arg = self._regex.findall(arg)
         if not arg:
-            raise ValueError('Please enter coherent interface(s) unique ID.')
+            raise ValueError('Please enter coherent record(s) unique ID.')
         self._uid = arg
         self._arguments.extend(arg)
         # raise StopIteration
@@ -124,10 +124,10 @@ class Interface(object):
     @from_uid.setter
     def from_uid(self, arg):
         if not arg:
-            raise ValueError('Please enter ranged from UID.')
+            raise ValueError('Please enter ranged from record unique ID.')
         match = self._regex.match(arg)
         if not match:
-            raise ValueError('Please enter coherent ranged from UID.')
+            raise ValueError('Please enter coherent ranged from record unique ID.')
         self._from_uid = arg
         self._arguments.append(arg)
 
@@ -144,7 +144,7 @@ class Interface(object):
         if arg:
             match = self._regex.match(arg)
             if not match:
-                raise ValueError('Please enter coherent ranged to UID.')
+                raise ValueError('Please enter coherent ranged to record unique ID.')
             self._to_uid = arg
             val = arg
         self._arguments.append(val)
