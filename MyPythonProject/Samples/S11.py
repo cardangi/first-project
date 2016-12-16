@@ -77,5 +77,7 @@ else:
         # ftp.nlst()
         refdirectory = "/music"
         ftp.cwd(refdirectory)
+        logger.debug("Current directory before: {0}.".format(ftp.pwd()))
         for file in foldercontent(refdirectory, ftp):
             logger.debug(file)
+        logger.debug("Current directory after: {0}.".format(ftp.pwd()))
