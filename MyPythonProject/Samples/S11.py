@@ -60,7 +60,7 @@ stack1 = ExitStack()
 try:
     ftp = stack1.enter_context(ftplib.FTP(r"192.168.1.20", timeout=30))
 except TimeoutError as err:
-    logger.debug(err)
+    logger.exception(err)
 else:
     with stack1:
         ftp.login(user="admin", passwd=b85decode(PASSWORD).decode())
