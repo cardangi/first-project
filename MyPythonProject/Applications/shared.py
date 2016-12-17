@@ -14,9 +14,9 @@ from datetime import datetime
 from dateutil.tz import gettz
 from operator import itemgetter
 from dateutil.parser import parse
-from contextlib import contextmanager
 from PIL import Image, TiffImagePlugin
 from collections import MutableMapping
+from contextlib import contextmanager, ContextDecorator
 
 __author__ = 'Xavier ROSSET'
 
@@ -59,6 +59,7 @@ BACK = 12
 EXTENSIONS = {"computing": ["py", "json", "yaml", "cmd", "css", "xsl"], "documents": ["doc", "txt", "pdf", "xav"]}
 ZONES = ["US/Pacific", "US/Eastern", "Indian/Mayotte", "Asia/Tokyo", "Australia/Sydney"]
 PASSWORD = r"F*HJDa$_+t"
+NAS = r"192.168.1.20"
 
 
 # ========
@@ -432,6 +433,20 @@ class SetExtensions(argparse.Action):
 
     def __call__(self, parsobj, namespace, values, option_string=None):
         setattr(namespace, self.dest, " ".join(values).split())
+
+
+class ChgCurDir(ContextDecorator):
+    def __init__(self, ftpobj, dir):
+        self.dir = dir
+        self.ftpobj = ftpobj
+        self.cwd = ftpobj.pwd()
+
+    def __enter__(self):
+        self.ftpobj.cwd(self.dir)
+        return self
+
+    def __exit__(self, *exc):
+        self.ftpobj.cwd(self.cwd)
 
 
 # ==========
