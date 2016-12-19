@@ -7,7 +7,7 @@ import logging
 from base64 import b85decode
 from contextlib import ExitStack
 from logging.config import dictConfig
-from Applications.shared import NAS, PASSWORD, EXTENSIONS, ChangeRemoteCurrentDirectory
+from Applications.shared import NAS, PASSWORD, ChangeRemoteCurrentDirectory
 
 __author__ = 'Xavier ROSSET'
 
@@ -71,13 +71,11 @@ if __name__ == "__main__":
         with stack1:
             ftp.login(user="admin", passwd=b85decode(PASSWORD).decode())
             logger.debug(ftp.getwelcome())
-            refdirectory = "/music"
+            refdirectory = "/pictures"
             try:
                 ftp.cwd(refdirectory)
             except ftplib.error_perm as err:
                 logger.exception(err)
             else:
-                # logger.debug("Current directory before: {0}.".format(ftp.pwd()))
-                for file in remotedirectorycontent(*EXTENSIONS["music"], ftpobject=ftp, currentdir=refdirectory, excluded=["#recycle"]):
+                for file in remotedirectorycontent("jpg", ftpobject=ftp, currentdir=refdirectory, excluded=["#recycle"]):
                     logger.debug(file)
-                # logger.debug("Current directory after: {0}.".format(ftp.pwd()))
