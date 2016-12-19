@@ -31,12 +31,12 @@ def remotedirectorycontent(*extensions, ftpobject, currentdir, logobject=None, e
             logobject.debug(item)
             logobject.debug(wdir)
 
-        # 2 --> Sub-folder "wdir" match the regular expression : it is excluded.
+        # 2 --> Sub-folder "wdir" match the regular expression: it is excluded.
         if regex and regex.match(wdir):
             continue
 
         # 3 --> Sub-folder "wdir" is set as current directory.    
-        #       If an exception occurs sub-folder "wdir" is a file : it is yielded.
+        #       If an exception occurs sub-folder "wdir" is a file: it is yielded.
         #       If any exception doesn't occur sub-folder "wdir" is walked through.
         stack2 = ExitStack()
         try:
