@@ -435,7 +435,7 @@ class SetExtensions(argparse.Action):
         setattr(namespace, self.dest, " ".join(values).split())
 
 
-class ChgCurDir(ContextDecorator):
+class ChangeRemoteCurrentDirectory(ContextDecorator):
     def __init__(self, ftpobj, dir):
         self.dir = dir
         self.ftpobj = ftpobj
@@ -516,22 +516,36 @@ def dateformat(dt, template):
                                          )
 
 
-def filesinfolder(*extensions, folder):
+def filesinfolder(*extensions, folder, excluded=None):
     """
     Return a generator object yielding files stored in "folder" having extension enumerated in "extensions".
     :param extensions: not mandatory list of extension(s) to filter files.
     :param folder: folder to walk through.
+    :param excluded: list of folder(s) to exclude.
     :return: generator object.
     """
+    logger = logging.getLogger("Default.{0}.filesinfolder".format(__name__))
+
+    # --> Regular expression for folder(s) exclusion.
+    regex1 = None
+    if excluded:
+        rex1 = r"(?:{0})".format("|".join(map(os.path.normpath, map(os.path.join, repeat(folder), excluded))).replace("\\", r"\\").replace("$", r"\$"))
+        regex1 = re.compile(rex1, re.IGNORECASE)
+
+    # --> Walk through folder.
     for root, folders, files in os.walk(folder):
+
+        # Regular expression for extension(s) inclusion.
+        rex2 = r"\.[a-z0-9]{3,}$"
+        if extensions:
+            rex2 = r"\.(?:{0})$".format("|".join(extensions))
+        regex2 = re.compile(rex2, re.IGNORECASE)
+
+        # Yield file(s) if not excluded.
         for file in files:
-            return_file = False
-            ext = os.path.splitext(file)[1][1:].lower()
-            if not extensions:
-                return_file = True
-            elif extensions and ext in (i.lower() for i in extensions):
-                return_file = True
-            if not return_file:
+            if regex1 and regex1.match(root):
+                continue
+            if not regex2.match(os.path.splitext(file)[1]):
                 continue
             yield os.path.join(root, file)
 

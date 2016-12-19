@@ -7,8 +7,7 @@ import logging
 from base64 import b85decode
 from contextlib import ExitStack
 from logging.config import dictConfig
-from Applications.shared import NAS, PASSWORD, ChgCurDir
-from Samples.S11 import directorycontent
+from Applications.shared import NAS, PASSWORD, ChangeRemoteCurrentDirectory
 
 __author__ = 'Xavier ROSSET'
 
@@ -43,7 +42,7 @@ if __name__ == "__main__":
                     stack2 = ExitStack()
                     while True:
                         try:
-                            stack2.enter_context(ChgCurDir(ftp, wdir))
+                            stack2.enter_context(ChangeRemoteCurrentDirectory(ftp, wdir))
                         except ftplib.error_perm:
                             logger.debug('"{0}" created.'.format(wdir))
                             ftp.mkd(wdir)
