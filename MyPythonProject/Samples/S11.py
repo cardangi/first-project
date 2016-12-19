@@ -14,21 +14,28 @@ __author__ = 'Xavier ROSSET'
 # ==========
 # Functions.
 # ==========
-def directorycontent(ftpobject, currentdir, logobject=None):
+def directorycontent(*extensions, ftpobject, currentdir, logobject=None, excluded=None):
+    regex = None
+    if excluded:
+        rex = r"{0}/(?:{1})".format(currentdir, "|".join(excluded))
+        regex = re.compile(rex, re.IGNORECASE)
     for item in ftpobject.nlst():
         wdir = "{0}/{1}".format(currentdir, item)
         if logobject:
             logobject.debug(currentdir)
             logobject.debug(item)
             logobject.debug(wdir)
+        if regex and regex.match(wdir):
+            continue
         stack2 = ExitStack()
         try:
             stack2.enter_context(ChgCurDir(ftpobject, wdir))
         except ftplib.error_perm:
-            yield wdir
+            if not extensions or (extensions and os.path.splitext(wdir)[1].lower in (extension.lower() for extension in extensions)):
+                yield wdir
         else:
             with stack2:
-                for content in directorycontent(ftpobject=ftpobject, currentdir=wdir, logobject=logobject):
+                for content in directorycontent(*extensions, ftpobject=ftpobject, currentdir=wdir, logobject=logobject, excluded=excluded):
                     yield content
 
 
@@ -59,6 +66,6 @@ if __name__ == "__main__":
                 logger.exception(err)
             else:
                 logger.debug("Current directory before: {0}.".format(ftp.pwd()))
-                for file in directorycontent(ftpobject=ftp, currentdir=refdirectory):
+                for file in directorycontent("ape", "mp3", "m4a", "flac", "ogg", ftpobject=ftp, currentdir=refdirectory):
                     logger.debug(file)
                 logger.debug("Current directory after: {0}.".format(ftp.pwd()))
