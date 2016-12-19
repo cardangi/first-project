@@ -6,7 +6,7 @@ import logging
 from base64 import b85decode
 from contextlib import ExitStack
 from logging.config import dictConfig
-from Applications.shared import NAS, PASSWORD, ChgCurDir
+from Applications.shared import NAS, PASSWORD, ChangeRemoteCurrentDirectory
 
 __author__ = 'Xavier ROSSET'
 
@@ -14,28 +14,39 @@ __author__ = 'Xavier ROSSET'
 # ==========
 # Functions.
 # ==========
-def directorycontent(*extensions, ftpobject, currentdir, logobject=None, excluded=None):
+def remotedirectorycontent(*extensions, ftpobject, currentdir, logobject=None, excluded=None):
+
+    # Define regular expression for folder(s) exclusion.
     regex = None
     if excluded:
-        rex = r"{0}/(?:{1})".format(currentdir, "|".join(excluded))
-        regex = re.compile(rex, re.IGNORECASE)
+        regex = re.compile(r"{0}/(?:{1})".format(currentdir, "|".join(excluded)), re.IGNORECASE)
+
+    # Loop over sub-folders.
     for item in ftpobject.nlst():
         wdir = "{0}/{1}".format(currentdir, item)
+
+        # 1 --> Log variables.  
         if logobject:
             logobject.debug(currentdir)
             logobject.debug(item)
             logobject.debug(wdir)
+
+        # 2 --> Sub-folder "wdir" match the regular expression : it is excluded.
         if regex and regex.match(wdir):
             continue
+
+        # 3 --> Sub-folder "wdir" is set as current directory.    
+        #       If an exception occurs sub-folder "wdir" is a file : it is yielded.
+        #       If any exception doesn't occur sub-folder "wdir" is walked through.
         stack2 = ExitStack()
         try:
-            stack2.enter_context(ChgCurDir(ftpobject, wdir))
+            stack2.enter_context(ChangeRemoteCurrentDirectory(ftpobject, wdir))
         except ftplib.error_perm:
-            if not extensions or (extensions and os.path.splitext(wdir)[1].lower in (extension.lower() for extension in extensions)):
+            if not extensions or (extensions and os.path.splitext(wdir)[1][1:].lower in (extension.lower() for extension in extensions)):
                 yield wdir
         else:
             with stack2:
-                for content in directorycontent(*extensions, ftpobject=ftpobject, currentdir=wdir, logobject=logobject, excluded=excluded):
+                for content in remotedirectorycontent(*extensions, ftpobject=ftpobject, currentdir=wdir, logobject=logobject, excluded=excluded):
                     yield content
 
 
@@ -66,6 +77,6 @@ if __name__ == "__main__":
                 logger.exception(err)
             else:
                 logger.debug("Current directory before: {0}.".format(ftp.pwd()))
-                for file in directorycontent("ape", "mp3", "m4a", "flac", "ogg", ftpobject=ftp, currentdir=refdirectory):
+                for file in remotedirectorycontent("ape", "mp3", "m4a", "flac", "ogg", ftpobject=ftp, currentdir=refdirectory):
                     logger.debug(file)
                 logger.debug("Current directory after: {0}.".format(ftp.pwd()))
