@@ -54,7 +54,7 @@ DFTDAYREGEX = "0[1-9]|[12]\d|3[01]"
 ACCEPTEDANSWERS = ["N", "Y"]
 MUSIC = "F:\\"
 IMAGES = "H:\\"
-EXTENSIONS = {"computing": ["py", "json", "yaml", "cmd", "css", "xsl"], "documents": ["doc", "txt", "pdf", "xav"]}
+EXTENSIONS = {"computing": ["py", "json", "yaml", "cmd", "css", "xsl"], "documents": ["doc", "txt", "pdf", "xav"], "music": ["ape", "mp3", "m4a", "flac", "ogg"]}
 ZONES = ["US/Pacific", "US/Eastern", "Indian/Mayotte", "Asia/Tokyo", "Australia/Sydney"]
 PASSWORD = r"F*HJDa$_+t"
 NAS = r"192.168.1.20"
@@ -527,8 +527,7 @@ def filesinfolder(*extensions, folder, excluded=None):
     # --> Regular expression for folder(s) exclusion.
     regex1 = None
     if excluded:
-        rex1 = r"(?:{0})".format("|".join(map(os.path.normpath, map(os.path.join, repeat(folder), excluded))).replace("\\", r"\\").replace("$", r"\$"))
-        regex1 = re.compile(rex1, re.IGNORECASE)
+        regex1 = re.compile(r"(?:{0})".format("|".join(map(os.path.normpath, map(os.path.join, repeat(folder), excluded))).replace("\\", r"\\").replace("$", r"\$")), re.IGNORECASE)
 
     # --> Walk through folder.
     for root, folders, files in os.walk(folder):
