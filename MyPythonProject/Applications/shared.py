@@ -33,7 +33,7 @@ locale.setlocale(locale.LC_ALL, "")
 APPEND = "a"
 WRITE = "w"
 DATABASE = os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db")
-ARECA = r'"C:\Program Files\Areca\areca_cl.exe"'
+ARECA = os.path.join(os.path.expandvars("%PROGRAMFILES%"), "Areca", "areca_cl.exe")
 DFTENCODING = "ISO-8859-1"
 DFTTIMEZONE = "Europe/Paris"
 UTC = timezone("UTC")
@@ -54,8 +54,6 @@ DFTDAYREGEX = "0[1-9]|[12]\d|3[01]"
 ACCEPTEDANSWERS = ["N", "Y"]
 MUSIC = "F:\\"
 IMAGES = "H:\\"
-EXIT = 11
-BACK = 12
 EXTENSIONS = {"computing": ["py", "json", "yaml", "cmd", "css", "xsl"], "documents": ["doc", "txt", "pdf", "xav"]}
 ZONES = ["US/Pacific", "US/Eastern", "Indian/Mayotte", "Asia/Tokyo", "Australia/Sydney"]
 PASSWORD = r"F*HJDa$_+t"
