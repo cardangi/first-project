@@ -155,6 +155,7 @@ class Interface(object):
 # ===============
 if __name__ == "__main__":
 
+    # --> Logging interface.
     with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
@@ -169,5 +170,5 @@ if __name__ == "__main__":
     logger.debug(arguments.uid)
     logger.debug(arguments.database)
 
-    # --> Delete interfaces.
+    # --> Delete record(s).
     sys.exit(deletefromuid(*arguments.uid, db=arguments.database))
