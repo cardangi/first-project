@@ -434,6 +434,9 @@ class SetExtensions(argparse.Action):
 
 
 class ChangeRemoteCurrentDirectory(ContextDecorator):
+    """
+    Context manager to change the current directory from a remote system.
+    """
     def __init__(self, ftpobj, directory):
         self._dir = directory
         self._ftpobj = ftpobj
@@ -448,6 +451,9 @@ class ChangeRemoteCurrentDirectory(ContextDecorator):
 
 
 class ChangeLocalCurrentDirectory(ContextDecorator):
+    """
+    Context manager to change the current directory from a local system.
+    """
     def __init__(self, ftpobj, directory):
         self._dir = directory
         self._cwd = os.getcwd()
