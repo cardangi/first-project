@@ -23,6 +23,7 @@ class Interface(object):
 
     _regex = re.compile(r"(?:{0})".format(shared.DFTYEARREGEX))
     _inputs = [("Would you like to run test Mode? [Y/N]", "test"), ("Please enter year", "year")]
+    year = shared.Year()
 
     def __init__(self):
         self._index, self._step = 0, 0
@@ -57,17 +58,17 @@ class Interface(object):
     # -----
     # YEAR.
     # -----
-    @property
-    def year(self):
-        return self._year
-
-    @year.setter
-    def year(self, arg):
-        value = self._regex.findall(arg)
-        if not value:
-            raise ValueError("Please enter coherent year(s).")
-        self._year = value
-        self._arguments.extend(value)
+    # @property
+    # def year(self):
+    #     return self._year
+    #
+    # @year.setter
+    # def year(self, arg):
+    #     value = self._regex.findall(arg)
+    #     if not value:
+    #         raise ValueError("Please enter coherent year(s).")
+    #     self._year = value
+    #     self._arguments.extend(value)
 
     # -----
     # TEST.
@@ -269,11 +270,13 @@ if __name__ == "__main__":
     gui = shared.interface(Interface())
 
     # --> Parse arguments.
-    arguments = parser.parse_args(gui.arguments)
+    # arguments = parser.parse_args(gui.arguments)
 
     # --> Log arguments.
-    logger.debug(arguments.test)
-    logger.debug(arguments.year)
+    logger.debug(gui.test)
+    logger.debug(gui.year)
+
+    sys.exit()
 
     # --> Main algorithm.
     for year in arguments.year:

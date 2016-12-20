@@ -434,6 +434,20 @@ class SetExtensions(argparse.Action):
         setattr(namespace, self.dest, " ".join(values).split())
 
 
+class Year(object):
+
+    _regex = re.compile(r"(?:{0})".format(DFTYEARREGEX))
+
+    def __get__(self, instance, owner):
+        return getattr(instance, "_year")
+
+    def __set__(self, instance, value):
+        year = self._regex.findall(value)
+        if not year:
+            raise ValueError("Please enter coherent year(s).")
+        setattr(instance, "_year", value)
+
+
 # ==========
 # Functions.
 # ==========
@@ -547,16 +561,16 @@ def getdatefromepoch(start, stop, zone=DFTTIMEZONE):
     return map(func2, seconds, map(func1, seconds, (list(i) for i in zip(*(map(func3, seconds, repeat(zone)) for zone in zones)))), repeat(1))
 
 
-def interface(interface):
-    for inp, dest in interface:
+def interface(obj):
+    for inp, dest in obj:
         while True:
-            value = input("{0}. {1}: ".format(interface.step, inp))
+            value = input("{0}. {1}: ".format(obj.step, inp))
             try:
-                setattr(interface, dest, value)
+                setattr(obj, dest, value)
             except ValueError:
                 continue
             break
-    return interface
+    return obj
 
 
 def enumeratesortedlistcontent(thatlist):
