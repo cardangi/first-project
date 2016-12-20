@@ -297,7 +297,7 @@ if __name__ == "__main__":
                         msg = '"{0}": renaming needed.'.format(curdir)
                         with decorator(logger, msg):
                             logger.info(msg)
-                        with shared.chgcurdir(curdir):
+                        with shared.ChangeLocalCurrentDirectory(curdir):
 
                             log.index = 0
                             for arg in args:
@@ -323,7 +323,7 @@ if __name__ == "__main__":
                     msg = '"{0}": renaming needed.'.format(curdir)
                     with decorator(logger, msg):
                         logger.info(msg)
-                    with shared.chgcurdir(curdir):
+                    with shared.ChangeLocalCurrentDirectory(curdir):
                         log.index = 0
                         for arg in args:
                             with rename(itemgetter(0)(arg), itemgetter(2)(arg), obj=logger, message=log(itemgetter(0)(arg), itemgetter(2)(arg)), test=arguments.test) as result:
@@ -336,7 +336,7 @@ if __name__ == "__main__":
                 msg = '"{0}": renaming needed.'.format(curdir)
                 with decorator(logger, msg):
                     logger.info(msg)
-                with shared.chgcurdir(curdir):
+                with shared.ChangeLocalCurrentDirectory(curdir):
 
                     log.index = 0
                     for arg in args:
