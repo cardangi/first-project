@@ -434,30 +434,35 @@ class SetExtensions(argparse.Action):
 
 
 class ChangeRemoteCurrentDirectory(ContextDecorator):
-    def __init__(self, ftpobj, dir):
-        self.dir = dir
-        self.ftpobj = ftpobj
-        self.cwd = ftpobj.pwd()
+    def __init__(self, ftpobj, directory):
+        self._dir = directory
+        self._ftpobj = ftpobj
+        self._cwd = ftpobj.pwd()
 
     def __enter__(self):
-        self.ftpobj.cwd(self.dir)
+        self._ftpobj.cwd(self._dir)
         return self
 
     def __exit__(self, *exc):
-        self.ftpobj.cwd(self.cwd)
+        self._ftpobj.cwd(self._cwd)
+
+
+class ChangeLocalCurrentDirectory(ContextDecorator):
+    def __init__(self, ftpobj, directory):
+        self._dir = directory
+        self._cwd = os.getcwd()
+
+    def __enter__(self):
+        os.chdir(self._dir)
+        return self
+
+    def __exit__(self, *exc):
+        os.chdir(self._cwd)
 
 
 # ==========
 # Functions.
 # ==========
-@contextmanager
-def chgcurdir(d):
-    wcdir = os.getcwd()
-    os.chdir(d)
-    yield
-    os.chdir(wcdir)
-
-
 def customformatterfactory(pattern=LOGPATTERN):
     return CustomFormatter(pattern)
 
