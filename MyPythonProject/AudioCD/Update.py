@@ -46,8 +46,6 @@ class Interface(object):
     def __next__(self):
         if self._index >= len(self._inputs):
             raise StopIteration
-        if self._uid:
-            raise StopIteration
         self._index += 1
         self._step += 1
         return self._inputs[self._index - 1]
