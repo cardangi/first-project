@@ -21,9 +21,9 @@ __author__ = 'Xavier ROSSET'
 # ========
 class Interface(object):
 
-    _regex = re.compile(r"(?:{0})".format(shared.DFTYEARREGEX))
     _inputs = [("Would you like to run test Mode? [Y/N]", "test"), ("Please enter year", "year")]
     year = shared.Years()
+    test = shared.TestMode()
 
     def __init__(self):
         self._index, self._step = 0, 0
@@ -56,34 +56,19 @@ class Interface(object):
         return self._arguments
 
     # -----
-    # YEAR.
-    # -----
-    # @property
-    # def year(self):
-    #     return self._year
-    #
-    # @year.setter
-    # def year(self, arg):
-    #     value = self._regex.findall(arg)
-    #     if not value:
-    #         raise ValueError("Please enter coherent year(s).")
-    #     self._year = value
-    #     self._arguments.extend(value)
-
-    # -----
     # TEST.
     # -----
-    @property
-    def test(self):
-        return self._test
-
-    @test.setter
-    def test(self, arg):
-        if arg not in shared.ACCEPTEDANSWERS:
-            raise ValueError("Please enter coherent answer.")
-        self._test = arg
-        if arg.upper() == "Y":
-            self._arguments.append("--test")
+    # @property
+    # def test(self):
+    #     return self._test
+    #
+    # @test.setter
+    # def test(self, arg):
+    #     if arg not in shared.ACCEPTEDANSWERS:
+    #         raise ValueError("Please enter coherent answer.")
+    #     self._test = arg
+    #     if arg.upper() == "Y":
+    #         self._arguments.append("--test")
 
 
 class ImagesCollection(MutableSequence):
