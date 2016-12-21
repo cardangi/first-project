@@ -23,7 +23,7 @@ class Interface(object):
 
     _regex = re.compile(r"(?:{0})".format(shared.DFTYEARREGEX))
     _inputs = [("Would you like to run test Mode? [Y/N]", "test"), ("Please enter year", "year")]
-    year = shared.Year()
+    year = shared.Years()
 
     def __init__(self):
         self._index, self._step = 0, 0
