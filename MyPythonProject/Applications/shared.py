@@ -287,18 +287,18 @@ class Images(Files):
         return os.path.normpath(os.path.join(drive, "{0}{1}".format(year, str(month).zfill(2))))
 
 
-class Header(object):
-
-    def __init__(self, header, steps, step=1):
-        self._header = header
-        self._steps = steps
-        self._step = step
-        self._index = 0
-
-    def __call__(self):
-        self._index += 1
-        self._step += 1
-        return self._header, self._step - 1, self._steps[self._index - 1]
+# class Header(object):
+#
+#     def __init__(self, header, steps, step=1):
+#         self._header = header
+#         self._steps = steps
+#         self._step = step
+#         self._index = 0
+#
+#     def __call__(self):
+#         self._index += 1
+#         self._step += 1
+#         return self._header, self._step - 1, self._steps[self._index - 1]
 
 
 class CustomFormatter(logging.Formatter):
@@ -316,6 +316,9 @@ class CustomFormatter(logging.Formatter):
         return s
 
 
+# ==========================
+# Customized parsing action.
+# ==========================
 class GetPath(argparse.Action):
     """
     Set "destination" attribute with the full path corresponding to the "values".
@@ -434,6 +437,48 @@ class SetExtensions(argparse.Action):
         setattr(namespace, self.dest, " ".join(values).split())
 
 
+# ============
+# Descriptors.
+# ============
+class Years(object):
+
+    _regex = re.compile(r"(?:{0})".format(DFTYEARREGEX))
+
+    def __get__(self, instance, owner):
+        return getattr(instance, "_year")
+
+    def __set__(self, instance, value):
+        years = self._regex.findall(value)
+        if not years:
+            raise ValueError("Please enter coherent year(s).")
+        setattr(instance, "_year", sorted(years, key=int))
+
+
+class Year(object):
+
+    _regex = re.compile(r"(?:{0})".format(DFTYEARREGEX))
+
+    def __get__(self, instance, owner):
+        return getattr(instance, "_year")
+
+    def __set__(self, instance, value):
+        match = self._regex.match(value)
+        if not match:
+            raise ValueError("Please enter coherent year.")
+        setattr(instance, "_year", value)
+
+
+class TestMode(object):
+
+    def __get__(self, instance, owner):
+        return getattr(instance, "_test")
+
+    def __set__(self, instance, value):
+        if value not in ACCEPTEDANSWERS:
+            raise ValueError('Please enter coherent answer. Only "Y" or "N" are allowed.')
+        setattr(instance, "_test", value)
+
+
 # ==========
 # Functions.
 # ==========
@@ -473,7 +518,7 @@ def validdb(db):
 
 def validseconds(seconds):
     if not re.match(r"^\d{10}$", seconds):
-        raise argparse.ArgumentTypeError('"{0}" is not a valid epoch'.format(seconds))
+        raise argparse.ArgumentTypeError('"{0}" is not a valid seconds number'.format(seconds))
     return int(seconds)
 
 
@@ -547,16 +592,16 @@ def getdatefromepoch(start, stop, zone=DFTTIMEZONE):
     return map(func2, seconds, map(func1, seconds, (list(i) for i in zip(*(map(func3, seconds, repeat(zone)) for zone in zones)))), repeat(1))
 
 
-def interface(interface):
-    for inp, dest in interface:
+def interface(obj):
+    for inp, dest in obj:
         while True:
-            value = input("{0}. {1}: ".format(interface.step, inp))
+            value = input("{0}. {1}: ".format(obj.step, inp))
             try:
-                setattr(interface, dest, value)
+                setattr(obj, dest, value)
             except ValueError:
                 continue
             break
-    return interface
+    return obj
 
 
 def enumeratesortedlistcontent(thatlist):
