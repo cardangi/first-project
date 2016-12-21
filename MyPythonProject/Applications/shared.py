@@ -434,18 +434,32 @@ class SetExtensions(argparse.Action):
         setattr(namespace, self.dest, " ".join(values).split())
 
 
-class Year(object):
+class Years(object):
 
     _regex = re.compile(r"(?:{0})".format(DFTYEARREGEX))
 
     def __get__(self, instance, owner):
-        return getattr(instance, "_year")
+        return self._year
 
     def __set__(self, instance, value):
         year = self._regex.findall(value)
         if not year:
             raise ValueError("Please enter coherent year(s).")
-        setattr(instance, "_year", value)
+        self._year = year
+
+
+class Year(object):
+
+    _regex = re.compile(r"(?:{0})".format(DFTYEARREGEX))
+
+    def __get__(self, instance, owner):
+        return self._year
+
+    def __set__(self, instance, value):
+        match = self._regex.match(value)
+        if not match:
+            raise ValueError("Please enter coherent year.")
+        self._year = value
 
 
 # ==========
