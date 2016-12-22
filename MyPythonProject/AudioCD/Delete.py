@@ -5,7 +5,7 @@ import sys
 import yaml
 import logging
 from logging.config import dictConfig
-from Applications.shared import DATABASE, interface
+from Applications.shared import Database, RecordsID, interface
 from Applications.parsers import deleterippinglog
 from Applications.Database.AudioCD.shared import deletefromuid
 
@@ -23,6 +23,8 @@ class Interface(object):
                ("Please enter record(s) unique ID", "uid"),
                ("Please enter ranged from record unique ID", "from_uid"),
                ("Please enter ranged to record unique ID", "to_uid")]
+    database = Database()
+    uid = RecordsID()
 
     def __init__(self):
         self._index, self._step = 0, 0
@@ -62,21 +64,21 @@ class Interface(object):
     # ---------
     # DATABASE.
     # ---------
-    @property
-    def database(self):
-        return self._database
-
-    @database.setter
-    def database(self, arg):
-        val = DATABASE
-        if arg:
-            arg = arg.replace('"', '')
-        if arg and not(os.path.exists(arg) and os.path.isfile(arg)):
-            raise ValueError('"{0}" isn\'t a valid database.'.format(arg))
-        elif arg and os.path.exists(arg) and os.path.isfile(arg):
-            val = arg
-        self._database = val
-        self._arguments.extend(["--db", val])
+    # @property
+    # def database(self):
+    #     return self._database
+    #
+    # @database.setter
+    # def database(self, arg):
+    #     val = DATABASE
+    #     if arg:
+    #         arg = arg.replace('"', '')
+    #     if arg and not(os.path.exists(arg) and os.path.isfile(arg)):
+    #         raise ValueError('"{0}" isn\'t a valid database.'.format(arg))
+    #     elif arg and os.path.exists(arg) and os.path.isfile(arg):
+    #         val = arg
+    #     self._database = val
+    #     self._arguments.extend(["--db", val])
 
     # -----
     # TYPE.
@@ -99,19 +101,19 @@ class Interface(object):
     # ----
     # UID.
     # ----
-    @property
-    def uid(self):
-        return self._uid
-
-    @uid.setter
-    def uid(self, arg):
-        if not arg:
-            raise ValueError('Please enter record(s) unique ID.')
-        arg = self._regex.findall(arg)
-        if not arg:
-            raise ValueError('Please enter coherent record(s) unique ID.')
-        self._uid = arg
-        self._arguments.extend(arg)
+    # @property
+    # def uid(self):
+    #     return self._uid
+    #
+    # @uid.setter
+    # def uid(self, arg):
+    #     if not arg:
+    #         raise ValueError('Please enter record(s) unique ID.')
+    #     arg = self._regex.findall(arg)
+    #     if not arg:
+    #         raise ValueError('Please enter coherent record(s) unique ID.')
+    #     self._uid = arg
+    #     self._arguments.extend(arg)
         # raise StopIteration
 
     # ---------

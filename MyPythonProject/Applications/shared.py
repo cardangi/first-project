@@ -16,7 +16,7 @@ from operator import itemgetter
 from dateutil.parser import parse
 from PIL import Image, TiffImagePlugin
 from collections import MutableMapping
-from contextlib import contextmanager, ContextDecorator
+from contextlib import ContextDecorator
 
 __author__ = 'Xavier ROSSET'
 
@@ -286,20 +286,6 @@ class Images(Files):
         return os.path.normpath(os.path.join(drive, "{0}{1}".format(year, str(month).zfill(2))))
 
 
-class Header(object):
-
-    def __init__(self, header, steps, step=1):
-        self._header = header
-        self._steps = steps
-        self._step = step
-        self._index = 0
-
-    def __call__(self):
-        self._index += 1
-        self._step += 1
-        return self._header, self._step - 1, self._steps[self._index - 1]
-
-
 class CustomFormatter(logging.Formatter):
 
     converter = datetime.fromtimestamp
@@ -315,6 +301,42 @@ class CustomFormatter(logging.Formatter):
         return s
 
 
+class ChangeRemoteCurrentDirectory(ContextDecorator):
+    """
+    Context manager to change the current directory from a remote system.
+    """
+    def __init__(self, ftpobj, directory):
+        self._dir = directory
+        self._ftpobj = ftpobj
+        self._cwd = ftpobj.pwd()
+
+    def __enter__(self):
+        self._ftpobj.cwd(self._dir)
+        return self
+
+    def __exit__(self, *exc):
+        self._ftpobj.cwd(self._cwd)
+
+
+class ChangeLocalCurrentDirectory(ContextDecorator):
+    """
+    Context manager to change the current directory from a local system.
+    """
+    def __init__(self, directory):
+        self._dir = directory
+        self._cwd = os.getcwd()
+
+    def __enter__(self):
+        os.chdir(self._dir)
+        return self
+
+    def __exit__(self, *exc):
+        os.chdir(self._cwd)
+
+
+# ===========================
+# Customized parsing actions.
+# ===========================
 class GetPath(argparse.Action):
     """
     Set "destination" attribute with the full path corresponding to the "values".
@@ -431,39 +453,6 @@ class SetExtensions(argparse.Action):
 
     def __call__(self, parsobj, namespace, values, option_string=None):
         setattr(namespace, self.dest, " ".join(values).split())
-
-
-class ChangeRemoteCurrentDirectory(ContextDecorator):
-    """
-    Context manager to change the current directory from a remote system.
-    """
-    def __init__(self, ftpobj, directory):
-        self._dir = directory
-        self._ftpobj = ftpobj
-        self._cwd = ftpobj.pwd()
-
-    def __enter__(self):
-        self._ftpobj.cwd(self._dir)
-        return self
-
-    def __exit__(self, *exc):
-        self._ftpobj.cwd(self._cwd)
-
-
-class ChangeLocalCurrentDirectory(ContextDecorator):
-    """
-    Context manager to change the current directory from a local system.
-    """
-    def __init__(self, ftpobj, directory):
-        self._dir = directory
-        self._cwd = os.getcwd()
-
-    def __enter__(self):
-        os.chdir(self._dir)
-        return self
-
-    def __exit__(self, *exc):
-        os.chdir(self._cwd)
 
 
 # ==========
@@ -584,16 +573,16 @@ def getdatefromepoch(start, stop, zone=DFTTIMEZONE):
     return map(func2, seconds, map(func1, seconds, (list(i) for i in zip(*(map(func3, seconds, repeat(zone)) for zone in zones)))), repeat(1))
 
 
-def interface(interface):
-    for inp, dest in interface:
+def interface(obj):
+    for inp, dest in obj:
         while True:
-            value = input("{0}. {1}: ".format(interface.step, inp))
+            value = input("{0}. {1}: ".format(obj.step, inp))
             try:
-                setattr(interface, dest, value)
+                setattr(obj, dest, value)
             except ValueError:
                 continue
             break
-    return interface
+    return obj
 
 
 def enumeratesortedlistcontent(thatlist):
