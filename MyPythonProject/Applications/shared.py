@@ -455,48 +455,6 @@ class SetExtensions(argparse.Action):
         setattr(namespace, self.dest, " ".join(values).split())
 
 
-# ============
-# Descriptors.
-# ============
-class Years(object):
-
-    _regex = re.compile(r"(?:{0})".format(DFTYEARREGEX))
-
-    def __get__(self, instance, owner):
-        return getattr(instance, "_year")
-
-    def __set__(self, instance, value):
-        years = self._regex.findall(value)
-        if not years:
-            raise ValueError("Please enter coherent year(s).")
-        setattr(instance, "_year", sorted(years, key=int))
-
-
-class Year(object):
-
-    _regex = re.compile(r"(?:{0})".format(DFTYEARREGEX))
-
-    def __get__(self, instance, owner):
-        return getattr(instance, "_year")
-
-    def __set__(self, instance, value):
-        match = self._regex.match(value)
-        if not match:
-            raise ValueError("Please enter coherent year.")
-        setattr(instance, "_year", value)
-
-
-class TestMode(object):
-
-    def __get__(self, instance, owner):
-        return getattr(instance, "_test")
-
-    def __set__(self, instance, value):
-        if value not in ACCEPTEDANSWERS:
-            raise ValueError('Please enter coherent answer. Only "Y" or "N" are allowed.')
-        setattr(instance, "_test", value)
-
-
 # ==========
 # Functions.
 # ==========

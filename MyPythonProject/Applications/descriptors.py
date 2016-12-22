@@ -10,12 +10,12 @@ __author__ = 'Xavier ROSSET'
 
 class Database(object):
 
-    def __init__(self):
-        self._defaultdb = DATABASE
+    def __init__(self, default=DATABASE):
+        self._default = default
         self._data = WeakKeyDictionary()
 
     def __get__(self, instance, owner):
-        return self._data.get(instance, self._defaultdb)
+        return self._data.get(instance, self._default)
 
     def __set__(self, instance, value):
         argument = value
@@ -23,7 +23,7 @@ class Database(object):
             argument = argument.replace('"', '')
         if argument and not(os.path.exists(argument) and os.path.isfile(argument)):
             raise ValueError('"{0}" isn\'t a valid database.'.format(argument))
-        database = self._defaultdb
+        database = self._default
         if argument:
             database = argument
         self._data[instance] = database

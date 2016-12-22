@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple, MutableSequence
+from Applications.descriptors import Answers, Year
 from itertools import accumulate, repeat
 from contextlib import contextmanager
 from logging.config import dictConfig
@@ -21,15 +22,16 @@ __author__ = 'Xavier ROSSET'
 # ========
 class Interface(object):
 
+    # Data descriptor(s).
+    year = Year()
+    test = Answers("N", "Y", default="Y")
+
+    # Class variable(s).
     _inputs = [("Would you like to run test Mode? [Y/N]", "test"), ("Please enter year", "year")]
-    year = shared.Years()
-    test = shared.TestMode()
 
     def __init__(self):
-        self._index, self._step = 0, 0
-        self._year = None
-        self._test = None
-        self._arguments = []
+        self._index = 0
+        self._step = 0
 
     def __iter__(self):
         return self
@@ -41,34 +43,9 @@ class Interface(object):
         self._step += 1
         return self._inputs[self._index - 1]
 
-    # -----
-    # STEP.
-    # -----
     @property
     def step(self):
         return self._step
-
-    # ----------
-    # ARGUMENTS.
-    # ----------
-    @property
-    def arguments(self):
-        return self._arguments
-
-    # -----
-    # TEST.
-    # -----
-    # @property
-    # def test(self):
-    #     return self._test
-    #
-    # @test.setter
-    # def test(self, arg):
-    #     if arg not in shared.ACCEPTEDANSWERS:
-    #         raise ValueError("Please enter coherent answer.")
-    #     self._test = arg
-    #     if arg.upper() == "Y":
-    #         self._arguments.append("--test")
 
 
 class ImagesCollection(MutableSequence):
@@ -97,15 +74,15 @@ class ImagesCollection(MutableSequence):
         return self._collection
 
     @collection.setter
-    def collection(self, arg):
+    def collection(self, val):
 
         # Argument must be a coherent year.
-        if not re.match(r"^(?=\d{4})20[0-2]\d$", str(arg)):
-            raise ValueError('"{0}" is not a valid year'.format(arg))
+        if not re.match(r"^(?=\d{4})20[0-2]\d$", str(val)):
+            raise ValueError('"{0}" is not a valid year'.format(val))
 
         # Dictionary of images grouped by month.
         # Example: {"201001": ["file", "file2", "file3"], "201002": ["file", "file2", "file3"]}
-        images = {k: v for k, v in dict(self.func3(arg)).items() if v}
+        images = {k: v for k, v in dict(self.func3(val)).items() if v}
 
         # List of found months.
         # Example: ["201001", "201002"]
@@ -170,12 +147,12 @@ class Log(object):
         return self._index
 
     @index.setter
-    def index(self, arg):
-        self._index = arg
+    def index(self, val):
+        self._index = val
 
-    def __call__(self, **kwargs):
+    def __call__(self, *vals):
         self.index += 1
-        return '{index:>4d}. Rename "{src}" to "{dst}".'.format(index=self.index, src=kwargs["src"], dst=kwargs["dst"])
+        return '{index:>4d}. Rename "{src}" to "{dst}".'.format(index=self.index, src=vals[0], dst=vals[1])
 
 
 # ==========
@@ -191,7 +168,7 @@ def decorator(obj, s):
 
 @contextmanager
 def rename(src, dst, test=True, obj=None, message=None):
-    failed, result = False, {True: "Failed", False: "Succeeded"}
+    failed, res = False, {True: "Failed", False: "Succeeded"}
     if not test:
         try:
             os.rename(src=src, dst=dst)
@@ -201,10 +178,10 @@ def rename(src, dst, test=True, obj=None, message=None):
                 obj.exception(err)
     yield failed
     if message and obj:
-        obj.info("{log} {result}.".format(log=message, result=result[failed]))
+        obj.info("{log} {result}.".format(log=message, result=res[failed]))
 
 
-def year(y):
+def validyear(y):
     import re
     regex = re.compile(r"^(?=\d{4})20[0-2]\d$")
     if not regex.match(y):
@@ -231,7 +208,7 @@ def func3(s, i):
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("year", type=year, nargs="+")
+parser.add_argument("year", type=validyear, nargs="+")
 parser.add_argument("-t", "--test", action="store_true")
 
 
@@ -244,7 +221,7 @@ if __name__ == "__main__":
     MODES = {True: "test mode.", False: "rename mode."}
 
     # --> Initializations.
-    status, nt, results, log = 99, namedtuple("nt", "match sequence"), [], Log()
+    status, nt, results, arguments, log = 99, namedtuple("nt", "match sequence"), [], [], Log()
 
     # --> Logging interface.
     with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
@@ -255,20 +232,21 @@ if __name__ == "__main__":
     gui = shared.interface(Interface())
 
     # --> Parse arguments.
-    # arguments = parser.parse_args(gui.arguments)
+    arguments.extend(gui.year)
+    if gui.test == "Y":
+        arguments.append("--test")
+    arguments = parser.parse_args(arguments)
 
     # --> Log arguments.
-    logger.debug(gui.test)
-    logger.debug(gui.year)
-
-    sys.exit()
+    logger.debug(sorted(arguments.year, key=int))
+    logger.debug(arguments.test)
 
     # --> Main algorithm.
-    for year in arguments.year:
+    for year in sorted(arguments.year, key=int):
         try:
             collection = ImagesCollection(year)
-        except ValueError as err:
-            logger.exception(err)
+        except ValueError as exception:
+            logger.exception(exception)
         else:
             for keys, values in collection:
                 curdir = os.path.normpath(os.path.join(shared.IMAGES, keys))

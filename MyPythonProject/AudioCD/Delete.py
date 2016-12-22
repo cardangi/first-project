@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
-import re
 import sys
 import yaml
 import logging
 from logging.config import dictConfig
-from Applications.shared import Database, RecordsID, interface
+from Applications.shared import interface
 from Applications.parsers import deleterippinglog
+from Applications.descriptors import Answers, Database, Integer
 from Applications.Database.AudioCD.shared import deletefromuid
 
 __author__ = 'Xavier ROSSET'
@@ -17,23 +17,23 @@ __author__ = 'Xavier ROSSET'
 # ========
 class Interface(object):
 
-    _regex = re.compile(r"\d+")
+    # Data descriptor(s).
+    database = Database()
+    mode = Answers("S", "R", default="S")
+    uid = Integer()
+    from_uid = Integer()
+    to_uid = Integer(mandatory=False, default="9999")
+
+    # Class variable(s).
     _inputs = [("Please enter database to update", "database"),
-               ("Would you to update singled or ranged records? [S/R]", "type"),
+               ("Would you to update singled or ranged records? [S/R]", "mode"),
                ("Please enter record(s) unique ID", "uid"),
                ("Please enter ranged from record unique ID", "from_uid"),
                ("Please enter ranged to record unique ID", "to_uid")]
-    database = Database()
-    uid = RecordsID()
 
     def __init__(self):
-        self._index, self._step = 0, 0
-        self._database = None
-        self._type = None
-        self._uid = None
-        self._from_uid = None
-        self._to_uid = None
-        self._arguments = []
+        self._index = 0
+        self._step = 0
 
     def __iter__(self):
         return self
@@ -41,115 +41,15 @@ class Interface(object):
     def __next__(self):
         if self._index >= len(self._inputs):
             raise StopIteration
-        if self._uid:
-            raise StopIteration
+        # if self.uid:
+        #     raise StopIteration
         self._index += 1
         self._step += 1
         return self._inputs[self._index - 1]
 
-    # -----
-    # STEP.
-    # -----
     @property
     def step(self):
         return self._step
-
-    # ----------
-    # ARGUMENTS.
-    # ----------
-    @property
-    def arguments(self):
-        return self._arguments
-
-    # ---------
-    # DATABASE.
-    # ---------
-    # @property
-    # def database(self):
-    #     return self._database
-    #
-    # @database.setter
-    # def database(self, arg):
-    #     val = DATABASE
-    #     if arg:
-    #         arg = arg.replace('"', '')
-    #     if arg and not(os.path.exists(arg) and os.path.isfile(arg)):
-    #         raise ValueError('"{0}" isn\'t a valid database.'.format(arg))
-    #     elif arg and os.path.exists(arg) and os.path.isfile(arg):
-    #         val = arg
-    #     self._database = val
-    #     self._arguments.extend(["--db", val])
-
-    # -----
-    # TYPE.
-    # -----
-    @property
-    def type(self):
-        return self._type
-
-    @type.setter
-    def type(self, arg):
-        if arg.upper() not in ["R", "S"]:
-            raise ValueError('"{0}" isn\'t a valid choice. Accepted choices are only "R" or "S".'.format(arg))
-        self._type = arg.upper()
-        if arg.upper() == "S":
-            self._arguments.extend(["singled"])
-        elif arg.upper() == "R":
-            self._arguments.extend(["ranged"])
-            self._index = 3
-
-    # ----
-    # UID.
-    # ----
-    # @property
-    # def uid(self):
-    #     return self._uid
-    #
-    # @uid.setter
-    # def uid(self, arg):
-    #     if not arg:
-    #         raise ValueError('Please enter record(s) unique ID.')
-    #     arg = self._regex.findall(arg)
-    #     if not arg:
-    #         raise ValueError('Please enter coherent record(s) unique ID.')
-    #     self._uid = arg
-    #     self._arguments.extend(arg)
-        # raise StopIteration
-
-    # ---------
-    # FROM_UID.
-    # ---------
-    @property
-    def from_uid(self):
-        return self._from_uid
-
-    @from_uid.setter
-    def from_uid(self, arg):
-        if not arg:
-            raise ValueError('Please enter ranged from record unique ID.')
-        match = self._regex.match(arg)
-        if not match:
-            raise ValueError('Please enter coherent ranged from record unique ID.')
-        self._from_uid = arg
-        self._arguments.append(arg)
-
-    # -------
-    # TO_UID.
-    # -------
-    @property
-    def to_uid(self):
-        return self._to_uid
-
-    @to_uid.setter
-    def to_uid(self, arg):
-        val = "9999"
-        if arg:
-            match = self._regex.match(arg)
-            if not match:
-                raise ValueError('Please enter coherent ranged to record unique ID.')
-            self._to_uid = arg
-            val = arg
-        self._arguments.append(val)
 
 
 # ===============
@@ -162,15 +62,29 @@ if __name__ == "__main__":
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
+    # --> Initializations.
+    arguments = []
+
     # --> User interface.
     gui = interface(Interface())
 
     # --> Parse arguments.
-    arguments = deleterippinglog.parse_args(gui.arguments)
+    arguments.extend(["--db", gui.database])
+    if gui.mode == "S":
+        arguments.append("singled")
+        arguments.extend(gui.uid)
+    elif gui.mode == "R":
+        arguments.append("ranged")
+        arguments.extend(gui.from_uid)
+        arguments.extend(gui.to_uid)
+
+    # --> Parse arguments.
+    arguments = deleterippinglog.parse_args(arguments)
 
     # --> Log arguments.
-    logger.debug(arguments.uid)
     logger.debug(arguments.database)
+    logger.debug(arguments.uid)
 
     # --> Delete record(s).
+    sys.exit(0)
     sys.exit(deletefromuid(*arguments.uid, db=arguments.database))
