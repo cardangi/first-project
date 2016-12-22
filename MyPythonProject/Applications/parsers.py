@@ -59,3 +59,12 @@ parser3_g.add_argument("end", nargs="?", default="9999", type=int, action=shared
 foldercontent = argparse.ArgumentParser()
 foldercontent.add_argument("folder", type=shared.validpath)
 foldercontent.add_argument("extensions", nargs="*")
+
+
+#     =========
+#  5. PARSER 5.
+#     =========
+improvedfoldercontent = argparse.ArgumentParser()
+improvedfoldercontent.add_argument("folder", type=shared.validpath)
+improvedfoldercontent.add_argument("excluded", nargs="*")
+improvedfoldercontent.add_argument("-e", "--ext", dest="extensions", nargs="*")

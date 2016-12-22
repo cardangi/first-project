@@ -14,9 +14,9 @@ from datetime import datetime
 from dateutil.tz import gettz
 from operator import itemgetter
 from dateutil.parser import parse
-from contextlib import contextmanager
 from PIL import Image, TiffImagePlugin
 from collections import MutableMapping
+from contextlib import ContextDecorator
 
 __author__ = 'Xavier ROSSET'
 
@@ -33,7 +33,7 @@ locale.setlocale(locale.LC_ALL, "")
 APPEND = "a"
 WRITE = "w"
 DATABASE = os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db")
-ARECA = r'"C:\Program Files\Areca\areca_cl.exe"'
+ARECA = os.path.join(os.path.expandvars("%PROGRAMFILES%"), "Areca", "areca_cl.exe")
 DFTENCODING = "ISO-8859-1"
 DFTTIMEZONE = "Europe/Paris"
 UTC = timezone("UTC")
@@ -54,11 +54,10 @@ DFTDAYREGEX = "0[1-9]|[12]\d|3[01]"
 ACCEPTEDANSWERS = ["N", "Y"]
 MUSIC = "F:\\"
 IMAGES = "H:\\"
-EXIT = 11
-BACK = 12
-EXTENSIONS = {"computing": ["py", "json", "yaml", "cmd", "css", "xsl"], "documents": ["doc", "txt", "pdf", "xav"]}
+EXTENSIONS = {"computing": ["py", "json", "yaml", "cmd", "css", "xsl"], "documents": ["doc", "txt", "pdf", "xav"], "music": ["ape", "mp3", "m4a", "flac", "ogg"]}
 ZONES = ["US/Pacific", "US/Eastern", "Indian/Mayotte", "Asia/Tokyo", "Australia/Sydney"]
 PASSWORD = r"F*HJDa$_+t"
+NAS = r"192.168.1.20"
 
 
 # ========
@@ -287,20 +286,6 @@ class Images(Files):
         return os.path.normpath(os.path.join(drive, "{0}{1}".format(year, str(month).zfill(2))))
 
 
-# class Header(object):
-#
-#     def __init__(self, header, steps, step=1):
-#         self._header = header
-#         self._steps = steps
-#         self._step = step
-#         self._index = 0
-#
-#     def __call__(self):
-#         self._index += 1
-#         self._step += 1
-#         return self._header, self._step - 1, self._steps[self._index - 1]
-
-
 class CustomFormatter(logging.Formatter):
 
     converter = datetime.fromtimestamp
@@ -316,9 +301,42 @@ class CustomFormatter(logging.Formatter):
         return s
 
 
-# ==========================
-# Customized parsing action.
-# ==========================
+class ChangeRemoteCurrentDirectory(ContextDecorator):
+    """
+    Context manager to change the current directory from a remote system.
+    """
+    def __init__(self, ftpobj, directory):
+        self._dir = directory
+        self._ftpobj = ftpobj
+        self._cwd = ftpobj.pwd()
+
+    def __enter__(self):
+        self._ftpobj.cwd(self._dir)
+        return self
+
+    def __exit__(self, *exc):
+        self._ftpobj.cwd(self._cwd)
+
+
+class ChangeLocalCurrentDirectory(ContextDecorator):
+    """
+    Context manager to change the current directory from a local system.
+    """
+    def __init__(self, directory):
+        self._dir = directory
+        self._cwd = os.getcwd()
+
+    def __enter__(self):
+        os.chdir(self._dir)
+        return self
+
+    def __exit__(self, *exc):
+        os.chdir(self._cwd)
+
+
+# ===========================
+# Customized parsing actions.
+# ===========================
 class GetPath(argparse.Action):
     """
     Set "destination" attribute with the full path corresponding to the "values".
@@ -482,14 +500,6 @@ class TestMode(object):
 # ==========
 # Functions.
 # ==========
-@contextmanager
-def chgcurdir(d):
-    wcdir = os.getcwd()
-    os.chdir(d)
-    yield
-    os.chdir(wcdir)
-
-
 def customformatterfactory(pattern=LOGPATTERN):
     return CustomFormatter(pattern)
 
@@ -546,22 +556,35 @@ def dateformat(dt, template):
                                          )
 
 
-def filesinfolder(*extensions, folder):
+def filesinfolder(*extensions, folder, excluded=None):
     """
     Return a generator object yielding files stored in "folder" having extension enumerated in "extensions".
     :param extensions: not mandatory list of extension(s) to filter files.
     :param folder: folder to walk through.
+    :param excluded: list of folder(s) to exclude.
     :return: generator object.
     """
+    logger = logging.getLogger("Default.{0}.filesinfolder".format(__name__))
+
+    # --> Regular expression for folder(s) exclusion.
+    regex1 = None
+    if excluded:
+        regex1 = re.compile(r"(?:{0})".format("|".join(map(os.path.normpath, map(os.path.join, repeat(folder), excluded))).replace("\\", r"\\").replace("$", r"\$")), re.IGNORECASE)
+
+    # --> Walk through folder.
     for root, folders, files in os.walk(folder):
+
+        # Regular expression for extension(s) inclusion.
+        rex2 = r"\.[a-z0-9]{3,}$"
+        if extensions:
+            rex2 = r"\.(?:{0})$".format("|".join(extensions))
+        regex2 = re.compile(rex2, re.IGNORECASE)
+
+        # Yield file(s) if not excluded.
         for file in files:
-            return_file = False
-            ext = os.path.splitext(file)[1][1:].lower()
-            if not extensions:
-                return_file = True
-            elif extensions and ext in (i.lower() for i in extensions):
-                return_file = True
-            if not return_file:
+            if regex1 and regex1.match(root):
+                continue
+            if not regex2.match(os.path.splitext(file)[1]):
                 continue
             yield os.path.join(root, file)
 

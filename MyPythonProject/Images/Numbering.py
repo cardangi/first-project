@@ -246,7 +246,7 @@ if __name__ == "__main__":
     # --> Initializations.
     status, nt, results, log = 99, namedtuple("nt", "match sequence"), [], Log()
 
-    # --> Logging.
+    # --> Logging interface.
     with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Images.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
@@ -285,7 +285,7 @@ if __name__ == "__main__":
                         msg = '"{0}": renaming needed.'.format(curdir)
                         with decorator(logger, msg):
                             logger.info(msg)
-                        with shared.chgcurdir(curdir):
+                        with shared.ChangeLocalCurrentDirectory(curdir):
 
                             log.index = 0
                             for arg in args:
@@ -311,7 +311,7 @@ if __name__ == "__main__":
                     msg = '"{0}": renaming needed.'.format(curdir)
                     with decorator(logger, msg):
                         logger.info(msg)
-                    with shared.chgcurdir(curdir):
+                    with shared.ChangeLocalCurrentDirectory(curdir):
                         log.index = 0
                         for arg in args:
                             with rename(itemgetter(0)(arg), itemgetter(2)(arg), obj=logger, message=log(itemgetter(0)(arg), itemgetter(2)(arg)), test=arguments.test) as result:
@@ -324,7 +324,7 @@ if __name__ == "__main__":
                 msg = '"{0}": renaming needed.'.format(curdir)
                 with decorator(logger, msg):
                     logger.info(msg)
-                with shared.chgcurdir(curdir):
+                with shared.ChangeLocalCurrentDirectory(curdir):
 
                     log.index = 0
                     for arg in args:
