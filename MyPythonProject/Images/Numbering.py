@@ -20,32 +20,15 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Classes.
 # ========
-class Interface(object):
+class LocalInterface(shared.GlobalInterface):
 
     # Data descriptor(s).
     year = Year()
     test = Answers("N", "Y", default="Y")
 
-    # Class variable(s).
-    _inputs = [("Would you like to run test Mode? [Y/N]", "test"), ("Please enter year", "year")]
-
-    def __init__(self):
-        self._index = 0
-        self._step = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self._index >= len(self._inputs):
-            raise StopIteration
-        self._index += 1
-        self._step += 1
-        return self._inputs[self._index - 1]
-
-    @property
-    def step(self):
-        return self._step
+    # Instance method(s).
+    def __init__(self, *args):
+        super(LocalInterface, self).__init__(*args)
 
 
 class ImagesCollection(MutableSequence):
@@ -229,7 +212,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("Images.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
     # --> User interface.
-    gui = shared.interface(Interface())
+    gui = shared.interface(LocalInterface(("Would you like to run test Mode? [Y/N]", "test"), ("Please enter year", "year")))
 
     # --> Parse arguments.
     arguments.extend(gui.year)

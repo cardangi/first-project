@@ -6,8 +6,8 @@ import logging
 from logging.config import dictConfig
 from Applications.shared import interface
 from Applications.parsers import deleterippinglog
-from Applications.descriptors import Answers, Database, Integer
 from Applications.Database.AudioCD.shared import deletefromuid
+from Applications.descriptors import Answers, Database, Integer
 
 __author__ = 'Xavier ROSSET'
 
@@ -15,7 +15,7 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Classes.
 # ========
-class Interface(object):
+class LocalInterface(object):
 
     # Data descriptor(s).
     database = Database()
@@ -24,25 +24,34 @@ class Interface(object):
     from_uid = Integer()
     to_uid = Integer(mandatory=False, default="9999")
 
-    # Class variable(s).
-    _inputs = [("Please enter database to update", "database"),
-               ("Would you to update singled or ranged records? [S/R]", "mode"),
-               ("Please enter record(s) unique ID", "uid"),
-               ("Please enter ranged from record unique ID", "from_uid"),
-               ("Please enter ranged to record unique ID", "to_uid")]
-
-    def __init__(self):
-        self._index = 0
+    # Instance method(s).
+    def __init__(self, *args):
+        self._args = args
+        self._levels = 2
+        self._level = 0
         self._step = 0
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        if self._index >= len(self._inputs):
+
+        # Stop iteration once second level is exhausted.
+        if self._level >= self._levels and self._index >= len(self._inputs):
             raise StopIteration
-        # if self.uid:
-        #     raise StopIteration
+
+        # Load second level once first level is exhausted.
+        if self._level == 1 and self._index >= len(self._inputs):
+            self._inputs = list(self._args[self._level][self.mode])
+            self._level += 1
+            self._index = 0
+
+        # Load first level.
+        elif self._level == 0:
+            self._inputs = list(self._args[self._level])
+            self._level += 1
+            self._index = 0
+
         self._index += 1
         self._step += 1
         return self._inputs[self._index - 1]
@@ -66,7 +75,10 @@ if __name__ == "__main__":
     arguments = []
 
     # --> User interface.
-    gui = interface(Interface())
+    gui = interface(LocalInterface([("Please enter database to update", "database"), ("Would you to update singled or ranged records? [S/R]", "mode")],
+                                   {"S": [("Please enter record(s) unique ID", "uid")], "R": [("Please enter ranged from record unique ID", "from_uid"), ("Please enter ranged to record unique ID", "to_uid")]}
+                                   )
+                    )
 
     # --> Parse arguments.
     arguments.extend(["--db", gui.database])
@@ -86,5 +98,4 @@ if __name__ == "__main__":
     logger.debug(arguments.uid)
 
     # --> Delete record(s).
-    sys.exit(0)
     sys.exit(deletefromuid(*arguments.uid, db=arguments.database))

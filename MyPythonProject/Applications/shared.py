@@ -334,6 +334,28 @@ class ChangeLocalCurrentDirectory(ContextDecorator):
         os.chdir(self._cwd)
 
 
+class GlobalInterface(object):
+
+    def __init__(self, *args):
+        self._inputs = args
+        self._index = 0
+        self._step = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._index >= len(self._inputs):
+            raise StopIteration
+        self._index += 1
+        self._step += 1
+        return self._inputs[self._index - 1]
+
+    @property
+    def step(self):
+        return self._step
+
+
 # ===========================
 # Customized parsing actions.
 # ===========================
