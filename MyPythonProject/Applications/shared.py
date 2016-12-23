@@ -497,6 +497,8 @@ def validpath(p):
         raise argparse.ArgumentTypeError('"{0}" doesn\'t exist'.format(p))
     if not os.path.isdir(p):
         raise argparse.ArgumentTypeError('"{0}" is not a directory'.format(p))
+    if not os.access(p, os.R_OK):
+        raise ValueError('"{0}" is not a readable directory'.format(p))
     return p
 
 

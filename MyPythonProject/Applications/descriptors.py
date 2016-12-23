@@ -96,3 +96,44 @@ class Answers(object):
         if answer not in self._acceptedanswers:
             raise ValueError('Please enter coherent answer. Only {0} are allowed.'.format(", ".join(self._acceptedanswers)))
         self._data[instance] = answer
+
+
+class Folder(object):
+
+    def __init__(self):
+        self._data = WeakKeyDictionary()
+
+    def __get__(self, instance, owner):
+        return self._data[instance]
+
+    def __set__(self, instance, value):
+        if not value:
+            raise ValueError("Please enter directory.")
+        directory = value.replace('"', '')
+        if not os.path.exists(directory):
+            raise ValueError('"{0}" doesn\'t exist'.format(directory))
+        if not os.path.isdir(directory):
+            raise ValueError('"{0}" is not a directory'.format(directory))
+        if not os.access(directory, os.R_OK):
+            raise ValueError('"{0}" is not a readable directory'.format(directory))
+        self._data[instance] = directory
+
+
+class Extensions(object):
+
+    _regex = re.compile(r"\w+")
+
+    def __init__(self, mandatory=False):
+        self._mandatory = mandatory
+        self._data = WeakKeyDictionary()
+
+    def __get__(self, instance, owner):
+        return self._data[instance]
+
+    def __set__(self, instance, value):
+        if self._mandatory and not value:
+            raise ValueError('Please enter extension(s).')
+        argument = self._regex.findall(value)
+        if self._mandatory and not argument:
+            raise ValueError('Please enter coherent extension(s).')
+        self._data[instance] = argument

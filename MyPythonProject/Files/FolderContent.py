@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
-import re
 import yaml
 import logging
 from logging.config import dictConfig
 from Applications.parsers import foldercontent
-from Applications.shared import interface, filesinfolder, UTF8, WRITE
+from Applications.descriptors import Folder, Extensions
+from Applications.shared import interface, filesinfolder, UTF8, WRITE, GlobalInterface
 
 __author__ = "Xavier ROSSET"
 
@@ -13,69 +13,13 @@ __author__ = "Xavier ROSSET"
 # ========
 # Classes.
 # ========
-class Interface(object):
+class LocalInterface(GlobalInterface):
 
-    _regex = re.compile(r"\W+")
-    _inputs = [("Please enter folder", "folder"), ("Please enter extension(s)", "extensions")]
+    folder = Folder()
+    extensions = Extensions()
 
-    def __init__(self):
-        self._index, self._step = 0, 0
-        self._folder = None
-        self._extensions = None
-        self._arguments = []
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self._index >= len(self._inputs):
-            raise StopIteration
-        self._index += 1
-        self._step += 1
-        return self._inputs[self._index - 1]
-
-    # -----
-    # STEP.
-    # -----
-    @property
-    def step(self):
-        return self._step
-
-    # ----------
-    # ARGUMENTS.
-    # ----------
-    @property
-    def arguments(self):
-        return self._arguments
-
-    # -------
-    # FOLDER.
-    # -------
-    @property
-    def folder(self):
-        return self._folder
-
-    @folder.setter
-    def folder(self, arg):
-        if arg:
-            arg = arg.replace('"', '')
-        if not os.path.exists(arg):
-            raise ValueError('"{0}" isn\'t a valid folder.'.format(arg))
-        self._folder = arg
-        self._arguments.append(arg)
-
-    # -----------
-    # EXTENSIONS.
-    # -----------
-    @property
-    def extensions(self):
-        return self._extensions
-
-    @extensions.setter
-    def extensions(self, arg):
-        if arg:
-            self._extensions = arg
-            self._arguments.extend(self._regex.split(arg))
+    def __init__(self, *args):
+        super(LocalInterface, self).__init__(*args)
 
 
 # ===============
@@ -88,11 +32,16 @@ if __name__ == "__main__":
         dictConfig(yaml.load(fp))
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
+    # --> Initializations.
+    arguments = []
+
     # --> User interface.
-    gui = interface(Interface())
+    gui = interface(LocalInterface(("Please enter folder", "folder"), ("Please enter extension(s)", "extensions")))
 
     # --> Parse arguments.
-    arguments = foldercontent.parse_args(gui.arguments)
+    arguments.append(gui.folder)
+    arguments.extend(gui.extensions)
+    arguments = foldercontent.parse_args(arguments)
 
     # --> Log arguments.
     logger.debug(arguments.folder)
