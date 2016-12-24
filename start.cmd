@@ -27,7 +27,7 @@ REM ==================
 SET _documentsID=123456797
 SET _gnucashID=123456798
 SET _videos=%USERPROFILE%\videos
-SET _filesrotation=%_COMPUTING%\filesrotation.cmd
+REM _filesrotation=%_COMPUTING%\filesrotation.cmd
 
 
 REM ===============
@@ -133,9 +133,9 @@ REM     ---------------------------------
 :STEP6
 IF "%_yready%" EQU "Y" (
     IF EXIST y:\Python XXCOPY y:\Python\ /S /RS /FC /DB#10 /R /H /Y /PD0 /Fo:%TEMP%\RemovePythonScripts.lst /FM:L
-    IF EXIST "%_XXCOPYLOG%" (
-        IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
-    )
+    REM IF EXIST "%_XXCOPYLOG%" (
+        REM IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
+    REM )
     XXCOPY %_PYTHONPROJECT%\*\ y:\Python\/$ymmdd$\ /X:*.pyc /X:*.xml /KS /BI /FF /Y /R /Fo:%TEMP%\PythonBackup.lst /FM:DTZA /oA:%_XXCOPYLOG%
 )
 SHIFT
@@ -159,9 +159,9 @@ REM 10. Backup PDF documents.
 REM     ---------------------
 :STEP9
 IF "%_zready%" EQU "Y" (
-    IF EXIST "%_XXCOPYLOG%" (
-        IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
-    )
+    REM IF EXIST "%_XXCOPYLOG%" (
+        REM IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
+    REM )
     XXCOPY %_MYDOCUMENTS%\Administratif\*\*.pdf z:\Z123456789\ /KS /BI /FF /Y /R /Fo:%TEMP%\Administratif.lst /FM:DTZA /oA:%_XXCOPYLOG%
 )
 SHIFT
@@ -173,9 +173,9 @@ REM 11. Clone "album art" content.
 REM     --------------------------
 :STEP10
 IF "%_zready%" EQU "Y" (
-    IF EXIST "%_XXCOPYLOG%" (
-        IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
-    )
+    REM IF EXIST "%_XXCOPYLOG%" (
+        REM IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
+    REM )
     XXCOPY "%_MYDOCUMENTS%\Album Art\*\*.jpg" z:\Z123456790\ /CLONE /Fo:%TEMP%\AlbumArt.lst /FM:DTZA /oA:%_XXCOPYLOG%
 )
 SHIFT
@@ -187,9 +187,9 @@ REM 12. Clone MP3Tag configuration.
 REM     ---------------------------
 :STEP11
 IF "%_zready%" EQU "Y" (
-    IF EXIST "%_XXCOPYLOG%" (
-        IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
-    )
+    REM IF EXIST "%_XXCOPYLOG%" (
+        REM IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
+    REM )
     XXCOPY "%APPDATA%\MP3Tag\" z:\Z123456791\ /X:*.log /X:*.zip /CLONE /oA:%_XXCOPYLOG%
 )
 SHIFT
@@ -201,9 +201,9 @@ REM 13. Backup videos.
 REM     --------------
 :STEP12
 IF "%_zready%" EQU "Y" (
-    IF EXIST "%_XXCOPYLOG%" (
-        IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
-    )
+    REM IF EXIST "%_XXCOPYLOG%" (
+        REM IF EXIST "%_filesrotation%" CALL "%_filesrotation%" 5 150000 "%_XXCOPYLOG%"
+    REM )
     XXCOPY "%_videos%\*.mp4" z:\Z123456792\ /CLONE /oA:%_XXCOPYLOG%
 )
 SHIFT
