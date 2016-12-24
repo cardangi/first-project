@@ -816,11 +816,11 @@ def audiofilesinfolder(*extensions, folder):
 
 def copy_audiofiles_to_remotedirectory(*args, server=shared.NAS, user="admin", password=b85decode(shared.PASSWORD).decode()):
     """
-    Upload audio file(s) to a remote directory.
+    Upload audio file(s) to a remote directory on the NAS server.
     :param args: list of audio files.
-    :param server: IP address of the server.
-    :param user: user.
-    :param password: password.
+    :param server: IP address of the NAS server.
+    :param user: user for creating connection to the server.
+    :param password: password for creating connection to the server.
     :return: None.
     """
 
@@ -839,7 +839,7 @@ def copy_audiofiles_to_remotedirectory(*args, server=shared.NAS, user="admin", p
     # --> Copy local audio files to remote directory.
     stack1 = ExitStack()
     try:
-        ftp = stack1.enter_context(ftputil.FTPHost(server, user=user, passwd=password))
+        ftp = stack1.enter_context(ftputil.FTPHost(server, user, password))
     except ftputil.error.FTPOSError as err:
         logger.exception(err)
     else:
