@@ -235,8 +235,25 @@ REM -->  1. Clone "H:" to "\\Diskstation\pictures". Don't delete extra files.
 XXCOPY "H:\" "\\Diskstation\pictures" /CLONE /Z0 /oA:%_XXCOPYLOG%
 
 REM -->  2. Reverse both source and destination. Then remove brand new files but exclude "#recycle" folder.
-REM         This trick allows to remove files from "\\Diskstation\pictures" not present in "H:".
+REM         This trick allows to remove files from "\\Diskstation\pictures" not present in "H:".And preserve "#recycle"!
 XXCOPY "\\Diskstation\pictures" "H:\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
+
+SHIFT
+GOTO MAIN
+
+
+REM     ------------------------------------
+REM 16. Clone "F:" to "\\Diskstation\music".
+REM     ------------------------------------
+REM     Only FLAC.
+:STEP16
+
+REM -->  1. Clone "F:" to "\\Diskstation\pictures". Don't delete extra files.
+XXCOPY "F:\*\*.flac" "\\Diskstation\music" /CLONE /Z0 /oA:%_XXCOPYLOG%
+
+REM -->  2. Reverse both source and destination. Then remove brand new files but exclude "#recycle" folder.
+REM         This trick allows to remove files from "\\Diskstation\music" not present in "F:".And preserve "#recycle"!
+XXCOPY "\\Diskstation\music" "F:\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
 
 SHIFT
 GOTO MAIN
