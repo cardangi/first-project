@@ -69,6 +69,7 @@ GOTO MAIN
 REM     --------------------------
 REM  3. Clear temporary directory.
 REM     --------------------------
+REM     /DB#1: removes files older than or equal to 1 day.
 :STEP1
 XXCOPY %TEMP%\ /S /RS /DB#1 /R /H /Y /PD0 /Fo:%TEMP%\ClearTemp.lst /FM:L
 SHIFT
@@ -189,9 +190,9 @@ SHIFT
 GOTO MAIN
 
 
-REM     --------------
-REM 13. Backup videos.
-REM     --------------
+REM     -------------
+REM 13. Clone videos.
+REM     -------------
 :STEP12
 IF "%_zready%" EQU "Y" (
     XXCOPY "%_videos%\*.mp4" z:\Z123456792\ /CLONE /oA:%_XXCOPYLOG%
