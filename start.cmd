@@ -79,20 +79,20 @@ REM     -----------------
 REM  4. Backup documents.
 REM     -----------------
 :STEP2
-IF "%_yready%%_zready%" EQU "YY" (
-    PUSHD %_PYTHONPROJECT%
-    python -m Applications.Database.LastRunDates.dbLastRunDates delta %_documentsID% -t 5
-    IF NOT ERRORLEVEL 1 (
+REM IF "%_yready%%_zready%" EQU "YY" (
+    REM PUSHD %_PYTHONPROJECT%
+    REM python -m Applications.Database.LastRunDates.dbLastRunDates delta %_documentsID% -t 5
+    REM IF NOT ERRORLEVEL 1 (
 
         REM Run Backup.
-        python Backups`Areca`L.py documents --check --debug --target 1282856126
+        REM python Backups`Areca`L.py documents --check --debug --target 1282856126
 
         REM Update last run date.
-        python -m Applications.Database.LastRunDates.dbLastRunDates update %_documentsID%
+        REM python -m Applications.Database.LastRunDates.dbLastRunDates update %_documentsID%
 
-    )
-    POPD
-)
+    REM )
+    REM POPD
+REM )
 SHIFT
 GOTO MAIN
 
@@ -122,7 +122,7 @@ REM     ---------------------------
 REM  7. Backup "zoho docs" content.
 REM     ---------------------------
 :STEP5
-IF "%_yready%" EQU "Y" XXCOPY "%_MYDOCUMENTS%\zoho docs" "y:\" /KS /Y /BI /FF
+REM IF "%_yready%" EQU "Y" XXCOPY "%_MYDOCUMENTS%\zoho docs" "y:\" /KS /Y /BI /FF
 SHIFT
 GOTO MAIN
 
@@ -214,8 +214,8 @@ REM     -------------------------------
 REM 14. Delete GNUCash sandbox content.
 REM     -------------------------------
 :STEP13
-PUSHD %_PYTHONPROJECT%
-python -m Applications.Database.LastRunDates.dbLastRunDates delta "%_gnucashID%" -t 10 && "C:\Program Files\Sandboxie\Start.exe" /box:GNUCash delete_sandbox_silent && python -m Applications.Database.LastRunDates.dbLastRunDates update "%_gnucashID%"
-POPD
+REM PUSHD %_PYTHONPROJECT%
+REM python -m Applications.Database.LastRunDates.dbLastRunDates delta "%_gnucashID%" -t 10 && "C:\Program Files\Sandboxie\Start.exe" /box:GNUCash delete_sandbox_silent && python -m Applications.Database.LastRunDates.dbLastRunDates update "%_gnucashID%"
+REM POPD
 SHIFT
 GOTO MAIN

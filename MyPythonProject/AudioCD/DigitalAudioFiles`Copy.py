@@ -94,7 +94,7 @@ filestocopy = CopyFilesFrom(arguments.file)
 # ========
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
     dictConfig(yaml.load(fp))
-logger = logging.getLogger("Ripper.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
+logger = logging.getLogger("AudioCD.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 logger.debug("Delay: {0} second(s).".format(arguments.delay))
 logger.debug("{0:>5d} file(s) to copy.".format(len(filestocopy)))
 

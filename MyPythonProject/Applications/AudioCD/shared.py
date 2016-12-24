@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
-from collections import MutableMapping, MutableSequence, namedtuple
+from collections import MutableMapping, namedtuple
+from contextlib import ContextDecorator, ExitStack
 from jinja2 import Environment, FileSystemLoader
 from sortedcontainers import SortedDict
-from contextlib import ContextDecorator
 from mutagen.apev2 import APETextValue
 from operator import itemgetter
+from itertools import compress
 from datetime import datetime
+from base64 import b85decode
 import mutagen.monkeysaudio
 from pytz import timezone
+import ftputil.error
 import mutagen.flac
 import argparse
 import mutagen
@@ -809,6 +812,55 @@ def audiofilesinfolder(*extensions, folder):
     :return: generator object.
     """
     return ((result.file, result.object, result.tags) for result in map(getmetadata, shared.filesinfolder(*extensions, folder=folder)) if result.found)
+
+
+def copy_audiofiles_to_remotedirectory(*args, server=shared.NAS, user="admin", password=b85decode(shared.PASSWORD).decode()):
+    """
+    Upload audio file(s) to a remote directory.
+    :param args: list of audio files.
+    :param server: IP address of the server.
+    :param user: user.
+    :param password: password.
+    :return: None.
+    """
+
+    # --> Check existing files.
+    if not any(map(os.path.exists, args)):
+        return
+
+    # --> Logging.
+    logger = logging.getLogger("{0}.copy_audiofiles_to_remotedirectory".format(__name__))
+
+    # --> Initializations.
+    refdirectory = "/music"
+    genexp = ((item.file, item.tags) for item in (getmetadata(file) for file in compress(args, map(os.path.exists, args))) if item.found)
+    files = dict([(a, b["albumsort"][:-3]) for a, b in genexp if "albumsort" in b])
+
+    # --> Copy local audio files to remote directory.
+    stack1 = ExitStack()
+    try:
+        ftp = stack1.enter_context(ftputil.FTPHost(server, user=user, passwd=password))
+    except ftputil.error.FTPOSError as err:
+        logger.exception(err)
+    else:
+        with stack1:
+            ftp.chdir(refdirectory)
+            for file in files:
+                wdir = ftp.path.join(refdirectory, "/".join(file.split("\\")[1:3]), files[file])
+                logger.debug(wdir)
+                logger.debug(file)
+                logger.debug(files[file])
+                stack2 = ExitStack()
+                while True:
+                    try:
+                        stack2.enter_context(shared.AlternativeChangeRemoteCurrentDirectory(ftp, wdir))
+                    except ftputil.error.PermanentError:
+                        ftp.makedirs(wdir)
+                    else:
+                        break
+                with stack2:
+                    ftp.upload(file, os.path.basename(file))
+                logger.debug(ftp.getcwd())
 
 
 # ================

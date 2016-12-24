@@ -119,6 +119,29 @@ class Folder(object):
         self._data[instance] = directory
 
 
+class File(object):
+
+    def __init__(self, mandatory=True):
+        self._mandatory = mandatory
+        self._data = WeakKeyDictionary()
+
+    def __get__(self, instance, owner):
+        return self._data[instance]
+
+    def __set__(self, instance, value):
+        if self._mandatory and not value:
+            raise ValueError("Please enter an existing file. Both dirname and basename.")
+        if value:
+            value = value.replace('"', '')
+            if not os.path.exists(value):
+                raise ValueError('"{0}" doesn\'t exist. Please enter an existing file. Both dirname and basename.'.format(value))
+            if not os.path.isfile(value):
+                raise ValueError('"{0}" isn\'t a file. Please enter an existing file. Both dirname and basename.'.format(value))
+            if not os.access(value, os.R_OK):
+                raise ValueError('"{0}" is not a readable file.'.format(value))
+        self._data[instance] = value
+
+
 class Extensions(object):
 
     _regex = re.compile(r"\w+")

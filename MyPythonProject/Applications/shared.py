@@ -304,6 +304,7 @@ class CustomFormatter(logging.Formatter):
 class ChangeRemoteCurrentDirectory(ContextDecorator):
     """
     Context manager to change the current directory from a remote system.
+    Use default FTPLIB library.
     """
     def __init__(self, ftpobj, directory):
         self._dir = directory
@@ -316,6 +317,24 @@ class ChangeRemoteCurrentDirectory(ContextDecorator):
 
     def __exit__(self, *exc):
         self._ftpobj.cwd(self._cwd)
+
+
+class AlternativeChangeRemoteCurrentDirectory(ContextDecorator):
+    """
+    Context manager to change the current directory from a remote system.
+    Use FTPUTIL library.
+    """
+    def __init__(self, ftpobj, directory):
+        self._dir = directory
+        self._ftpobj = ftpobj
+        self._cwd = ftpobj.getcwd()
+
+    def __enter__(self):
+        self._ftpobj.chdir(self._dir)
+        return self
+
+    def __exit__(self, *exc):
+        self._ftpobj.chdir(self._cwd)
 
 
 class ChangeLocalCurrentDirectory(ContextDecorator):

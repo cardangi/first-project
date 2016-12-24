@@ -44,17 +44,22 @@ if __name__ == "__main__":
                 remote.extend([os.path.basename(image) for image in remotedirectorycontent("jpg", ftpobject=ftp, currentdir=refdirectory, excluded=["#recycle"])])
 
                 # --> Remote collection.
-                remote = set(remote)
+                remote_collection = set(remote)
 
                 # --> Local collection.
-                local = set(map(os.path.basename, images()))
+                local_images = ((os.path.dirname(image), os.path.basename(image)) for image in images())  # Generator expression.
+                local_collection = set(map(os.path.basename, images()))
 
-                difference = sorted(local - remote)
-                # for image in difference:
-                #     logger.debug(image)
-                logger.debug("Differences: {0}".format(len(difference)))
+                difference = sorted(local_collection - remote_collection)
+                if difference:
+                    logger.debug("-----------")
+                    logger.debug("differences".upper())
+                    logger.debug("-----------")
+                    logger.debug("Differences: {0}".format(len(difference)))
+                    for file in (os.path.join(dirname, basename) for dirname, basename in local_images if basename in difference):
+                        logger.debug(file)
 
-                common = sorted(local & remote)
+                common = sorted(local_collection & remote_collection)
                 # for image in common:
                 #     logger.debug(image)
-                logger.debug("Common: {0}".format(len(common)))
+                # logger.debug("Common: {0}".format(len(common)))

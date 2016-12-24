@@ -86,7 +86,7 @@ kywargs = {"folder": arguments.folder, "test": arguments.test}
 # ========
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding=UTF8) as fp:
     dictConfig(yaml.load(fp))
-logger = logging.getLogger("Ripper.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
+logger = logging.getLogger("AudioCD.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 logger.debug("Delay: {0} second(s).".format(arguments.delay))
 logger.debug("Test : {0}.".format(arguments.test))
 
