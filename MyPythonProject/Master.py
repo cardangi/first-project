@@ -52,7 +52,7 @@ r = [dateformat(UTC.localize(datetime.utcnow()).astimezone(LOCAL), TEMPLATE2), l
 if arguments.print:
     pp.pprint(r)
 with open(OUTFILE, mode=WRITE) as fp:
-    json.dump(r, fp, indent=4)
+    json.dump(r, fp, indent=4, ensure_ascii=False)
 
 #  3. Fermeture de la connexion à la base de données.
 conn.close()

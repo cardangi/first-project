@@ -11,13 +11,14 @@
         {{- "%s. %s."|format(tasks[31].number|rjustify(2), tasks[31].title) }}
         {{ "%s. %s."|format(tasks[13].number|rjustify(2), tasks[13].title)|rjustify(tasks[13].length + column)|rtabulate(l=112) }}
         {{- "%s. %s."|format(tasks[32].number|rjustify(2), tasks[32].title) }}
-        {{ "%s. %s."|format(tasks[2].number|rjustify(2), tasks[2].title)|rtabulate()|rtabulate(l=112) }}
+        {{ "%s. %s."|format(tasks[2].number|rjustify(2), tasks[2].title)|rtabulate() }}
+        {{- "%s. %s."|format(tasks[36].number|rjustify(2), tasks[36].title)|rtabulate() }}
         {{- "%s. %s."|format(tasks[33].number|rjustify(2), tasks[33].title) }}
         {{ "%s. %s."|format(tasks[3].number|rjustify(2), tasks[3].title)|rtabulate() }}
+        {{- "%s. %s."|format(tasks[37].number|rjustify(2), tasks[37].title) }}
         {{ "%s. %s."|format(tasks[4].number|rjustify(2), tasks[4].title)|rtabulate() }}
         {{ "%s. %s."|format(tasks[5].number|rjustify(2), tasks[5].title)|rtabulate() }}
         {{ "%s. %s."|format(tasks[6].number|rjustify(2), tasks[6].title)|rtabulate() }}
-
         {{ "%s. %s."|format(tasks[7].number|rjustify(2), tasks[7].title) }}
         {{ "%s. %s."|format(tasks[8].number|rjustify(2), tasks[8].title) }}
         {{ "%s. %s."|format(tasks[9].number|rjustify(2), tasks[9].title) }}
@@ -55,7 +56,7 @@
         ********
         * EXIT *
         ********
-        {{ "%s. %s."|format(tasks[36].number|rjustify(2), tasks[36].title) }}
+        {{ "%s. %s."|format(tasks[38].number|rjustify(2), tasks[38].title) }}
 
 
 

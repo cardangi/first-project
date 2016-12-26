@@ -1,5 +1,5 @@
 @ECHO off
-REM Exécuté depuis le scheduler windows avec les paramètres 1 2 3 4 5 6 7 9 10 11 13.
+REM Exécuté depuis le scheduler windows avec les paramètres 1 2 3 4 6 7 9 10 11 13.
 
 
 REM
@@ -16,9 +16,9 @@ SET _myparent=%~dp0
 REM ==================
 REM Initializations 2.
 REM ==================
-SET _xready=N
-SET _yready=N
-SET _zready=N
+rem SET _xready=N
+rem SET _yready=N
+rem SET _zready=N
 
 
 REM ==================
@@ -37,11 +37,11 @@ REM ===============
 REM     -----------------------------------------
 REM  1. Check if both Y and Z drives are present.
 REM     -----------------------------------------
-FOR /F "usebackq skip=1 delims=:" %%i IN (`wmic logicaldisk get caption`) DO (
-    IF "%%i" EQU "X" SET _xready=Y
-    IF "%%i" EQU "Y" SET _yready=Y
-    IF "%%i" EQU "Z" SET _zready=Y
-)
+rem FOR /F "usebackq skip=1 delims=:" %%i IN (`wmic logicaldisk get caption`) DO (
+rem     IF "%%i" EQU "X" SET _xready=Y
+rem     IF "%%i" EQU "Y" SET _yready=Y
+rem     IF "%%i" EQU "Z" SET _zready=Y
+rem )
 
 
 REM     ------
@@ -53,7 +53,6 @@ IF "%~1" EQU "1" GOTO STEP1
 IF "%~1" EQU "2" GOTO STEP2
 IF "%~1" EQU "3" GOTO STEP3
 IF "%~1" EQU "4" GOTO STEP4
-IF "%~1" EQU "5" GOTO STEP5
 IF "%~1" EQU "6" GOTO STEP6
 IF "%~1" EQU "7" GOTO STEP7
 IF "%~1" EQU "9" GOTO STEP9
@@ -62,6 +61,7 @@ IF "%~1" EQU "11" GOTO STEP11
 IF "%~1" EQU "12" GOTO STEP12
 IF "%~1" EQU "13" GOTO STEP13
 IF "%~1" EQU "14" GOTO STEP14
+IF "%~1" EQU "17" GOTO STEP17
 SHIFT
 GOTO MAIN
 
@@ -98,16 +98,19 @@ SHIFT
 GOTO MAIN
 
 
-REM     -----------------------
-REM  5. Backup "sandboxie.ini".
-REM     -----------------------
+REM     ---------------------------------------------------------
+REM  5. Backup "sandboxie.ini" and others single important files.
+REM     ---------------------------------------------------------
 REM     /Y:  suppresses prompt when overwriting existing files.
 REM     /BI: backs up incrementally. Different, by time/size, files only.
 :STEP3
-IF "%_yready%" EQU "Y" (
+IF EXIST "y:" (
     XXCOPY "%WINDIR%\sandboxie.ini" "y:\" /KS /Y /BI /FF
     XXCOPY "%_MYDOCUMENTS%\comptes.gnucash" "y:\" /KS /Y /BI /FF
+    XXCOPY "%_MYDOCUMENTS%\comptes.xlsx" "y:\" /KS /Y /BI /FF
     XXCOPY "%_COMPUTING%\database.db" "y:\" /KS /Y /BI /FF
+    XXCOPY "%_COMPUTING%\logging.yml" "y:\" /KS /Y /BI /FF
+    XXCOPY "%_COMPUTING%\.gitignore" "y:\" /KS /Y /BI /FF
 )
 SHIFT
 GOTO MAIN
@@ -117,16 +120,7 @@ REM  6. Remove Areca log files.
 REM     -----------------------
 REM     /DB#8: removes files older than or equal to 8 days.
 :STEP4
-IF "%_yready%" EQU "Y" XXCOPY %_BACKUP%\*\*.log /RS /DB#8 /R /H /Y /PD0 /ED /Fo:%TEMP%\RemoveArecaLog.lst /FM:L
-SHIFT
-GOTO MAIN
-
-
-REM     ---------------------------
-REM  7. Backup "zoho docs" content.
-REM     ---------------------------
-:STEP5
-REM IF "%_yready%" EQU "Y" XXCOPY "%_MYDOCUMENTS%\zoho docs" "y:\" /KS /Y /BI /FF
+IF EXIST %_BACKUP% XXCOPY %_BACKUP%\*\*.log /RS /DB#8 /R /H /Y /PD0 /ED /Fo:%TEMP%\RemoveArecaLog.lst /FM:L
 SHIFT
 GOTO MAIN
 
@@ -135,10 +129,11 @@ REM     ---------------------------------
 REM  8. Backup "mypythonproject" content.
 REM     ---------------------------------
 REM     /DB#10: removes files older than or equal to 10 days.
+REM     /IA   : copies file(s) only if destination directory must not exist.
 :STEP6
-IF "%_yready%" EQU "Y" (
-    IF EXIST y:\Python XXCOPY y:\Python\ /S /RS /FC /DB#10 /R /H /Y /PD0 /Fo:%TEMP%\RemovePythonScripts.lst /FM:L
-    XXCOPY %_PYTHONPROJECT%\*\ y:\Python\/$ymmdd$\ /X:*.pyc /X:*.xml /KS /BI /FF /Y /R /Fo:%TEMP%\PythonBackup.lst /FM:DTZA /oA:%_XXCOPYLOG%
+IF EXIST y:\python (
+    XXCOPY y:\python\ /S /RS /FC /DB#10 /R /H /Y /PD0 /Fo:%TEMP%\RemovepythonScripts.lst /FM:L
+    XXCOPY %_PYTHONPROJECT%\*\ y:\python\/$ymmdd$\ /X:*.pyc /X:*.xml /IA /KS /BI /FF /Y /R /Fo:%TEMP%\pythonScriptsBackup.lst /FM:DTZA /oA:%_XXCOPYLOG%
 )
 SHIFT
 GOTO MAIN
@@ -149,7 +144,7 @@ REM  9. Backup both CSS ans XSL sheets.
 REM     -------------------------------
 REm     /SX: flattens subdirectories.
 :STEP7
-IF "%_yready%" EQU "Y" (
+IF EXIST "y:" (
     XXCOPY %_COMPUTING%\*.xsl y:\ /SX /KS /Y /BI /FF
     XXCOPY %_COMPUTING%\*.css y:\ /SX /KS /Y /BI /FF
 )
@@ -161,20 +156,16 @@ REM     ---------------------
 REM 10. Backup PDF documents.
 REM     ---------------------
 :STEP9
-IF "%_zready%" EQU "Y" (
-    XXCOPY %_MYDOCUMENTS%\Administratif\*\*.pdf z:\Z123456789\ /KS /BI /FF /Y /R /Fo:%TEMP%\Administratif.lst /FM:DTZA /oA:%_XXCOPYLOG%
-)
+IF EXIST "z:\Z123456789" XXCOPY "%_MYDOCUMENTS%\Administratif\*\*.pdf" "z:\Z123456789\" /KS /BI /FF /Y /R /Fo:%TEMP%\Administratif.lst /FM:DTZA /oA:%_XXCOPYLOG%
 SHIFT
 GOTO MAIN
 
 
-REM     --------------------------
-REM 11. Clone "album art" content.
-REM     --------------------------
+REM     -----------------
+REM 11. Clone album arts.
+REM     -----------------
 :STEP10
-IF "%_zready%" EQU "Y" (
-    XXCOPY "%_MYDOCUMENTS%\Album Art\*\*.jpg" z:\Z123456790\ /CLONE /Fo:%TEMP%\AlbumArt.lst /FM:DTZA /oA:%_XXCOPYLOG%
-)
+IF EXIST "z:\Z123456790" XXCOPY "%_MYDOCUMENTS%\Album Art\*\*.jpg" "z:\Z123456790\" /CLONE /Fo:%TEMP%\AlbumArt.lst /FM:DTZA /oA:%_XXCOPYLOG%
 SHIFT
 GOTO MAIN
 
@@ -183,9 +174,7 @@ REM     ---------------------------
 REM 12. Clone MP3Tag configuration.
 REM     ---------------------------
 :STEP11
-IF "%_zready%" EQU "Y" (
-    XXCOPY "%APPDATA%\MP3Tag\" z:\Z123456791\ /X:*.log /X:*.zip /CLONE /oA:%_XXCOPYLOG%
-)
+IF EXIST "z:\Z123456791" XXCOPY "%APPDATA%\MP3Tag\" "z:\Z123456791\" /X:*.log /X:*.zip /CLONE /oA:%_XXCOPYLOG%
 SHIFT
 GOTO MAIN
 
@@ -194,9 +183,7 @@ REM     -------------
 REM 13. Clone videos.
 REM     -------------
 :STEP12
-IF "%_zready%" EQU "Y" (
-    XXCOPY "%_videos%\*.mp4" z:\Z123456792\ /CLONE /oA:%_XXCOPYLOG%
-)
+IF EXIST "z:\Z123456792" XXCOPY "%_videos%\*.mp4" "z:\Z123456792\" /CLONE /oA:%_XXCOPYLOG%
 SHIFT
 GOTO MAIN
 
@@ -256,5 +243,15 @@ REM -->  2. Reverse both source and destination. Then remove brand new files but
 REM         This trick allows to remove files from "\\Diskstation\music" not present in "F:".And preserve "#recycle"!
 XXCOPY "\\Diskstation\music" "F:\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
 
+SHIFT
+GOTO MAIN
+
+
+REM     ------------------------------------
+REM 17. Clone "F:" to "\\Diskstation\music".
+REM     ------------------------------------
+REM     Only FLAC.
+:STEP17
+XXCOPY "F:\*\Springsteen*\*\*.flac" %TEMP% /CLONE /Z0 /oA:%_XXCOPYLOG%
 SHIFT
 GOTO MAIN

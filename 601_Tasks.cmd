@@ -38,6 +38,24 @@ IF ERRORLEVEL 99 GOTO EXIT
 
 
 REM -------------------
+REM Clone music to NAS.
+REM -------------------
+IF ERRORLEVEL 38 (
+    REM "G:\Computing\start.cmd" 15
+    GOTO MENU
+)
+
+
+REM --------------------
+REM Clone images to NAS.
+REM --------------------
+IF ERRORLEVEL 37 (
+    REM "G:\Computing\start.cmd" 14
+    GOTO MENU
+)
+
+
+REM -------------------
 REM Numbering pictures.
 REM -------------------
 IF ERRORLEVEL 36 (
