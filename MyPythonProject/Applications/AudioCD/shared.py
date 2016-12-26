@@ -846,7 +846,7 @@ def copy_audiofiles_to_remotedirectory(*args, server=shared.NAS, user="admin", p
         with stack1:
             ftp.chdir(refdirectory)
             for file in files:
-                wdir = ftp.path.join(refdirectory, "/".join(file.split("\\")[1:3]), files[file])
+                wdir = ftp.path.join(refdirectory, "/".join(os.path.splitdrive(os.path.dirname(file))[1][1:].split("\\")))
                 logger.debug(wdir)
                 logger.debug(file)
                 logger.debug(files[file])
