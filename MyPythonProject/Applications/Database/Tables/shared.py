@@ -3,6 +3,7 @@ import sqlite3
 import logging
 import datetime
 from itertools import repeat
+from collections import namedtuple
 from Applications.shared import DATABASE
 
 __author__ = 'Xavier ROSSET'
@@ -60,6 +61,33 @@ def insert(*uid, db=DATABASE, table=None, date=None):
             for item in uid:
                 logger.debug("Unique ID: {0:>4d}.".format(item))
     return status
+
+
+def update(uid, db=DATABASE, table=None, date=None):
+    if table is None:
+        return 0
+    if table not in MAPPING:
+        return 0
+    if date is None:
+        date = datetime.datetime.utcnow()
+    recordid = list(selectfromuid(uid, table, db))
+
+    # Record still exists: it is updated.
+    if recordid:
+        conn = sqlite3.connect(db)
+        with conn:
+            conn.execute("UPDATE {0} SET {1}=? WHERE id=?".format(table, MAPPING[table]), (date, uid))
+            status = conn.total_changes
+            # logger = logging.getLogger("{0}.insert".format(__name__))
+            # logger.debug("Table: {0}".format(table))
+            # logger.debug("{0} records inserted.".format(status))
+            # if status:
+            #     for item in uid:
+            #         logger.debug("Unique ID: {0:>4d}.".format(item))
+        return status
+
+    # Record doesn't exist: it is inserted.
+    return insert(uid, db=db, table=table, date=date)
 
 
 def deletefromuid(*uid, db=DATABASE, table=None):
