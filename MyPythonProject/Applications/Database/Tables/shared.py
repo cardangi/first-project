@@ -45,6 +45,8 @@ def selectfromuid(uid, table, db=DATABASE):
 def insert(*uid, db=DATABASE, table=None, date=None):
     if table is None:
         return 0
+    if table not in MAPPING:
+        return 0
     if date is None:
         date = datetime.datetime.utcnow()
     conn = sqlite3.connect(db)
