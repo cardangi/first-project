@@ -33,7 +33,7 @@ def selectfromuid(uid, table, db=DATABASE):
     conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = sqlite3.Row
     for row in conn.execute("SELECT * FROM {0} WHERE rowid=?".format(table), (uid,)):
-        logger = logging.getLogger("{0}.selectfromuid_rundates".format(__name__))
+        logger = logging.getLogger("{0}.selectfromuid".format(__name__))
         logger.debug("Table          : {0}".format(table))
         logger.debug("Selected record:")
         logger.debug("Unique ID: {0:>4d}.".format(uid))
@@ -53,7 +53,43 @@ def insert(*uid, db=DATABASE, table=None, date=None):
     with conn:
         conn.executemany("INSERT INTO {0} (id, {1}) VALUES(?, ?)".format(table, MAPPING[table]), zip(uid, repeat(date)))
         status = conn.total_changes
-        logger = logging.getLogger("{0}.insert_rundates".format(__name__))
+        logger = logging.getLogger("{0}.insert".format(__name__))
         logger.debug("Table: {0}".format(table))
         logger.debug("{0} records inserted.".format(status))
+        if status:
+            for item in uid:
+                logger.debug("Unique ID: {0:>4d}.".format(item))
+    return status
+
+
+def deletefromuid(*uid, db=DATABASE, table=None):
+    if table is None:
+        return 0
+    if table not in MAPPING:
+        return 0
+    status, conn = 0, sqlite3.connect(db)
+    with conn:
+        conn.executemany("DELETE FROM {0} WHERE id=?".format(table), [(i,) for i in uid])
+        status = conn.total_changes
+        logger = logging.getLogger("{0}.deletefromuid".format(__name__))
+        logger.debug("Table: {0}".format(table))
+        logger.debug("{0} records removed.".format(status))
+        if status:
+            for item in uid:
+                logger.debug("Unique ID: {0:>4d}.".format(item))
+    return status
+
+
+def delete(db=DATABASE, table=None):
+    if table is None:
+        return 0
+    if table not in MAPPING:
+        return 0
+    status, conn = 0, sqlite3.connect(db)
+    with conn:
+        conn.execute("DELETE FROM {0}".format(table))
+        status = conn.total_changes
+        logger = logging.getLogger("{0}.delete".format(__name__))
+        logger.debug("Table: {0}".format(table))
+        logger.debug("{0} records removed.".format(status))
     return status
