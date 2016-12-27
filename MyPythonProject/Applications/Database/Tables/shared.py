@@ -121,3 +121,5 @@ def delete(db=DATABASE, table=None):
         logger.debug("Table: {0}".format(table))
         logger.debug("{0} records removed.".format(status))
     return status
+
+# AAAAAAAAAAAAAAAAAAAAAAAAAA
