@@ -3,7 +3,6 @@ import sqlite3
 import logging
 import datetime
 from itertools import repeat
-from collections import namedtuple
 from Applications.shared import DATABASE
 
 __author__ = 'Xavier ROSSET'
@@ -40,7 +39,7 @@ def selectfromuid(uid, table, db=DATABASE):
         logger.debug("ID      : {0:>3d}.".format(uid))
         for item in tuple(row):
             logger.debug("\t{0}".format(item).expandtabs(3))
-        yield tuple(row)
+        return tuple(row)
 
 
 def insert(*uid, db=DATABASE, table=None, date=None):
