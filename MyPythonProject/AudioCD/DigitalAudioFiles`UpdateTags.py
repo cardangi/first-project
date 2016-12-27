@@ -30,7 +30,7 @@ def validfolder(f):
 
 def updatetags(*args, **kwargs):
 
-    logger = logging.getLogger("Default.{0}.updatetags".format(splitext(basename(__file__))[0]))
+    logger = logging.getLogger("AudioCD.{0}.updatetags".format(splitext(basename(__file__))[0]))
     rex = re.compile(r"^(?:{0})\.\d -\B".format(DFTYEARREGEX))
     if "folder" not in kwargs:
         return False
@@ -39,9 +39,13 @@ def updatetags(*args, **kwargs):
     l = []
 
     for num, (fil, audioobj, tags) in enumerate(audiofilesinfolder(*args, folder=kwargs["folder"]), start=1):
-        if any(tag not in tags for tag in ["album", "albumsort"]):
+        if any(tag not in tags for tag in ["album", "albumsort", "titlesort"]):
             continue
         if rex.match(tags["album"]):
+            continue
+        if tags["titlesort"][-1].upper() == "Y":
+            continue
+        if tags["albumsort"].startswith("2."):
             continue
         album = "{0}.{1} - {2}".format(tags["albumsort"][2:6], tags["albumsort"][11], tags["album"])
         logger.debug('{0:>3d}. "{1}".'.format(num, fil))

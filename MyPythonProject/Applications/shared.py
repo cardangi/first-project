@@ -458,12 +458,12 @@ class IncludeExtensions(argparse.Action):
         setattr(namespace, "extensions", lext)
 
 
-class SetEndEpoch(argparse.Action):
+class SetEndSeconds(argparse.Action):
     """
     Set "end" attribute.
     """
     def __init__(self, option_strings, dest, **kwargs):
-        super(SetEndEpoch, self).__init__(option_strings, dest, **kwargs)
+        super(SetEndSeconds, self).__init__(option_strings, dest, **kwargs)
 
     def __call__(self, parsobj, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)
@@ -483,17 +483,6 @@ class SetUID(argparse.Action):
     def __call__(self, parsobj, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)
         setattr(namespace, "uid", list(range(getattr(namespace, "start"), values + 1)))
-
-
-class SetExtensions(argparse.Action):
-    """
-    Set "extensions" attribute from "foldercontent" parser.
-    """
-    def __init__(self, option_strings, dest, **kwargs):
-        super(SetExtensions, self).__init__(option_strings, dest, **kwargs)
-
-    def __call__(self, parsobj, namespace, values, option_string=None):
-        setattr(namespace, self.dest, " ".join(values).split())
 
 
 # ==========
@@ -590,7 +579,7 @@ def filesinfolder(*extensions, folder, excluded=None):
             yield os.path.join(root, file)
 
 
-def getdatefromepoch(start, stop, zone=DFTTIMEZONE):
+def getdatefromseconds(start, stop, zone=DFTTIMEZONE):
     """
     Return a map object yielding human readable dates corresponding to a range of seconds since the epoch.
     :param start: range start seconds.

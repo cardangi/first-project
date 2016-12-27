@@ -32,7 +32,7 @@ parser1_g.add_argument("-i", "--incl", dest="include", nargs="*", action=shared.
 #     =========
 epochconverter = argparse.ArgumentParser()
 epochconverter.add_argument("start", help="Start epoch", type=shared.validseconds)
-epochconverter.add_argument("end", help="End epoch", type=shared.validseconds, nargs="?", action=shared.SetEndEpoch)
+epochconverter.add_argument("end", help="End epoch", type=shared.validseconds, nargs="?", action=shared.SetEndSeconds)
 epochconverter.add_argument("-z", "--zone", help="Time zone", default=shared.DFTTIMEZONE)
 
 
@@ -68,3 +68,12 @@ improvedfoldercontent = argparse.ArgumentParser()
 improvedfoldercontent.add_argument("folder", type=shared.validpath)
 improvedfoldercontent.add_argument("excluded", nargs="*")
 improvedfoldercontent.add_argument("-e", "--ext", dest="extensions", nargs="*")
+
+
+#     =========
+#  6. PARSER 6.
+#     =========
+readtable = argparse.ArgumentParser()
+readtable.add_argument("database", type=shared.validdb, help="Read database")
+readtable.add_argument("table", choices=["rundates", "backups"], help="Read table")
+readtable.add_argument("uid", help="Read record", type=int)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from Applications.shared import now, getdatefromepoch, WRITE, UTF8
+from Applications.shared import now, getdatefromseconds, WRITE, UTF8
 from Applications.parsers import  epochconverterparser
 from logging.config import dictConfig
 import logging
@@ -28,7 +28,7 @@ arguments = epochconverterparser.parse_args()
 # Main algorithm.
 # ===============
 try:
-    mylist = list(getdatefromepoch(arguments.start, arguments.end, arguments.zone))
+    mylist = list(getdatefromseconds(arguments.start, arguments.end, arguments.zone))
 except ValueError as err:
     logger.exception(err)
 else:

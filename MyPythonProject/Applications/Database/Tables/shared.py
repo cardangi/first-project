@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import sqlite3
 import logging
-import datetime
 from itertools import repeat
+from datetime import datetime,timedelta
 from Applications.shared import DATABASE
 
 __author__ = 'Xavier ROSSET'
@@ -48,7 +48,7 @@ def insert(*uid, db=DATABASE, table=None, date=None):
     if table not in MAPPING:
         return 0
     if date is None:
-        date = datetime.datetime.utcnow()
+        date = datetime.utcnow()
     conn = sqlite3.connect(db)
     with conn:
         conn.executemany("INSERT INTO {0} (id, {1}) VALUES(?, ?)".format(table, MAPPING[table]), zip(uid, repeat(date)))
@@ -70,7 +70,7 @@ def update(uid, db=DATABASE, table=None, date=None):
     if table not in MAPPING:
         return 0
     if date is None:
-        date = datetime.datetime.utcnow()
+        date = datetime.utcnow()
     recordid = list(selectfromuid(uid, table, db))
 
     # Record exists: it is updated.
@@ -118,3 +118,12 @@ def delete(db=DATABASE, table=None):
         logger.debug("Table   : {0}.".format(table))
         logger.debug("{0:>3d} records removed.".format(status))
     return status
+
+
+def isdeltareached(uid, table, db=DATABASE, days=10):
+    deltareached = True
+    record = selectfromuid(uid, table, db)
+    if record:
+        if datetime.utcnow() - record[1] < timedelta(days=days):
+            deltareached = False
+    return deltareached
