@@ -30,16 +30,22 @@ def select(table, db=DATABASE):
 
 
 def selectfromuid(uid, table, db=DATABASE):
+
+    # Log arguments.
+    logger = logging.getLogger("{0}.selectfromuid".format(__name__))
+    logger.debug("Database: {0}.".format(db))
+    logger.debug("Table   : {0}.".format(table))
+    logger.debug("ID      : {0:>3d}.".format(uid))
+
+    # Get data relative to record unique ID.
     conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
-    conn.row_factory = sqlite3.Row
-    for row in conn.execute("SELECT * FROM {0} WHERE rowid=?".format(table), (uid,)):
-        logger = logging.getLogger("{0}.selectfromuid".format(__name__))
-        logger.debug("Database: {0}.".format(db))
-        logger.debug("Table   : {0}.".format(table))
-        logger.debug("ID      : {0:>3d}.".format(uid))
-        for item in tuple(row):
-            logger.debug("\t{0}".format(item).expandtabs(3))
-        return tuple(row)
+    curs = conn.cursor()
+    curs.execute("SELECT * FROM {0} WHERE rowid=?".format(table), (uid,))
+    record = curs.fetchone()
+    conn.close()
+
+    # Return found data.
+    return record
 
 
 def insert(*uid, db=DATABASE, table=None, date=None):
@@ -71,7 +77,7 @@ def update(uid, db=DATABASE, table=None, date=None):
         return 0
     if date is None:
         date = datetime.utcnow()
-    recordid = list(selectfromuid(uid, table, db))
+    recordid = selectfromuid(uid, table, db)
 
     # Record exists: it is updated.
     if recordid:
