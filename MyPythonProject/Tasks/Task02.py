@@ -44,9 +44,9 @@ status, arguments = 0, parser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-if isdeltareached(UID, TABLE, arguments.database):
-    with zipfile.ZipFile(os.path.join("F:\\", "passwords.7z"), WRITE) as myzip:
-        if all(map(os.path.exists, FILES)):
+if all(map(os.path.exists, FILES)):
+    if isdeltareached(UID, TABLE, arguments.database):
+        with zipfile.ZipFile(os.path.join("F:\\", "passwords.7z"), WRITE) as myzip:
             for file in FILES:
                 myzip.write(file, arcname=os.path.basename(file))
             status = update(UID, TABLE, arguments.database)
