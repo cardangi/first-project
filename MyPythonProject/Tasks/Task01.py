@@ -43,10 +43,10 @@ status, arguments = 0, parser.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-if isdeltareached(UID, TABLE, arguments.database, 10):
+if isdeltareached(UID, TABLE, arguments.database):
     process = run(["C:\Program Files\Sandboxie\Start.exe", "/box:GNUCash", "delete_sandbox_silent"])
     logger.debug(process.returncode)
     if not process.returncode:
-        status = update(UID, db=arguments.database, table=TABLE)
+        status = update(UID, TABLE, arguments.database)
 logger.debug(status)
 sys.exit(status)

@@ -69,10 +69,8 @@ def insert(*uid, db=DATABASE, table=None, date=None):
     return status
 
 
-def update(uid, db=DATABASE, table=None, date=None):
+def update(uid, table, db=DATABASE, date=None):
 
-    if table is None:
-        return 0
     if table not in MAPPING:
         return 0
     if date is None:
@@ -91,9 +89,7 @@ def update(uid, db=DATABASE, table=None, date=None):
     return insert(uid, db=db, table=table, date=date)
 
 
-def deletefromuid(*uid, db=DATABASE, table=None):
-    if table is None:
-        return 0
+def deletefromuid(*uid, table, db=DATABASE):
     if table not in MAPPING:
         return 0
     status, conn = 0, sqlite3.connect(db)
@@ -110,9 +106,7 @@ def deletefromuid(*uid, db=DATABASE, table=None):
     return status
 
 
-def delete(db=DATABASE, table=None):
-    if table is None:
-        return 0
+def delete(table, db=DATABASE):
     if table not in MAPPING:
         return 0
     status, conn = 0, sqlite3.connect(db)
