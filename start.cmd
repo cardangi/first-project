@@ -1,5 +1,5 @@
 @ECHO off
-REM Exécuté depuis le scheduler windows avec les paramètres 1 2 3 4 6 7 9 10 11 13.
+REM Exécuté depuis le scheduler windows avec les paramètres 1 3 4 6 7 9 10 11 13.
 
 
 REM
@@ -16,16 +16,6 @@ SET _myparent=%~dp0
 REM ==================
 REM Initializations 2.
 REM ==================
-rem SET _xready=N
-rem SET _yready=N
-rem SET _zready=N
-
-
-REM ==================
-REM Initializations 3.
-REM ==================
-SET _documentsID=123456797
-SET _gnucashID=123456798
 SET _videos=%USERPROFILE%\videos
 
 
@@ -34,23 +24,12 @@ REM Main algorithm.
 REM ===============
 
 
-REM     -----------------------------------------
-REM  1. Check if both Y and Z drives are present.
-REM     -----------------------------------------
-rem FOR /F "usebackq skip=1 delims=:" %%i IN (`wmic logicaldisk get caption`) DO (
-rem     IF "%%i" EQU "X" SET _xready=Y
-rem     IF "%%i" EQU "Y" SET _yready=Y
-rem     IF "%%i" EQU "Z" SET _zready=Y
-rem )
-
-
 REM     ------
 REM  2. Tasks.
 REM     ------
 :MAIN
 IF "%~1" EQU "" EXIT /B %ERRORLEVEL%
 IF "%~1" EQU "1" GOTO STEP1
-IF "%~1" EQU "2" GOTO STEP2
 IF "%~1" EQU "3" GOTO STEP3
 IF "%~1" EQU "4" GOTO STEP4
 IF "%~1" EQU "6" GOTO STEP6
@@ -76,24 +55,10 @@ SHIFT
 GOTO MAIN
 
 
-REM     -----------------
-REM  4. Backup documents.
-REM     -----------------
+REM     ------
+REM  4. Dummy.
+REM     ------
 :STEP2
-REM IF "%_yready%%_zready%" EQU "YY" (
-    REM PUSHD %_PYTHONPROJECT%
-    REM python -m Applications.Database.LastRunDates.dbLastRunDates delta %_documentsID% -t 5
-    REM IF NOT ERRORLEVEL 1 (
-
-        REM Run Backup.
-        REM python Backups`Areca`L.py documents --check --debug --target 1282856126
-
-        REM Update last run date.
-        REM python -m Applications.Database.LastRunDates.dbLastRunDates update %_documentsID%
-
-    REM )
-    REM POPD
-REM )
 SHIFT
 GOTO MAIN
 
@@ -192,9 +157,7 @@ REM     -------------------------------
 REM 14. Delete GNUCash sandbox content.
 REM     -------------------------------
 :STEP13
-REM PUSHD %_PYTHONPROJECT%
-REM python -m Applications.Database.LastRunDates.dbLastRunDates delta "%_gnucashID%" -t 10 && "C:\Program Files\Sandboxie\Start.exe" /box:GNUCash delete_sandbox_silent && python -m Applications.Database.LastRunDates.dbLastRunDates update "%_gnucashID%"
-REM POPD
+python G:\Computing\MyPythonProject\Tasks\Task01.py
 SHIFT
 GOTO MAIN
 
@@ -205,10 +168,10 @@ REM     ---------------------------------------
 :STEP14
 
 REM -->  1. Clone "H:" to "\\Diskstation\pictures". Don't delete extra files.
-XXCOPY "C:\Users\Xavier\Downloads\h\" "%TEMP%\h\" /CLONE /I /Z0 /oA:%_XXCOPYLOG%
+REM XXCOPY "C:\Users\Xavier\Downloads\h\" "%TEMP%\h\" /CLONE /I /Z0 /oA:%_XXCOPYLOG%
 
 REM -->  2. Reverse both source and destination. Only remove brand new files. Exclude "#recycle folder".
-XXCOPY "%TEMP%\h\" "C:\Users\Xavier\Downloads\h\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
+REM XXCOPY "%TEMP%\h\" "C:\Users\Xavier\Downloads\h\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
 
 SHIFT
 GOTO MAIN
@@ -237,11 +200,11 @@ REM     Only FLAC.
 :STEP16
 
 REM -->  1. Clone "F:" to "\\Diskstation\pictures". Don't delete extra files.
-XXCOPY "F:\*\*.flac" "\\Diskstation\music" /CLONE /Z0 /oA:%_XXCOPYLOG%
+REM XXCOPY "F:\*\*.flac" "\\Diskstation\music" /CLONE /Z0 /oA:%_XXCOPYLOG%
 
 REM -->  2. Reverse both source and destination. Then remove brand new files but exclude "#recycle" folder.
 REM         This trick allows to remove files from "\\Diskstation\music" not present in "F:".And preserve "#recycle"!
-XXCOPY "\\Diskstation\music" "F:\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
+REM XXCOPY "\\Diskstation\music" "F:\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
 
 SHIFT
 GOTO MAIN
@@ -252,6 +215,6 @@ REM 17. Clone "F:" to "\\Diskstation\music".
 REM     ------------------------------------
 REM     Only FLAC.
 :STEP17
-XXCOPY "F:\*\Springsteen*\*\*.flac" %TEMP% /CLONE /Z0 /oA:%_XXCOPYLOG%
+REM XXCOPY "F:\*\Springsteen*\*\*.flac" %TEMP% /CLONE /Z0 /oA:%_XXCOPYLOG%
 SHIFT
 GOTO MAIN
