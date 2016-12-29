@@ -279,20 +279,24 @@ IF ERRORLEVEL 13 (
 )
 
 
-REM --------------------------------
-REM "LastRunDates" HTML simple view.
-REM --------------------------------
+REM --------------------
+REM "RunDates" raw view.
+REM --------------------
 IF ERRORLEVEL 12 (
-    REM python %_PYTHONPROJECT%\Database`HTMLView`L.py LastRunDates
+    CLS
+    python %_PYTHONPROJECT%\Tasks\Dates.py "rundates"
+    PAUSE
     GOTO MENU
 )
 
 
-REM --------------------------
-REM "Backup" HTML simple view.
-REM --------------------------
+REM -------------------
+REM "Backups" raw view.
+REM -------------------
 IF ERRORLEVEL 11 (
-    REM python %_PYTHONPROJECT%\Database`HTMLView`L.py Backups
+    CLS
+    python %_PYTHONPROJECT%\Tasks\Dates.py "backups"
+    PAUSE
     GOTO MENU
 )
 
