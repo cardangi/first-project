@@ -74,6 +74,5 @@ improvedfoldercontent.add_argument("-e", "--ext", dest="extensions", nargs="*")
 #  6. PARSER 6.
 #     =========
 readtable = argparse.ArgumentParser()
-readtable.add_argument("database", type=shared.validdb, help="Read database")
 readtable.add_argument("table", choices=["rundates", "backups"], help="Read table")
-readtable.add_argument("uid", help="Read record", type=int)
+readtable.add_argument("database", nargs="?", default=shared.DATABASE, type=shared.validdb, help="Read database")

@@ -4,7 +4,7 @@ import yaml
 import logging
 from logging.config import dictConfig
 from Applications.parsers import readtable
-from Applications.Database.Tables.shared import selectfromuid
+from Applications.Database.Tables.shared import select
 from Applications.shared import dateformat, LOCAL, UTC, TEMPLATE2
 
 __author__ = 'Xavier ROSSET'
@@ -27,9 +27,9 @@ arguments = readtable.parse_args()
 # ===============
 # Main algorithm.
 # ===============
-record = selectfromuid(arguments.uid, arguments.table, db=arguments.database)
-if record:
-    id, date = record
-    print(id)
-    print(dateformat(UTC.localize(date), TEMPLATE2))
-    print(dateformat(UTC.localize(date).astimezone(LOCAL), TEMPLATE2))
+for record in select(arguments.table, db=arguments.database):
+    if record:
+        id, date = record
+        print("\n-*- {0} -*-".format(id))
+        print(dateformat(UTC.localize(date), TEMPLATE2))
+        print(dateformat(UTC.localize(date).astimezone(LOCAL), TEMPLATE2))
