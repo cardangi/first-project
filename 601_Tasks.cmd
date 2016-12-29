@@ -65,7 +65,7 @@ IF ERRORLEVEL 36 (
 
 
 REM ----------------------------------
-REM Delete "RippingLog" table records.
+REM Delete "rippinglog" table records.
 REM ----------------------------------
 IF ERRORLEVEL 35 (
     python %_PYTHONPROJECT%\AudioCD\Delete.py
@@ -122,7 +122,7 @@ IF ERRORLEVEL 31 (
 
 
 REM ----------------------------------
-REM Update "RippingLog" table records.
+REM Update "rippinglog" table records.
 REM ----------------------------------
 IF ERRORLEVEL 30 (
     python %_PYTHONPROJECT%\AudioCD\Update.py
@@ -207,33 +207,6 @@ IF ERRORLEVEL 22 (
 )
 
 
-REM -------------------
-REM Rename audio files.
-REM -------------------
-IF ERRORLEVEL 21 (
-    REM python AudioFiles`renameFiles`L.py
-    GOTO MENU
-)
-
-
-REM ----------------------------------
-REM Copy audio files from audio drive.
-REM ----------------------------------
-IF ERRORLEVEL 20 (
-    REM REM CALL "G:\Computing\802_copyAudioFiles.cmd"
-    GOTO MENU
-)
-
-
-REM ----------------------------------
-REM Import audio files to audio drive.
-REM ----------------------------------
-IF ERRORLEVEL 19 (
-    REM CALL "G:\Computing\801_importAudioFiles.cmd"
-    GOTO MENU
-)
-
-
 REM ---------------------------
 REM Display geometric sequence.
 REM ---------------------------
@@ -252,12 +225,15 @@ IF ERRORLEVEL 17 (
 )
 
 
-REM ------------------------
-REM Edit RippingLog Content.
-REM ------------------------
+REM --------------------------
+REM Edit "rippinglog" content.
+REM --------------------------
 IF ERRORLEVEL 15 (
     python %_PYTHONPROJECT%\AudioCD\RippedCD`View1.py
     python %_PYTHONPROJECT%\AudioCD\RippedCD`View2.py
+    CLS
+    python %_PYTHONPROJECT%\AudioCD\RippedCD`View3.py
+    PAUSE
     GOTO MENU
 )
 
@@ -279,9 +255,9 @@ IF ERRORLEVEL 13 (
 )
 
 
-REM --------------------
-REM "RunDates" raw view.
-REM --------------------
+REM ------------------------
+REM Edit "rundates" content.
+REM ------------------------
 IF ERRORLEVEL 12 (
     CLS
     python %_PYTHONPROJECT%\Tasks\Dates.py "rundates"
@@ -290,9 +266,9 @@ IF ERRORLEVEL 12 (
 )
 
 
-REM -------------------
-REM "Backups" raw view.
-REM -------------------
+REM -----------------------
+REM Edit "backups" content.
+REM -----------------------
 IF ERRORLEVEL 11 (
     CLS
     python %_PYTHONPROJECT%\Tasks\Dates.py "backups"
@@ -314,7 +290,7 @@ REM --------------
 REM Backup videos.
 REM --------------
 IF ERRORLEVEL 9 (
-    REM CALL "G:\Computing\start.cmd" 12
+    CALL "G:\Computing\start.cmd" 12
     GOTO MENU
 )
 
@@ -325,7 +301,7 @@ REM -----------------
 IF ERRORLEVEL 8 (
 
     REM Run Backup.
-    python G:\Computing\MyPythonProject\Areca\Areca.py -c documents 1282856126
+    REM python G:\Computing\MyPythonProject\Areca\Areca.py -c documents 1282856126
 
     REM Update last run date.
     REM python -m Applications.Database.LastRunDates.dbLastRunDates update 123456797
