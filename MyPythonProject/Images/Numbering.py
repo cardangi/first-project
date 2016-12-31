@@ -212,7 +212,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("Images.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
     # --> User interface.
-    gui = shared.interface(LocalInterface(("Would you like to run test Mode? [Y/N]", "test"), ("Please enter year", "year")))
+    gui = shared.interface(LocalInterface([("Would you like to run test Mode? [Y/N]", "test"), ("Please enter year", "year")]))
 
     # --> Parse arguments.
     arguments.extend(gui.year)

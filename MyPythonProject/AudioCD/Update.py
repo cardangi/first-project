@@ -7,6 +7,7 @@ import logging
 from Applications import shared
 from logging.config import dictConfig
 from Applications.Database.AudioCD.shared import update
+from Applications.descriptors import Database, Integer
 
 __author__ = 'Xavier ROSSET'
 
@@ -14,89 +15,26 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Classes.
 # ========
-class Interface(object):
+class LocalInterface(shared.GlobalInterface):
 
-    _regex1 = re.compile(r"\d+")
-    _regex2 = re.compile(r"^(?:{0})$".format(shared.DFTYEARREGEX))
-    _regex3 = re.compile(r"^1\.(?:{0})0000\.\d$".format(shared.DFTYEARREGEX))
-    _regex4 = re.compile(r"\d{12,13}")
-    _inputs = [("Please enter database to update", "database"),
-               ("Please enter record(s) unique ID", "uid"),
-               ("Please enter artist new value ", "artist"),
-               ("Please enter year new value", "year"),
-               ("Please enter album new value", "album"),
-               ("Please enter UPC new value", "upc"),
-               ("Please enter genre new value", "genre"),
-               ("Please enter albumsort new value", "albumsort"),
-               ("Please enter artistsort new value", "artistsort")]
+    # Data descriptor(s).
+    database = Database()
+    uid = Integer()
 
-    def __init__(self):
+    # Regular expression(s).
+    _regex1 = re.compile(r"^(?:{0})$".format(shared.DFTYEARREGEX))
+    _regex2 = re.compile(r"^1\.(?:{0})0000\.\d$".format(shared.DFTYEARREGEX))
+    _regex3 = re.compile(r"\d{12,13}")
+
+    # Instance method(s).
+    def __init__(self, *args):
+        super(LocalInterface, self).__init__(*args)
         self._upc = None
-        self._year = None
         self._album = None
         self._genre = None
         self._artist = None
         self._albumsort = None
         self._artistsort = None
-        self._index, self._step, self._uid, self._arguments = None, 0, [], {}
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self._index >= len(self._inputs):
-            raise StopIteration
-        self._index += 1
-        self._step += 1
-        return self._inputs[self._index - 1]
-
-    # -----
-    # STEP.
-    # -----
-    @property
-    def step(self):
-        return self._step
-
-    # ---------
-    # DATABASE.
-    # ---------
-    @property
-    def database(self):
-        return self._database
-
-    @database.setter
-    def database(self, arg):
-        val = DATABASE
-        if arg:
-            arg = arg.replace('"', '')
-        if arg and not(os.path.exists(arg) and os.path.isfile(arg)):
-            raise ValueError('"{0}" isn\'t a valid database.'.format(arg))
-        elif arg and os.path.exists(arg) and os.path.isfile(arg):
-            val = arg
-        self._database = val
-
-    # ----------
-    # ARGUMENTS.
-    # ----------
-    @property
-    def arguments(self):
-        return self._arguments
-
-    # ----
-    # UID.
-    # ----
-    @property
-    def uid(self):
-        return self._uid
-
-    @uid.setter
-    def uid(self, arg):
-        if not arg:
-            raise ValueError('Please enter record(s) unique ID.')
-        arg = self._regex1.findall(arg)
-        if not arg:
-            raise ValueError('Please enter coherent record(s) unique ID.')
-        self._uid = arg
 
     # -------
     # ARTIST.
@@ -107,8 +45,8 @@ class Interface(object):
 
     @artist.setter
     def artist(self, arg):
-        self._artist = arg
-        self._arguments["artist"] = arg
+        if arg:
+            self._artist = arg
 
     # -----
     # YEAR.
@@ -119,10 +57,10 @@ class Interface(object):
 
     @year.setter
     def year(self, arg):
-        if not self._regex2.match(arg):
-            raise ValueError('Please enter coherent year.')
-        self._year = int(arg)
-        self._arguments["year"] = int(arg)
+        if arg:
+            if not self._regex1.match(arg):
+                raise ValueError('Please enter coherent year.')
+            self._year = int(arg)
 
     # ------
     # ALBUM.
@@ -133,8 +71,8 @@ class Interface(object):
 
     @album.setter
     def album(self, arg):
-        self._album = arg
-        self._arguments["album"] = arg
+        if arg:
+            self._album = arg
 
     # ----
     # UPC.
@@ -145,10 +83,10 @@ class Interface(object):
 
     @upc.setter
     def upc(self, arg):
-        if not self._regex4.match(arg):
-            raise ValueError('Please enter coherent UPC.')
-        self._upc = arg
-        self._arguments["upc"] = arg
+        if arg:
+            if not self._regex3.match(arg):
+                raise ValueError('Please enter coherent UPC.')
+            self._upc = arg
 
     # ------
     # GENRE.
@@ -159,8 +97,8 @@ class Interface(object):
 
     @genre.setter
     def genre(self, arg):
-        self._genre = arg
-        self._arguments["genre"] = arg
+        if arg:
+            self._genre = arg
 
     # ----------
     # ALBUMSORT.
@@ -171,10 +109,10 @@ class Interface(object):
 
     @albumsort.setter
     def albumsort(self, arg):
-        if not self._regex3.match(choice):
-            raise ValueError('Please enter coherent albumsort.')
-        self._albumsort = arg
-        self._arguments["albumsort"] = arg
+        if arg:
+            if not self._regex2.match(arg):
+                raise ValueError('Please enter coherent albumsort.')
+            self._albumsort = arg
 
     # -----------
     # ARTISTSORT.
@@ -185,8 +123,8 @@ class Interface(object):
 
     @artistsort.setter
     def artistsort(self, arg):
-        self._artistsort = arg
-        self._arguments["artistsort"] = arg
+        if arg:
+            self._artistsort = arg
 
 
 # ===============
@@ -200,12 +138,22 @@ if __name__ == "__main__":
     logger = logging.getLogger("Default.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
     # --> User interface.
-    gui = interface(Interface())
+    gui = shared.interface(LocalInterface([("Please enter database to update", "database"), 
+                                           ("Please enter record(s) unique ID", "uid"),
+                                           ("Please enter artist new value ", "artist"),
+                                           ("Please enter year new value", "year"),
+                                           ("Please enter album new value", "album"),
+                                           ("Please enter UPC new value", "upc"),
+                                           ("Please enter genre new value", "genre"),
+                                           ("Please enter albumsort new value", "albumsort"),
+                                           ("Please enter artistsort new value", "artistsort")]
+                                          )
+                           )
 
     # --> Log arguments.
     logger.debug(gui.database)
     logger.debug(gui.uid)
-    for tup in gui.arguments.items():
+    arguments = {i: getattr(gui, i) for i in ["artist", "year", "album", "upc", "genre", "albumsort", "artistsort"] if hasattr(gui, i) and getattr(gui, i) is not None}
+    for tup in arguments.items():
         logger.debug("{t[0]}: {t[1]}".format(t=tup))
-        logger.debug(type(tup[1]))
-    sys.exit(update(*gui.uid, db=gui.database, **gui.arguments))
+    sys.exit(update(*gui.uid, db=gui.database, **arguments))

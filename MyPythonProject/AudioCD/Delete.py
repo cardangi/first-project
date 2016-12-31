@@ -4,7 +4,7 @@ import sys
 import yaml
 import logging
 from logging.config import dictConfig
-from Applications.shared import interface
+from Applications.shared import interface, GlobalInterface
 from Applications.parsers import deleterippinglog
 from Applications.Database.AudioCD.shared import deletefromuid
 from Applications.descriptors import Answers, Database, Integer
@@ -15,7 +15,7 @@ __author__ = 'Xavier ROSSET'
 # ========
 # Classes.
 # ========
-class LocalInterface(object):
+class LocalInterface(GlobalInterface):
 
     # Data descriptor(s).
     database = Database()
@@ -26,39 +26,7 @@ class LocalInterface(object):
 
     # Instance method(s).
     def __init__(self, *args):
-        self._args = args
-        self._levels = 2
-        self._level = 0
-        self._step = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-
-        # Stop iteration once second level is exhausted.
-        if self._level >= self._levels and self._index >= len(self._inputs):
-            raise StopIteration
-
-        # Load second level once first level is exhausted.
-        if self._level == 1 and self._index >= len(self._inputs):
-            self._inputs = list(self._args[self._level][self.mode])
-            self._level += 1
-            self._index = 0
-
-        # Load first level.
-        elif self._level == 0:
-            self._inputs = list(self._args[self._level])
-            self._level += 1
-            self._index = 0
-
-        self._index += 1
-        self._step += 1
-        return self._inputs[self._index - 1]
-
-    @property
-    def step(self):
-        return self._step
+        super(LocalInterface, self).__init__(*args)
 
 
 # ===============
@@ -89,8 +57,6 @@ if __name__ == "__main__":
         arguments.append("ranged")
         arguments.extend(gui.from_uid)
         arguments.extend(gui.to_uid)
-
-    # --> Parse arguments.
     arguments = deleterippinglog.parse_args(arguments)
 
     # --> Log arguments.

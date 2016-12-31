@@ -8,7 +8,7 @@ import argparse
 from logging.config import dictConfig
 from Applications.parsers import foldercontent
 from Applications.descriptors import Answers, Folder, Extensions
-from Applications.shared import interface, filesinfolder, UTF8, WRITE
+from Applications.shared import interface, filesinfolder, GlobalInterface, UTF8, WRITE
 
 __author__ = "Xavier ROSSET"
 
@@ -16,65 +16,30 @@ __author__ = "Xavier ROSSET"
 # ========
 # Classes.
 # ========
-class LocalInterface(object):
+class LocalInterface(GlobalInterface):
 
+    # Data descriptor(s).
     folder = Folder()
     extensions = Extensions()
     json_output = Answers("N", "Y", default="Y")
 
     # Instance method(s).
     def __init__(self, *args):
-        self._name = None
-        self._args = args
-        self._levels = 2
-        self._level = 0
-        self._step = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-
-        # Stop iteration once second level is exhausted.
-        if self._level >= self._levels and self._index >= len(self._inputs):
-            raise StopIteration
-
-        # Stop iteration once first level is exhausted with not "Y" as answer.
-        if self._level == 1 and self._index >= len(self._inputs) and self.json_output != "Y":
-            raise StopIteration
-
-        # Load second level once first level is exhausted with "Y" as answer.
-        if self._level == 1 and self._index >= len(self._inputs) and self.json_output == "Y":
-            self._inputs = list(self._args[self._level])
-            self._level += 1
-            self._index = 0
-
-        # Load first level.
-        elif self._level == 0:
-            self._inputs = list(self._args[self._level])
-            self._level += 1
-            self._index = 0
-
-        self._index += 1
-        self._step += 1
-        return self._inputs[self._index - 1]
+        super(LocalInterface, self).__init__(*args)
+        self._json_name = None
 
     # Properties.
     @property
-    def step(self):
-        return self._step
+    def json_name(self):
+        return self._json_name
 
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, arg):
-        if not arg:
-            arg = os.path.join(os.path.expandvars("%TEMP%"), "content.json")
-        if not os.path.exists(os.path.dirname(arg)):
-            raise ValueError('"{0}" doesn\'t exist. Please enter an existing directory'.format(os.path.dirname(arg)))
-        self._name = arg
+    @json_name.setter
+    def json_name(self, value):
+        if not value:
+            value = os.path.join(os.path.expandvars("%TEMP%"), "content.json")
+        if not os.path.exists(os.path.dirname(value)):
+            raise ValueError('"{0}" doesn\'t exist. Please enter an existing directory'.format(os.path.dirname(value)))
+        self._json_name = value
 
 
 # ===============
@@ -92,7 +57,9 @@ if __name__ == "__main__":
 
     # --> User interface.
     gui = interface(LocalInterface([("Please enter folder", "folder"), ("Please enter extension(s)", "extensions"), ("Would you like to display content in a JSON file [Y/N]?", "json_output")],
-                                   [("Please enter JSON file name", "name")]))
+                                   {"Y": [("Please enter JSON file name", "json_name")]}
+                                   )
+                    )
 
     # --> Define new argument.
     foldercontent.add_argument("--json", dest="output", default=os.path.join(os.path.expandvars("%TEMP%"), "content.txt"), type=argparse.FileType(mode=WRITE, encoding=UTF8))
@@ -102,7 +69,7 @@ if __name__ == "__main__":
     arguments.extend(gui.extensions)
     if gui.json_output == "Y":
         arguments.append("--json")
-        arguments.append(gui.name)
+        arguments.append(gui.json_name)
     arguments = foldercontent.parse_args(arguments)
 
     # --> Log arguments.

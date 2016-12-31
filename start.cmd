@@ -40,7 +40,6 @@ IF "%~1" EQU "11" GOTO STEP11
 IF "%~1" EQU "12" GOTO STEP12
 IF "%~1" EQU "13" GOTO STEP13
 IF "%~1" EQU "14" GOTO STEP14
-IF "%~1" EQU "17" GOTO STEP17
 SHIFT
 GOTO MAIN
 
@@ -168,22 +167,12 @@ REM     ---------------------------------------
 :STEP14
 
 REM -->  1. Clone "H:" to "\\Diskstation\pictures". Don't delete extra files.
-REM XXCOPY "C:\Users\Xavier\Downloads\h\" "%TEMP%\h\" /CLONE /I /Z0 /oA:%_XXCOPYLOG%
-
-REM -->  2. Reverse both source and destination. Only remove brand new files. Exclude "#recycle folder".
-REM XXCOPY "%TEMP%\h\" "C:\Users\Xavier\Downloads\h\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
-
-SHIFT
-GOTO MAIN
-
-
-REM     ---------------------------------------
-REM 15. Clone "H:" to "\\Diskstation\pictures".
-REM     ---------------------------------------
-:STEP15
-
-REM -->  1. Clone "H:" to "\\Diskstation\pictures". Don't delete extra files.
-XXCOPY "H:\" "\\Diskstation\pictures" /CLONE /Z0 /oA:%_XXCOPYLOG%
+REM         Exclude "RECYCLER".
+REM         Exclude "$RECYCLE.BIN".
+REM         Exclude "SYSTEM VOLUME INFORMATION".
+REM         Exclude "IPHONE".
+REM         Exclude "RECOVER".
+XXCOPY "H:\*\*.jpg" "\\Diskstation\pictures" /X:*recycle*\ /X:*volume*\ /X:iphone\ /X:recover\ /CLONE /Z0 /oA:%_XXCOPYLOG%
 
 REM -->  2. Reverse both source and destination. Then remove brand new files but exclude "#recycle" folder.
 REM         This trick allows to remove files from "\\Diskstation\pictures" not present in "H:".And preserve "#recycle"!
@@ -197,24 +186,7 @@ REM     ------------------------------------
 REM 16. Clone "F:" to "\\Diskstation\music".
 REM     ------------------------------------
 REM     Only FLAC.
-:STEP16
-
-REM -->  1. Clone "F:" to "\\Diskstation\pictures". Don't delete extra files.
-REM XXCOPY "F:\*\*.flac" "\\Diskstation\music" /CLONE /Z0 /oA:%_XXCOPYLOG%
-
-REM -->  2. Reverse both source and destination. Then remove brand new files but exclude "#recycle" folder.
-REM         This trick allows to remove files from "\\Diskstation\music" not present in "F:".And preserve "#recycle"!
-REM XXCOPY "\\Diskstation\music" "F:\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
-
-SHIFT
-GOTO MAIN
-
-
-REM     ------------------------------------
-REM 17. Clone "F:" to "\\Diskstation\music".
-REM     ------------------------------------
-REM     Only FLAC.
-:STEP17
+:STEP15
 REM XXCOPY "F:\*\Springsteen*\*\*.flac" %TEMP% /CLONE /Z0 /oA:%_XXCOPYLOG%
 SHIFT
 GOTO MAIN

@@ -355,8 +355,12 @@ class ChangeLocalCurrentDirectory(ContextDecorator):
 
 class GlobalInterface(object):
 
-    def __init__(self, *args):
-        self._inputs = args
+    def __init__(self, *inputs):
+        self._answer = None
+        self._inputs = inputs
+        self._levels = len(inputs)
+        self._input = inputs[0]
+        self._level = 1
         self._index = 0
         self._step = 0
 
@@ -364,15 +368,35 @@ class GlobalInterface(object):
         return self
 
     def __next__(self):
-        if self._index >= len(self._inputs):
+
+        # Stop iteration once last level is exhausted.
+        if self._level >= self._levels and self._index >= len(self._input):
             raise StopIteration
+
+        # Load next level once previous level is exhausted.
+        if self._level > 0 and self._index >= len(self._input):
+            self._input = self._inputs[self._level].get(self._answer)
+            if not self._input:
+                raise StopIteration
+            self._level += 1
+            self._index = 0
+
+        # Return expected input.
         self._index += 1
         self._step += 1
-        return self._inputs[self._index - 1]
+        return self._input[self._index - 1]
 
     @property
     def step(self):
         return self._step
+
+    @property
+    def answer(self):
+        return self._answer
+
+    @answer.setter
+    def answer(self, value):
+        self._answer = value
 
 
 # ===========================
@@ -611,6 +635,7 @@ def interface(obj):
             value = input("{0}. {1}: ".format(obj.step, inp))
             try:
                 setattr(obj, dest, value)
+                setattr(obj, "answer", value)
             except ValueError:
                 continue
             break
