@@ -17,6 +17,7 @@ REM ==================
 REM Initializations 2.
 REM ==================
 SET _videos=%USERPROFILE%\videos
+SET _log=%_COMPUTING%\XXCOPYFilesLog.log
 
 
 REM ===============
@@ -50,7 +51,7 @@ REM  3. Clear temporary directory.
 REM     --------------------------
 REM     /DB#1: removes files older than or equal to 1 day.
 :STEP1
-XXCOPY %TEMP%\ /S /RS /DB#1 /R /H /Y /PD0 /Fo:%TEMP%\ClearTemp.lst /FM:L
+XXCOPY %TEMP%\ /S /RS /DB#1 /R /H /Y /PD0 /Fo:%_log% /FM:DTL
 SHIFT
 GOTO MAIN
 
@@ -85,7 +86,7 @@ REM  6. Remove Areca log files.
 REM     -----------------------
 REM     /DB#8: removes files older than or equal to 8 days.
 :STEP4
-IF EXIST %_BACKUP% XXCOPY %_BACKUP%\*\*.log /RS /DB#8 /R /H /Y /PD0 /ED /Fo:%TEMP%\RemoveArecaLog.lst /FM:L
+IF EXIST %_BACKUP% XXCOPY %_BACKUP%\*\*.log /RS /DB#8 /R /H /Y /PD0 /ED /Fo:%_log% /FM:DTL
 SHIFT
 GOTO MAIN
 
@@ -94,11 +95,11 @@ REM     ---------------------------------
 REM  8. Backup "mypythonproject" content.
 REM     ---------------------------------
 REM     /DB#10: removes files older than or equal to 10 days.
-REM     /IA   : copies file(s) only if destination directory must not exist.
+REM     /IA   : copies file(s) only if destination directory doesn't exist.
 :STEP6
 IF EXIST y:\python (
-    XXCOPY y:\python\ /S /RS /FC /DB#10 /R /H /Y /PD0 /Fo:%TEMP%\RemovepythonScripts.lst /FM:L
-    XXCOPY %_PYTHONPROJECT%\*\ y:\python\/$ymmdd$\ /X:*.pyc /X:*.xml /IA /KS /BI /FF /Y /R /Fo:%TEMP%\pythonScriptsBackup.lst /FM:DTZA /oA:%_XXCOPYLOG%
+    XXCOPY y:\python\ /S /RS /FC /DB#10 /R /H /Y /PD0 /Fo:%_log% /FM:DTL
+    XXCOPY %_PYTHONPROJECT%\*\ y:\python\/$ymmdd$\ /X:*.pyc /X:*.xml /IA /KS /BI /FF /Y /R /Fo:%_log% /FM:DTL /oA:%_XXCOPYLOG%
 )
 SHIFT
 GOTO MAIN
@@ -121,7 +122,7 @@ REM     ---------------------
 REM 10. Backup PDF documents.
 REM     ---------------------
 :STEP9
-IF EXIST "z:\Z123456789" XXCOPY "%_MYDOCUMENTS%\Administratif\*\*.pdf" "z:\Z123456789\" /KS /BI /FF /Y /R /Fo:%TEMP%\Administratif.lst /FM:DTZA /oA:%_XXCOPYLOG%
+IF EXIST "z:\Z123456789" XXCOPY "%_MYDOCUMENTS%\Administratif\*\*.pdf" "z:\Z123456789\" /KS /BI /FF /Y /R /Fo:%_log% /FM:DTL /oA:%_XXCOPYLOG%
 SHIFT
 GOTO MAIN
 
@@ -130,7 +131,7 @@ REM     -----------------
 REM 11. Clone album arts.
 REM     -----------------
 :STEP10
-IF EXIST "z:\Z123456790" XXCOPY "%_MYDOCUMENTS%\Album Art\*\*.jpg" "z:\Z123456790\" /CLONE /Fo:%TEMP%\AlbumArt.lst /FM:DTZA /oA:%_XXCOPYLOG%
+IF EXIST "z:\Z123456790" XXCOPY "%_MYDOCUMENTS%\Album Art\*\*.jpg" "z:\Z123456790\" /CLONE /Fo:%_log% /FM:DTL /oA:%_XXCOPYLOG%
 SHIFT
 GOTO MAIN
 
@@ -176,8 +177,8 @@ REM         Exclude "RECOVER".
 XXCOPY "H:\*\*.jpg" "\\Diskstation\pictures\" /X:*recycle*\ /X:*volume*\ /X:iphone\ /X:recover\ /CLONE /Z0 /oA:%_XXCOPYLOG%
 
 REM -->  2. Reverse both source and destination. Then remove brand new files but exclude "#recycle" folder.
-REM         This trick allows to remove files from "\\Diskstation\pictures" not present in "H:".And preserve "#recycle"!
-XXCOPY "\\Diskstation\pictures\" "H:\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
+REM         This trick allows to remove files from "\\Diskstation\pictures" not present in "H:". And preserve "#recycle"!
+XXCOPY "\\Diskstation\pictures\" "H:\" /RS /BN /S /PD0 /RSY /X:#recycle\ /oA:%_XXCOPYLOG% /Fo:%_log% /FM:DTL
 
 SHIFT
 GOTO MAIN
@@ -188,7 +189,7 @@ REM 16. Clone "F:" to "\\Diskstation\music".
 REM     ------------------------------------
 REM     Only FLAC.
 :STEP15
-XXCOPY "F:\*\Springsteen*\*\*.flac" "\\Diskstation\music\" /X:*recycle*\ /X:*volume*\ /CLONE /Z0 /oA:%_XXCOPYLOG%
-XXCOPY "\\Diskstation\music\" "F:\*\Springsteen*\*\*.flac" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
+XXCOPY "F:\*\Springsteen*\*\1984\*\*.flac" "\\Diskstation\music\" /X:*recycle*\ /X:*volume*\ /KS /S /R /Q /Y /BI /FF /oA:%_XXCOPYLOG% /Fo:%_log% /FM:DTL
+XXCOPY "\\Diskstation\music\" "F:\" /RS /BN /S /PD0 /RSY /X:#recycle\ /oA:%_XXCOPYLOG% /Fo:%_log% /FM:DTL
 SHIFT
 GOTO MAIN
