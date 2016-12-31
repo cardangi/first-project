@@ -6,9 +6,9 @@ import logging
 from base64 import b85decode
 from contextlib import ExitStack
 from logging.config import dictConfig
-from Images.LocalCollection import images
+from Images.CollectionLocal import images
 from Applications.shared import NAS, PASSWORD
-from Images.RemoteCollection import remotedirectorycontent
+from Images.CollectionRemote import remotedirectorycontent
 
 __author__ = 'Xavier ROSSET'
 
@@ -60,6 +60,10 @@ if __name__ == "__main__":
                         logger.debug(file)
 
                 common = sorted(local_collection & remote_collection)
-                # for image in common:
-                #     logger.debug(image)
-                # logger.debug("Common: {0}".format(len(common)))
+                if common:
+                    logger.debug("-----------")
+                    logger.debug("common".upper())
+                    logger.debug("-----------")
+                    logger.debug("Common: {0}".format(len(common)))
+                    for file in (os.path.join(dirname, basename) for dirname, basename in local_images if basename in common):
+                        logger.debug(file)

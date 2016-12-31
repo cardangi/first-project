@@ -154,6 +154,8 @@ if __name__ == "__main__":
     logger.debug(gui.database)
     logger.debug(gui.uid)
     arguments = {i: getattr(gui, i) for i in ["artist", "year", "album", "upc", "genre", "albumsort", "artistsort"] if hasattr(gui, i) and getattr(gui, i) is not None}
-    for tup in arguments.items():
-        logger.debug("{t[0]}: {t[1]}".format(t=tup))
-    sys.exit(update(*gui.uid, db=gui.database, **arguments))
+    if arguments:
+        for tup in arguments.items():
+            logger.debug("{t[0]}: {t[1]}".format(t=tup))
+        sys.exit(update(*gui.uid, db=gui.database, **arguments))
+    sys.exit(0)

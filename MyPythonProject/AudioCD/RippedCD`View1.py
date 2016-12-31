@@ -67,7 +67,7 @@ OUTPUT = os.path.join(os.path.expandvars("%_COMPUTING%"), "RippedCD", "rippedcd.
 # Arguments parser.
 # =================
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--db", dest="database", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=validdb)
+parser.add_argument("database", nargs="?", default=os.path.join(os.path.expandvars("%_COMPUTING%"), "database.db"), type=validdb)
 
 
 # ========

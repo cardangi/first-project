@@ -40,6 +40,7 @@ IF "%~1" EQU "11" GOTO STEP11
 IF "%~1" EQU "12" GOTO STEP12
 IF "%~1" EQU "13" GOTO STEP13
 IF "%~1" EQU "14" GOTO STEP14
+IF "%~1" EQU "15" GOTO STEP15
 SHIFT
 GOTO MAIN
 
@@ -172,11 +173,11 @@ REM         Exclude "$RECYCLE.BIN".
 REM         Exclude "SYSTEM VOLUME INFORMATION".
 REM         Exclude "IPHONE".
 REM         Exclude "RECOVER".
-XXCOPY "H:\*\*.jpg" "\\Diskstation\pictures" /X:*recycle*\ /X:*volume*\ /X:iphone\ /X:recover\ /CLONE /Z0 /oA:%_XXCOPYLOG%
+XXCOPY "H:\*\*.jpg" "\\Diskstation\pictures\" /X:*recycle*\ /X:*volume*\ /X:iphone\ /X:recover\ /CLONE /Z0 /oA:%_XXCOPYLOG%
 
 REM -->  2. Reverse both source and destination. Then remove brand new files but exclude "#recycle" folder.
 REM         This trick allows to remove files from "\\Diskstation\pictures" not present in "H:".And preserve "#recycle"!
-XXCOPY "\\Diskstation\pictures" "H:\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
+XXCOPY "\\Diskstation\pictures\" "H:\" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
 
 SHIFT
 GOTO MAIN
@@ -187,6 +188,7 @@ REM 16. Clone "F:" to "\\Diskstation\music".
 REM     ------------------------------------
 REM     Only FLAC.
 :STEP15
-REM XXCOPY "F:\*\Springsteen*\*\*.flac" %TEMP% /CLONE /Z0 /oA:%_XXCOPYLOG%
+XXCOPY "F:\*\Springsteen*\*\*.flac" "\\Diskstation\music\" /X:*recycle*\ /X:*volume*\ /CLONE /Z0 /oA:%_XXCOPYLOG%
+XXCOPY "\\Diskstation\music\" "F:\*\Springsteen*\*\*.flac" /RS /BN /PD0 /S /RSY /X:#recycle\ /oA:%_XXCOPYLOG%
 SHIFT
 GOTO MAIN
