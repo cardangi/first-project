@@ -189,7 +189,7 @@ REM 16. Clone "F:" to "\\Diskstation\music".
 REM     ------------------------------------
 REM     Only FLAC.
 :STEP15
-XXCOPY "F:\*\Springsteen*\*\1984\*\*.flac" "\\Diskstation\music\" /X:*recycle*\ /X:*volume*\ /KS /S /R /Q /Y /BI /FF /oA:%_XXCOPYLOG% /Fo:%_log% /FM:DTL
+XXCOPY "F:\*\Springsteen*\*\2007\*\*.flac" "\\Diskstation\music\" /X:*recycle*\ /X:*volume*\ /KS /S /R /Q /Y /BI /FF /oA:%_XXCOPYLOG% /Fo:%_log% /FM:DTL
 XXCOPY "\\Diskstation\music\" "F:\" /RS /BN /S /PD0 /RSY /X:#recycle\ /oA:%_XXCOPYLOG% /Fo:%_log% /FM:DTL
 SHIFT
 GOTO MAIN
