@@ -23,3 +23,5 @@ from Applications.shared import MUSIC
 from Applications.AudioCD.shared import audiofilesinfolder
 """
 print(timeit(stmt='audiofilesinfolder("flac", "m4a", folder=MUSIC)', setup=imp, number=100000))
+
+# AAAAAAAAAAAAAAAAAAAAAAAA
