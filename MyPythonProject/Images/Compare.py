@@ -13,6 +13,17 @@ from Images.CollectionRemote import remotedirectorycontent
 __author__ = 'Xavier ROSSET'
 
 
+# ==========
+# Functions.
+# ==========
+@contextmanager
+def decorator(obj, s):
+    sep = "".join(list(repeat("-", len(s))))
+    obj.info(sep)
+    yield
+    obj.info(sep)
+
+
 # ===============
 # Main algorithm.
 # ===============
@@ -52,12 +63,11 @@ if __name__ == "__main__":
 
                 difference = sorted(local_collection - remote_collection)
                 if difference:
-                    logger.debug("-----------")
-                    logger.debug("differences".upper())
-                    logger.debug("-----------")
-                    logger.debug("Differences: {0}".format(len(difference)))
+                    with decorator(logger, "differences"):
+                        logger.info("differences".upper())
+                    logger.info("Differences: {0}".format(len(difference)))
                     for file in (os.path.join(dirname, basename) for dirname, basename in local_images if basename in difference):
-                        logger.debug(file)
+                        logger.info(file)
 
                 common = sorted(local_collection & remote_collection)
                 if common:
