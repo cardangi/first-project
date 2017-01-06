@@ -121,9 +121,11 @@ def delete(table, db=DATABASE):
 
 
 def isdeltareached(uid, table, db=DATABASE, days=10):
+    logger = logging.getLogger("{0}.isdeltareached".format(__name__))
     deltareached = True
     record = selectfromuid(uid, table, db)
     if record:
         if datetime.utcnow() - record[1] < timedelta(days=days):
             deltareached = False
+    logger.debug(deltareached)
     return deltareached
