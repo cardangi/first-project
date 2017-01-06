@@ -14,34 +14,29 @@ import os
 __author__ = 'Xavier ROSSET'
 
 
-# ===============
-# Main algorithm.
-# ===============
-if __name__ == "__main__":
+#  1. --> Logging.
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
+    dictConfig(yaml.load(fp))
+logger = logging.getLogger("Applications.shared.zipfiles")
 
-    #  1. --> Logging.
-    with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
-        dictConfig(yaml.load(fp))
-    logger = logging.getLogger("Applications.shared.zipfiles")
+#  2. --> Constant(s).
+UID = 123456799
 
-    #  2. --> Initializations.
-    UID = 123456799
+#  3. --> Initialization(s).
+status, arguments = 0, dbparser.parse_args()
+zipfiles = functools.partial(zipfiles, r"F:\passwords.7z", r"C:\Users\Xavier\Documents\Database.kdbx", r"Y:\Database.key")
+isdeltareached = functools.partial(isdeltareached, UID, "rundates")
+update = functools.partial(update, UID, "rundates")
 
-    #  3. --> Initializations.
-    status, arguments = 0, dbparser.parse_args()
-    zipfiles = functools.partial(zipfiles, r"F:\passwords.7z", r"C:\Users\Xavier\Documents\Database.kdbx", r"Y:\Database.key")
-    isdeltareached = functools.partial(isdeltareached, UID, "rundates")
-    update = functools.partial(update, UID, "rundates")
+#  4. --> Main algorithm.
+if isdeltareached(arguments.database):
+    try:
+        zipfiles()
+    except OSError as err:
+        logger.exception(err)
+    else:
+        status = update(arguments.database)
 
-    #  4. --> Main algorithm.
-    if isdeltareached(arguments.database):
-        try:
-            zipfiles()
-        except OSError as err:
-            logger.exception(err)
-        else:
-            status = update(arguments.database)
-
-    #  5. --> Exit algorithm.
-    logger.info(status)
-    sys.exit(status)
+#  5. --> Exit algorithm.
+logger.info(status)
+sys.exit(status)
