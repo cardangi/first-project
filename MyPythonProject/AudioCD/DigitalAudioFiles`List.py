@@ -191,4 +191,4 @@ if __name__ == "__main__":
     #     ---------------
     if any([ext_count1, ext_count2, art_count1, art_count2, artext_dict]):
         with open(OUTFILE, mode=shared.WRITE, encoding=shared.UTF8) as fp:
-            json.dump([shared.now(), ext_count1, ext_count2, art_count1, art_count2, artext_dict], fp, indent=4, ensure_ascii=False)
+            json.dump([shared.now(), arguments.directory, arguments.extensions, ext_count1, ext_count2, art_count1, art_count2, artext_dict], fp, indent=4, ensure_ascii=False)
