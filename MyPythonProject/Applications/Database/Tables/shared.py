@@ -120,9 +120,9 @@ def delete(table, db=DATABASE):
     return status
 
 
-def isdeltareached(uid, table, db=DATABASE, days=10):
+def isdeltareached(uid, db=DATABASE, days=10):
     deltareached = True
-    record = selectfromuid(uid, table, db)
+    record = selectfromuid(uid, "rundates", db)
     if record:
         if datetime.utcnow() - record[1] < timedelta(days=days):
             deltareached = False
