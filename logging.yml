@@ -51,10 +51,6 @@ loggers:
     propagate: no
 #
 # Loggers for database processing Application.
-  Tables:
-    level: DEBUG
-    handlers: [file]
-    propagate: no
   Applications.Database.Tables:
     level: DEBUG
     handlers: [file]
