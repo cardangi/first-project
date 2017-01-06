@@ -3,21 +3,14 @@ import os
 import sys
 import yaml
 import logging
-import argparse
 import itertools
 from subprocess import run
 from logging.config import dictConfig
+from Applications.parsers import dbparser
 from Applications.shared import validdb, DATABASE
 from Applications.Database.Tables.shared import isdeltareached, update
 
 __author__ = 'Xavier ROSSET'
-
-
-# ==========
-# Arguments.
-# ==========
-parser = argparse.ArgumentParser()
-parser.add_argument("database", nargs="?", default=DATABASE, type=validdb, help="Read/Updated database")
 
 
 # ===============
@@ -34,7 +27,7 @@ if __name__ == "__main__":
     UID = 123456798
 
     #  3. --> Initializations.
-    status, arguments = 0, parser.parse_args()
+    status, arguments = 0, dbparser.parse_args()
     isdeltareached = functools.partial(isdeltareached, UID, "rundates")
     update = functools.partial(update, UID, "rundates")
 
