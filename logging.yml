@@ -50,12 +50,22 @@ loggers:
     handlers: [file]
     propagate: no
 #
-# Loggers for Database processing Application.
+# Loggers for database processing Application.
   Tables:
     level: DEBUG
     handlers: [file]
     propagate: no
   Applications.Database.Tables:
+    level: DEBUG
+    handlers: [file]
+    propagate: no
+#
+# Loggers for zip files Application.
+  zipfiles:
+    level: DEBUG
+    handlers: [file]
+    propagate: no
+  Applications.shared.zipfiles:
     level: DEBUG
     handlers: [file]
     propagate: no
