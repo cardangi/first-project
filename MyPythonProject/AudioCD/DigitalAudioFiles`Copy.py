@@ -1,6 +1,6 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 """
-Exécuter des copies de fichiers en utilisant les arguments énumérés dans le fichier JSON reçu en paramètre.
+ExÃ©cuter des copies de fichiers en utilisant les arguments Ã©numÃ©rÃ©s dans le fichier JSON reÃ§u en paramÃ¨tre.
 """
 from Applications.AudioCD.shared import validdelay
 from collections import MutableSequence
@@ -44,7 +44,7 @@ TABSIZE = 3
 # ========
 class CopyFilesFrom(MutableSequence):
 
-    logger = logging.getLogger("{0}.CopyFilesFrom".format(os.path.splitext(os.path.basename(__file__))[0]))
+    logger = logging.getLogger("Applications.AudioCD.CopyFilesFrom")
 
     def __init__(self, filobj):
         self._seq = json.load(filobj)
@@ -94,7 +94,7 @@ filestocopy = CopyFilesFrom(arguments.file)
 # ========
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
     dictConfig(yaml.load(fp))
-logger = logging.getLogger("AudioCD.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
+logger = logging.getLogger("Applications.AudioCD")
 logger.debug("Delay: {0} second(s).".format(arguments.delay))
 logger.debug("{0:>5d} file(s) to copy.".format(len(filestocopy)))
 
@@ -104,12 +104,12 @@ logger.debug("{0:>5d} file(s) to copy.".format(len(filestocopy)))
 # ===============
 if len(filestocopy):
 
-    # Mise à jour immédiate.
+    # Mise Ã  jour immÃ©diate.
     if not arguments.delay:
         filestocopy(test=arguments.test)
         sys.exit(0)
 
-    # Mise à jour différée.
+    # Mise Ã  jour diffÃ©rÃ©e.
     s = sched.scheduler()
     s.enter(arguments.delay, 1, filestocopy, kwargs={"test": arguments.test})
     s.run()
