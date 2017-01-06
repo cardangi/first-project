@@ -7,7 +7,6 @@ import functools
 from subprocess import run
 from logging.config import dictConfig
 from Applications.parsers import dbparser
-from Applications.shared import validdb, DATABASE
 from Applications.Database.Tables.shared import isdeltareached, update
 
 __author__ = 'Xavier ROSSET'

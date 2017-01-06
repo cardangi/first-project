@@ -15,7 +15,7 @@ __author__ = 'Xavier ROSSET'
 # ========
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
     dictConfig(yaml.load(fp))
-logger = logging.getLogger("Tables.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
+logger = logging.getLogger("Applications.Database.Tables")
 
 
 # ==========
@@ -29,7 +29,7 @@ arguments = readtable.parse_args()
 # ===============
 for record in select(arguments.table, db=arguments.database):
     if record:
-        id, date = record
-        print("\n-*- {0} -*-".format(id))
-        print(dateformat(UTC.localize(date), TEMPLATE2))
+        uid, date = record
+        print("\n-*- {0} -*-".format(uid))
+        # print(dateformat(UTC.localize(date), TEMPLATE2))
         print(dateformat(UTC.localize(date).astimezone(LOCAL), TEMPLATE2))
