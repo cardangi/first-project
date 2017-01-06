@@ -57,10 +57,6 @@ loggers:
     propagate: no
 #
 # Loggers for zip files Application.
-  zipfiles:
-    level: DEBUG
-    handlers: [file]
-    propagate: no
   Applications.shared.zipfiles:
     level: DEBUG
     handlers: [file]
