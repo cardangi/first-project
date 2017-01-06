@@ -17,6 +17,7 @@ __author__ = 'Xavier ROSSET'
 # Initializations.
 # ================
 zipfiles = functools.partial(zipfiles, r"F:\passwords.7z", r"C:\Users\Xavier\Documents\Database.kdbx", r"Y:\Database.key")
+updaterundates = functools.partial(update, table="rundates")
 
 
 # ==========
