@@ -59,9 +59,8 @@ if __name__ == "__main__":
     #     ---------------- 
     #  0. Initializations.
     #     ---------------- 
-    reflist, lista, listb, listc, listd, liste, ext_list, art_list, artext_dict, extensions, artists = [], None, None, None, None, None, [], [], SortedDict(), SortedDict(), SortedDict()
-    rex1 = re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\")
-    arguments = []
+    reflist, lista, listb, listc, listd, liste, ext_list, art_list, artext_dict, extensions, artists, arguments = [], None, None, None, None, None, [], [], SortedDict(), SortedDict(), SortedDict(), []
+    regex = re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\")
 
     # --> User interface.
     gui = shared.interface(LocalInterface([("Please enter directory to walk through", "folder"), ("Please enter extension(s) to filter out", "extensions")]))
@@ -78,7 +77,7 @@ if __name__ == "__main__":
         art = None
         ext = splitext(fil)[1][1:].upper()
         ext_list.append(ext)
-        match = rex1.match(normpath(fil))
+        match = regex.match(normpath(fil))
         if match:
             reflist.append((fil, int(os.path.getctime(fil)), "Créé le %s" % (shared.dateformat(datetime.fromtimestamp(os.path.getctime(fil), tz=timezone(shared.DFTTIMEZONE)), shared.TEMPLATE1),), len(fil)))
             art = match.group(1)
