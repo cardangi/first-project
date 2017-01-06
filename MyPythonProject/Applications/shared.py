@@ -643,10 +643,10 @@ def interface(obj):
 
 
 def zipfiles(archive, *files):
-    logger = logging.getLogger("Zip.{0}.toto".format(os.path.splitext(os.path.basename(__file__))[0]))
+    logger = logging.getLogger("{0}.zipfiles".format(__name__))
     if not os.path.exists(os.path.dirname(archive)):
         raise OSError('"{0}" doesn\'t exist. Please enter an existing directory.'.format(os.path.dirname(archive)))
-    with zipfile.ZipFile(archive), "w") as myzip:
+    with zipfile.ZipFile(archive, "w") as myzip:
         logger.info('"{0}" used as archive.'.format(archive))
         for file in files:
             if os.path.exists(file):
