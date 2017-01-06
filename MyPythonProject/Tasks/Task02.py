@@ -40,7 +40,7 @@ if __name__ == "__main__":
     isdeltareached = functools.partial(isdeltareached, UID, "rundates")
     update = functools.partial(update, UID, "rundates")
 
-    #  4. --> Main.
+    #  4. --> Main algorithm.
     if isdeltareached(arguments.database):
         try:
             zipfiles()
@@ -49,5 +49,6 @@ if __name__ == "__main__":
         else:
             status = update(arguments.database)
 
-logger.info(status)
-sys.exit(status)
+    #  5. --> Exit algorithm.
+    logger.info(status)
+    sys.exit(status)
