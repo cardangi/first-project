@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from Applications.Database.Tables.shared import isdeltareached, update
 from Applications.shared import DATABASE, WRITE, validdb, zipfiles
+from Applications.parsers import dbparser
 from logging.config import dictConfig
 import functools
 import argparse
@@ -11,14 +12,6 @@ import sys
 import os
 
 __author__ = 'Xavier ROSSET'
-
-
-# ==========
-# Arguments.
-# ==========
-parser = argparse.ArgumentParser()
-parser.add_argument("database", nargs="?", default=DATABASE, type=validdb, help="Read/Updated database")
-
 
 
 # ===============
@@ -35,7 +28,7 @@ if __name__ == "__main__":
     UID = 123456799
 
     #  3. --> Initializations.
-    status, arguments = 0, parser.parse_args()
+    status, arguments = 0, dbparser.parse_args()
     zipfiles = functools.partial(zipfiles, r"F:\passwords.7z", r"C:\Users\Xavier\Documents\Database.kdbx", r"Y:\Database.key")
     isdeltareached = functools.partial(isdeltareached, UID, "rundates")
     update = functools.partial(update, UID, "rundates")
