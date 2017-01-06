@@ -28,7 +28,7 @@ if __name__ == "__main__":
     #  1. --> Logging.
     with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
         dictConfig(yaml.load(fp))
-    logger = logging.getLogger("Tables.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
+    logger = logging.getLogger("Applications.Database.Tables.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
 
     #  2. --> Initializations.
     UID = 123456798
