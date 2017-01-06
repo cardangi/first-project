@@ -13,13 +13,6 @@ import os
 __author__ = 'Xavier ROSSET'
 
 
-# ================
-# Initializations.
-# ================
-zipfiles = functools.partial(zipfiles, r"F:\passwords.7z", r"C:\Users\Xavier\Documents\Database.kdbx", r"Y:\Database.key")
-updaterundates = functools.partial(update, table="rundates")
-
-
 # ==========
 # Arguments.
 # ==========
@@ -43,18 +36,18 @@ if __name__ == "__main__":
 
     #  3. --> Initializations.
     status, arguments = 0, parser.parse_args()
+    zipfiles = functools.partial(zipfiles, r"F:\passwords.7z", r"C:\Users\Xavier\Documents\Database.kdbx", r"Y:\Database.key")
+    isdeltareached = functools.partial(isdeltareached, UID, "rundates")
+    update = functools.partial(update, UID, "rundates")
 
     #  4. --> Main.
-    if isdeltareached(UID, arguments.database):
+    if isdeltareached(arguments.database):
         try:
             zipfiles()
         except OSError as err:
             logger.exception(err)
         else:
-            status = updaterundates(UID, arguments.database)
+            status = update(arguments.database)
 
 logger.info(status)
 sys.exit(status)
-
-
-# FILES = [r"C:\Users\Xavier\Documents\Database.kdbx", r"Y:\Database.key"]
