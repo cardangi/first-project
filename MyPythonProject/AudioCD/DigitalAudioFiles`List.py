@@ -61,6 +61,7 @@ if __name__ == "__main__":
     #     ---------------- 
     reflist, lista, listb, listc, listd, liste, ext_list, art_list, artext_dict, extensions, artists, arguments = [], None, None, None, None, None, [], [], SortedDict(), SortedDict(), SortedDict(), []
     regex = re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\")
+    C = collections.Counter
 
     # --> User interface.
     gui = shared.interface(LocalInterface([("Please enter directory to walk through", "folder"), ("Please enter extension(s) to filter out", "extensions")]))
@@ -91,7 +92,7 @@ if __name__ == "__main__":
     #     --------------------
     #  2. Total par extension.
     #     --------------------
-    ext_count = collections.Counter()
+    ext_count = C()
     for extension in ext_list:
         ext_count[extension] += 1
 
@@ -104,7 +105,7 @@ if __name__ == "__main__":
     #     ------------------
     #  3. Total par artiste.
     #     ------------------
-    art_count = collections.Counter()
+    art_count = C()
     for artist in art_list:
         art_count[artist] += 1
 
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     #  4. Total par couple artiste/extension.
     #     -----------------------------------
     for artist in artext_dict:
-        count = collections.Counter()
+        count = C()
         for extension in artext_dict[artist]:
             count[extension] += 1
         artext_dict[artist] = collections.OrderedDict(sorted(count.items(), key=itemgetter(0)))
