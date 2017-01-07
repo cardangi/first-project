@@ -2,6 +2,7 @@
 from collections import MutableMapping, namedtuple
 from contextlib import ContextDecorator, ExitStack
 from jinja2 import Environment, FileSystemLoader
+from collections import MutableSequence
 from sortedcontainers import SortedDict
 from mutagen.apev2 import APETextValue
 from operator import itemgetter
@@ -12,6 +13,7 @@ import mutagen.monkeysaudio
 from pytz import timezone
 import ftputil.error
 import mutagen.flac
+import itertools
 import argparse
 import mutagen
 import logging
@@ -616,6 +618,65 @@ class RippedCD(ContextDecorator):
         self.logger.debug('END "%s".' % (os.path.basename(__file__),))
 
 
+class AudioFilesList(MutableSequence):
+
+    logger = logging.getLogger("{0}.AudioFilesList".format(__name__))
+
+    def __init__(self, *extensions, folder, excluded=None):
+        self.logger.debug(extensions)
+        self.logger.debug(folder)
+        self.logger.debug(excluded)
+        self._reflist = sorted((fil, os.path.getctime(fil)) for fil in shared.filesinfolder(*extensions, folder=folder, excluded=excluded))
+        self._artists = [(fil, tags["artist"]) for fil, tags in ((fil.file, fil.tags) for fil in map(getmetadata, (itemgetter(0)(item) for item in self._reflist)) if fil.found) if "artist" in tags]
+
+    def __getitem__(self, item):
+        return self._reflist[item]
+
+    def __setitem__(self, key, value):
+        self._reflist[key] = value
+
+    def __delitem__(self, key):
+        del self._reflist[key]
+
+    def __len__(self):
+        return len(self._reflist)
+
+    def insert(self, index, value):
+        self._reflist.insert(index, value)
+
+    @property
+    def sorted_reflist(self):
+        reflist = sorted(sorted(self._reflist, key=self.keyfunc1), key=self.keyfunc2)
+        for item in reflist:
+            self.logger.debug(itemgetter(0)(item))
+            self.logger.debug(itemgetter(1)(item))
+        return reflist
+
+    @property
+    def grouped_reflist(self):
+        return itertools.groupby(self.sorted_reflist, key=self.keyfunc2)
+
+    @property
+    def sortedbyartist(self):
+        reflist = sorted(sorted(self._artists, key=itemgetter(0)), key=itemgetter(1))
+        for item in reflist:
+            self.logger.debug(itemgetter(0)(item))
+            self.logger.debug(itemgetter(1)(item))
+        return reflist
+
+    @property
+    def groupedbyartist(self):
+        return itertools.groupby(self.sortedbyartist, key=itemgetter(1))
+
+    @staticmethod
+    def keyfunc1(item):
+        return os.path.splitext(itemgetter(0)(item))[0]
+
+    @staticmethod
+    def keyfunc2(item):
+        return os.path.splitext(itemgetter(0)(item))[1][1:]
+
+
 # ==========
 # Functions.
 # ==========
@@ -749,11 +810,14 @@ def getmetadata(audiofil):
                 - "object". Audio file object.
     """
     tags, result = {}, namedtuple("result", "file found tags object")
+    logger = logging.getLogger("{0}.getmetadata".format(__name__))
+    logger.debug(audiofil)
 
     # Guess "audiofil" type.
     try:
         audioobj = mutagen.File(audiofil)
-    except mutagen.MutagenError:
+    except (mutagen.MutagenError, TypeError) as err:
+        logger.debug(err)
         return result(audiofil, False, {}, None)
 
     # Is "audiofil" a valid audio file?

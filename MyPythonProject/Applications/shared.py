@@ -16,9 +16,8 @@ from dateutil.tz import gettz
 from operator import itemgetter
 from dateutil.parser import parse
 from PIL import Image, TiffImagePlugin
+from collections import MutableMapping
 from contextlib import ContextDecorator
-from sortedcontainers import SortedDict
-from collections import MutableMapping, MutableSequence, Counter, OrderedDict
 
 __author__ = 'Xavier ROSSET'
 
@@ -399,117 +398,6 @@ class GlobalInterface(object):
     @answer.setter
     def answer(self, value):
         self._answer = value
-
-
-class FilesListing(MutableSequence):
-
-    def __init__(self, folder, excluded, *extensions):
-
-        #  0 --> Initializations.
-        c = Counter
-        self._reflist = []
-        self._ext_count, self._art_count, self._artext_count = c(), c(), SortedDict()
-        ext_list, art_list, artext_dict = [], [], SortedDict()
-        regex = re.compile(r"^(?:[^\\]+\\){2}([^\\]+)\\")
-
-        #  1 --> Inventaire des fichiers.
-        for fil in filesinfolder(*extensions, folder=folder, excluded=excluded):
-            art = None
-            ext = os.path.splitext(fil)[1][1:].upper()
-            ext_list.append(ext)
-            match = regex.match(os.path.normpath(fil))
-            if match:
-                self._reflist.append((fil,
-                                      int(os.path.getctime(fil)),
-                                      "Créé le %s" % (dateformat(datetime.fromtimestamp(os.path.getctime(fil), tz=timezone(DFTTIMEZONE)), TEMPLATE1),),
-                                      len(fil))
-                                     )
-                art = match.group(1)
-            if art:
-                art_list.append(art)
-            if all([art, ext]):
-                if art not in artext_dict:
-                    artext_dict[art] = []
-                artext_dict[art].append(ext)
-
-        #  2 --> Total par extension.
-        for extension in ext_list:
-            self._ext_count[extension] += 1
-
-        #  3 --> Total par artiste.
-        for artist in art_list:
-            self._art_count[artist] += 1
-
-        #  4 --> Total par couple artiste/extension.
-        for artist in artext_dict:
-            count = c()
-            for extension in artext_dict[artist]:
-                count[extension] += 1
-            self._artext_count[artist] = OrderedDict(sorted(count.items(), key=itemgetter(0)))
-
-    def __getitem__(self, item):
-        return [itemgetter(0)(item) for item in sorted(self._reflist, key=itemgetter(0))][item]
-
-    def __setitem__(self, key, value):
-        self._reflist[key] = value
-
-    def __delitem__(self, key):
-        del self._reflist[key]
-
-    def __len__(self):
-        return len(self._reflist)
-
-    def insert(self, index, value):
-        self._reflist.insert(index, value)
-
-    #  Tri par extension croissante.
-    @property
-    def ext_count1(self):
-        return OrderedDict(sorted(self._ext_count.items(), key=itemgetter(0)))
-
-    #  Tri par total décroissant et par extension croissante.
-    @property
-    def ext_count2(self):
-        return OrderedDict(sorted(sorted(self._ext_count.items(), key=itemgetter(0)), key=itemgetter(1), reverse=True))
-
-    #  Tri par artiste croissant.
-    @property
-    def art_count1(self):
-        return OrderedDict(sorted(self._art_count.items(), key=itemgetter(0)))
-
-    #  Tri par total décroissant et par artiste croissant.
-    @property
-    def art_count2(self):
-        return OrderedDict(sorted(sorted(self._art_count.items(), key=itemgetter(0)), key=itemgetter(1), reverse=True))
-
-    #  Total par couple artiste/extension.
-    @property
-    def artext_count(self):
-        return self._artext_count
-
-    # Liste des fichiers. Tri par nom croissant.
-    @property
-    def files1(self):
-        return ((a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(2)(item)) for item in sorted(self._reflist, key=itemgetter(0))], 1))
-
-    # Liste des 50 fichiers créés dernièrement. Tri par date décroissante, puis nom croissant.
-    @property
-    def files2(self):
-        return ((a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(2)(item)) for item in sorted(sorted(self._reflist, key=itemgetter(0)), key=itemgetter(1), reverse=True)[:50]], 1))
-
-    @property
-    def extensions(self):
-        return ((a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(self._ext_count.items(), key=itemgetter(0))], 1))
-
-    # Liste des artistes. Tri par nom croissant.
-    @property
-    def artist1(self):
-        return ((a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(self._art_count.items(), key=itemgetter(0))], 1))
-
-    # Liste des artistes. Tri par ranking décroissant, puis nom croissant.
-    @property
-    def artist2(self):
-        return ((a, b, c) for a, (b, c) in enumerate([(itemgetter(0)(item), itemgetter(1)(item)) for item in sorted(sorted(self._art_count.items(), key=itemgetter(0)), key=itemgetter(1), reverse=True)], 1))
 
 
 # ===========================
