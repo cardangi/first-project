@@ -18,7 +18,7 @@ from dateutil.parser import parse
 from PIL import Image, TiffImagePlugin
 from contextlib import ContextDecorator
 from sortedcontainers import SortedDict
-from collections import MutableMapping, Counter, OrderedDict
+from collections import MutableMapping, MutableSequence, Counter, OrderedDict
 
 __author__ = 'Xavier ROSSET'
 
@@ -401,15 +401,12 @@ class GlobalInterface(object):
         self._answer = value
 
 
-class FilesListing(object):
+class FilesListing(MutableSequence):
 
     def __init__(self, folder, excluded, *extensions):
 
         #  0 --> Initializations.
         c = Counter
-        self._folder = folder
-        self._excluded = excluded
-        self._extension = extensions
         self._reflist = []
         self._ext_count, self._art_count, self._artext_count = c(), c(), SortedDict()
         ext_list, art_list, artext_dict = [], [], SortedDict()
@@ -449,6 +446,21 @@ class FilesListing(object):
             for extension in artext_dict[artist]:
                 count[extension] += 1
             self._artext_count[artist] = OrderedDict(sorted(count.items(), key=itemgetter(0)))
+
+    def __getitem__(self, item):
+        return [itemgetter(item)(0) for item in self._reflist][item]
+
+    def __setitem__(self, key, value):
+        self._reflist[key] = value
+
+    def __delitem__(self, key):
+        del self._reflist[key]
+
+    def __len__(self):
+        return len(self._reflist)
+
+    def insert(self, index, value):
+        self._reflist.insert(index, value)
 
     #  Tri par extension croissante.
     @property
