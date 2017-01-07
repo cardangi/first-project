@@ -448,7 +448,7 @@ class FilesListing(MutableSequence):
             self._artext_count[artist] = OrderedDict(sorted(count.items(), key=itemgetter(0)))
 
     def __getitem__(self, item):
-        return [itemgetter(item)(0) for item in self._reflist][item]
+        return [itemgetter(0)(item) for item in sorted(self._reflist, key=itemgetter(0))][item]
 
     def __setitem__(self, key, value):
         self._reflist[key] = value

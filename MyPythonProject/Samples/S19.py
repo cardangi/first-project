@@ -46,3 +46,6 @@ if any([mylist.files1, mylist.files2, mylist.extensions, mylist.artist1, mylist.
 if any([mylist.ext_count1, mylist.ext_count2, mylist.art_count1, mylist.art_count2, mylist.artext_count]):
     with open(OUTFILE, mode=WRITE, encoding=UTF8) as fp:
         json.dump([now(), mylist.ext_count1, mylist.ext_count2, mylist.art_count1, mylist.art_count2, mylist.artext_count], fp, indent=4, ensure_ascii=False)
+
+for fil in mylist:
+    print(fil)
