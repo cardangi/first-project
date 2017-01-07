@@ -62,7 +62,7 @@ if __name__ == "__main__":
     arguments = parser.parse_args(arguments)
 
     # --> Create list interface.
-    mylist = shared.FilesListing(normpath(arguments.directory), excluded=["recycle", "\$recycle"], *arguments.extensions)
+    mylist = shared.FilesListing(normpath(arguments.directory), ["recycle", "\$recycle"], *arguments.extensions)
 
     # --> XML Output.
     root = ElementTree.Element("Data", attrib=dict(css="firstcss.css"))
