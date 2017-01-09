@@ -6,7 +6,9 @@ import argparse
 from os.path import normpath
 from Applications import shared
 import xml.etree.ElementTree as ElementTree
+from Applications.AudioCD.shared import AudioFilesList
 from Applications.descriptors import Folder, Extensions
+
 
 __author__ = 'Xavier ROSSET'
 
@@ -62,7 +64,7 @@ if __name__ == "__main__":
     arguments = parser.parse_args(arguments)
 
     # --> Create list interface.
-    mylist = shared.FilesListing(normpath(arguments.directory), ["recycle", "\$recycle"], *arguments.extensions)
+    mylist = AudioFilesList(*arguments.extensions, folder=normpath(arguments.directory), excluded=["recycle", "\$recycle"])
 
     # --> XML Output.
     root = ElementTree.Element("Data", attrib=dict(css="firstcss.css"))

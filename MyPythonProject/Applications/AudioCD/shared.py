@@ -628,27 +628,28 @@ class AudioFilesList(MutableSequence):
         self.logger.debug(extensions)
         self.logger.debug(folder)
         self.logger.debug(excluded)
-        self._reflist = sorted((fil, os.path.getctime(fil)) for fil in shared.filesinfolder(*extensions, folder=folder, excluded=excluded))
+        self._reflist = [(fil, os.path.getctime(fil)) for fil in shared.filesinfolder(*extensions, folder=folder, excluded=excluded)]
         self._artists = [(fil, tags["artist"]) for fil, tags in ((fil.file, fil.tags) for fil in map(getmetadata, (itemgetter(0)(item) for item in self._reflist)) if fil.found) if "artist" in tags]
+        self._artexte = [(fil, os.path.splitext(fil)[1][1:], art) for fil, art in self._artists]
 
     def __getitem__(self, item):
-        return self._reflist[item]
+        return sorted(self._reflist, key=itemgetter(0))[item]
 
     def __setitem__(self, key, value):
-        self._reflist[key] = value
+        sorted(self._reflist, key=itemgetter(0))[key] = value
 
     def __delitem__(self, key):
-        del self._reflist[key]
+        del sorted(self._reflist, key=itemgetter(0))[key]
 
     def __len__(self):
         return len(self._reflist)
 
     def insert(self, index, value):
-        self._reflist.insert(index, value)
+        sorted(self._reflist, key=itemgetter(0)).insert(index, value)
 
     @property
     def sorted_reflist(self):
-        reflist = sorted(sorted(self._reflist, key=itemgetter(0)), key=self.keyfunc)
+        reflist = sorted(sorted(self._reflist, key=itemgetter(0)), key=self.keyfunc1)
         for item in reflist:
             self.logger.debug(itemgetter(0)(item))
             self.logger.debug(itemgetter(1)(item))
@@ -656,10 +657,10 @@ class AudioFilesList(MutableSequence):
 
     @property
     def grouped_reflist(self):
-        return itertools.groupby(self.sorted_reflist, key=self.keyfunc)
+        return itertools.groupby(self.sorted_reflist, key=self.keyfunc1)
 
     @property
-    def sortedbyartist(self):
+    def sortedby_artist(self):
         reflist = sorted(sorted(self._artists, key=itemgetter(0)), key=itemgetter(1))
         for item in reflist:
             self.logger.debug(itemgetter(0)(item))
@@ -667,12 +668,29 @@ class AudioFilesList(MutableSequence):
         return reflist
 
     @property
-    def groupedbyartist(self):
-        return itertools.groupby(self.sortedbyartist, key=itemgetter(1))
+    def groupedby_artist(self):
+        return itertools.groupby(self.sortedby_artist, key=itemgetter(1))
+
+    @property
+    def sortedby_artist_extension(self):
+        reflist = sorted(sorted(sorted(self._artexte, key=itemgetter(0)), key=itemgetter(1)), key=itemgetter(2))
+        for item in reflist:
+            self.logger.debug(itemgetter(0)(item))
+            self.logger.debug(itemgetter(1)(item))
+            self.logger.debug(itemgetter(2)(item))
+        return reflist
+
+    @property
+    def groupedby_artist_extension(self):
+        return itertools.groupby(self.sortedby_artist_extension, key=self.keyfunc2)
 
     @staticmethod
-    def keyfunc(item):
+    def keyfunc1(item):
         return os.path.splitext(itemgetter(0)(item))[1][1:]
+
+    @staticmethod
+    def keyfunc2(item):
+        return itemgetter(2)(item), itemgetter(1)(item)
 
 
 # ==========

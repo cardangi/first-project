@@ -16,7 +16,7 @@ with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encod
 # logger = logging.getLogger("Applications.AudioCD")
 
 # OUTFILE = os.path.join(os.path.expandvars("%TEMP%"), "ranking.json")
-mylist = AudioFilesList("flac", "mp3", folder=r"F:\S\Springsteen, Bruce", excluded=["recycle", "\$recycle"])
+mylist = AudioFilesList("flac", "mp3", folder=r"F:\K", excluded=["recycle", "\$recycle"])
 
 # --> XML Output.
 # root = ElementTree.Element("Data", attrib=dict(css="firstcss.css"))
@@ -62,9 +62,14 @@ for k, g in mylist.grouped_reflist:
     for item in x:
         print(item)
 
-print(len(mylist))
+for k, g in mylist.groupedby_artist:
+    print(k)
+    x = list(g)
+    print(len(x))
+    for item in x:
+        print(item)
 
-for k, g in mylist.groupedbyartist:
+for k, g in mylist.groupedby_artist_extension:
     print(k)
     x = list(g)
     print(len(x))
