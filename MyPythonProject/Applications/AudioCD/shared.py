@@ -5,6 +5,7 @@ from jinja2 import Environment, FileSystemLoader
 from collections import MutableSequence
 from sortedcontainers import SortedDict
 from mutagen.apev2 import APETextValue
+from mutagen.easyid3 import EasyID3
 from operator import itemgetter
 from itertools import compress
 from datetime import datetime
@@ -13,6 +14,7 @@ import mutagen.monkeysaudio
 from pytz import timezone
 import ftputil.error
 import mutagen.flac
+import mutagen.mp3
 import itertools
 import argparse
 import mutagen
@@ -646,7 +648,7 @@ class AudioFilesList(MutableSequence):
 
     @property
     def sorted_reflist(self):
-        reflist = sorted(sorted(self._reflist, key=self.keyfunc1), key=self.keyfunc2)
+        reflist = sorted(sorted(self._reflist, key=itemgetter(0)), key=self.keyfunc)
         for item in reflist:
             self.logger.debug(itemgetter(0)(item))
             self.logger.debug(itemgetter(1)(item))
@@ -654,7 +656,7 @@ class AudioFilesList(MutableSequence):
 
     @property
     def grouped_reflist(self):
-        return itertools.groupby(self.sorted_reflist, key=self.keyfunc2)
+        return itertools.groupby(self.sorted_reflist, key=self.keyfunc)
 
     @property
     def sortedbyartist(self):
@@ -669,11 +671,7 @@ class AudioFilesList(MutableSequence):
         return itertools.groupby(self.sortedbyartist, key=itemgetter(1))
 
     @staticmethod
-    def keyfunc1(item):
-        return os.path.splitext(itemgetter(0)(item))[0]
-
-    @staticmethod
-    def keyfunc2(item):
+    def keyfunc(item):
         return os.path.splitext(itemgetter(0)(item))[1][1:]
 
 
@@ -815,7 +813,7 @@ def getmetadata(audiofil):
 
     # Guess "audiofil" type.
     try:
-        audioobj = mutagen.File(audiofil)
+        audioobj = mutagen.File(audiofil, easy=True)
     except (mutagen.MutagenError, TypeError) as err:
         logger.debug(err)
         return result(audiofil, False, {}, None)
@@ -824,8 +822,8 @@ def getmetadata(audiofil):
     if not audioobj:
         return result(audiofil, False, {}, None)
 
-    # Is "audiofil" type FLAC or Monkey's Audio?
-    if any([isinstance(audioobj, mutagen.flac.FLAC), isinstance(audioobj, mutagen.monkeysaudio.MonkeysAudio)]):
+    # Is "audiofil" type FLAC, Monkey's Audio or MP3 (with ID3 tags)?
+    if any([isinstance(audioobj, mutagen.flac.FLAC), isinstance(audioobj, mutagen.monkeysaudio.MonkeysAudio), isinstance(audioobj, mutagen.mp3.MP3)]):
 
         # --> FLAC.
         try:
@@ -842,6 +840,32 @@ def getmetadata(audiofil):
             pass
         else:
             tags = {k.lower(): str(v) for k, v in audioobj.tags.items() if isinstance(v, APETextValue)}
+
+        # --> MP3 (with ID3 tags).
+        try:
+            assert isinstance(audioobj, mutagen.mp3.MP3) is True
+        except AssertionError:
+            pass
+        else:
+
+            # Map user-defined text frame key.
+            for key in ["incollection", "titlelanguage", "totaltracks", "totaldiscs", "upc", "encoder"]:
+                description, cycle = key, 0
+                while True:
+                    EasyID3.RegisterTXXXKey(key, description)
+                    if key.lower() in (item.lower() for item in audioobj.tags):
+                        break
+                    cycle += 1
+                    if cycle > 1:
+                        break
+                    description = key.upper()
+
+            # Map normalized text frame key.
+            for key, description in [("artistsort", "TSOP"), ("albumartistsort", "TSO2"), ("albumsort", "TSOA"), ("mediatype", "TMED"), ("encodingtime", "TDEN"), ("label", "TPUB")]:
+                EasyID3.RegisterTextKey(key, description)
+
+            # Aggregate ID3 frames.
+            tags = {k.lower(): v[0] for k, v in audioobj.tags.items()}
 
     # Have "audiofil" metadata been retrieved?
     if not tags:
