@@ -856,8 +856,8 @@ def getmetadata(audiofil):
     # Guess "audiofil" type.
     try:
         audioobj = mutagen.File(audiofil, easy=True)
-    except (mutagen.MutagenError, TypeError) as err:
-        logger.debug(err)
+    except (mutagen.MutagenError, TypeError, ZeroDivisionError) as err:
+        logger.exception(err)
         return result(audiofil, False, {}, None)
 
     # Is "audiofil" a valid audio file?
