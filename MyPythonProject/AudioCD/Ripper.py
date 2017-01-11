@@ -25,7 +25,7 @@ parser.add_argument("-t", "--test", action="store_true")
 # ========
 with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
     dictConfig(yaml.load(fp))
-logger = logging.getLogger("AudioCD.{0}".format(os.path.splitext(os.path.basename(__file__))[0]))
+logger = logging.getLogger("Applications.AudioCD")
 
 
 # ============

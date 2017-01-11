@@ -2,8 +2,10 @@
 from collections import MutableMapping, namedtuple
 from contextlib import ContextDecorator, ExitStack
 from jinja2 import Environment, FileSystemLoader
+from collections import MutableSequence
 from sortedcontainers import SortedDict
 from mutagen.apev2 import APETextValue
+from mutagen.easyid3 import EasyID3
 from operator import itemgetter
 from itertools import compress
 from datetime import datetime
@@ -12,6 +14,8 @@ import mutagen.monkeysaudio
 from pytz import timezone
 import ftputil.error
 import mutagen.flac
+import mutagen.mp3
+import itertools
 import argparse
 import mutagen
 import logging
@@ -616,6 +620,103 @@ class RippedCD(ContextDecorator):
         self.logger.debug('END "%s".' % (os.path.basename(__file__),))
 
 
+class AudioFilesList(MutableSequence):
+
+    logger = logging.getLogger("{0}.AudioFilesList".format(__name__))
+
+    def __init__(self, *extensions, folder, excluded=None):
+        self.logger.debug(extensions)
+        self.logger.debug(folder)
+        self.logger.debug(excluded)
+        self._reflist = [(fil,
+                          os.path.splitext(fil)[1][1:],
+                          tags["artist"],
+                          os.path.getctime(fil))
+                         for fil, tags in (
+                             (fil.file, fil.tags) for fil in map(getmetadata, shared.filesinfolder(*extensions, folder=folder, excluded=excluded)) if fil.found
+                         ) if "artist" in tags]
+
+    def __getitem__(self, item):
+        return sorted(self._reflist, key=itemgetter(0))[item]
+
+    def __setitem__(self, key, value):
+        sorted(self._reflist, key=itemgetter(0))[key] = value
+
+    def __delitem__(self, key):
+        del sorted(self._reflist, key=itemgetter(0))[key]
+
+    def __len__(self):
+        return len(self._reflist)
+
+    def insert(self, index, value):
+        sorted(self._reflist, key=itemgetter(0)).insert(index, value)
+
+    @property
+    def reflist(self):
+        return self._reflist
+
+    @property
+    def sortedby_extension(self):
+        reflist = sorted(sorted(self._reflist, key=itemgetter(0)), key=itemgetter(1))
+        for item in reflist:
+            self.logger.debug(itemgetter(0)(item))
+            self.logger.debug(itemgetter(1)(item))
+        return reflist
+
+    @property
+    def groupedby_extension(self):
+        return itertools.groupby(self.sortedby_extension, key=itemgetter(1))
+
+    @property
+    def countby_extension(self):
+        return [(key, len(list(group))) for key, group in self.groupedby_extension]
+
+    @property
+    def sortedby_artist(self):
+        reflist = sorted(sorted(self._reflist, key=itemgetter(0)), key=itemgetter(2))
+        for item in reflist:
+            self.logger.debug(itemgetter(0)(item))
+            self.logger.debug(itemgetter(1)(item))
+        return reflist
+
+    @property
+    def groupedby_artist(self):
+        return itertools.groupby(self.sortedby_artist, key=itemgetter(2))
+
+    @property
+    def countby_artist(self):
+        return [(key, len(list(group))) for key, group in self.groupedby_artist]
+
+    @property
+    def sortedby_artist_extension(self):
+        reflist = sorted(sorted(sorted(self._reflist, key=itemgetter(0)), key=itemgetter(1)), key=itemgetter(2))
+        for item in reflist:
+            self.logger.debug(itemgetter(0)(item))
+            self.logger.debug(itemgetter(1)(item))
+            self.logger.debug(itemgetter(2)(item))
+        return reflist
+
+    @property
+    def groupedby_artist_extension(self):
+        return itertools.groupby(self.sortedby_artist_extension, key=self.keyfunc)
+
+    @property
+    def countby_artist_extension(self):
+        reflist = [(art, ext, count) for (art, ext), count in ((key, len(list(group))) for key, group in self.groupedby_artist_extension)]
+        reflist = sorted(sorted(reflist, key=itemgetter(1)), key=itemgetter(0))
+        return itertools.groupby(reflist, key=itemgetter(0))
+
+    @property
+    def alternative_countby_artist_extension(self):
+        reflist = [(art, ext, count) for (art, ext), count in ((key, len(list(group))) for key, group in self.groupedby_artist_extension)]
+        reflist = sorted(sorted(sorted(reflist, key=itemgetter(1)), key=itemgetter(2), reverse=True), key=itemgetter(0))
+        return itertools.groupby(reflist, key=itemgetter(0))
+
+    @staticmethod
+    def keyfunc(item):
+        return itemgetter(2)(item), itemgetter(1)(item)
+
+
 # ==========
 # Functions.
 # ==========
@@ -749,19 +850,22 @@ def getmetadata(audiofil):
                 - "object". Audio file object.
     """
     tags, result = {}, namedtuple("result", "file found tags object")
+    logger = logging.getLogger("{0}.getmetadata".format(__name__))
+    logger.debug(audiofil)
 
     # Guess "audiofil" type.
     try:
-        audioobj = mutagen.File(audiofil)
-    except mutagen.MutagenError:
+        audioobj = mutagen.File(audiofil, easy=True)
+    except (mutagen.MutagenError, TypeError, ZeroDivisionError) as err:
+        logger.exception(err)
         return result(audiofil, False, {}, None)
 
     # Is "audiofil" a valid audio file?
     if not audioobj:
         return result(audiofil, False, {}, None)
 
-    # Is "audiofil" type FLAC or Monkey's Audio?
-    if any([isinstance(audioobj, mutagen.flac.FLAC), isinstance(audioobj, mutagen.monkeysaudio.MonkeysAudio)]):
+    # Is "audiofil" type FLAC, Monkey's Audio or MP3 (with ID3 tags)?
+    if any([isinstance(audioobj, mutagen.flac.FLAC), isinstance(audioobj, mutagen.monkeysaudio.MonkeysAudio), isinstance(audioobj, mutagen.mp3.MP3)]):
 
         # --> FLAC.
         try:
@@ -778,6 +882,32 @@ def getmetadata(audiofil):
             pass
         else:
             tags = {k.lower(): str(v) for k, v in audioobj.tags.items() if isinstance(v, APETextValue)}
+
+        # --> MP3 (with ID3 tags).
+        try:
+            assert isinstance(audioobj, mutagen.mp3.MP3) is True
+        except AssertionError:
+            pass
+        else:
+
+            # Map user-defined text frame key.
+            for key in ["incollection", "titlelanguage", "totaltracks", "totaldiscs", "upc", "encoder"]:
+                description, cycle = key, 0
+                while True:
+                    EasyID3.RegisterTXXXKey(key, description)
+                    if key.lower() in (item.lower() for item in audioobj.tags):
+                        break
+                    cycle += 1
+                    if cycle > 1:
+                        break
+                    description = key.upper()
+
+            # Map normalized text frame key.
+            for key, description in [("artistsort", "TSOP"), ("albumartistsort", "TSO2"), ("albumsort", "TSOA"), ("mediatype", "TMED"), ("encodingtime", "TDEN"), ("label", "TPUB")]:
+                EasyID3.RegisterTextKey(key, description)
+
+            # Aggregate ID3 frames.
+            tags = {k.lower(): v[0] for k, v in audioobj.tags.items()}
 
     # Have "audiofil" metadata been retrieved?
     if not tags:

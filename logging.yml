@@ -25,10 +25,10 @@ loggers:
     propagate: no
 #
 # Loggers for Audio CD processing Application.
-  AudioCD:
-    level: DEBUG
-    handlers: [file]
-    propagate: no
+# AudioCD:
+#   level: DEBUG
+#   handlers: [file]
+#   propagate: no
   Applications.Database.AudioCD:
     level: DEBUG
     handlers: [file]
@@ -50,12 +50,14 @@ loggers:
     handlers: [file]
     propagate: no
 #
-# Loggers for Database processing Application.
-  Tables:
+# Loggers for database processing Application.
+  Applications.Database.Tables:
     level: DEBUG
     handlers: [file]
     propagate: no
-  Applications.Database.Tables:
+#
+# Loggers for zip files Application.
+  Applications.shared.zipfiles:
     level: DEBUG
     handlers: [file]
     propagate: no

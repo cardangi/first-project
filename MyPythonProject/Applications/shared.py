@@ -4,6 +4,7 @@ import io
 import os
 import locale
 import logging
+import zipfile
 import argparse
 import itertools
 import logging.handlers
@@ -640,6 +641,20 @@ def interface(obj):
                 continue
             break
     return obj
+
+
+def zipfiles(archive, *files):
+    logger = logging.getLogger("{0}.zipfiles".format(__name__))
+    if not os.path.exists(os.path.dirname(archive)):
+        raise OSError('"{0}" doesn\'t exist. Please enter an existing directory.'.format(os.path.dirname(archive)))
+    with zipfile.ZipFile(archive, "w") as thatzip:
+        logger.info('"{0}" used as ZIP file.'.format(archive))
+        for file in files:
+            if os.path.exists(file):
+                thatzip.write(file, arcname=os.path.basename(file))
+                logger.info('"{0}" successfully written.'.format(file))
+                continue
+            logger.info('Failed to write "{0}".'.format(file))
 
 
 def enumeratesortedlistcontent(thatlist):
