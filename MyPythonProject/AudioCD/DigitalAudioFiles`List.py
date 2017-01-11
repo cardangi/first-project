@@ -2,7 +2,6 @@
 import yaml
 import locale
 import os.path
-import logging
 import argparse
 import datetime
 from os.path import normpath
