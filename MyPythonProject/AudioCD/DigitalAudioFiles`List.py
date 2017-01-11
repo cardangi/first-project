@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
-import json
+import yaml
 import locale
 import os.path
+import logging
 import argparse
+import datetime
 from os.path import normpath
+from operator import itemgetter
 from Applications import shared
+from logging.config import dictConfig
 import xml.etree.ElementTree as ElementTree
 from Applications.AudioCD.shared import AudioFilesList
 from Applications.descriptors import Folder, Extensions
@@ -41,10 +45,11 @@ parser.add_argument("directory", help="mandatory directory to walk through", typ
 parser.add_argument("extensions", help="one or more extension(s) to filter out", nargs="*")
 
 
-# ==========
-# Constants.
-# ==========
-OUTFILE = os.path.join(os.path.expandvars("%TEMP%"), "ranking.json")
+# ========
+# Logging.
+# ========
+with open(os.path.join(os.path.expandvars("%_COMPUTING%"), "logging.yml"), encoding="UTF_8") as fp:
+    dictConfig(yaml.load(fp))
 
 
 # ===============
@@ -52,53 +57,73 @@ OUTFILE = os.path.join(os.path.expandvars("%TEMP%"), "ranking.json")
 # ===============
 if __name__ == "__main__":
 
-    # -->  Initializations.
+    # -->  1. Initializations.
     arguments = []
 
-    # --> User interface.
+    # -->  2. User interface.
     gui = shared.interface(LocalInterface([("Please enter directory to walk through", "folder"), ("Please enter extension(s) to filter out", "extensions")]))
 
-    # --> Parse arguments.
+    # -->  3. Parse arguments.
     arguments.append(gui.folder)
     arguments.extend(gui.extensions)
     arguments = parser.parse_args(arguments)
 
-    # --> Create list interface.
+    # -->  4. Create list interface.
     mylist = AudioFilesList(*arguments.extensions, folder=normpath(arguments.directory), excluded=["recycle", "\$recycle"])
 
-    # --> XML Output.
+    # -->  5. XML Output.
     root = ElementTree.Element("Data", attrib=dict(css="firstcss.css"))
     se = ElementTree.SubElement(root, "Updated")
     se.text = shared.now()
-    if mylist.files1:
+
+    #  5.a. Files list.
+    if mylist.sortedby_extension:
         se = ElementTree.SubElement(root, "Files")
-        for item1, item2, item3 in mylist.files1:
+        for item1, item2, item3 in [(num, fil, shared.dateformat(shared.LOCAL.localize(datetime.datetime.fromtimestamp(ctime)), shared.TEMPLATE2))
+                                    for num, (fil, ext, art, ctime) in enumerate(mylist.sortedby_extension, start=1)]:
             file = ElementTree.SubElement(se, "File", attrib=dict(number=str(item1), created=item3))
             file.text = item2
-    if mylist.files2:
+
+    #  5.b. Last fifty files list.
+    if mylist.reflist:
         se = ElementTree.SubElement(root, "RecentFiles")
-        for item1, item2, item3 in mylist.files2:
+        for item1, item2, item3 in [(num, fil, shared.dateformat(shared.LOCAL.localize(datetime.datetime.fromtimestamp(ctime)), shared.TEMPLATE2))
+                                    for num, (fil, ext, art, ctime) in enumerate(sorted(sorted(mylist.reflist, key=itemgetter(0)), key=itemgetter(3), reverse=True)[:50], start=1)]:
             file = ElementTree.SubElement(se, "File", attrib=dict(number=str(item1), created=item3))
             file.text = item2
-    if mylist.extensions:
+
+    #  5.c. Extensions list.
+    if mylist.sortedby_extension:
         se = ElementTree.SubElement(root, "Extensions")
-        for item1, item2, item3 in mylist.extensions:
+        for item1, item2, item3 in [(num, ext.upper(), count) for num, (ext, count) in enumerate([(k, len(list(g))) for k, g in mylist.groupedby_extension], start=1)]:
             file = ElementTree.SubElement(se, "Extension", attrib=dict(number=str(item1), count=str(item3)))
             file.text = item2
-    if mylist.artist1:
-        se = ElementTree.SubElement(root, "Artists")
-        for item1, item2, item3 in mylist.artist1:
-            file = ElementTree.SubElement(se, "Artist", attrib=dict(number=str(item1), count=str(item3)))
-            file.text = item2
-    if mylist.artist2:
-        se = ElementTree.SubElement(root, "Ranking")
-        for item1, item2, item3 in mylist.artist2:
-            file = ElementTree.SubElement(se, "Artist", attrib=dict(number=str(item1), count=str(item3)))
-            file.text = item2
-    if any([mylist.files1, mylist.files2, mylist.extensions, mylist.artist1, mylist.artist2]):
-        ElementTree.ElementTree(root).write(os.path.join(os.path.expandvars("%_COMPUTING%"), "DigitalAudioFilesList.xml"), encoding="UTF-8", xml_declaration=True)
 
-    # --> Ranking Output.
-    if any([mylist.ext_count1, mylist.ext_count2, mylist.art_count1, mylist.art_count2, mylist.artext_count]):
-        with open(OUTFILE, mode=shared.WRITE, encoding=shared.UTF8) as fp:
-            json.dump([shared.now(), arguments.directory, arguments.extensions, mylist.ext_count1, mylist.ext_count2, mylist.art_count1, mylist.art_count2, mylist.artext_count], fp, indent=4, ensure_ascii=False)
+    #  5.d. Artists list.
+    if mylist.sortedby_artist:
+        se = ElementTree.SubElement(root, "Artists")
+        for item1, item2, item3 in [(num, ext, count) for num, (ext, count) in enumerate([(k, len(list(g))) for k, g in mylist.groupedby_artist], start=1)]:
+            file = ElementTree.SubElement(se, "Artist", attrib=dict(number=str(item1), count=str(item3)))
+            file.text = item2
+
+    #  5.e. Extensions by artist list.
+    if mylist.sortedby_artist_extension:
+
+        # Sorted by artist in ascending order then extension in ascending order.
+        se = ElementTree.SubElement(root, "Counts")
+        for key, group in mylist.countby_artist_extension:
+            sse = ElementTree.SubElement(se, "Artist", attrib=dict(name=key))
+            for item1, item2, item3, item4 in [(num, art, ext, count) for num, (art, ext, count) in enumerate(list(group), start=1)]:
+                extension = ElementTree.SubElement(sse, "Extension", attrib=dict(number=str(item1), count=str(item4)))
+                extension.text = item3.upper()
+
+        # Sorted by artist in ascending order then count in descending order.
+        se = ElementTree.SubElement(root, "AlternativeCounts")
+        for key, group in mylist.alternative_countby_artist_extension:
+            sse = ElementTree.SubElement(se, "Artist", attrib=dict(name=key))
+            for item1, item2, item3, item4 in [(num, art, ext, count) for num, (art, ext, count) in enumerate(list(group), start=1)]:
+                extension = ElementTree.SubElement(sse, "Extension", attrib=dict(number=str(item1), count=str(item4)))
+                extension.text = item3.upper()
+
+    if any([mylist.reflist, mylist.reflist, mylist.sortedby_extension, mylist.sortedby_artist, mylist.sortedby_artist_extension]):
+        ElementTree.ElementTree(root).write(os.path.join(os.path.expandvars("%_COMPUTING%"), "DigitalAudioFilesList.xml"), encoding="UTF-8", xml_declaration=True)
